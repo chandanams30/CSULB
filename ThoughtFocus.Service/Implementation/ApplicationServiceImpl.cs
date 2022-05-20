@@ -39,6 +39,7 @@ namespace ThoughtFocus.Service.Implementation
             //    }).ToList();
             #endregion
 
+            // gets the list of applications
             List<ApplicationListResponse> obj = new List<ApplicationListResponse>();
 
             SqlParameter[] parameters =

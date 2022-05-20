@@ -29,6 +29,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
+                // gets the forms list 
                 List<FormResponse> response = _formsService.GetFormList(programId, semesterId);
                 return Ok(response);
             }

@@ -29,6 +29,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
+                // gets the application list
                 List<ApplicationListResponse> response = _applicationService.GetApplications(userId);
                 return Ok(response);
             }
