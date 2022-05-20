@@ -1,0 +1,88 @@
+29-04-2022 13:45:00	This log contains information about the import schema operation into project 'CSULB_DB' on computer 'WLD22HFW' by user '106789'.
+29-04-2022 13:45:00	Import of database schema has started.
+29-04-2022 13:45:12	Gathering database credentials
+29-04-2022 13:45:12	Gathering database options
+29-04-2022 13:45:12	Gathering generic database scoped configuration option
+29-04-2022 13:45:12	Gathering users
+29-04-2022 13:45:12	Gathering roles
+29-04-2022 13:45:12	Gathering application roles
+29-04-2022 13:45:12	Gathering role memberships
+29-04-2022 13:45:12	Gathering filegroups
+29-04-2022 13:45:12	Gathering full-text catalogs
+29-04-2022 13:45:12	Gathering assemblies
+29-04-2022 13:45:12	Gathering certificates
+29-04-2022 13:45:12	Gathering asymmetric keys
+29-04-2022 13:45:12	Gathering symmetric keys
+29-04-2022 13:45:12	Gathering encrypted symmetric keys
+29-04-2022 13:45:12	Gathering schemas
+29-04-2022 13:45:12	Gathering XML schema collections
+29-04-2022 13:45:12	Gathering user-defined data types
+29-04-2022 13:45:12	Gathering user-defined types
+29-04-2022 13:45:12	Gathering table types
+29-04-2022 13:45:12	Gathering unique keys for table types
+29-04-2022 13:45:12	Gathering primary keys for table types
+29-04-2022 13:45:12	Gathering indexes for table types
+29-04-2022 13:45:13	Gathering check constraints for table types
+29-04-2022 13:45:13	Gathering default constraints for table types
+29-04-2022 13:45:13	Gathering partition functions
+29-04-2022 13:45:13	Gathering partition schemes
+29-04-2022 13:45:13	Gathering functions
+29-04-2022 13:45:13	Gathering encrypted functions
+29-04-2022 13:45:13	Gathering aggregates
+29-04-2022 13:45:13	Gathering procedures
+29-04-2022 13:45:13	Gathering encrypted procedures
+29-04-2022 13:45:13	Gathering tables
+29-04-2022 13:45:13	Gathering primary keys
+29-04-2022 13:45:13	Gathering unique constraints
+29-04-2022 13:45:13	Gathering foreign keys
+29-04-2022 13:45:13	Gathering default constraints
+29-04-2022 13:45:13	Gathering check constraints
+29-04-2022 13:45:13	Gathering views
+29-04-2022 13:45:13	Gathering encrypted views
+29-04-2022 13:45:13	Gathering indexes
+29-04-2022 13:45:13	Gathering statistics
+29-04-2022 13:45:13	Gathering full-text index stoplists
+29-04-2022 13:45:13	Gathering search property lists
+29-04-2022 13:45:13	Gathering search properties
+29-04-2022 13:45:13	Gathering full-text indexes
+29-04-2022 13:45:13	Gathering column store indexes
+29-04-2022 13:45:13	Gathering spatial indexes
+29-04-2022 13:45:13	Gathering XML indexes
+29-04-2022 13:45:13	Gathering Selective XML indexes
+29-04-2022 13:45:13	Gathering encrypted triggers
+29-04-2022 13:45:13	Gathering triggers
+29-04-2022 13:45:13	Gathering encrypted and clr ddl triggers
+29-04-2022 13:45:13	Gathering ddl triggers
+29-04-2022 13:45:13	Creating edge constraints
+29-04-2022 13:45:13	Gathering synonyms
+29-04-2022 13:45:13	Gathering defaults
+29-04-2022 13:45:13	Gathering data constraint uddt bindings
+29-04-2022 13:45:13	Gathering rules
+29-04-2022 13:45:13	Gathering data constraint uddt bindings
+29-04-2022 13:45:13	Gathering message types
+29-04-2022 13:45:13	Gathering queues
+29-04-2022 13:45:13	Gathering contracts
+29-04-2022 13:45:13	Gathering services
+29-04-2022 13:45:13	Gathering event notifications
+29-04-2022 13:45:13	Gathering remote service bindings
+29-04-2022 13:45:13	Gathering broker priorities
+29-04-2022 13:45:13	Gathering signatures
+29-04-2022 13:45:13	Gathering data compression options
+29-04-2022 13:45:13	Gathering sequence types
+29-04-2022 13:45:13	Gathering security policies
+29-04-2022 13:45:13	Gather column encryption keys
+29-04-2022 13:45:13	Gathering column master keys
+29-04-2022 13:45:13	Gathering external data sources
+29-04-2022 13:45:13	Gathering external file formats
+29-04-2022 13:45:13	Gathering external tables
+29-04-2022 13:45:13	Gathering database permissions
+29-04-2022 13:45:13	Gathering extended properties
+29-04-2022 13:45:13	Gathering assemblies
+29-04-2022 13:45:13	Gathering credentials
+29-04-2022 13:45:13	Gathering logins
+29-04-2022 13:45:13	Gathering server audits
+29-04-2022 13:45:14	Scanning project for duplicate elements
+29-04-2022 13:45:15	Finished duplicate element processing
+29-04-2022 13:45:15	Finished importing database.
+29-04-2022 13:45:15	A summary of the import was saved to the following location: D:\Asif\CodeWorkArounds\DotNetCore\CSULB-COE\CSULB_DB\Import Schema Logs\CSULB_DB_20220429081500.log
+29-04-2022 13:45:15	Click Finish to continue...

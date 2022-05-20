@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+
+#nullable disable
+
+namespace ThoughtFocus.DataAccess.Models
+{
+    public partial class UserCred
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+    }
+}
