@@ -5,3 +5,4 @@ _ReSharper.*
 bin
 obj
 packages
+.vs/CSULB-CED/v16/.suo
