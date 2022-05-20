@@ -25,7 +25,7 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("Authenticate")]
-        //public IActionResult Login ([FromBody]Models.AuthenticateRequest model)
+        //public IActionResult Login ([FromBody]Models.AuthenticateRequest model) // uncomment after testing
         public IActionResult Login(string userName,string password)
         {
             //_logger.LogInformation("Start : Authenticating for {userName}",userName);
