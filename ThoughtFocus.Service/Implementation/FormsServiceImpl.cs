@@ -26,7 +26,7 @@ namespace ThoughtFocus.Service.Implementation
             _context = context;
             _helper = helper;
         }
-        public FormResponse GetForm(int formId,int programId)
+        public FormResponse GetForm(int formId,int applicationId,int programId)
         {
             #region Linq statement
             //var obj = _context.Forms.Where(a => a.Id==formId).Select(data => new FormResponse
@@ -56,27 +56,61 @@ namespace ThoughtFocus.Service.Implementation
                                          {
                                              FormId = Convert.ToInt32(row["ID"]),
                                              //Form = Convert.ToString(row["Form"])//,
-                                             Form = GetDeserializedTemplate(Convert.ToString(row["Form"]), programId)
+                                             Form = GetDeserializedTemplate(Convert.ToString(row["Form"]),applicationId, programId)
                                          }).FirstOrDefault();
             }
             return obj;
         }
 
-        public List<FormResponse> GetFormList(int programId, int semesterId)
+        public List<FormResponse> GetFormList(int programId, int semesterId,int stateId)
         {
-            var obj = _context.Forms.Where(a => a.SemesterId == semesterId && a.ProgramId==programId).Select(data => new FormResponse
+
+            #region Linq Statement 
+            //var obj = _context.Forms.Where(a => a.SemesterId == semesterId && a.ProgramId==programId).Select(data => new FormResponse
+            //{
+            //  FormId=Convert.ToInt32(data.Id),
+            //  ApplicantId= Convert.ToInt32(data.UserId),
+            //  ApplicantName="",
+            //  ProgramId= Convert.ToInt32(data.ProgramId),
+            //  ProgramName="",
+            //  SemesterId= Convert.ToInt32(data.SemesterId),
+            //  Semester="",
+            //  Form=data.Form1
+
+
+            //}).ToList();
+
+            #endregion
+
+            List<FormResponse> obj = new List<FormResponse>();
+            SqlParameter[] parameters =
+                                 {
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programId },
+                                          new SqlParameter("@SemesterID", SqlDbType.Int, 50) { Value = semesterId },
+                                          new SqlParameter("@State", SqlDbType.Int, 50) { Value = stateId }
+                                 };
+
+            DataTable dtForm = _helper.GetDataTable("[dbo].[GetFormsList]", parameters);
+            if (dtForm.Rows.Count > 0)
             {
-              FormId=Convert.ToInt32(data.Id),
-              ApplicantId= Convert.ToInt32(data.UserId),
-              ApplicantName="",
-              ProgramId= Convert.ToInt32(data.ProgramId),
-              ProgramName="",
-              SemesterId= Convert.ToInt32(data.SemesterId),
-              Semester="",
-              Form=data.Form1
+                obj = dtForm.AsEnumerable().Select(row =>
+                                         new FormResponse
+                                         {
+                                            FormId=Convert.ToInt32(row["ID"]),
+                                            ApplicantId= Convert.ToInt32(row["UserID"]),
+                                            ApplicantName=Convert.ToString(row["ApplicantName"]),
+                                            ProgramId= Convert.ToInt32(row["ProgramID"]),
+                                            ProgramName= Convert.ToString(row["ProgramName"]),
+                                            SemesterId= Convert.ToInt32(row["SemesterID"]),
+                                            Semester= Convert.ToString(row["SemesterName"]),
+                                            Form="",
+                                            ApplicationNumber= Convert.ToString(row["ApplicationNumber"]),
+                                            ReviewerId=0,
+                                            ReviewerName= "",
+                                            ReviewerRecommendation=""
+                                         }).ToList();
+            }
 
-
-            }).ToList();
 
             return obj;
         }
@@ -87,6 +121,7 @@ namespace ThoughtFocus.Service.Implementation
             string jsonString = string.Empty;
             if (request != null)
             {
+                string applicationNumber = GetApplicationNumber(request.ProgramId, request.SemesterId);
                 jsonString  = SetJsonString(request.Form, request.ProgramId);
                 SqlParameter[] parameters =
                                       {
@@ -96,12 +131,27 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@SemesterId", SqlDbType.Int, 50) { Value = Convert.ToInt32(request.SemesterId) },
                                           new SqlParameter("@Form", SqlDbType.NVarChar, 3999) { Value = Convert.ToString(request.Form) },
                                           new SqlParameter("@State", SqlDbType.Int, 50) { Value = Convert.ToInt32(request.State) },
+                                          new SqlParameter("@ApplicationNumber", SqlDbType.NVarChar, 100) { Value = Convert.ToString(applicationNumber) }
                                         };
 
                 int identity = _helper.InsertTable("[dbo].[SaveForm]", parameters);
             }
 
             return responseString;
+        }
+
+        private string GetApplicationNumber(int programId,int semesterId)
+        {
+            string ApplicationNumber = string.Empty;
+
+            SqlParameter[] parameters =
+                                {
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programId },
+                                          new SqlParameter("@SemesterID", SqlDbType.Int, 50) { Value = semesterId }
+                                 };
+
+            ApplicationNumber = _helper.ExecuteSPWithOutputVariable("[dbo].[GetApplicationNumber]", parameters);
+            return ApplicationNumber;
         }
 
         private string SetJsonString(object obj,int programId)
@@ -121,29 +171,41 @@ namespace ThoughtFocus.Service.Implementation
         {
             return Convert.ChangeType(source, dest);
         }
-        private object GetDeserializedTemplate(string jsonString, int programId)
+        private object GetDeserializedTemplate(string jsonString,int applicationId, int programId)
         {
             object _obj = new object();
+            if (applicationId == (int)ApplicationTypes.InitialCredentialPrograms)
+            {
+                // CTE PROGRAM IS MISSING TEMPLATE// ADD HERE ONCE CONFIRMED 
+                if (programId == (int)Programs.MultipleSubjectCredentialProgram)
+                {
+                    TemplateStore<FormMSCP> store = new TemplateStore<FormMSCP>();
+                    _obj = store.GetDeserializedTemplate(jsonString);
+                }
+                if (programId == (int)Programs.SingleSubjectCredentialProgram)
+                {
+                    TemplateStore<FormSSCP> store = new TemplateStore<FormSSCP>();
+                    _obj = store.GetDeserializedTemplate(jsonString);
+                }
+                if (programId == (int)Programs.EducationSpecialistCredentialProgram)
+                {
+                    TemplateStore<FormESCP> store = new TemplateStore<FormESCP>();
+                    _obj = store.GetDeserializedTemplate(jsonString);
+                }
+                if (programId == (int)Programs.UrbanDualCredentialProgram)
+                {
+                    TemplateStore<FormUDCP> store = new TemplateStore<FormUDCP>();
+                    _obj = store.GetDeserializedTemplate(jsonString);
+                }
+            }
+            if(applicationId==(int)ApplicationTypes.GraduatePrograms)
+            {
+                TemplateStore<FormGraduatePrograms> store = new TemplateStore<FormGraduatePrograms>();
+                _obj = store.GetDeserializedTemplate(jsonString);
+            }
+            if (applicationId == (int)ApplicationTypes.DoctoralPrograms)
+            {
 
-            if (programId == (int)Programs.MultipleSubjectCredentialProgram)
-            {
-                TemplateStore<FormMSCP> store = new TemplateStore<FormMSCP>();
-                _obj = store.GetDeserializedTemplate(jsonString);
-            }
-            if (programId == (int)Programs.SingleSubjectCredentialProgram)
-            {
-                TemplateStore<FormSSCP> store = new TemplateStore<FormSSCP>();
-                _obj = store.GetDeserializedTemplate(jsonString);
-            }
-            if (programId == (int)Programs.EducationSpecialistCredentialProgram)
-            {
-                TemplateStore<FormESCP> store = new TemplateStore<FormESCP>();
-                _obj = store.GetDeserializedTemplate(jsonString);
-            }
-            if (programId == (int)Programs.UrbanDualCredentialProgram)
-            {
-                TemplateStore<FormUDCP> store = new TemplateStore<FormUDCP>();
-                _obj = store.GetDeserializedTemplate(jsonString);
             }
 
             return _obj;

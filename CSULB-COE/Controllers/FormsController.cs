@@ -25,12 +25,12 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetFormsList")]
-        public IActionResult GetFormsList(int programId,int semesterId, int userId)
+        public IActionResult GetFormsList(int programId,int semesterId,int stateId, int userId)
         {
             try
             {
                 // gets the forms list 
-                List<FormResponse> response = _formsService.GetFormList(programId, semesterId);
+                List<FormResponse> response = _formsService.GetFormList(programId, semesterId,stateId);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -42,11 +42,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetForm")]
-        public IActionResult GetForm(int formId,int programId, int userId)
+        public IActionResult GetForm(int formId,int applicationId, int programId, int userId)
         {
             try
             {
-                FormResponse response = _formsService.GetForm(formId,programId);
+                FormResponse response = _formsService.GetForm(formId,applicationId,programId);
                 return Ok(response);
             }
             catch (Exception ex)

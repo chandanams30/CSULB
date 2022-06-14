@@ -16,4 +16,10 @@ namespace ThoughtFocus.Domain.Enumeration
         UrbanDualCredentialProgram=5
 
     }
+    public enum ApplicationTypes
+    {
+        InitialCredentialPrograms=1,
+        GraduatePrograms=2,
+        DoctoralPrograms=3
+    }
 }

@@ -41,11 +41,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetProgram")]
-        public IActionResult GetProgram(int programId, int userId)
+        public IActionResult GetProgram(int programId, int semesterId, int userId)
         {
             try
             {
-                ProgramResponse response = _programService.GetProgram(programId, userId);
+                ProgramResponse response = _programService.GetProgram(programId,semesterId, userId);
                 return Ok(response);
             }
             catch (Exception ex)

@@ -10,5 +10,6 @@ namespace ThoughtFocus.DataAccess.DBHelper
     {
         DataTable GetDataTable(string procedureName, params SqlParameter[] commandParameters);
         int InsertTable(string procedureName, params SqlParameter[] commandParameters);
+        string ExecuteSPWithOutputVariable(string procedureName, params SqlParameter[] commandParameters);
     }
 }

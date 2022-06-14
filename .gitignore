@@ -6,3 +6,9 @@ bin
 obj
 packages
 .vs/CSULB-CED/v16/.suo
+.vs/CSULB-CED/DesignTimeBuild/.dtbcache.v2
+CSULB_DB/CSULB_DB.dbmdl
+CSULB_DB/CSULB_DB.jfm
+CSULB_DB/CSULB_DB.jfm
+CSULB_DB/CSULB_DB.jfm
+.vs/CSULB-CED/config/applicationhost.config

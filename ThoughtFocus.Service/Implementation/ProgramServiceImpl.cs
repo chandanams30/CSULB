@@ -12,6 +12,8 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Reflection;
+using ThoughtFocus.Domain.Response.Program.TemplateResponse;
+using System.Dynamic;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -27,7 +29,7 @@ namespace ThoughtFocus.Service.Implementation
             _context = context;
             _helper = helper;
         }
-        public ProgramResponse GetProgram(int programId, int userId)
+        public ProgramResponse GetProgram(int programId,int semesterId, int userId)
         {
             #region LINQ statement
             //var obj = _context.Programs.Where(pr=>pr.Id==programId)
@@ -59,7 +61,7 @@ namespace ThoughtFocus.Service.Implementation
                                          {
                                              ProgramId = Convert.ToInt32(row["ID"]),
                                              ProgramName = Convert.ToString(row["Name"]),
-                                             Template= GetDeserializedTemplate(Convert.ToString(row["FormTemplate"]),programId)
+                                             Template= GetDeserializedTemplate(Convert.ToString(row["FormTemplate"]), Convert.ToInt32(row["ApplicationTypesID"]), programId,semesterId)
                                          }).FirstOrDefault();
             }
 
@@ -108,10 +110,10 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        private object GetDeserializedTemplate(string jsonString,int programId)
+        private object GetDeserializedTemplate(string jsonString,int applicationTypeId,int programId,int semesterId)
         {
             object _obj = new object();
-            _obj = GetTemplateName(programId); // gets the class instance based on the Program ID
+            _obj = GetTemplateName(applicationTypeId,programId); // gets the class instance based on the Program ID
             Type formTemplateType = _obj.GetType(); // gets the form template type
             Type templateStoreType = typeof(TemplateStore<>); // gets the template store type
             var genericType = templateStoreType.MakeGenericType(formTemplateType);
@@ -143,23 +145,102 @@ namespace ThoughtFocus.Service.Implementation
             //}
             #endregion
 
-            return obj;
+            object appendedObj = appendTemplateObject(applicationTypeId, programId,semesterId, obj);
+
+            return appendedObj;
         }
 
-        private object GetTemplateName(int programId)
+        private object GetTemplateName(int applicationTypeId,int programId)
         {
             
             object obj = new object();
-            if (programId == (int)Programs.MultipleSubjectCredentialProgram)
-                obj = new ThoughtFocus.Domain.Response.Program.FormTemplate();
-            if (programId == (int)Programs.SingleSubjectCredentialProgram)
-                obj = new ThoughtFocus.Domain.Response.Program.FormTemplateSSCP();
-            if (programId == (int)Programs.EducationSpecialistCredentialProgram)
-                obj = new ThoughtFocus.Domain.Response.Program.FormTemplateESCP();
-            if (programId == (int)Programs.UrbanDualCredentialProgram)
-                obj = new ThoughtFocus.Domain.Response.Program.FormTemplateUDCP();
+            if (applicationTypeId == (int)ApplicationTypes.InitialCredentialPrograms)
+            {
+                if (programId == (int)Programs.MultipleSubjectCredentialProgram)
+                    obj = new ThoughtFocus.Domain.Response.Program.FormTemplate();
+                if (programId == (int)Programs.SingleSubjectCredentialProgram)
+                    obj = new ThoughtFocus.Domain.Response.Program.FormTemplateSSCP();
+                if (programId == (int)Programs.EducationSpecialistCredentialProgram)
+                    obj = new ThoughtFocus.Domain.Response.Program.FormTemplateESCP();
+                if (programId == (int)Programs.UrbanDualCredentialProgram)
+                    obj = new ThoughtFocus.Domain.Response.Program.FormTemplateUDCP();
+            }
+            if (applicationTypeId == (int)ApplicationTypes.GraduatePrograms)
+            {
+                obj = new ThoughtFocus.Domain.Response.Program.TemplateResponse.FormGraduatePrograms();
+            }
+            if (applicationTypeId == (int)ApplicationTypes.DoctoralPrograms)
+            {
 
-            return obj;
+            }
+
+                return obj;
+        }
+
+        private object appendTemplateObject(int applicationTypeId, int programId,int semesterId,object emptyObj)
+        {
+            object _obj = new object();
+            string applicationNumber =string.Empty;
+            applicationNumber = GetApplicationNumber(programId, semesterId); 
+            if (applicationTypeId == (int)ApplicationTypes.InitialCredentialPrograms)
+            {
+                if (programId == (int)Programs.MultipleSubjectCredentialProgram)
+                {
+                    FormTemplate templateObj = (FormTemplate)emptyObj;
+                    templateObj.ApplicationnNumber = applicationNumber;
+                    _obj = templateObj;
+                }
+                if (programId == (int)Programs.SingleSubjectCredentialProgram)
+                {
+                    FormTemplateSSCP templateObj = (FormTemplateSSCP)emptyObj;
+                    templateObj.ApplicationnNumber = applicationNumber;
+                    _obj = templateObj;
+                }
+                if (programId == (int)Programs.EducationSpecialistCredentialProgram)
+                {
+                    FormTemplateESCP templateObj = (FormTemplateESCP)emptyObj;
+                    templateObj.ApplicationnNumber = applicationNumber;
+                    _obj = templateObj;
+                }
+                if (programId == (int)Programs.UrbanDualCredentialProgram)
+                {
+                    FormTemplateUDCP templateObj = (FormTemplateUDCP)emptyObj;
+                    templateObj.ApplicationnNumber = applicationNumber;
+                    _obj = templateObj;
+                }
+            }
+            if (applicationTypeId == (int)ApplicationTypes.GraduatePrograms)
+            {
+                FormGraduatePrograms gpObj = (FormGraduatePrograms)emptyObj;
+                gpObj.ApplicationNumber = applicationNumber;
+                gpObj.Documents = new List<dynamic>();
+                gpObj.Documents.Add(new ExpandoObject());
+                gpObj.Documents[0].Resume = new ExpandoObject();
+                gpObj.Documents[0].Resume.DocumentId = "1";
+                gpObj.Documents[0].Resume.FileName = "Resume.docx";
+                gpObj.Documents[0].Resume.IsOptional = "1";
+                _obj = gpObj;
+            }
+            if (applicationTypeId == (int)ApplicationTypes.DoctoralPrograms)
+            {
+
+            }
+
+            return _obj;
+        }
+
+        private string GetApplicationNumber(int programId, int semesterId)
+        {
+            string ApplicationNumber = string.Empty;
+
+            SqlParameter[] parameters =
+                                {
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programId },
+                                          new SqlParameter("@SemesterID", SqlDbType.Int, 50) { Value = semesterId }
+                                 };
+
+            ApplicationNumber = _helper.ExecuteSPWithOutputVariable("[dbo].[GetApplicationNumber]", parameters);
+            return ApplicationNumber;
         }
 
     }

@@ -32,8 +32,8 @@ namespace ThoughtFocus.Domain.Response.Program.TemplateResponse
         [JsonProperty("Highest Degree Earned")]
         public string HighestDegreeEarned { get; set; }
 
-        [JsonProperty("BEGINNING with teh most recent, list all colleges")]
-        public List<BEGINNINGWithTehMostRecentListAllCollege> BEGINNINGWithTehMostRecentListAllColleges { get; set; }
+        //[JsonProperty("BEGINNING with teh most recent, list all colleges")]
+        //public List<BEGINNINGWithTehMostRecentListAllCollege> BEGINNINGWithTehMostRecentListAllColleges { get; set; }
         public List<Comments> Comments { get; set; }
 
         [JsonProperty("Official Section")]

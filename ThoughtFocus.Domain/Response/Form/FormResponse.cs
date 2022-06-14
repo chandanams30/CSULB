@@ -14,5 +14,10 @@ namespace ThoughtFocus.Domain.Response.Form
         public int SemesterId { get; set; }
         public string Semester { get; set; }
         public object Form { get; set; }
+        public string ApplicationNumber { get; set; }
+        public int ReviewerId { get; set; }
+        public string ReviewerName { get; set; }
+        public string ReviewerRecommendation { get; set; }
+        public string CampusId { get; set; }
     }
 }

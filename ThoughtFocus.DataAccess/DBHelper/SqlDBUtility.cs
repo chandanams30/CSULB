@@ -118,5 +118,37 @@ namespace ThoughtFocus.DataAccess.DBHelper
             }
             return result;
         }
+
+        public string ExecuteSPWithOutputVariable(string procedureName, params SqlParameter[] commandParameters)
+        {
+            string result = string.Empty;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.Connection = conn;
+                    cmd.CommandText = procedureName;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Clear();
+                    if (commandParameters != null)
+                    {
+                        cmd.Parameters.Add("@Message", SqlDbType.Char, 500);
+                        cmd.Parameters["@Message"].Direction = ParameterDirection.Output;
+                        cmd.Parameters.AddRange(commandParameters);
+                    }
+                    cmd.ExecuteNonQuery();
+                    result = Convert.ToString(cmd.Parameters["@Message"].Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message.ToString();
+                _logger.LogError(ex, msg);
+                result = "Error";
+            }
+            return result;
+        }
     }
 }

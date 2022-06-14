@@ -7,56 +7,42 @@ namespace ThoughtFocus.Domain.Response.Program.TemplateResponse
 {
     public class FormESCP
     {
-        [JsonProperty("Credential Pathway")]
-        public string CredentialPathway { get; set; }
-
-        [JsonProperty("Application for")]
-        public string ApplicationFor { get; set; }
-
-        [JsonProperty("CSULB Campus ID #")]
+        public string ApplicationnNumber { get; set; }
+        public CredentialPathway CredentialPathway { get; set; }
+        public string Applicationfor { get; set; }
         public string CSULBCampusID { get; set; }
-
-        [JsonProperty("Social Security #")]
-        public string SocialSecurity { get; set; }
+        public string SocialSecurityNumber { get; set; }
         public Name Name { get; set; }
         public Address Address { get; set; }
-
-        [JsonProperty("Date of Birth")]
         public string DateOfBirth { get; set; }
-        public string Gender { get; set; }
-
-        [JsonProperty("Bachelor’s Degree Major")]
-        public string BachelorSDegreeMajor { get; set; }
+        public string BachelorsDegreeMajor { get; set; }
         public string Institution { get; set; }
-
-        [JsonProperty("Highest Degree Earned")]
-        public string HighestDegreeEarned { get; set; }
-
-        [JsonProperty("BEGINNING with teh most recent, list all colleges")]
-        public List<BEGINNINGWithTehMostRecentListAllCollege> BEGINNINGWithTehMostRecentListAllColleges { get; set; }
-
-        [JsonProperty("EDSP 454 or equivalent2")]
-        public EDSP454OrEquivalent2 EDSP454OrEquivalent2 { get; set; }
-
-        [JsonProperty("ED P 405 or equivalent2")]
-        public EDP405OrEquivalent2 EDP405OrEquivalent2 { get; set; }
-
-        [JsonProperty("EDSP 350 or equivalent2")]
-        public EDSP350OrEquivalent2 EDSP350OrEquivalent2 { get; set; }
-
-        [JsonProperty("ED P 301 or ED P 302 or equivalent2")]
-        public EDP301OrEDP302OrEquivalent2 EDP301OrEDP302OrEquivalent2 { get; set; }
-
-        [JsonProperty("ETEC 110 or equivalent2")]
-        public ETEC110OrEquivalent2 ETEC110OrEquivalent2 { get; set; }
+        public HighestDegreeEarned HighestDegreeEarned { get; set; }
+        public List<BeginningWithTheMostRecentListOfCollege> Beginning_With_The_Most_Recent_ListOfColleges { get; set; }
+        public EDSP454OrEquivalent2 EDSP_454_or_equivalent2 { get; set; }
+        public EDP405OrEquivalent2 ED_P_405_or_equivalent2 { get; set; }
+        public EDSP350OrEquivalent2 EDSP_350_or_equivalent2 { get; set; }
+        public EDP301OrEDP302OrEquivalent2 ED_P_301_or_ED_P_302_or_equivalent2 { get; set; }
+        public ETEC110OrEquivalent2 ETEC_110_or_equivalent2 { get; set; }
         public List<Comments> Comments { get; set; }
-
-        [JsonProperty("Official Section")]
-        public OfficialSection OfficialSection { get; set; }
+        public OfficialSection Official_Section { get; set; }
     }
 
-    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
- 
+    public class BeginningWithTheMostRecentListOfCollege
+    {
+        public string CollegeUniversity { get; set; }
+        public string State { get; set; }
+        public string DatesAttended { get; set; }
+        public string DegreeOrCredentialEarned { get; set; }
+    }
+
+
+
+    public class CredentialPathway
+    {
+        public List<string> Choices { get; set; }
+        public string Selected { get; set; }
+    }
 
     public class EDP301OrEDP302OrEquivalent2
     {
@@ -93,7 +79,10 @@ namespace ThoughtFocus.Domain.Response.Program.TemplateResponse
         public string Grade { get; set; }
     }
 
-    
-
+    public class HighestDegreeEarned
+    {
+        public List<string> Choices { get; set; }
+        public string Selected { get; set; }
+    }
 
 }

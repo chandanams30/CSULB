@@ -8,8 +8,8 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IFormsService
     {
-        List<FormResponse> GetFormList(int programId,int semesterId);
-        FormResponse GetForm(int formId,int programId);
+        List<FormResponse> GetFormList(int programId,int semesterId,int stateId);
+        FormResponse GetForm(int formId,int applicationId,int programId);
 
         string SaveForm(FormAddRequest request);
     }
