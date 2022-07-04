@@ -9,6 +9,7 @@ namespace ThoughtFocus.DataAccess.DBHelper
     public interface ISqlDBUtility
     {
         DataTable GetDataTable(string procedureName, params SqlParameter[] commandParameters);
+        DataSet GetDataSet(string procedureName, params SqlParameter[] commandParameters);
         int InsertTable(string procedureName, params SqlParameter[] commandParameters);
         string ExecuteSPWithOutputVariable(string procedureName, params SqlParameter[] commandParameters);
     }

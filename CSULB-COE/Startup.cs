@@ -91,6 +91,12 @@ namespace CSULB_COE
             // forms service 
             services.AddScoped<IFormsService, FormsServiceImpl>();
 
+            //user service 
+            services.AddScoped<IUserService, UserServiceImpl>();
+
+            //Field Work service 
+            services.AddScoped<IFieldWorkService, FieldWorkServiceImpl>();
+
             // DBUtility 
             services.AddScoped<ISqlDBUtility, SqlDBUtility>();
 
@@ -135,6 +141,7 @@ namespace CSULB_COE
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "ThoughtFocus CSULB-CED");
+                //c.SwaggerEndpoint("./v1/swagger.json", "ThoughtFocus CSULB-CED");
             });
 
             app.UseEndpoints(endpoints =>

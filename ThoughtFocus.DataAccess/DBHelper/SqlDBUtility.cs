@@ -56,7 +56,7 @@ namespace ThoughtFocus.DataAccess.DBHelper
             return dt;
         }
 
-        internal DataSet GetDataSet(string ProcedureName, SqlParameter[] commandParameters)
+        public DataSet GetDataSet(string ProcedureName, SqlParameter[] commandParameters)
         {
             DataSet ds = new DataSet();
             try
@@ -150,5 +150,7 @@ namespace ThoughtFocus.DataAccess.DBHelper
             }
             return result;
         }
+
+       
     }
 }
