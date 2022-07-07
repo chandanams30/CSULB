@@ -1,4 +1,4 @@
-﻿CREATE TABLE [Master].[ApplicationDocuments] (
+﻿CREATE TABLE [Master].[ProgramDocuments] (
     [ID]              BIGINT        IDENTITY (1, 1) NOT NULL,
     [ProgramID]       BIGINT        NOT NULL,
     [DocumentID]      BIGINT        NOT NULL,

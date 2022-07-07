@@ -7,7 +7,10 @@
     [Notes]              NVARCHAR (MAX) NULL,
     [CreatedDateTime]    DATETIME2 (7)  CONSTRAINT [DF_Programs_CreatedDateTime] DEFAULT (getdate()) NOT NULL,
     [CreatedByUserID]    BIGINT         NOT NULL,
+    [AliasName]          VARCHAR (10)   NULL,
     CONSTRAINT [PK_Application] PRIMARY KEY CLUSTERED ([ID] ASC),
     CONSTRAINT [FK_Application_ApplicationTypes] FOREIGN KEY ([ApplicationTypesID]) REFERENCES [Master].[ApplicationTypes] ([ID])
 );
+
+
 

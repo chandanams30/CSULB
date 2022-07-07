@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[SaveForm]
 @ProgramId int,
 @SemesterId int,
 @Form nvarchar(max),
-@State int
+@State int,
+@ApplicationNumber nvarchar(100)
 AS
 if (@FormId=0)
 begin
@@ -22,7 +23,8 @@ INSERT INTO [Application].[Forms]
            ,[CreatedByUserID]
            ,[ModifiedDateTime]
            ,[ModifiedBy]
-           ,[State])
+           ,[State]
+		   ,[ApplicationNumber])
      VALUES
            (@UserId
 		   ,@ProgramId
@@ -32,7 +34,8 @@ INSERT INTO [Application].[Forms]
 		   ,@UserId
 		   ,GETDATE()
 		   ,@UserId
-		   ,@State)
+		   ,@State
+		   ,@ApplicationNumber)
 
 end
 else

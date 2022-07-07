@@ -5,6 +5,9 @@
     [CreatedByUserID]      BIGINT        NOT NULL,
     [LastModifiedDateTime] DATETIME2 (7) NOT NULL,
     [LastModifiedByUserID] BIGINT        NOT NULL,
+    [Name]                 VARCHAR (100) NULL,
     CONSTRAINT [PK_Role] PRIMARY KEY CLUSTERED ([ID] ASC)
 );
+
+
 

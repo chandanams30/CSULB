@@ -7,8 +7,13 @@
     [CreatedByUserID]      BIGINT         NOT NULL,
     [AuthenticationTypeId] INT            NULL,
     [Status]               BIT            NULL,
+    [CSULBID]              VARCHAR (50)   NULL,
+    [FirstNamePref]        NVARCHAR (255) NULL,
+    [LastNamePref]         NVARCHAR (255) NULL,
     CONSTRAINT [PK_Users] PRIMARY KEY CLUSTERED ([ID] ASC)
 );
+
+
 
 
 

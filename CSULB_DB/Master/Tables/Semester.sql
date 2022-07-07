@@ -6,6 +6,10 @@
     [EndDate]         DATETIME2 (7)  NOT NULL,
     [CreatedByUserID] BIGINT         NOT NULL,
     [CreatedDateTime] DATETIME2 (7)  CONSTRAINT [DF_Semester_CreatedDateTime] DEFAULT (getdate()) NOT NULL,
+    [Year]            INT            NULL,
+    [TermCode]        VARCHAR (50)   NULL,
     CONSTRAINT [PK_Semester] PRIMARY KEY CLUSTERED ([ID] ASC)
 );
+
+
 
