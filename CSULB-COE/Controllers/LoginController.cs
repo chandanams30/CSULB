@@ -9,6 +9,7 @@ using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
 using ThoughtFocus.Service.Interfaces;
 using Microsoft.Extensions.Logging;
+using ThoughtFocus.Domain.Request;
 
 namespace CSULB_COE.Controllers
 {
@@ -24,14 +25,14 @@ namespace CSULB_COE.Controllers
             _logger = logger;
         }
 
-        [HttpGet("Authenticate")]
+        [HttpPost("Authenticate")]
         //public IActionResult Login ([FromBody]Models.AuthenticateRequest model) // uncomment after testing // updated testing venky
-        public IActionResult Login(string userName,string password)
+        public IActionResult Login(LoginRequest request)
         {
             //_logger.LogInformation("Start : Authenticating for {userName}",userName);
             ViewModels.AuthenticateRequest authModel = new ViewModels.AuthenticateRequest();
-            authModel.Username = userName;
-            authModel.Password = password;
+            authModel.Username = request.UserName;
+            authModel.Password = request.Password;
             try
             {
                 var response = _userLoginService.Authenticate(authModel);
