@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.DocumentManager;
 using ThoughtFocus.Repository.Implementation;
 using ThoughtFocus.Repository.Interfaces;
 using ThoughtFocus.Service.Implementation;
@@ -37,8 +38,8 @@ namespace CSULB_COE
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-    
 
+            services.AddCors();
             services.AddControllers().AddNewtonsoftJson();
 
 
@@ -100,6 +101,14 @@ namespace CSULB_COE
             // DBUtility 
             services.AddScoped<ISqlDBUtility, SqlDBUtility>();
 
+            //Document Service 
+            services.AddScoped<IDocumentService, DocumentServiceImpl>();
+
+            //document converter
+            services.AddScoped<IFileConverter, FIleConverter>();
+
+
+
 
             // Enable Swagger   
             services.AddSwaggerGen(swagger =>
@@ -133,6 +142,13 @@ namespace CSULB_COE
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
 
             app.UseAuthentication();
             app.UseAuthorization();

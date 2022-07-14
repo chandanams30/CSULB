@@ -9,5 +9,6 @@ namespace ThoughtFocus.Service.Interfaces
     {
         List<ProgramResponse> GetProgramList(int applicationTypeId, int semesterId, int stateId, int userId);
         ProgramResponse GetProgram(int programId, int semesterId, int userId);
+        List<ProgramApplicationListResponse> GetProgramApplications(int programId, int semesterId, int stateId, int userId);
     }
 }
