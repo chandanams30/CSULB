@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Request.FieldWork;
+using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
 
 namespace ThoughtFocus.Service.Interfaces
@@ -10,6 +11,8 @@ namespace ThoughtFocus.Service.Interfaces
     {
         List<FieldWorkResponse> GetFieldWorkList(int userId);
         FieldWorkDataResponse GetFieldWorkDetailsById(int userId,int fieldWorkId);
-        string UpdateFieldWorkValidation(FieldWorkValidationRequest input);
+        BaseResponse UpdateFieldWorkValidation(FieldWorkValidationRequest input);
+        BaseResponse UpdateFieldWorkDocumentValidation(FieldWorkUploadDocumentsRequest input);
+        FieldWorkProfileAttachments DownloadRequiredDocuments(int userId, int fieldworkAttachmentId);
     }
 }

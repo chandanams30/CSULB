@@ -55,6 +55,12 @@ namespace CSULB_COE.Controllers
             }
 
         }
+        [HttpGet("GetProgramApplications")]
+        public IActionResult GetProgramApplications(int programId,int semesterId,int stateId,int userId)
+        {
+            List<ProgramApplicationListResponse> response = _programService.GetProgramApplications(programId,semesterId,stateId,userId);
+            return Ok(response);
+        }
         [HttpPost("AddProgram")]
         public IActionResult AddUpdateProgram(AddUpdateRequest model)
         {

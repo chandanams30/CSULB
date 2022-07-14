@@ -23,15 +23,16 @@ namespace ThoughtFocus.Domain.Response.FieldWork
     {
         public int FieldWorkAttachmentID { get; set; }
         public int UserID { get; set; }
-        public int DocumentID { get; set; }
+        public string DocumentType { get; set; }
         public string FileName { get; set; }
-        public string FileExtn { get; set; }
-        public string FolderName { get; set; }
+        //public string FileExtn { get; set; }
+       // public string FolderName { get; set; }
         public bool? IsApproved { get; set; }
-        public int ApprovedBy { get; set; }
+        public string ApprovedBy { get; set; }
         public DateTime? ValidatedDate { get; set; }
-        public int CreatedBy { get; set; }
-        public DateTime? CreatedDate { get; set; }
+       // public int CreatedBy { get; set; }
+       // public DateTime? CreatedDate { get; set; }
         public DateTime? ValidTill { get; set; }
+        public byte[] FileContent { get; set; }
     }
 }

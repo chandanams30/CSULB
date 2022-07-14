@@ -243,5 +243,32 @@ namespace ThoughtFocus.Service.Implementation
             return ApplicationNumber;
         }
 
+        public List<ProgramApplicationListResponse> GetProgramApplications(int programId, int semesterId, int stateId, int userId)
+        {
+            List<ProgramApplicationListResponse> obj = new List<ProgramApplicationListResponse>();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programId },
+                                          new SqlParameter("@StateId", SqlDbType.Int, 50) { Value = stateId },
+                                          new SqlParameter("@SemesterID", SqlDbType.Int, 50) { Value = semesterId },
+                                        };
+
+            DataTable dtProgramsList = _helper.GetDataTable("[dbo].[GetProgramApplications]", parameters);
+            if (dtProgramsList.Rows.Count > 0)
+            {
+                obj = dtProgramsList.AsEnumerable().Select(row =>
+                                          new ProgramApplicationListResponse
+                                          {
+                                              FormId=Convert.ToInt32(row["FormId"]),
+                                              ProgramName = Convert.ToString(row["ProgramName"]),
+                                              SemesterName= Convert.ToString(row["SemesterName"]),
+                                              ApplicationNumber= Convert.ToString(row["ApplicationNumber"]),
+                                              ApplicantName= Convert.ToString(row["ApplicantName"]),
+                                              CampusID= Convert.ToString(row["CSULBID"]),
+                                              ReviewerName= Convert.ToString(row["ReviewerName"])
+                                          }).ToList();
+            }
+            return obj;
+        }
     }
 }
