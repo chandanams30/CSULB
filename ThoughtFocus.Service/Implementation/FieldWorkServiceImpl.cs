@@ -76,7 +76,8 @@ namespace ThoughtFocus.Service.Implementation
                                               //CreatedBy = Convert.ToInt32(row["CreatedBy"]),
                                               //CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
                                               ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
-                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"])==string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(),"FieldWork"), Convert.ToString(row["FileName"])+"."+Convert.ToString(row["FileExtn"]))
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"])==string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(),"FieldWork"), Convert.ToString(row["FileName"])+"."+Convert.ToString(row["FileExtn"])),
+                                              RejectReason=Convert.ToString(row["RejectedReason"])
                                           }).ToList();
                 
             }

@@ -51,17 +51,17 @@ namespace CSULB_COE.Controllers
             string responseString = string.Empty;
             // -------------just for testing -  comment it after testing 
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
-            string filepath = "D:\\CSULB\\GitHub\\Documents\\TB-TEST.docx";
+           // string filepath = "D:\\CSULB\\GitHub\\Documents\\TB-TEST.docx";
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
-            byte[] fileContent = null;
-            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
-            long byteLength = new System.IO.FileInfo(filepath).Length;
-            fileContent = binaryReader.ReadBytes((Int32)byteLength);
-            input.FileContent = fileContent;
-            fs.Close();
-            fs.Dispose();
-            binaryReader.Close();
+            //byte[] fileContent = null;
+           // System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+           // System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            //long byteLength = new System.IO.FileInfo(filepath).Length;
+           // fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            //input.FileContent = fileContent;
+           // fs.Close();
+            //fs.Dispose();
+            //binaryReader.Close();
             //----end comment----------------------------------------
             BaseResponse response = _fieldWorkService.UpdateFieldWorkDocumentValidation(input);
             return response;

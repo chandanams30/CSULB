@@ -34,5 +34,6 @@ namespace ThoughtFocus.Domain.Response.FieldWork
        // public DateTime? CreatedDate { get; set; }
         public DateTime? ValidTill { get; set; }
         public byte[] FileContent { get; set; }
+        public string RejectReason { get; set; }
     }
 }
