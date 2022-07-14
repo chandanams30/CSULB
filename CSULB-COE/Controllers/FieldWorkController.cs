@@ -12,7 +12,7 @@ using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class FieldWorkController : ControllerBase
     {

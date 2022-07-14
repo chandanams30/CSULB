@@ -11,7 +11,7 @@ using ThoughtFocus.Domain.Request.Program;
 
 namespace CSULB_COE.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ProgramsController : ControllerBase
     {
