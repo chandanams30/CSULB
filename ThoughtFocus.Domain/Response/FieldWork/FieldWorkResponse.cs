@@ -15,4 +15,9 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public bool IsTBTest { get; set; }
         public bool IsCtcDone { get; set; }
     }
+
+    public class FieldWorkListResponse:BaseResponse
+    {
+        public List<FieldWorkResponse> FieldWorkResponse { get; set; }
+    }
 }

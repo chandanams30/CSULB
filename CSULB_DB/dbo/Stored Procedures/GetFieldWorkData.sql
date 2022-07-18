@@ -12,7 +12,7 @@ BEGIN
 				case when CTC.ValidTill>GETDATE() then isnull(CTC.IsApproved,'') else 0 end as CTC
 				from [FieldWork].[FieldWork] F
 				Join [User].[Users] U on U.ID=F.UserID 
-				Join [FieldWork].[Courses] C on C.ID=F.CourseID
+				Join [Master].[FieldWorkCourses] C on C.ID=F.CourseID
 				Join [Master].[Semester] S on S.TermCode=C.TermCode
 				Join [FieldWork].[Attachments]TB on TB.UserID=F.UserID and TB.DocumentID =7
 				Join [FieldWork].[Attachments] CTC  on CTC.UserID=F.UserID and CTC.DocumentID =8

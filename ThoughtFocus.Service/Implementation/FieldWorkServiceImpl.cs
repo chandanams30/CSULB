@@ -37,49 +37,61 @@ namespace ThoughtFocus.Service.Implementation
                                         };
 
             DataSet dsFieldWorkData = _helper.GetDataSet("[dbo].[GetFieldWork]", parameters);
-            if (dsFieldWorkData.Tables.Count > 0)
+            try
             {
-                obj.FieldWork = dsFieldWorkData.Tables[0].AsEnumerable().Select(row =>
-                                          new FieldWorkResponse
-                                          {
-                                              FieldWorkId = Convert.ToInt32(row["ID"]),
-                                              StudentName = Convert.ToString(row["StudentName"]),
-                                              CourseTitle = Convert.ToString(row["CourseTitle"]),
-                                              CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
-                                              College = Convert.ToString(row["College"]),
-                                              Term = Convert.ToString(row["Term"])
-                                          }).FirstOrDefault();
+                if (dsFieldWorkData.Tables.Count > 0)
+                {
+                    obj.FieldWork = dsFieldWorkData.Tables[0].AsEnumerable().Select(row =>
+                                              new FieldWorkResponse
+                                              {
+                                                  FieldWorkId = Convert.ToInt32(row["ID"]),
+                                                  StudentName = Convert.ToString(row["StudentName"]),
+                                                  CourseTitle = Convert.ToString(row["CourseTitle"]),
+                                                  CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
+                                                  College = Convert.ToString(row["College"]),
+                                                  Term = Convert.ToString(row["Term"])
+                                              }).FirstOrDefault();
 
-                obj.FieldWorkRoles = dsFieldWorkData.Tables[1].AsEnumerable().Select(row =>
-                                          new FieldWorkRoles
-                                          {
-                                            ID= Convert.ToInt32(row["ID"]),
-                                            UserID = Convert.ToInt32(row["UserID"]),
-                                            FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
-                                            RoleID = Convert.ToInt32(row["RoleID"]),
-                                            Name = Convert.ToString(row["Name"]),
-                                            Description = Convert.ToString(row["Description"])
-                                          }).ToList();
+                    obj.FieldWorkRoles = dsFieldWorkData.Tables[1].AsEnumerable().Select(row =>
+                                              new FieldWorkRoles
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                                  RoleID = Convert.ToInt32(row["RoleID"]),
+                                                  Name = Convert.ToString(row["Name"]),
+                                                  Description = Convert.ToString(row["Description"])
+                                              }).ToList();
 
-                obj.FieldWorkAttachments = dsFieldWorkData.Tables[2].AsEnumerable().Select(row =>
-                                          new FieldWorkProfileAttachments
-                                          {
-                                              FieldWorkAttachmentID = Convert.ToInt32(row["ID"]),
-                                              UserID = Convert.ToInt32(row["UserID"]),
-                                              DocumentType = Convert.ToString(row["DocumentType"]),
-                                              FileName = Convert.ToString(row["FileName"])+ "."+ Convert.ToString(row["FileExtn"]),
+                    obj.FieldWorkAttachments = dsFieldWorkData.Tables[2].AsEnumerable().Select(row =>
+                                              new FieldWorkProfileAttachments
+                                              {
+                                                  FieldWorkAttachmentID = Convert.ToInt32(row["ID"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  DocumentType = Convert.ToString(row["DocumentType"]),
+                                                  FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
                                               // FileExtn = Convert.ToString(row["FileExtn"]),
                                               // FolderName = Convert.ToString(row["FolderName"]),
                                               IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
-                                              ApprovedBy = Convert.ToString(row["ApprovedBy"] == DBNull.Value ? null : row["ApprovedBy"]),
-                                              ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
+                                                  ApprovedBy = Convert.ToString(row["ApprovedBy"] == DBNull.Value ? null : row["ApprovedBy"]),
+                                                  ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
                                               //CreatedBy = Convert.ToInt32(row["CreatedBy"]),
                                               //CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
                                               ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
-                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"])==string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(),"FieldWork"), Convert.ToString(row["FileName"])+"."+Convert.ToString(row["FileExtn"])),
-                                              RejectReason=Convert.ToString(row["RejectedReason"])
-                                          }).ToList();
-                
+                                                  FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(), "FieldWork"), Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"])),
+                                                  RejectReason = Convert.ToString(row["RejectedReason"])
+                                              }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch(Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
             }
             return obj;
         }
@@ -98,8 +110,9 @@ namespace ThoughtFocus.Service.Implementation
             binaryReader.Close();
             return fileContent;
         }
-        public List<FieldWorkResponse> GetFieldWorkList(int userId)
+        public FieldWorkListResponse GetFieldWorkList(int userId)
         {
+            FieldWorkListResponse objList = new FieldWorkListResponse();
             List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
 
 
@@ -109,23 +122,37 @@ namespace ThoughtFocus.Service.Implementation
                                         };
 
             DataTable dtFieldWorkList= _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
-            if (dtFieldWorkList.Rows.Count > 0)
+            try
             {
-                obj = dtFieldWorkList.AsEnumerable().Select(row =>
-                                          new FieldWorkResponse
-                                          {
-                                              FieldWorkId = Convert.ToInt32(row["ID"]),
-                                              StudentName=Convert.ToString(row["StudentName"]),
-                                              CourseTitle = Convert.ToString(row["CourseTitle"]),
-                                              CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
-                                              College = Convert.ToString(row["College"]),
-                                              Term= Convert.ToString(row["Term"]),
-                                              IsTBTest=false,
-                                              IsCtcDone=false
+                if (dtFieldWorkList.Rows.Count > 0)
+                {
+                    obj = dtFieldWorkList.AsEnumerable().Select(row =>
+                                              new FieldWorkResponse
+                                              {
+                                                  FieldWorkId = Convert.ToInt32(row["ID"]),
+                                                  StudentName = Convert.ToString(row["StudentName"]),
+                                                  CourseTitle = Convert.ToString(row["CourseTitle"]),
+                                                  CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
+                                                  College = Convert.ToString(row["College"]),
+                                                  Term = Convert.ToString(row["Term"]),
+                                                  IsTBTest = false,
+                                                  IsCtcDone = false
 
-                                          }).ToList();
+                                              }).ToList();
+
+                    objList.FieldWorkResponse = obj;
+                    objList.IsSuccess = true;
+                    objList.Message = "Data Retrieved Successfully";
+
+                }
             }
-            return obj;
+            catch(Exception ex)
+            {
+                objList.IsSuccess = false;
+                objList.Message = "Data Retrievel Failed";
+                objList.StackTrace =ex.Message;
+            }
+            return objList;
         }
 
         public BaseResponse UpdateFieldWorkValidation(FieldWorkValidationRequest input)

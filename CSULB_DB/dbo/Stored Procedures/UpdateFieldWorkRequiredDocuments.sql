@@ -1,5 +1,5 @@
 ﻿
--- exec UpdateFieldWorkRequiredDocuments 25,0,'',''
+-- exec UpdateFieldWorkRequiredDocuments 1545,2586,'',''
 CREATE PROCEDURE UpdateFieldWorkRequiredDocuments
 @UserId bigint,
 @FieldWorkAttachmentID bigint,
@@ -8,8 +8,9 @@ CREATE PROCEDURE UpdateFieldWorkRequiredDocuments
 AS
 BEGIN
 declare @folderName varchar(100);
-set @folderName= (select 
-		(case when CSULBID is null then CAST(ID as varchar(25))+FirstName+LastName else CAST(ID as varchar(25))+CSULBID+FirstName+LastName end) foldername 
+
+	 (select @folderName=CAST(ID as varchar(25))+trim(isnull(CSULBID,''))+TRIM(REPLACE(FirstName, ' ', '')) + TRIM(REPLACE(LastName, ' ', ''))
+		
 		from [User].Users where ID=@UserId)
 
 	update [FieldWork].[Attachments]  set [FileName]=@FileName,FileExtn=@FileExtn,FolderName=@folderName

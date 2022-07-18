@@ -9,7 +9,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IFieldWorkService
     {
-        List<FieldWorkResponse> GetFieldWorkList(int userId);
+        FieldWorkListResponse GetFieldWorkList(int userId);
         FieldWorkDataResponse GetFieldWorkDetailsById(int userId,int fieldWorkId);
         BaseResponse UpdateFieldWorkValidation(FieldWorkValidationRequest input);
         BaseResponse UpdateFieldWorkDocumentValidation(FieldWorkUploadDocumentsRequest input);

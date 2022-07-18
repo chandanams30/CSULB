@@ -3,7 +3,7 @@
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
--- exec [dbo].[GetFieldWork] 1,1
+-- exec [dbo].[GetFieldWork] 1545,3553
 CREATE PROCEDURE [dbo].[GetFieldWork]
 @UserId bigint,
 @FieldWorkId bigint
@@ -15,7 +15,7 @@ BEGIN
 					--,UR.UserID
 					from [FieldWork].[FieldWork] F
 					Join [User].[Users] U on U.ID=F.UserID 
-					Join [FieldWork].[Courses] C on C.ID=F.CourseID
+					Join [Master].[FieldWorkCourses] C on C.ID=F.CourseID
 					Join [Master].[Semester] S on S.TermCode=C.TermCode
 					--join [FieldWork].[UserRoles] UR on ur.FieldWorkID=f.ID
 					where F.ID =@FieldWorkId
@@ -36,11 +36,13 @@ BEGIN
 				SELECT a.[ID]
 					  ,a.[UserID]
 					  ,a.[DocumentID]
+					  ,d.[Description] DocumentType
 					  ,a.[FileName]
 					  ,a.[FileExtn]
 					  ,a.[FolderName]
 					  ,a.[IsApproved]
-					  ,a.[ApprovedBy]
+					  --,a.[ApprovedBy]
+					  ,(u.FirstName+' '+u.LastName) ApprovedBy
 					  ,a.[ValidatedDate]
 					  ,a.[CreatedBy]
 					  ,a.[CreatedDate]
@@ -48,9 +50,8 @@ BEGIN
 					  ,a.[RejectedReason]
 				  FROM [FieldWork].[Attachments] a
 				  join [FieldWork].[FieldWork] f on f.ID=@fieldWorkID and f.UserID=a.UserID
-
-
-
+				  join [Master].[Documents] d on d.ID=a.DocumentID
+				  left join [User].[Users] u on u.ID=a.ApprovedBy
 
 
 END

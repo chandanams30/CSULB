@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ThoughtFocus.Domain.Response.FieldWork
 {
-    public class FieldWorkDataResponse
+    public class FieldWorkDataResponse :BaseResponse
     {
         public FieldWorkResponse FieldWork { get; set; }
         public List<FieldWorkRoles> FieldWorkRoles { get; set; }

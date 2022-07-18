@@ -27,7 +27,7 @@ namespace CSULB_COE.Controllers
 
         [HttpPost("Authenticate")]
         //public IActionResult Login ([FromBody]Models.AuthenticateRequest model) // uncomment after testing // updated testing venky
-        public IActionResult Login(LoginRequest request)
+        public IActionResult Login([FromBody]LoginRequest request)
         {
             //_logger.LogInformation("Start : Authenticating for {userName}",userName);
             ViewModels.AuthenticateRequest authModel = new ViewModels.AuthenticateRequest();
