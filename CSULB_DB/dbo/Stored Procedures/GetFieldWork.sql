@@ -1,57 +1,49 @@
-﻿-- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
--- exec [dbo].[GetFieldWork] 1545,3553
-CREATE PROCEDURE [dbo].[GetFieldWork]
-@UserId bigint,
-@FieldWorkId bigint
+﻿CREATE PROCEDURE [dbo].[GetFieldWork] @UserId BIGINT
+	,@FieldWorkId BIGINT
 AS
 BEGIN
-		
-					select F.ID,U.FirstName+' '+U.LastName as [StudentName] , C.CourseTitle , C.CSULBCourseId , C.College , S.[Name] as Term 
-					 
-					--,UR.UserID
-					from [FieldWork].[FieldWork] F
-					Join [User].[Users] U on U.ID=F.UserID 
-					Join [Master].[FieldWorkCourses] C on C.ID=F.CourseID
-					Join [Master].[Semester] S on S.TermCode=C.TermCode
-					--join [FieldWork].[UserRoles] UR on ur.FieldWorkID=f.ID
-					where F.ID =@FieldWorkId
+	SELECT F.ID
+		,U.FirstName + ' ' + U.LastName AS [StudentName]
+		,C.CourseTitle
+		,C.CSULBCourseId
+		,C.College
+		,S.[Name] AS Term
+		,FWPS.[FieldWorkPrerequisiteStatus]
+	FROM [FieldWork].[FieldWork] F
+	JOIN [User].[Users] U ON U.ID = F.UserID
+	JOIN [Master].[FieldWorkCourses] C ON C.ID = F.CourseID
+	JOIN [Master].[Semester] S ON S.TermCode = C.TermCode
+	JOIN [CSULB_DB].[dbo].[View_FieldWorkPrerequisiteStatus] FWPS on FWPS.FieldWorkID=F.ID
+	WHERE F.ID = @FieldWorkId
 
+	SELECT FWU.[ID]
+		,FWU.[UserID]
+		,FWU.[FieldWorkID]
+		,FWU.[RoleID]
+		,U.FirstName + ' ' + U.LastName AS [Name]
+		,R.[Description]
+	FROM [FieldWork].[FieldWorkUsers] FWU
+	JOIN [User].[Users] U ON U.ID = FWU.UserID
+	JOIN [Master].[Role] r ON R.ID = FWU.RoleID
+	WHERE FWU.FieldWorkID = @FieldWorkId
 
-					SELECT FWU.[ID]
-						  ,FWU.[UserID]
-						  ,FWU.[FieldWorkID]
-						  ,FWU.[RoleID]
-						  ,U.FirstName+' '+U.LastName as [Name]
-						  ,r.[Description]
-					  FROM [FieldWork].[FieldWorkUsers] FWU
-					  Join [User].[Users] U on U.ID=FWU.UserID 
-					  join [Master].[Role] r on r.ID=FWU.RoleID
-					  where FWU.FieldWorkID=@FieldWorkId
-
-
-				SELECT a.[ID]
-					  ,a.[UserID]
-					  ,a.[DocumentID]
-					  ,d.[Description] DocumentType
-					  ,a.[FileName]
-					  ,a.[FileExtn]
-					  ,a.[FolderName]
-					  ,a.[IsApproved]
-					  --,a.[ApprovedBy]
-					  ,(u.FirstName+' '+u.LastName) ApprovedBy
-					  ,a.[ValidatedDate]
-					  ,a.[CreatedBy]
-					  ,a.[CreatedDate]
-					  ,a.[ValidTill]
-					  ,a.[RejectedReason]
-				  FROM [FieldWork].[Attachments] a
-				  join [FieldWork].[FieldWork] f on f.ID=@fieldWorkID and f.UserID=a.UserID
-				  join [Master].[Documents] d on d.ID=a.DocumentID
-				  left join [User].[Users] u on u.ID=a.ApprovedBy
-
-
+	SELECT A.[ID]
+		,A.[UserID]
+		,A.[DocumentID]
+		,D.[Name] DocumentName
+		,A.[FileName]
+		,A.[FileExtn]
+		,A.[FolderName]
+		,A.[IsApproved]
+		,(U.FirstName + ' ' + U.LastName) ApprovedBy
+		,A.[ValidatedDate]
+		,A.[CreatedBy]
+		,A.[CreatedDate]
+		,A.[ValidTill]
+		,A.[RejectedReason]
+	FROM [FieldWork].[Attachments] A
+	JOIN [FieldWork].[FieldWork] F ON F.ID = @fieldWorkID AND f.UserID = A.UserID
+	JOIN [Master].[FieldWorkDocuments] FWD ON FWD.CourseID = F.CourseID AND A.DocumentID = FWD.DocumentID
+	JOIN [Master].[Documents] D ON D.ID = FWD.DocumentID
+	LEFT JOIN [User].[Users] U ON u.ID = A.ApprovedBy
 END
