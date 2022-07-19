@@ -27,29 +27,62 @@ namespace CSULB_COE.Controllers
         [HttpGet("GetFieldWorkList")]
         public IActionResult GetFieldWorkList(int userId)
         {
-            FieldWorkListResponse lstFieldWork= _fieldWorkService.GetFieldWorkList(userId);
-            return Ok(lstFieldWork);
+            try
+            {
+                FieldWorkListResponse lstFieldWork = _fieldWorkService.GetFieldWorkList(userId);
+                return Ok(lstFieldWork);
+            }
+            catch (Exception ex)
+            {
+                FieldWorkListResponse response = new FieldWorkListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(response);
+            }
         }
         [HttpGet("GetFieldWorkById")]
         public FieldWorkDataResponse GetFieldWorkById(int userId,int fieldWorkId)
         {
-            FieldWorkDataResponse fieldWorkDataResponse = _fieldWorkService.GetFieldWorkDetailsById(userId, fieldWorkId);
-            return fieldWorkDataResponse;
+            try
+            {
+                FieldWorkDataResponse fieldWorkDataResponse = _fieldWorkService.GetFieldWorkDetailsById(userId, fieldWorkId);
+                return fieldWorkDataResponse;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkDataResponse response = new FieldWorkDataResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
         }
 
         [HttpPost("UpdateFieldWorkValidation")]
         public BaseResponse UpdateFieldWorkValidation(FieldWorkValidationRequest input)
         {
-            string responseString = string.Empty;
-            BaseResponse response = _fieldWorkService.UpdateFieldWorkValidation(input);
-            return response;
+            try
+            {
+                BaseResponse response = _fieldWorkService.UpdateFieldWorkValidation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
         }
 
         [HttpPost("UploadFieldWorkRequiredDocuments")]
         public BaseResponse UploadFieldWorkRequiredDocuments(FieldWorkUploadDocumentsRequest input)
         {
-            string responseString = string.Empty;
-
             #region testing with manual file , actual file will come as byte array 
             //-------------just for testing - comment it after testing
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
@@ -66,9 +99,20 @@ namespace CSULB_COE.Controllers
             //binaryReader.Close();
             //----end comment----------------------------------------
             #endregion
-
-            BaseResponse response = _fieldWorkService.UpdateFieldWorkDocumentValidation(input);
-            return response;
+            try
+            {
+                BaseResponse response = _fieldWorkService.UpdateFieldWorkDocumentValidation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
         }
         [HttpGet("DownloadRequiredDocuments")]
         public IActionResult DownloadRequiredDocuments(int userId,int fieldworkAttachmentId)

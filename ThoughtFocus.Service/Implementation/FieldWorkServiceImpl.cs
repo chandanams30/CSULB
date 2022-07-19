@@ -49,7 +49,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   CourseTitle = Convert.ToString(row["CourseTitle"]),
                                                   CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
                                                   College = Convert.ToString(row["College"]),
-                                                  Term = Convert.ToString(row["Term"])
+                                                  Term = Convert.ToString(row["Term"]),
+                                                  FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
                                               }).FirstOrDefault();
 
                     obj.FieldWorkRoles = dsFieldWorkData.Tables[1].AsEnumerable().Select(row =>
@@ -68,7 +69,7 @@ namespace ThoughtFocus.Service.Implementation
                                               {
                                                   FieldWorkAttachmentID = Convert.ToInt32(row["ID"]),
                                                   UserID = Convert.ToInt32(row["UserID"]),
-                                                  DocumentType = Convert.ToString(row["DocumentType"]),
+                                                  DocumentName = Convert.ToString(row["DocumentName"]),
                                                   FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
                                               // FileExtn = Convert.ToString(row["FileExtn"]),
                                               // FolderName = Convert.ToString(row["FolderName"]),
@@ -135,8 +136,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
                                                   College = Convert.ToString(row["College"]),
                                                   Term = Convert.ToString(row["Term"]),
-                                                  IsTBTest = false,
-                                                  IsCtcDone = false
+                                                  FieldWorkPrerequisiteStatus=Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
 
                                               }).ToList();
 
@@ -262,6 +262,7 @@ namespace ThoughtFocus.Service.Implementation
             FieldWorkProfileAttachments obj = new FieldWorkProfileAttachments();
             SqlParameter[] parameters =
                                      {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userId },
                                           new SqlParameter("@FieldWorkAttachmentID", SqlDbType.BigInt) { Value = fieldworkAttachmentId }
                                      };
             DataTable dtAttachments = _helper.GetDataTable("[dbo].[DownloadFieldWorkRequiredDocument]", parameters);

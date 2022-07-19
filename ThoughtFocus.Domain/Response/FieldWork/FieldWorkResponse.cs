@@ -12,8 +12,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string CSULBCourseID { get; set; }
         public string College { get; set; }
         public string Term { get; set; }
-        public bool IsTBTest { get; set; }
-        public bool IsCtcDone { get; set; }
+        public int FieldWorkPrerequisiteStatus { get; set; }
     }
 
     public class FieldWorkListResponse:BaseResponse

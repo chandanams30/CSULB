@@ -23,7 +23,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
     {
         public int FieldWorkAttachmentID { get; set; }
         public int UserID { get; set; }
-        public string DocumentType { get; set; }
+        public string DocumentName { get; set; }
         public string FileName { get; set; }
         //public string FileExtn { get; set; }
        // public string FolderName { get; set; }
