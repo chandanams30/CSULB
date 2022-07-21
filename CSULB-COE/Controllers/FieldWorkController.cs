@@ -87,16 +87,16 @@ namespace CSULB_COE.Controllers
             //-------------just for testing - comment it after testing
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
             // string filepath = "D:\\CSULB\\GitHub\\Documents\\TB-TEST.docx";
-            //string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
-            //byte[] fileContent = null;
-            // System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-            // System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
-            //long byteLength = new System.IO.FileInfo(filepath).Length;
-            // fileContent = binaryReader.ReadBytes((Int32)byteLength);
-            //input.FileContent = fileContent;
-            // fs.Close();
-            //fs.Dispose();
-            //binaryReader.Close();
+            string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            input.FileContent = fileContent;
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
             //----end comment----------------------------------------
             #endregion
             try
@@ -129,6 +129,44 @@ namespace CSULB_COE.Controllers
             fileType = GetFileType(fileSplit[1]);
 
             return File(inputStream, fileType, fileName);
+        }
+        [HttpGet("GetFieldWorkActivityLog")]
+        public FieldWorkActivityLogResponse GetFieldWorkActivityLog(int userId, int fieldWorkId)
+        {
+            try
+            {
+                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                response = _fieldWorkService.GetFieldWorkActivityLog(userId, fieldWorkId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFieldWorkActivityLog")]
+        public FieldWorkActivityLogResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
+        {
+            try
+            {
+                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                response = _fieldWorkService.UpdateFieldWorkActivityLog(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save Activity Log, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
         }
 
         private string GetFileType(string fileExt)

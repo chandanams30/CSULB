@@ -79,8 +79,8 @@ namespace ThoughtFocus.Service.Implementation
                                               //CreatedBy = Convert.ToInt32(row["CreatedBy"]),
                                               //CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
                                               ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
-                                                  FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(), "FieldWork"), Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"])),
-                                                  RejectReason = Convert.ToString(row["RejectedReason"])
+                                              //FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(), "FieldWork"), Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"])),
+                                              RejectReason = Convert.ToString(row["RejectedReason"])
                                               }).ToList();
 
                     obj.IsSuccess = true;
@@ -208,7 +208,7 @@ namespace ThoughtFocus.Service.Implementation
             if (input.FileName != string.Empty)
             {
                 string[] fileSplit = input.FileName.Split('.');
-                fileName = fileSplit[0].ToString();
+                fileName = input.FieldWorkAttachmentId+fileSplit[0].ToString()+DateTime.Now.ToString("MMddyyyyHHmmss");
                 fileExtension= fileSplit[1].ToString();
             }
             // call the SP to save the save the file details in fieldwork.attachments table 
@@ -231,12 +231,12 @@ namespace ThoughtFocus.Service.Implementation
                     if (Directory.Exists(dirFieldWork))
                     {
                         // copy the file here 
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, input.FileName), input.FileContent);
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, fileName+"."+fileExtension), input.FileContent);
                     }
                     else
                     {
                         Directory.CreateDirectory(dirFieldWork);
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, input.FileName), input.FileContent);
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, fileName + "." + fileExtension), input.FileContent);
                     }
                 }
                 else
@@ -248,7 +248,7 @@ namespace ThoughtFocus.Service.Implementation
                     dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
                     dirFieldWorkFolder.SetAccessControl(dSecurity);
 
-                    File.WriteAllBytes(Path.Combine(dirFieldWork,input.FileName), input.FileContent);
+                    File.WriteAllBytes(Path.Combine(dirFieldWork, fileName + "." + fileExtension), input.FileContent);
                 }
             }
 
@@ -279,6 +279,65 @@ namespace ThoughtFocus.Service.Implementation
                                               ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
                                               FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(), "FieldWork"), Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]))
                                           }).FirstOrDefault();
+
+            return obj;
+        }
+
+        public FieldWorkActivityLogResponse GetFieldWorkActivityLog(int userId, int fieldworkId)
+        {
+            FieldWorkActivityLogResponse obj = new FieldWorkActivityLogResponse();
+
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userId },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldworkId }
+                                     };
+            DataTable dtActivityLog = _helper.GetDataTable("[dbo].[GetFieldWorkActivityLog]", parameters);
+            if (dtActivityLog.Rows.Count > 0)
+            {
+                obj = dtActivityLog.AsEnumerable().Select(row =>
+                                              new FieldWorkActivityLogResponse
+                                              {
+                                                  FieldWorkId = Convert.ToInt32(row["FieldWorkID"]),
+                                                  BaseSchema = Convert.ToString(row["BaseSchema"]),
+                                                  ResponseSchema = Convert.ToString(row["ResponseSchema"])
+                                              }).FirstOrDefault();
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully";
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data";
+            }
+
+            return obj;
+        }
+
+        public FieldWorkActivityLogResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
+        {
+            FieldWorkActivityLogResponse obj = new FieldWorkActivityLogResponse();
+
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserId },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkId },
+                                          new SqlParameter("@ResponseSchema", SqlDbType.NVarChar) { Value = input.ResponseSchema }
+                                     };
+            DataTable dtActivityLog = _helper.GetDataTable("[dbo].[UpdateFieldWorkActivityLog]", parameters);
+            if (dtActivityLog.Rows.Count > 0)
+            {
+                obj = dtActivityLog.AsEnumerable().Select(row =>
+                                              new FieldWorkActivityLogResponse
+                                              {
+                                                  FieldWorkId = Convert.ToInt32(row["FieldWorkID"]),
+                                                  BaseSchema = Convert.ToString(row["BaseSchema"]),
+                                                  ResponseSchema = Convert.ToString(row["ResponseSchema"])
+                                              }).FirstOrDefault();
+                obj.IsSuccess = true;
+                obj.Message = "Data Saved Successfully";
+            }
+          
 
             return obj;
         }
