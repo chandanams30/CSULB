@@ -1,4 +1,3 @@
-using CSULB_COE.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,13 +15,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
-using ThoughtFocus.DocumentManager;
 using ThoughtFocus.Repository.Implementation;
 using ThoughtFocus.Repository.Interfaces;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
+using ThoughtFocus.Common.WorkFlowDataAccess;
+using ThoughtFocus.Workflow;
+using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Common;
 
 namespace CSULB_COE
 {
@@ -38,10 +39,9 @@ namespace CSULB_COE
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+    
 
-            services.AddCors();
             services.AddControllers().AddNewtonsoftJson();
-
 
             // adding db context 
             services.AddDbContext<CSULB_DBContext>(options =>
@@ -53,6 +53,14 @@ namespace CSULB_COE
                                 sqlOptions.EnableRetryOnFailure();
 
                             });
+            });
+
+            services.AddDbContext<WorkFlowContext>(options =>
+            {
+                options.UseLazyLoadingProxies()
+                   .UseSqlServer(Configuration.GetConnectionString("AppDBConnection"),
+                               sqlServerOptionsAction: sqlOptions =>
+                               { sqlOptions.EnableRetryOnFailure(); });
             });
 
             // Adding JWT Token
@@ -77,37 +85,39 @@ namespace CSULB_COE
                 };
             });
 
+            // configure strongly typed settings object
+            //services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            services.Configure<SqlConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
+
+
+            services.AddSingleton<SqlConnectionStrings>(new SqlConnectionStrings()
+            {
+                AppDBConnection = Configuration.GetConnectionString("AppDBConnection")
+            });
+
             // user login service 
             services.AddScoped<IUserRepository, UserRepositoryImpl>();
             services.AddScoped<ThoughtFocus.Repository.Interfaces.User.IUserDetailsRepository, ThoughtFocus.Repository.Implementation.User.UserDetailsImpl>();
             services.AddScoped<ThoughtFocus.Repository.Interfaces.User.IUserActivityRepository, ThoughtFocus.Repository.Implementation.User.UserActivityImpl>();
             services.AddTransient<IUserLoginService, UserLoginServiceImpl>();
 
+
+            services.AddScoped<WorkflowInit>();
+            services.AddScoped<WorkflowRole>();
+            services.AddScoped<WorkflowRule>();
+            services.AddScoped<WorkflowActions>();
+
             // Application service 
             services.AddScoped<IApplicationService, ApplicationServiceImpl>();
-
-            // program service 
-            services.AddScoped<IProgramsService, ProgramServiceImpl>();
-
-            // forms service 
-            services.AddScoped<IFormsService, FormsServiceImpl>();
-
-            //user service 
-            services.AddScoped<IUserService, UserServiceImpl>();
-
-            //Field Work service 
-            services.AddScoped<IFieldWorkService, FieldWorkServiceImpl>();
-
-            // DBUtility 
-            services.AddScoped<ISqlDBUtility, SqlDBUtility>();
-
-            //Document Service 
-            services.AddScoped<IDocumentService, DocumentServiceImpl>();
-
-            //document converter
-            services.AddScoped<IFileConverter, FIleConverter>();
-
-
+            // Workflow service
+            var serviceProvider = services.BuildServiceProvider();
+            DependencyHelper.WorkflowInit = serviceProvider.GetService<WorkflowInit>();
+            DependencyHelper.WorkflowRole = serviceProvider.GetService<WorkflowRole>();
+            DependencyHelper.WorkflowRule = serviceProvider.GetService<WorkflowRule>();
+            DependencyHelper.SqlConnectionStrings = serviceProvider.GetService<SqlConnectionStrings>();
+            DependencyHelper.WorkflowActions = serviceProvider.GetService<WorkflowActions>();
+            
 
 
             // Enable Swagger   
@@ -133,22 +143,9 @@ namespace CSULB_COE
                 app.UseDeveloperExceptionPage();
             }
 
-            // validate the appsettings for turning On/Off the http requests tracking
-            string check=this.Configuration["TrackIncomingRequests"];
-            // using the middleware for http-request handling
-            if(check=="True")
-                app.UseMiddleware<RequestHandlerMiddleware>();
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            // global cors policy
-            app.UseCors(x => x
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .SetIsOriginAllowed(origin => true) // allow any origin
-                .AllowCredentials()); // allow credentials
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -157,7 +154,6 @@ namespace CSULB_COE
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "ThoughtFocus CSULB-CED");
-                //c.SwaggerEndpoint("./v1/swagger.json", "ThoughtFocus CSULB-CED");
             });
 
             app.UseEndpoints(endpoints =>

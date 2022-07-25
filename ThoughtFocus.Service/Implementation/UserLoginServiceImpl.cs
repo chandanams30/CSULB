@@ -62,8 +62,7 @@ namespace ThoughtFocus.Service.Implementation
                         response.FirstName = _user.FirstName; 
                         response.LastName = _user.LastName; 
                         response.Roles = roles; // pull the roles based on the userID 
-                        response.JWTToken = GetJWTString(_user);
-                        response.UserId = Convert.ToInt32(_user.Id);
+                        response.JWTToken = GetJWTString(_user);  
                 }
             }
          

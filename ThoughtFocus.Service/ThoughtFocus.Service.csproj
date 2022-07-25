@@ -5,15 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Office.Interop.Word" Version="12.0.0" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ThoughtFocus.Common.Exceptions\ThoughtFocus.Common.Exceptions.csproj" />
     <ProjectReference Include="..\ThoughtFocus.DocumentManager\ThoughtFocus.DocumentManager.csproj" />
     <ProjectReference Include="..\ThoughtFocus.Domain\ThoughtFocus.Domain.csproj" />
     <ProjectReference Include="..\ThoughtFocus.Repository\ThoughtFocus.Repository.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Workflow\ThoughtFocus.Workflow.csproj" />
   </ItemGroup>
 
 </Project>

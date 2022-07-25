@@ -9,7 +9,6 @@ using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
 using ThoughtFocus.Service.Interfaces;
 using Microsoft.Extensions.Logging;
-using ThoughtFocus.Domain.Request;
 
 namespace CSULB_COE.Controllers
 {
@@ -25,24 +24,17 @@ namespace CSULB_COE.Controllers
             _logger = logger;
         }
 
-        [HttpPost("Authenticate")]
-        //public IActionResult Login ([FromBody]Models.AuthenticateRequest model) // uncomment after testing // updated testing venky
-        public IActionResult Login([FromBody]LoginRequest request)
+        [HttpGet("Authenticate")]
+        //public IActionResult Login ([FromBody]Models.AuthenticateRequest model)
+        public IActionResult Login(string userName,string password)
         {
             //_logger.LogInformation("Start : Authenticating for {userName}",userName);
+           // _logger.LogError(new DivideByZeroException(), "divided by zero exception");
             ViewModels.AuthenticateRequest authModel = new ViewModels.AuthenticateRequest();
-            authModel.Username = request.UserName;
-            authModel.Password = request.Password;
-            try
-            {
-                var response = _userLoginService.Authenticate(authModel);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return BadRequest();
-            }
+            authModel.Username = userName;
+            authModel.Password = password;
+            var response = _userLoginService.Authenticate(authModel);
+            return Ok(response);
         }
     }
 }

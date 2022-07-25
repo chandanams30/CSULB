@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ThoughtFocus.Common.Exceptions\ThoughtFocus.Common.Exceptions.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Common.Workflow.Common\ThoughtFocus.Common.Workflow.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup> 
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="5.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+</Project>

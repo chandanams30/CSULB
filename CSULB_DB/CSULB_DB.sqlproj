@@ -130,10 +130,10 @@
     <Folder Include="dbo\" />
     <Folder Include="dbo\Views\" />
     <Folder Include="Security\" />
-    <Folder Include="dbo\Stored Procedures\" />
     <Folder Include="dbo\Tables\" />
     <Folder Include="FieldWork\" />
     <Folder Include="FieldWork\Tables\" />
+    <Folder Include="dbo\Stored Procedures\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="WorkFlow\Tables\ActionDefinition.sql">
@@ -301,158 +301,166 @@
     <Build Include="Security\User.sql" />
     <Build Include="Security\WorkFlow.sql" />
     <Build Include="Security\Permissions.sql" />
-    <Build Include="User\Tables\UserCred.sql">
+    <Build Include="User\Tables\UserCred_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="User\Tables\UserActivityLog.sql">
+    <Build Include="User\Tables\UserActivityLog_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Master\Tables\AuthenticationType.sql">
+    <Build Include="Master\Tables\ProgramDocuments_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Application\Tables\ProgramUsers.sql">
+    <Build Include="Master\Tables\FieldWorkDocuments_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Application\Tables\Log.sql">
+    <Build Include="Master\Tables\FieldWorkCourses_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Application\Tables\FormUsers.sql">
+    <Build Include="Master\Tables\AuthenticationType_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Application\Tables\FormsHistory.sql">
+    <Build Include="dbo\Tables\student_plans_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\SaveForm.sql">
+    <Build Include="dbo\Tables\csulb_ced_users_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetProgramList.sql">
+    <Build Include="dbo\Tables\csulb_ced_terms_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetProgram.sql">
+    <Build Include="dbo\Tables\csulb_ced_faculty_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetFormDetails.sql">
+    <Build Include="dbo\Tables\csulb_ced_enrollments_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetApplications.sql">
+    <Build Include="dbo\Tables\csulb_ced_courses_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Master\Tables\ProgramDocuments.sql">
+    <Build Include="Application\Tables\ProgramUsers_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Master\Tables\FieldWorkDocuments.sql">
+    <Build Include="Application\Tables\Log_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Tables\student_plans.sql">
+    <Build Include="Application\Tables\FormUsers_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Tables\csulb_ced_users.sql">
+    <Build Include="Application\Tables\FormsHistory_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Tables\csulb_ced_terms.sql">
+    <Build Include="Application\Tables\FormAttachments_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Tables\csulb_ced_faculty.sql">
+    <Build Include="Application\Tables\ApplicationNumberFactory_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Tables\csulb_ced_enrollments.sql">
+    <Build Include="FieldWork\Tables\Attachments_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Tables\csulb_ced_courses.sql">
+    <Build Include="FieldWork\Tables\FieldWorkUsers_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Application\Tables\FormAttachments.sql">
+    <Build Include="FieldWork\Tables\FieldWork_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Application\Tables\ApplicationNumberFactory.sql">
+    <Build Include="FieldWork\Tables\Courses_Old_Not-Reqd.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="FieldWork\Tables\Attachments.sql">
+    <Build Include="dbo\Views\View_FieldWorkPrerequisiteStatus_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="FieldWork\Tables\FieldWorkUsers.sql">
+    <Build Include="dbo\Stored Procedures\UpdateFieldWorkValidation_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="FieldWork\Tables\FieldWork.sql">
+    <Build Include="dbo\Stored Procedures\UpdateFieldWorkRequiredDocuments_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="FieldWork\Tables\Courses.sql">
+    <Build Include="dbo\Stored Procedures\UpdateFieldWorkActivityLog.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\UpdateFieldWorkValidation.sql">
+    <Build Include="dbo\Stored Procedures\SaveForm_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\UpdateFieldWorkRequiredDocuments.sql">
+    <Build Include="dbo\Stored Procedures\GetUsersByRole_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetUsersByRole.sql">
+    <Build Include="dbo\Stored Procedures\GetProgramList_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetFormsList.sql">
+    <Build Include="dbo\Stored Procedures\GetProgramApplications_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetFieldWorkData.sql">
+    <Build Include="dbo\Stored Procedures\GetProgram_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetFieldWork.sql">
+    <Build Include="dbo\Stored Procedures\GetFormsList_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetDocuments.sql">
+    <Build Include="dbo\Stored Procedures\GetFormDetails_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetApplicationNumber.sql">
+    <Build Include="dbo\Stored Procedures\GetFieldWorkData_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Security\FieldWork.sql" />
-    <Build Include="Master\Tables\FieldWorkCourses.sql">
+    <Build Include="dbo\Stored Procedures\GetFieldWorkActivityLog.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\GetProgramApplications.sql">
+    <Build Include="dbo\Stored Procedures\GetFieldWork_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\DownloadFieldWorkRequiredDocument.sql">
+    <Build Include="dbo\Stored Procedures\GetDocuments_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Views\View_FieldWorkPrerequisiteStatus.sql">
+    <Build Include="dbo\Stored Procedures\GetApplications_1.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
+    <Build Include="dbo\Stored Procedures\GetApplicationNumber_1.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
+    <Build Include="dbo\Stored Procedures\DownloadFieldWorkRequiredDocument_1.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
+    <Build Include="Security\FieldWork_1.sql" />
   </ItemGroup>
 </Project>

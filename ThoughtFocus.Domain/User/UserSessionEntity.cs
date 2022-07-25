@@ -1,0 +1,26 @@
+﻿namespace ThoughtFocus.Domain.User
+{
+    using System;
+    using System.Collections.Generic;
+
+    //[Serializable]
+    public class UserSessionEntity
+    {
+        #region Properties
+
+
+        public long UserID { get; set; }
+
+        public Guid IdentityID { get; set; }
+        public string UserName { get; set; }
+
+        public long ContactID { get; set; }
+
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public Nullable<System.DateTime> LastLoginDateTime { get; set; }         
+
+        #endregion Properties
+    }
+}

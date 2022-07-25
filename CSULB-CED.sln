@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32407.337
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.CSULB-CED.App", "CSULB-COE\ThoughtFocus.CSULB-CED.App.csproj", "{A0AE1C73-2D33-47FA-A3DA-E27D668D7854}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83EC7253-AB17-4B0C-8271-DEBE0C2D3A0B} = {83EC7253-AB17-4B0C-8271-DEBE0C2D3A0B}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CC26D84F-661B-4D3D-8251-FDA447696F7A}"
 EndProject
@@ -44,10 +47,21 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.DocumentManager", "ThoughtFocus.DocumentManager\ThoughtFocus.DocumentManager.csproj", "{83EC7253-AB17-4B0C-8271-DEBE0C2D3A0B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.Service", "ThoughtFocus.Service\ThoughtFocus.Service.csproj", "{D991BA48-86E2-4A04-829E-A08CFC03F440}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83EC7253-AB17-4B0C-8271-DEBE0C2D3A0B} = {83EC7253-AB17-4B0C-8271-DEBE0C2D3A0B}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "7-DB", "7-DB", "{18A7373E-809B-4366-A0E0-946B87188F8E}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "CSULB_DB", "CSULB_DB\CSULB_DB.sqlproj", "{252921CF-093E-4217-9E20-C1619FDD075A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.Common.Workflow.Common", "ThoughtFocus.Common.Workflow.Common\ThoughtFocus.Common.Workflow.Common.csproj", "{C0B4B896-1F02-48BC-B902-71EE2369F500}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.Common.Workflow.Core", "ThoughtFocus.Common.Workflow.Core\ThoughtFocus.Common.Workflow.Core.csproj", "{DA3CCE78-823C-4B6F-8A18-6F7CB262DA6B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.Common.Workflow.DbPersistance", "ThoughtFocus.Common.Workflow.DbPersistance\ThoughtFocus.Common.Workflow.DbPersistance.csproj", "{DF4A76EB-175C-4C34-B978-04E4EC678887}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.Common.WorkFlowDataAccess", "ThoughtFocus.Common.WorkFlowDataAccess\ThoughtFocus.Common.WorkFlowDataAccess.csproj", "{52E8288D-0AE2-4581-96F3-B4C842F9D7B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +127,22 @@ Global
 		{252921CF-093E-4217-9E20-C1619FDD075A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{252921CF-093E-4217-9E20-C1619FDD075A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{252921CF-093E-4217-9E20-C1619FDD075A}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C0B4B896-1F02-48BC-B902-71EE2369F500}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0B4B896-1F02-48BC-B902-71EE2369F500}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0B4B896-1F02-48BC-B902-71EE2369F500}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0B4B896-1F02-48BC-B902-71EE2369F500}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA3CCE78-823C-4B6F-8A18-6F7CB262DA6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA3CCE78-823C-4B6F-8A18-6F7CB262DA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA3CCE78-823C-4B6F-8A18-6F7CB262DA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA3CCE78-823C-4B6F-8A18-6F7CB262DA6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF4A76EB-175C-4C34-B978-04E4EC678887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF4A76EB-175C-4C34-B978-04E4EC678887}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF4A76EB-175C-4C34-B978-04E4EC678887}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF4A76EB-175C-4C34-B978-04E4EC678887}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52E8288D-0AE2-4581-96F3-B4C842F9D7B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52E8288D-0AE2-4581-96F3-B4C842F9D7B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52E8288D-0AE2-4581-96F3-B4C842F9D7B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52E8288D-0AE2-4581-96F3-B4C842F9D7B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,6 +169,10 @@ Global
 		{D991BA48-86E2-4A04-829E-A08CFC03F440} = {2A4BCA24-6E4D-48C0-B81A-CDA9A609A3B5}
 		{18A7373E-809B-4366-A0E0-946B87188F8E} = {CC26D84F-661B-4D3D-8251-FDA447696F7A}
 		{252921CF-093E-4217-9E20-C1619FDD075A} = {18A7373E-809B-4366-A0E0-946B87188F8E}
+		{C0B4B896-1F02-48BC-B902-71EE2369F500} = {1245DC52-98FC-4E9B-A649-4EA06AB9B82D}
+		{DA3CCE78-823C-4B6F-8A18-6F7CB262DA6B} = {1245DC52-98FC-4E9B-A649-4EA06AB9B82D}
+		{DF4A76EB-175C-4C34-B978-04E4EC678887} = {1245DC52-98FC-4E9B-A649-4EA06AB9B82D}
+		{52E8288D-0AE2-4581-96F3-B4C842F9D7B9} = {B52AA867-9D06-4E46-851C-7DE030C211F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {83F55F36-70F9-4973-BD23-2F66771C0405}

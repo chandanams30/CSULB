@@ -4,4 +4,13 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ThoughtFocus.Common.Exceptions\ThoughtFocus.Common.Exceptions.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Common.Workflow.Common\ThoughtFocus.Common.Workflow.Common.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Common.Workflow.Core\ThoughtFocus.Common.Workflow.Core.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Common.Workflow.DbPersistance\ThoughtFocus.Common.Workflow.DbPersistance.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Common.WorkFlowDataAccess\ThoughtFocus.Common.WorkFlowDataAccess.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Domain\ThoughtFocus.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
