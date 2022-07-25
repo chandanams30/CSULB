@@ -47,8 +47,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   FieldWorkId = Convert.ToInt32(row["ID"]),
                                                   StudentName = Convert.ToString(row["StudentName"]),
                                                   CourseTitle = Convert.ToString(row["CourseTitle"]),
-                                                  CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
+                                                  CSULBCourseID = Convert.ToString(row["Course"]),
                                                   College = Convert.ToString(row["College"]),
+                                                  Section= Convert.ToString(row["Section"]),
                                                   Term = Convert.ToString(row["Term"]),
                                                   FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
                                               }).FirstOrDefault();
@@ -133,8 +134,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   FieldWorkId = Convert.ToInt32(row["ID"]),
                                                   StudentName = Convert.ToString(row["StudentName"]),
                                                   CourseTitle = Convert.ToString(row["CourseTitle"]),
-                                                  CSULBCourseID = Convert.ToString(row["CSULBCourseID"]),
+                                                  CSULBCourseID = Convert.ToString(row["Course"]),
                                                   College = Convert.ToString(row["College"]),
+                                                  Section= Convert.ToString(row["Section"]),
                                                   Term = Convert.ToString(row["Term"]),
                                                   FieldWorkPrerequisiteStatus=Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
 
@@ -340,6 +342,109 @@ namespace ThoughtFocus.Service.Implementation
           
 
             return obj;
+        }
+
+        public FieldWorkAttachmentsResponse UploadFieldWorkActivityDocuments(FieldWorkAttachmentsRequest input)
+        {
+            FieldWorkAttachmentsResponse response = new FieldWorkAttachmentsResponse();
+            string fileName = string.Empty;
+            string fileExtension = string.Empty;
+            string savedFileName = string.Empty;
+            string userFolderName = string.Empty;
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            if (input.FileName != string.Empty)
+            {
+                string[] fileSplit = input.FileName.Split('.');
+                fileName = fileSplit[0].ToString();
+                savedFileName = input.UserID + fileSplit[0].ToString() + DateTime.Now.ToString("MMddyyyyHHmmss");
+                fileExtension = fileSplit[1].ToString();
+            }
+            // call the SP to save the save the file details in fieldwork.attachments table 
+            SqlParameter[] parameters =
+                                      {
+                                          new SqlParameter("@UserId", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 250) { Value = savedFileName },
+                                        };
+            DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UploadFieldWorkActivityLogAttachments]", parameters);
+            if (dtFWDoc.Rows.Count > 0)
+            {
+                // check if the userFolder exists and if it exists then check if if the FieldWorkFolder exists
+                string[] folderSplit = dtFWDoc.Rows[0]["FolderName"].ToString().Split('~');
+                userFolderName = folderSplit[0].ToString();
+                string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                if (Directory.Exists(dirUserFolderPath))
+                {
+                    string dirFieldWork = Path.Combine(dirUserFolderPath, "Fieldwork");
+                    if (Directory.Exists(dirFieldWork))
+                    {
+                        // copy the file here 
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(dirFieldWork);
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                    }
+                }
+                else
+                {
+                    string dirFieldWork = Path.Combine(dirUserFolderPath, "Fieldwork");
+                    DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                    DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirFieldWork);
+                    DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                    dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                    dirFieldWorkFolder.SetAccessControl(dSecurity);
+
+                    File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                }
+                response.FileDisplayName = fileName + "." + fileExtension;
+                response.FileSavedName = savedFileName + "." + fileExtension;
+                response.AttachmentID = Convert.ToInt32(dtFWDoc.Rows[0]["ID"]);
+            }
+
+            response.IsSuccess = true;
+            response.Message = "Field Work Document Uploaded Successfully";
+            return response;
+        }
+
+        public FieldWorkProfileAttachments DownloadActivityAttachments(int userId, int fieldworkAttachmentId)
+        {
+            FieldWorkProfileAttachments obj = new FieldWorkProfileAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userId },
+                                          new SqlParameter("@FieldWorkAttachmentID", SqlDbType.BigInt) { Value = fieldworkAttachmentId }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[DownloadFieldWorkRequiredDocument]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new FieldWorkProfileAttachments
+                                          {
+                                              FieldWorkAttachmentID = Convert.ToInt32(row["ID"]),
+                                              UserID = Convert.ToInt32(row["UserID"]),
+                                              FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
+                                              ApprovedBy = Convert.ToString(row["ApprovedBy"] == DBNull.Value ? null : row["ApprovedBy"]),
+                                              ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
+                                              ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "FieldWork"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        private string GetAttachmentsFolderName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string userFolderName = folderSplit[0].ToString();
+            return userFolderName;
+        }
+        private string GetAttachmentsSavedFileName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string savedFileName = folderSplit[1].ToString();
+            return savedFileName;
         }
     }
 }

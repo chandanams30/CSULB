@@ -1,11 +1,13 @@
-﻿CREATE PROCEDURE [dbo].[GetFieldWorkData]
+﻿--exec GetFieldWorkData 1
+CREATE PROCEDURE [dbo].[GetFieldWorkData]
 @UserId bigint
 AS
 BEGIN
 	SELECT F.ID
 		,U.FirstName + ' ' + U.LastName AS [StudentName]
 		,C.CourseTitle
-		,C.CSULBCourseId
+		,c.[Subject]+'_'+c.CourseNumber Course
+		,c.ClassSection Section
 		,C.College
 		,S.[Name] AS Term
 		,FWPS.FieldWorkPrerequisiteStatus
@@ -14,7 +16,7 @@ BEGIN
 	JOIN [Master].[FieldWorkCourses] C ON C.ID = F.CourseID
 	JOIN [Master].[Semester] S ON S.TermCode = C.TermCode
 	JOIN [CSULB_DB].[dbo].[View_FieldWorkPrerequisiteStatus] FWPS ON FWPS.FieldWorkID = F.ID
-	WHERE F.ID IN (
+	WHERE F.[Status]=1 and F.ID IN (
 			SELECT F.ID
 			FROM [FieldWork].[FieldWork] F
 			JOIN [User].[Users] U ON U.ID = F.UserID

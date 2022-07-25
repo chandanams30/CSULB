@@ -1,6 +1,6 @@
 ﻿
 -- exec UpdateFieldWorkRequiredDocuments 1545,2586,'',''
-CREATE PROCEDURE UpdateFieldWorkRequiredDocuments
+CREATE PROCEDURE [dbo].[UpdateFieldWorkRequiredDocuments]
 @UserId bigint,
 @FieldWorkAttachmentID bigint,
 @FileName varchar(250),
@@ -13,7 +13,7 @@ declare @folderName varchar(100);
 		
 		from [User].Users where ID=@UserId)
 
-	update [FieldWork].[Attachments]  set [FileName]=@FileName,FileExtn=@FileExtn,FolderName=@folderName
+	update [FieldWork].[Attachments]  set [FileName]=@FileName,FileExtn=@FileExtn,FolderName=@folderName, [IsApproved]=NULL, [ValidTill]=NULL,[ApprovedBy]=NULL, [ValidatedDate]=Null, [RejectedReason]=Null
 	where ID=@FieldWorkAttachmentID;
 
 	select * from [FieldWork].[Attachments] where ID=@FieldWorkAttachmentID;

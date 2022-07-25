@@ -11,6 +11,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string CourseTitle { get; set; }
         public string CSULBCourseID { get; set; }
         public string College { get; set; }
+        public string Section { get; set; }
         public string Term { get; set; }
         public int FieldWorkPrerequisiteStatus { get; set; }
     }

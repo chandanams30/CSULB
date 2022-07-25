@@ -1,11 +1,13 @@
-﻿CREATE PROCEDURE [dbo].[GetFieldWork] @UserId BIGINT
+﻿--exec [GetFieldWork] 614,1
+CREATE PROCEDURE [dbo].[GetFieldWork] @UserId BIGINT
 	,@FieldWorkId BIGINT
 AS
 BEGIN
 	SELECT F.ID
 		,U.FirstName + ' ' + U.LastName AS [StudentName]
 		,C.CourseTitle
-		,C.CSULBCourseId
+		,c.[Subject]+'_'+c.CourseNumber Course
+		,c.ClassSection Section
 		,C.College
 		,S.[Name] AS Term
 		,FWPS.[FieldWorkPrerequisiteStatus]

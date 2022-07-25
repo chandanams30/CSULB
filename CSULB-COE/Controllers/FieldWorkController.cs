@@ -169,12 +169,58 @@ namespace CSULB_COE.Controllers
             }
         }
 
-        [HttpPost("UploadFieldWorkDocuments")]
-        public BaseResponse UploadFieldWorkDocuments()
+        [HttpPost("UploadFieldWorkActivityDocuments")]
+        public FieldWorkAttachmentsResponse UploadFieldWorkActivityDocuments(FieldWorkAttachmentsRequest input)
         {
-            BaseResponse response = new BaseResponse();
+            try
+            {
+                // comment the below after testing 
 
-            return response;
+
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
+                // string filepath = "D:\\CSULB\\GitHub\\Documents\\TB-TEST.docx";
+                string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
+                byte[] fileContent = null;
+                System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                long byteLength = new System.IO.FileInfo(filepath).Length;
+                fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                input.FileContent = fileContent;
+                fs.Close();
+                fs.Dispose();
+                binaryReader.Close();
+
+                // end comment
+                FieldWorkAttachmentsResponse response = new FieldWorkAttachmentsResponse();
+                response = _fieldWorkService.UploadFieldWorkActivityDocuments(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkAttachmentsResponse response = new FieldWorkAttachmentsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to upload activity attachments, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("DownloadActivityAttachments")]
+        public IActionResult DownloadActivityAttachments(int userId, int fieldworkAttachmentId)
+        {
+            byte[] inputStream = null;
+            string fileType = string.Empty;
+            string fileName = string.Empty;
+
+            FieldWorkProfileAttachments obj = _fieldWorkService.DownloadActivityAttachments(userId, fieldworkAttachmentId);
+            fileName = obj.FileName;
+            inputStream = obj.FileContent;
+            string[] fileSplit = obj.FileName.Split('.');
+
+            fileType = GetFileType(fileSplit[1]);
+
+            return File(inputStream, fileType, fileName);
         }
 
         private string GetFileType(string fileExt)
