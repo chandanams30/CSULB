@@ -14,5 +14,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateFieldWorkValidation(FieldWorkValidationRequest input);
         BaseResponse UpdateFieldWorkDocumentValidation(FieldWorkUploadDocumentsRequest input);
         FieldWorkProfileAttachments DownloadRequiredDocuments(int userId, int fieldworkAttachmentId);
+        FieldWorkActivityLogResponse GetFieldWorkActivityLog(int userId, int fieldworkId);
+        FieldWorkActivityLogResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input);
     }
 }
