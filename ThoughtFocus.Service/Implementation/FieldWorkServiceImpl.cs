@@ -206,11 +206,13 @@ namespace ThoughtFocus.Service.Implementation
             string fileName = string.Empty;
             string fileExtension = string.Empty;
             string userFolderName = string.Empty;
+            string savedFileName = string.Empty;
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             if (input.FileName != string.Empty)
             {
                 string[] fileSplit = input.FileName.Split('.');
-                fileName = input.FieldWorkAttachmentId+fileSplit[0].ToString()+DateTime.Now.ToString("MMddyyyyHHmmss");
+                fileName = fileSplit[0].ToString();
+                savedFileName = input.FieldWorkAttachmentId+fileSplit[0].ToString()+DateTime.Now.ToString("MMddyyyyHHmmss");
                 fileExtension= fileSplit[1].ToString();
             }
             // call the SP to save the save the file details in fieldwork.attachments table 
@@ -219,13 +221,15 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserId", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@FieldWorkAttachmentID", SqlDbType.BigInt) { Value = input.FieldWorkAttachmentId },
                                           new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileName },
-                                          new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension }
+                                          new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = savedFileName }
                                         };
             DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UpdateFieldWorkRequiredDocuments]", parameters);
             if (dtFWDoc.Rows.Count > 0)
             {
-                // check if the userFolder exists and if it exists then check if if the FieldWorkFolder exists
-                userFolderName = dtFWDoc.Rows[0]["FolderName"].ToString();
+                // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
+                string[] folderSplit = dtFWDoc.Rows[0]["FolderName"].ToString().Split('~');
+                userFolderName = folderSplit[0].ToString();
                 string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
                 if (Directory.Exists(dirUserFolderPath))
                 {
@@ -233,12 +237,12 @@ namespace ThoughtFocus.Service.Implementation
                     if (Directory.Exists(dirFieldWork))
                     {
                         // copy the file here 
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, fileName+"."+fileExtension), input.FileContent);
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "."+fileExtension), input.FileContent);
                     }
                     else
                     {
                         Directory.CreateDirectory(dirFieldWork);
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, fileName + "." + fileExtension), input.FileContent);
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
                     }
                 }
                 else
@@ -250,7 +254,7 @@ namespace ThoughtFocus.Service.Implementation
                     dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
                     dirFieldWorkFolder.SetAccessControl(dSecurity);
 
-                    File.WriteAllBytes(Path.Combine(dirFieldWork, fileName + "." + fileExtension), input.FileContent);
+                    File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
                 }
             }
 
@@ -279,7 +283,8 @@ namespace ThoughtFocus.Service.Implementation
                                               ApprovedBy = Convert.ToString(row["ApprovedBy"] == DBNull.Value ? null : row["ApprovedBy"]),
                                               ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
                                               ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
-                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(), "FieldWork"), Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]))
+                                              //FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(), "FieldWork"), Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]))
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "FieldWork"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
                                           }).FirstOrDefault();
 
             return obj;
@@ -370,7 +375,7 @@ namespace ThoughtFocus.Service.Implementation
             DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UploadFieldWorkActivityLogAttachments]", parameters);
             if (dtFWDoc.Rows.Count > 0)
             {
-                // check if the userFolder exists and if it exists then check if if the FieldWorkFolder exists
+                // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
                 string[] folderSplit = dtFWDoc.Rows[0]["FolderName"].ToString().Split('~');
                 userFolderName = folderSplit[0].ToString();
                 string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);

@@ -99,6 +99,7 @@ namespace CSULB_COE.Controllers
             //binaryReader.Close();
             //----end comment----------------------------------------
             #endregion
+
             try
             {
                 BaseResponse response = _fieldWorkService.UpdateFieldWorkDocumentValidation(input);
@@ -174,6 +175,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
+                #region testing with manual file , actual file will come as byte array 
                 // comment the below after testing 
 
 
@@ -191,6 +193,8 @@ namespace CSULB_COE.Controllers
                 //binaryReader.Close();
 
                 // end comment
+                #endregion
+
                 FieldWorkAttachmentsResponse response = new FieldWorkAttachmentsResponse();
                 response = _fieldWorkService.UploadFieldWorkActivityDocuments(input);
                 return response;
