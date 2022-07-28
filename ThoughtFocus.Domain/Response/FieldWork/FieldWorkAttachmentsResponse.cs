@@ -6,7 +6,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
 {
     public class FieldWorkAttachmentsResponse : BaseResponse
     {
-        public int AttachmentID { get; set; }
+        public string AttachmentID { get; set; }
         public string FileSavedName { get; set; }
         public string FileDisplayName { get; set; }
     }

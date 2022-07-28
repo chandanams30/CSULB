@@ -8,6 +8,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
     {
         public int UserID { get; set; }
         public string FileName { get; set; }
+        public int FieldworkID { get; set; }
         public byte[] FileContent { get; set; }
     }
 }

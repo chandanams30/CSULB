@@ -17,6 +17,6 @@ namespace ThoughtFocus.Service.Interfaces
         FieldWorkActivityLogResponse GetFieldWorkActivityLog(int userId, int fieldworkId);
         FieldWorkActivityLogResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input);
         FieldWorkAttachmentsResponse UploadFieldWorkActivityDocuments(FieldWorkAttachmentsRequest input);
-        FieldWorkProfileAttachments DownloadActivityAttachments(int userId, int fieldworkAttachmentId);
+        FieldWorkProfileAttachments DownloadActivityAttachments(int userId, int fieldworkAttachmentId, string savedFileName);
     }
 }

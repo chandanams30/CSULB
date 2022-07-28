@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.FieldWork;
@@ -18,11 +20,15 @@ namespace CSULB_COE.Controllers
     {
         public ILogger<FieldWorkController> _logger;
         public IFieldWorkService _fieldWorkService;
+        private readonly IConfiguration _configuration;
         public FieldWorkController(IFieldWorkService fieldWorkService
-            , ILogger<FieldWorkController> logger)
+            , ILogger<FieldWorkController> logger
+            , IConfiguration configuration)
         {
             _logger = logger;
             _fieldWorkService = fieldWorkService;
+            _configuration = configuration;
+
         }
         [HttpGet("GetFieldWorkList")]
         public IActionResult GetFieldWorkList(int userId)
@@ -180,8 +186,8 @@ namespace CSULB_COE.Controllers
 
 
                 //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
-                // string filepath = "D:\\CSULB\\GitHub\\Documents\\TB-TEST.docx";
-                //string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
+                //// string filepath = "D:\\CSULB\\GitHub\\Documents\\TB-TEST.docx";
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
                 //byte[] fileContent = null;
                 //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
                 //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
@@ -211,20 +217,41 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("DownloadActivityAttachments")]
-        public IActionResult DownloadActivityAttachments(int userId, int fieldworkAttachmentId)
+        public IActionResult DownloadActivityAttachments(int userId, int fieldworkId,string savedFileName)
         {
             byte[] inputStream = null;
             string fileType = string.Empty;
             string fileName = string.Empty;
 
-            FieldWorkProfileAttachments obj = _fieldWorkService.DownloadActivityAttachments(userId, fieldworkAttachmentId);
-            fileName = obj.FileName;
-            inputStream = obj.FileContent;
-            string[] fileSplit = obj.FileName.Split('.');
+            // FieldWorkProfileAttachments obj = _fieldWorkService.DownloadActivityAttachments(userId, fieldworkId);
+            string filefolderName = GetFolderName(userId, fieldworkId);
+            string filepath = Path.Combine(filefolderName, savedFileName);
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            //input.FileContent = fileContent;
+
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            fileName = savedFileName;
+            inputStream = fileContent;
+            string[] fileSplit = savedFileName.Split('.');
 
             fileType = GetFileType(fileSplit[1]);
 
             return File(inputStream, fileType, fileName);
+        }
+        private string GetFolderName(int userId, int fieldWorkID)
+        {
+            string folderName = string.Empty;
+            string completePath = string.Empty;
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            folderName = Path.Combine(userId.ToString() + "//Fieldwork", fieldWorkID.ToString());
+            completePath= Path.Combine(fileRepoPath,folderName);
+            return completePath;
         }
 
         private string GetFileType(string fileExt)

@@ -365,64 +365,82 @@ namespace ThoughtFocus.Service.Implementation
                 fileExtension = fileSplit[1].ToString();
             }
             // call the SP to save the save the file details in fieldwork.attachments table 
-            SqlParameter[] parameters =
-                                      {
-                                          new SqlParameter("@UserId", SqlDbType.BigInt) { Value = input.UserID },
-                                          new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileName },
-                                          new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
-                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 250) { Value = savedFileName },
-                                        };
-            DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UploadFieldWorkActivityLogAttachments]", parameters);
-            if (dtFWDoc.Rows.Count > 0)
-            {
-                // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
-                string[] folderSplit = dtFWDoc.Rows[0]["FolderName"].ToString().Split('~');
-                userFolderName = folderSplit[0].ToString();
+            //SqlParameter[] parameters =
+            //                          {
+            //                              new SqlParameter("@UserId", SqlDbType.BigInt) { Value = input.UserID },
+            //                              new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileName },
+            //                              new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
+            //                              new SqlParameter("@SavedFileName", SqlDbType.VarChar, 250) { Value = savedFileName },
+            //                            };
+            //DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UploadFieldWorkActivityLogAttachments]", parameters);
+            //if (dtFWDoc.Rows.Count > 0)
+            //{
+            // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
+            //string[] folderSplit = dtFWDoc.Rows[0]["FolderName"].ToString().Split('~');
+            // userFolderName = folderSplit[0].ToString(); -- userfoldername should be a combination of Userid/"FieldWork"/fieldworkId
+                userFolderName = input.UserID.ToString();
                 string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
                 if (Directory.Exists(dirUserFolderPath))
                 {
                     string dirFieldWork = Path.Combine(dirUserFolderPath, "Fieldwork");
-                    if (Directory.Exists(dirFieldWork))
+                    string dirFieldWorkId = Path.Combine(dirFieldWork, input.FieldworkID.ToString());
+                if (Directory.Exists(dirFieldWork))
                     {
-                        // copy the file here 
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                    if (Directory.Exists(dirFieldWorkId))
+                    {
+                        File.WriteAllBytes(Path.Combine(dirFieldWorkId, savedFileName + "." + fileExtension), input.FileContent);
                     }
                     else
                     {
-                        Directory.CreateDirectory(dirFieldWork);
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                        Directory.CreateDirectory(dirFieldWorkId);
+                        File.WriteAllBytes(Path.Combine(dirFieldWorkId, savedFileName + "." + fileExtension), input.FileContent);
                     }
+                    }
+                else
+                {
+                    Directory.CreateDirectory(dirFieldWork);
+                    File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                }
                 }
                 else
                 {
                     string dirFieldWork = Path.Combine(dirUserFolderPath, "Fieldwork");
+                    string dirFieldWorkId = Path.Combine(dirFieldWork, input.FieldworkID.ToString());
                     DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
                     DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirFieldWork);
-                    DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                    DirectoryInfo dirFieldWorkIdFolder = System.IO.Directory.CreateDirectory(dirFieldWorkId);
+                    DirectorySecurity dSecurity = dirFieldWorkIdFolder.GetAccessControl();
                     dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-                    dirFieldWorkFolder.SetAccessControl(dSecurity);
+                    dirFieldWorkIdFolder.SetAccessControl(dSecurity);
 
-                    File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                    File.WriteAllBytes(Path.Combine(dirFieldWorkId, savedFileName + "." + fileExtension), input.FileContent);
                 }
+                Guid guidObj = Guid.NewGuid();
+                response.AttachmentID = guidObj.ToString();
                 response.FileDisplayName = fileName + "." + fileExtension;
                 response.FileSavedName = savedFileName + "." + fileExtension;
-                response.AttachmentID = Convert.ToInt32(dtFWDoc.Rows[0]["ID"]);
-            }
+                response.IsSuccess = true;
+                response.Message = "Activity Log Attachment Uploaded Succesfully ";
+               // response.AttachmentID = Convert.ToInt32(dtFWDoc.Rows[0]["ID"]);
+            //}
 
-            response.IsSuccess = true;
-            response.Message = "Field Work Document Uploaded Successfully";
+            //response.IsSuccess = true;
+            //response.Message = "Field Work Document Uploaded Successfully";
             return response;
         }
 
-        public FieldWorkProfileAttachments DownloadActivityAttachments(int userId, int fieldworkAttachmentId)
+   
+
+        public FieldWorkProfileAttachments DownloadActivityAttachments(int userId, int fieldworkId, string savedFileName)
         {
             FieldWorkProfileAttachments obj = new FieldWorkProfileAttachments();
             SqlParameter[] parameters =
                                      {
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userId },
-                                          new SqlParameter("@FieldWorkAttachmentID", SqlDbType.BigInt) { Value = fieldworkAttachmentId }
+                                          new SqlParameter("@FieldWorkAttachmentID", SqlDbType.BigInt) { Value = fieldworkId }
                                      };
-            DataTable dtAttachments = _helper.GetDataTable("[dbo].[DownloadFieldWorkRequiredDocument]", parameters);
+            // DataTable dtAttachments = _helper.GetDataTable("[dbo].[DownloadFieldWorkRequiredDocument]", parameters);
+            DataTable dtAttachments = null;
 
             obj = dtAttachments.AsEnumerable().Select(row =>
                                           new FieldWorkProfileAttachments
