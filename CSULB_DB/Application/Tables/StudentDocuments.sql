@@ -8,7 +8,8 @@
     [CreatedDateTime] DATETIME2 (7)  NOT NULL,
     [CreatedByUserID] BIGINT         NOT NULL,
     CONSTRAINT [PK_StudentDocuments] PRIMARY KEY CLUSTERED ([ID] ASC),
-    CONSTRAINT [FK_StudentDocuments_Documents] FOREIGN KEY ([DocumentID]) REFERENCES [Master].[Documents] ([ID]),
-    CONSTRAINT [FK_StudentDocuments_Users] FOREIGN KEY ([UserID]) REFERENCES [User].[Users] ([ID])
+    CONSTRAINT [FK_StudentDocuments_Documents] FOREIGN KEY ([DocumentID]) REFERENCES [Master].[Documents] ([ID])
 );
+
+
 

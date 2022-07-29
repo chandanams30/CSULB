@@ -156,8 +156,8 @@ namespace CSULB_COE
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "ThoughtFocus CSULB-CED");
-                //c.SwaggerEndpoint("./v1/swagger.json", "ThoughtFocus CSULB-CED");
+                //c.SwaggerEndpoint("/swagger/v1/swagger.json", "ThoughtFocus CSULB-CED");
+                c.SwaggerEndpoint("./v1/swagger.json", "ThoughtFocus CSULB-CED");
             });
 
             app.UseEndpoints(endpoints =>
