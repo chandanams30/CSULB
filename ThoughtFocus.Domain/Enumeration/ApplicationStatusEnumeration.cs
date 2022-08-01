@@ -7,79 +7,70 @@ namespace ThoughtFocus.Domain.Enumeration
     [Serializable]
     public enum ApplicationStatusEnumeration
     {
-          /// <summary>
-        /// Initialized
-        /// </summary>
-        Initialized = 1,
-
         /// <summary>
-        /// For Created
+        /// Open
         /// </summary>
-        Created = 2,
+        Open = 1,
 
         /// <summary>
         /// For Drafted
         /// </summary>
-        Drafted = 3,
+        Drafted = 2,
 
-         /// <summary>
-        /// Submitted
+        /// <summary>
+        /// For Submitted
         /// </summary>
-        Submitted = 4,
+        Submitted = 3,
 
         /// <summary>
         /// RequestedMoreInfo
         /// </summary>
-        RequestedMoreInfo = 5,
+        RequestedMoreInfo = 4,
 
         /// <summary>
-        /// RequestCompleted
-        /// </summary> 
-        RequestCompleted = 6,
+        /// InReview
+        /// </summary>
+        InReview = 5,
 
         /// <summary>
-        /// Accepted
+        /// ReviewCompleted
         /// </summary> 
-        Accepted = 7,
-        
-        /// <summary>
-        /// Approved
-        /// </summary> 
-        Approved = 8,
-        
-        /// <summary>
-        /// Rejected
-        /// </summary> 
-        Rejected = 9,
-        
-        /// <summary>
-        /// AgreementUploaded
-        /// </summary> 
-        AgreementUploaded = 10,
-        
-        /// <summary>
-        /// AgreementAccepted
-        /// </summary> 
-        AgreementAccepted = 11,
-        
-        /// <summary>
-        /// CFOApproved
-        /// </summary> 
-        CFOApproved = 12,
-
-         /// <summary>
-        /// AccountDisbursed
-        /// </summary> 
-        AccountDisbursed = 13,
+        ReviewCompleted = 6,
 
         /// <summary>
-        /// AgreementSubmitted
+        /// ScheduleInterview
         /// </summary> 
-        AgreementSubmitted = 14,
-        
+        ScheduleInterview = 7,
+
         /// <summary>
-        /// AgreementRejected
+        /// Waitlist
         /// </summary> 
-        AgreementRejected = 15,
+        Waitlist = 8,
+
+        /// <summary>
+        /// Disqualified
+        /// </summary> 
+        Disqualified = 9,
+
+        /// <summary>
+        /// Offered
+        /// </summary> 
+        Offered = 10,
+
+        /// <summary>
+        /// OfferAccepted
+        /// </summary> 
+        OfferAccepted = 11,
+
+        /// <summary>
+        /// OfferDeclined
+        /// </summary> 
+        OfferDeclined = 12,
+
+        /// <summary>
+        /// NotOffered
+        /// </summary> 
+        NotOffered = 13,
+
     }
 }

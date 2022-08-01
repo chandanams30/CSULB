@@ -182,17 +182,30 @@ namespace ThoughtFocus.Service.Implementation
                         }
                         if (applicationParam.CommandName == WorkFlowCommandEnumeration.Save.ToString())
                         {
-                            baseResponse = WorkflowInit.SetState(processID, workFlowID, ApplicationStatusEnumeration.Drafted.ToString(), workFlowParameters);
-                            if (!baseResponse.IsSuccess)
+                            if (ProcessStateName == ApplicationStatusEnumeration.Open.ToString() || ProcessStateName == ApplicationStatusEnumeration.Drafted.ToString())
                             {
-                                _Logger.LogError(String.Format("baseResponse  returned false in WorkflowInit.SetState call for Process ID {0}", processID));
-                                baseResponse.IsSuccess = false;
-                                return baseResponse;
+                                baseResponse = WorkflowInit.SetState(processID, workFlowID, ApplicationStatusEnumeration.Drafted.ToString(), workFlowParameters);
+                                if (!baseResponse.IsSuccess)
+                                {
+                                    _Logger.LogError(String.Format("baseResponse  returned false in WorkflowInit.SetState call for Process ID {0}", processID));
+                                    baseResponse.IsSuccess = false;
+                                    return baseResponse;
+                                }
+                            }
+                            else if (ProcessStateName == ApplicationStatusEnumeration.RequestedMoreInfo.ToString())
+                            {
+                                baseResponse = WorkflowInit.SetState(processID, workFlowID, ApplicationStatusEnumeration.RequestedMoreInfo.ToString(), workFlowParameters);
+                                if (!baseResponse.IsSuccess)
+                                {
+                                    _Logger.LogError(String.Format("baseResponse  returned false in WorkflowInit.SetState call for Process ID {0}", processID));
+                                    baseResponse.IsSuccess = false;
+                                    return baseResponse;
+                                }
                             }
                         }
                         if (applicationParam.CommandName == WorkFlowCommandEnumeration.Submit.ToString())
                         {
-                            if (ProcessStateName == ApplicationStatusEnumeration.Initialized.ToString() || ProcessStateName == ApplicationStatusEnumeration.Drafted.ToString())
+                            if (ProcessStateName == ApplicationStatusEnumeration.Open.ToString() || ProcessStateName == ApplicationStatusEnumeration.Drafted.ToString())
                             {
                                 baseResponse = WorkflowInit.SetState(processID, workFlowID, ApplicationStatusEnumeration.Submitted.ToString(), workFlowParameters);
                                 if (!baseResponse.IsSuccess)
@@ -204,7 +217,7 @@ namespace ThoughtFocus.Service.Implementation
                             }
                             else if (ProcessStateName == ApplicationStatusEnumeration.RequestedMoreInfo.ToString())
                             {
-                                baseResponse = WorkflowInit.SetState(processID, workFlowID, ApplicationStatusEnumeration.RequestCompleted.ToString(), workFlowParameters);
+                                baseResponse = WorkflowInit.SetState(processID, workFlowID, ApplicationStatusEnumeration.InReview.ToString(), workFlowParameters);
                                 if (!baseResponse.IsSuccess)
                                 {
                                     _Logger.LogError(String.Format("baseResponse  returned false in WorkflowInit.SetState call for Process ID {0}", processID));
@@ -214,35 +227,19 @@ namespace ThoughtFocus.Service.Implementation
                             }
                         }
                     }
-                    //else
-                    //{
-                    //    bool isTransactionDocument = applicationParam.ApplicationDocuments.Any(a => a.DocumentTypeID == (long)DocumentTypeEnumeration.FundingDetailDocument);
-                    //    if (isTransactionDocument)
-                    //    {
-                    //        applicationParam.FundUtilization.ApplicationDocument = new DocumentRequest();
-                    //        foreach (var document in applicationParam.ApplicationDocuments)
-                    //        {
-                    //            applicationParam.FundUtilization.ApplicationDocument.DocumentGUID = document.DocumentGUID;
-                    //            applicationParam.FundUtilization.ApplicationDocument.DocumentTypeID = document.DocumentTypeID;
-                    //            applicationParam.FundUtilization.ApplicationDocument.FileName = document.FileName;
-                    //            applicationParam.FundUtilization.ApplicationDocument.FileSize = document.FileSize;
-                    //            applicationParam.FundUtilization.ApplicationDocument.DocumentName = document.DocumentName;
-                    //            applicationParam.FundUtilization.ApplicationDocument.ApplicationID​​​​​​​​ = applicationParam.ApplicationID​​​​​​​​;
-                    //            applicationParam.FundUtilization.ApplicationDocument.PhysicalFileStorageKey = document.PhysicalFileStorageKey;
-                    //        }
-
-                    //    }
-
-                    //    workFlowParameters.Add("FundUtilization", applicationParam.FundUtilization);
-                    //    _Logger.LogDebug(String.Format("ExecuteCommand  is initiated for applicationID {0} with State {1}", processID, applicationParam.CommandName));
-                    //    baseResponse = WorkflowInit.ExecuteCommand(processID, applicationParam.CommandName, WorkFlowID, workFlowParameters);
-                    //    if (!baseResponse.IsSuccess)
-                    //    {
-                    //        _Logger.LogError(String.Format("baseResponse  returned false in WorkflowInit.ExecuteCommand call for Process ID {0}", processID));
-                    //        baseResponse.IsSuccess = false;
-                    //        return baseResponse;
-                    //    }
-                    //}
+                    else
+                    {
+                        
+                        //workFlowParameters.Add("FundUtilization", applicationParam.FundUtilization);
+                        _Logger.LogDebug(String.Format("ExecuteCommand  is initiated for applicationID {0} with State {1}", processID, applicationParam.CommandName));
+                        baseResponse = WorkflowInit.ExecuteCommand(processID, applicationParam.CommandName, WorkFlowID, workFlowParameters);
+                        if (!baseResponse.IsSuccess)
+                        {
+                            _Logger.LogError(String.Format("baseResponse  returned false in WorkflowInit.ExecuteCommand call for Process ID {0}", processID));
+                            baseResponse.IsSuccess = false;
+                            return baseResponse;
+                        }
+                    }
 
                 }
                 else
