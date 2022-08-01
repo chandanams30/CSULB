@@ -4,27 +4,24 @@ using System.Collections.Generic;
 using System.Linq;
 using ThoughtFocus.Common.Exceptions;
 using ThoughtFocus.Common.Workflow.Core.Runtime;
-//using ThoughtFocus.RoleProvider.Interfaces;
-//using ThoughtFocus.Repository.Interfaces.User;
-//using ThoughtFocus.DataAccess.Models.User;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Response.Users;
 
 namespace ThoughtFocus.Workflow
 {
     public class WorkflowRole : IWorkflowRoleProvider
     {
-        //private IListRole _listRole;
-        //private IUserRepository _iUserRepository;
-
+        private readonly ISqlDBUtility _helper;
+ 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkflowRole));
        
         
 
-        public WorkflowRole(
-            //IListRole listRole, IUserRepository iUserRepository
-            )
+        public WorkflowRole(ISqlDBUtility helper)
         {
-            //_listRole =listRole;
-            //_iUserRepository = iUserRepository;
+            _helper = helper;
         }
 
         public bool IsInRole(long identityId, string roleName, long processID)
@@ -35,26 +32,28 @@ namespace ThoughtFocus.Workflow
             try
             {
                 isInRole = true;
-                    //long roleID = this._listRole.GetRoleIDByRoleName(roleName);
+                DataTable dtRoleData = _helper.GetMasterTable("[Master].[Role]");
 
-                    //User user = this._iUserRepository.FirstOrDefault(item => item.IdentityID == identityId && item.IsActive == true);
-                    //if (user != null)
-                    //{
-                    //    userID = user.UserID;
-                    //}
+                if (dtRoleData.Rows.Count > 0)
+                {
+                    long roleID = dtRoleData.AsEnumerable().Where(x => Convert.ToString(x["Name"]) == roleName).Select(row => Convert.ToInt64(row["ID"])).FirstOrDefault();
+                    
+                    List<UsersResponse> listOfusers = this.GetUsersByRole(Convert.ToInt32(roleID));
 
-                    // List<long> listOfRoles = this._listRole.GetRolesByID(userID);
-                    //if (listOfRoles != null && listOfRoles.Count > 0)
-                    //{
-                    //    if (listOfRoles.Contains(roleID))
-                    //    {
-                    //        isInRole = true;
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    isInRole = false;
-                    //}
+                    if (listOfusers != null && listOfusers.Count > 0)
+                    {
+                        var user = listOfusers.Where(x => x.UserId == identityId).FirstOrDefault();
+
+                        if (user == null)
+                        {
+                            isInRole = false;
+                        }
+                    }
+                    else
+                    {
+                        isInRole = false;
+                    }
+                }
             }
             catch (RepositoryException ex)
             {
@@ -76,6 +75,32 @@ namespace ThoughtFocus.Workflow
         public IEnumerable<Guid> GetAllInRole(string roleId)
         {
             return new List<Guid>();
+        }
+
+        public List<UsersResponse> GetUsersByRole(int roleId)
+        {
+            List<UsersResponse> obj = new List<UsersResponse>();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@roleid", SqlDbType.Int, 50) { Value = roleId },
+                                          new SqlParameter("@userId", SqlDbType.Int, 50) { Value = 0 },
+                                        };
+
+            DataTable dtUsers = _helper.GetDataTable("[dbo].[GetUsersByRole]", parameters);
+            if (dtUsers.Rows.Count > 0)
+            {
+                obj = dtUsers.AsEnumerable().Select(row =>
+                                         new UsersResponse
+                                         {
+                                             UserId = Convert.ToInt32(row["UserId"]),
+                                             Name = Convert.ToString(row["Name"]),
+                                             EmailId = Convert.ToString(row["Email"]),
+                                             RoleId = Convert.ToInt32(row["RoleId"]),
+                                             Role = Convert.ToString(row["Description"])
+                                         }).ToList();
+            }
+
+            return obj;
         }
     }
 }

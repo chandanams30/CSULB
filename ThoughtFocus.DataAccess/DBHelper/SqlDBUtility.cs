@@ -151,6 +151,35 @@ namespace ThoughtFocus.DataAccess.DBHelper
             return result;
         }
 
-       
+        public DataTable GetMasterTable(string tableName)
+        {
+            DataTable dt = new DataTable();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+
+                    string command = "SELECT * FROM " + tableName;
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(command);
+                    cmd.Connection = conn;
+                    cmd.CommandTimeout = 0;
+
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string exceptionmessage = ex.Message;
+                _logger.LogError(ex, exceptionmessage);
+                dt = null;
+            }
+            return dt;
+        }
+
+
     }
 }

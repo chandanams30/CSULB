@@ -46,7 +46,7 @@ namespace CSULB_COE.Controllers
 
                 //ThoughtFocus.Domain.User.UserSessionEntity userSession = LoginUserInformation.getLoggedInUser(HttpContext);
                 ThoughtFocus.Domain.User.UserSessionEntity userSession = new ThoughtFocus.Domain.User.UserSessionEntity();
-                userSession.UserID = 11;
+                userSession.UserID = 1;
 
                 baseResponse = this._applicationService.ApplicationCommandHandler(applicationParam, userSession);
                 return baseResponse;

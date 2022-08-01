@@ -24,6 +24,7 @@ using ThoughtFocus.Common.WorkFlowDataAccess;
 using ThoughtFocus.Workflow;
 using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Common;
+using ThoughtFocus.DataAccess.DBHelper;
 
 namespace CSULB_COE
 {
@@ -62,6 +63,7 @@ namespace CSULB_COE
                                sqlServerOptionsAction: sqlOptions =>
                                { sqlOptions.EnableRetryOnFailure(); });
             });
+            services.AddScoped<ISqlDBUtility, SqlDBUtility>();
 
             // Adding JWT Token
 
@@ -97,6 +99,7 @@ namespace CSULB_COE
             });
 
             // user login service 
+           
             services.AddScoped<IUserRepository, UserRepositoryImpl>();
             services.AddScoped<ThoughtFocus.Repository.Interfaces.User.IUserDetailsRepository, ThoughtFocus.Repository.Implementation.User.UserDetailsImpl>();
             services.AddScoped<ThoughtFocus.Repository.Interfaces.User.IUserActivityRepository, ThoughtFocus.Repository.Implementation.User.UserActivityImpl>();
