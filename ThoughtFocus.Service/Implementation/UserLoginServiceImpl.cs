@@ -13,61 +13,78 @@ using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Repository.Interfaces;
 using ThoughtFocus.Repository.Interfaces.User;
 using ThoughtFocus.Service.Interfaces;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using ThoughtFocus.DataAccess.DBHelper;
 
 namespace ThoughtFocus.Service.Implementation
 {
     public class UserLoginServiceImpl : IUserLoginService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IUserDetailsRepository _userDetailsRepository;
-        private readonly IUserActivityRepository _userActivityRepository;
-        private readonly CSULB_DBContext _context;
+        private readonly ISqlDBUtility _helper;
         private readonly IConfiguration _config;
-        public UserLoginServiceImpl(IUserRepository userRepository,
-                                    IUserDetailsRepository userDetailsRepository, 
-                                    IUserActivityRepository userActivityRepository,
-                                    CSULB_DBContext context,
+
+        public UserLoginServiceImpl(ISqlDBUtility helper, 
                                     IConfiguration config 
                                     )
         {
-            _userRepository = userRepository;
-            _userDetailsRepository = userDetailsRepository;
-            _userActivityRepository = userActivityRepository;
+            _helper = helper;
             _config = config;
-            _context = context;
         }
+
         public AuthenticateResponse Authenticate(AuthenticateRequest model)
         {
-            AuthenticateResponse response = new AuthenticateResponse();
+            AuthenticateResponse obj = new AuthenticateResponse();
 
-            // validate credential
-            UserCred _cred = _userRepository.GetUserLogin(model.Username, model.Password);
-            if (_cred == null)
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@Username", SqlDbType.NVarChar, 100) { Value = model.Username },
+                                          new SqlParameter("@Password", SqlDbType.NVarChar, 100) { Value = model.Password }
+                                        };
+            DataSet dsUserValidationData = _helper.GetDataSet("[dbo].[AuthenticateUsers]", parameters);
+
+            try
             {
-                response.message = "Incorrect UserName / Password";
-                return response;
-            }
-            else
-            {
-                // adding data to UserActivityLog
-                string activityStatus = _userActivityRepository.AddActivityLog(_cred.UserId);
-                User _user = _userDetailsRepository.GetUserDetails(Convert.ToInt32(_cred.UserId));
-                if (_user != null)
-                { 
-                        List<Roles> roles = new List<Roles>();
-                     
-                        roles = GetUserRoles(_cred.UserId);
-                        response.UserName = model.Username;
-                        response.message = "Success";
-                        response.FirstName = _user.FirstName; 
-                        response.LastName = _user.LastName; 
-                        response.Roles = roles; // pull the roles based on the userID 
-                        response.JWTToken = GetJWTString(_user);  
+                if (dsUserValidationData.Tables.Count > 0)
+                {
+                    User _user = dsUserValidationData.Tables[0].AsEnumerable().Select(row =>
+                                              new User
+                                              {
+                                                  Id = Convert.ToInt64(row["UserId"]),
+                                                  FirstName = Convert.ToString(row["FirstName"]),
+                                                  LastName = Convert.ToString(row["LastName"]),
+                                                  Email = Convert.ToString(row["Email"])
+                                              }).FirstOrDefault();
+
+                    obj.Roles = dsUserValidationData.Tables[1].AsEnumerable().Select(row =>
+                                              new Roles
+                                              {
+                                                  RoleId = Convert.ToInt32(row["RoleId"]),
+                                                  RoleName = Convert.ToString(row["RoleName"])
+                                              }).ToList();
+
+                    obj.UserId = Convert.ToInt32(_user.Id);
+                    obj.UserName = model.Username;
+                    obj.FirstName = _user.FirstName;
+                    obj.LastName = _user.LastName;
+                    obj.Email = _user.Email;
+                    obj.JWTToken = GetJWTString(_user);
+
+     
+                    obj.message = "Data Retrieved Successfully";
+
                 }
+                else
+                    obj.message = "Incorrect UserName / Password";
             }
-         
-
-            return response;
+            catch (Exception ex)
+            {
+  
+                obj.message = "Data Retrieval Failed , Please contact site admin ";
+                //obj.StackTrace = ex.Message;
+            }
+            return obj;
         }
 
         private string GetJWTString(User user)
@@ -92,22 +109,22 @@ namespace ThoughtFocus.Service.Implementation
 
         }
 
-        private List<Roles> GetUserRoles(int userId)
-        {
-            List<Roles> roles = new List<Roles>();
+        //private List<Roles> GetUserRoles(int userId)
+        //{
+        //    List<Roles> roles = new List<Roles>();
 
-            var query = _context.Roles
-                         .Join(_context.UserRoles.Where(x=>x.UserId== userId),
-                         role => role.Id,
-                         userrole => userrole.RoleId,
-                         (role, userrole) => new Roles
-                         {
-                             RoleId=Convert.ToInt32(role.Id),
-                             RoleName=role.Description
-                         }).ToList();
+        //    var query = _context.Roles
+        //                 .Join(_context.UserRoles.Where(x=>x.UserId== userId),
+        //                 role => role.Id,
+        //                 userrole => userrole.RoleId,
+        //                 (role, userrole) => new Roles
+        //                 {
+        //                     RoleId=Convert.ToInt32(role.Id),
+        //                     RoleName=role.Description
+        //                 }).ToList();
 
-            return query;
-        }
+        //    return query;
+        //}
 
       
     }
