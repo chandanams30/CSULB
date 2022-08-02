@@ -92,8 +92,9 @@ namespace CSULB_COE.Controllers
             #region testing with manual file , actual file will come as byte array 
             //-------------just for testing - comment it after testing
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
-            // string filepath = "D:\\CSULB\\GitHub\\Documents\\TB-TEST.docx";
-            //string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
+            ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test500kb.pdf";
+            ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test1mb.pdf";
+            //////string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
             //byte[] fileContent = null;
             //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
             //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
@@ -103,6 +104,7 @@ namespace CSULB_COE.Controllers
             //fs.Close();
             //fs.Dispose();
             //binaryReader.Close();
+            //string fc = fileContent.ToString();
             //----end comment----------------------------------------
             #endregion
 

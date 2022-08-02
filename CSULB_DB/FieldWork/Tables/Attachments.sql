@@ -11,6 +11,9 @@
     [CreatedBy]      BIGINT         NOT NULL,
     [CreatedDate]    DATETIME       NOT NULL,
     [ValidTill]      DATETIME       NULL,
-    [RejectedReason] NVARCHAR (255) NULL
+    [RejectedReason] NVARCHAR (255) NULL,
+    [Comments]       NVARCHAR (MAX) NULL
 );
+
+
 

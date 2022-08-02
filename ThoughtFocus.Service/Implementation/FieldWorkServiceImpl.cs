@@ -81,7 +81,8 @@ namespace ThoughtFocus.Service.Implementation
                                               //CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
                                               ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
                                               //FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(row["FolderName"].ToString(), "FieldWork"), Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"])),
-                                              RejectReason = Convert.ToString(row["RejectedReason"])
+                                              RejectReason = Convert.ToString(row["RejectedReason"]),
+                                              Comments = Convert.ToString(row["Comments"])
                                               }).ToList();
 
                     obj.IsSuccess = true;
@@ -184,6 +185,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ValidatedDate", SqlDbType.DateTime, 50) { Value = validatedDate },
                                           new SqlParameter("@ValidTill", SqlDbType.DateTime, 50) { Value = (object)input.ValidTill??DBNull.Value },
                                           new SqlParameter("@RejectReason", SqlDbType.NVarChar, 255) { Value = (object)input.RejectedReason??DBNull.Value },
+                                          new SqlParameter("@Comments", SqlDbType.NVarChar,-1) { Value = (object)input.Comments??DBNull.Value }
                                         };
 
                 int identity = _helper.InsertTable("[dbo].[UpdateFieldWorkValidation]", parameters);
@@ -222,7 +224,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FieldWorkAttachmentID", SqlDbType.BigInt) { Value = input.FieldWorkAttachmentId },
                                           new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileName },
                                           new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
-                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = savedFileName }
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = savedFileName },
+                                          new SqlParameter("@ValidTill", SqlDbType.DateTime) { Value = input.ValidTill },
+                                          new SqlParameter("@Comments", SqlDbType.VarChar, -1) { Value = input.Comments }
                                         };
             DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UpdateFieldWorkRequiredDocuments]", parameters);
             if (dtFWDoc.Rows.Count > 0)

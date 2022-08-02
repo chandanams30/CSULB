@@ -11,6 +11,9 @@
     [College]         VARCHAR (50)   NULL,
     [AliasNames]      NVARCHAR (MAX) NULL,
     [CreatedDateTime] DATETIME       NOT NULL,
-    [CreatedByUserID] BIGINT         NOT NULL
+    [CreatedByUserID] BIGINT         NOT NULL,
+    [FieldWorkHours]  INT            NULL
 );
+
+
 

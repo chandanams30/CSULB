@@ -10,5 +10,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public int FieldWorkAttachmentId { get; set; }
         public string FileName { get; set; }
         public byte[] FileContent { get; set; }
+        public DateTime ValidTill { get; set; }
+        public string Comments { get; set; }
     }
 }

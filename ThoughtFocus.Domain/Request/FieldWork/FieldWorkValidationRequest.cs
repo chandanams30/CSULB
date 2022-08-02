@@ -11,5 +11,6 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public bool ApprovalStatus { get; set; }
         public Nullable<DateTime> ValidTill { get; set; }
         public string? RejectedReason { get; set; }
+        public string? Comments { get; set; }
     }
 }
