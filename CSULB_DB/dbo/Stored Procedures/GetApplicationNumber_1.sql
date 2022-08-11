@@ -1,9 +1,4 @@
-﻿-- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE [dbo].[GetApplicationNumber]
+﻿CREATE PROCEDURE [dbo].[GetApplicationNumber]
 @ProgramId int,
 @SemesterId int,
 @Message nvarchar(100) output
@@ -29,7 +24,7 @@ end
 	DECLARE @SemesterNumber nvarchar(5);
 	DECLARE @CurrentYear nvarchar(4);
 
-	select @ProgramAlias=AliasName from [Master].[Programs] where ID=@ProgramId;
+	select @ProgramAlias=ShortName from [Master].[Programs] where ID=@ProgramId;
 	select @SemesterNumber=RIGHT('00'+cast(@SemesterId as varchar(3)),5);
 	select @MaxApplicationNumber=[ApplicationNumber] from [Application].[ApplicationNumberFactory] where ProgramID=@ProgramId and SemesterID=@SemesterId 
 	select @CurrentYear=[Year] from [Master].[Semester] where ID=@SemesterId;

@@ -1,4 +1,7 @@
-﻿CREATE VIEW [dbo].[View_FieldWorkPrerequisiteStatus]
+﻿
+
+
+CREATE VIEW [dbo].[View_FieldWorkPrerequisiteStatus]
 AS
 SELECT [FieldWorkID]
 	,MIN([STATUS]) AS [FieldWorkPrerequisiteStatus]
@@ -10,14 +13,20 @@ FROM (
 				AND A.[IsApproved] IS NULL
 				THEN 0
 			WHEN A.[FileName] IS NOT NULL
+				--AND A.[ValidTill] < GETDATE()
+				AND( A.[IsApproved] IS  NULL or A.[IsApproved]=0 or A.[ValidTill] < GETDATE())
+				THEN 1
+			WHEN A.[FileName] IS NOT NULL
 				AND A.[ValidTill] > GETDATE()
 				AND A.[IsApproved] = 1
 				THEN 2
-			ELSE 1
+			--ELSE 1
 			END AS [STATUS]
-	FROM FieldWork.FieldWork AS FW
-	INNER JOIN Master.FieldWorkDocuments AS FWD ON FWD.CourseID = FW.CourseID
-	INNER JOIN FieldWork.Attachments AS A ON A.DocumentID = FWD.DocumentID
+	FROM [FieldWork].[FieldWork] FW
+	LEFT JOIN [Master].[FieldWorkCourses] FWC ON FWC.ID =  FW.FieldWorkCourseID 
+	JOIN [Master].[CourseTerm] CT ON FWC.CourseTermID = CT.ID
+	INNER JOIN [Master].FieldWorkDocuments FWD ON FWD.CourseID = CT.CourseID
+	INNER JOIN [FieldWork].Attachments A ON A.DocumentID = FWD.DocumentID
 		AND A.UserID = FW.UserID
 	) AS T
 GROUP BY [FieldWorkID]

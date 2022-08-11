@@ -1,20 +1,24 @@
-﻿CREATE PROCEDURE [dbo].[GetFieldWork] @UserId BIGINT
+﻿-- exec
+CREATE PROCEDURE [dbo].[GetFieldWork] @UserId BIGINT
 	,@FieldWorkId BIGINT
 AS
 BEGIN
-	SELECT F.ID
+	SELECT FW.ID
 		,U.FirstName + ' ' + U.LastName AS [StudentName]
-		,C.CourseTitle
-		,C.CSULBCourseId
+		,C.[Name] as [CourseTitle]
+		,c.[Subject]+'_'+c.CourseNumber Course
+		,c.ClassSection Section
 		,C.College
-		,S.[Name] AS Term
+		,T.[Name] AS Term
 		,FWPS.[FieldWorkPrerequisiteStatus]
-	FROM [FieldWork].[FieldWork] F
-	JOIN [User].[Users] U ON U.ID = F.UserID
-	JOIN [Master].[FieldWorkCourses] C ON C.ID = F.CourseID
-	JOIN [Master].[Semester] S ON S.TermCode = C.TermCode
-	JOIN [CSULB_DB].[dbo].[View_FieldWorkPrerequisiteStatus] FWPS on FWPS.FieldWorkID=F.ID
-	WHERE F.ID = @FieldWorkId
+	FROM [FieldWork].[FieldWork] FW
+	JOIN [User].[Users] U ON U.ID = FW.UserID
+	LEFT JOIN [Master].[FieldWorkCourses] FWC ON FWC.ID =  FW.FieldWorkCourseID 
+	JOIN [Master].[CourseTerm] CT ON FWC.CourseTermID = CT.ID
+	JOIN [Master].[Courses] C ON CT.CourseID = C.[ID]
+	JOIN [Master].[Term] T ON T.TermCode = CT.TermCode
+	JOIN [dbo].[View_FieldWorkPrerequisiteStatus] FWPS on FWPS.FieldWorkID=FW.ID
+	WHERE FW.ID = @FieldWorkId
 
 	SELECT FWU.[ID]
 		,FWU.[UserID]
@@ -34,16 +38,21 @@ BEGIN
 		,A.[FileName]
 		,A.[FileExtn]
 		,A.[FolderName]
-		,A.[IsApproved]
+		--,A.[IsApproved]
+		,CASE WHEN A.[ValidTill] < GETDATE() THEN 0 ELSE A.[IsApproved] END AS [IsApproved]
 		,(U.FirstName + ' ' + U.LastName) ApprovedBy
 		,A.[ValidatedDate]
 		,A.[CreatedBy]
 		,A.[CreatedDate]
 		,A.[ValidTill]
 		,A.[RejectedReason]
+		,A.[Comments]
 	FROM [FieldWork].[Attachments] A
-	JOIN [FieldWork].[FieldWork] F ON F.ID = @fieldWorkID AND f.UserID = A.UserID
-	JOIN [Master].[FieldWorkDocuments] FWD ON FWD.CourseID = F.CourseID AND A.DocumentID = FWD.DocumentID
+	JOIN [FieldWork].[FieldWork] FW ON FW.ID = @fieldWorkID AND FW.UserID = A.UserID
+	LEFT JOIN [Master].[FieldWorkCourses] FWC ON FWC.ID =  FW.FieldWorkCourseID 
+	JOIN [Master].[CourseTerm] CT ON FWC.CourseTermID = CT.ID
+	--JOIN [Master].[Courses] C ON CT.CourseID = C.[ID]
+	JOIN [Master].[FieldWorkDocuments] FWD ON FWD.CourseID = CT.CourseID AND A.DocumentID = FWD.DocumentID
 	JOIN [Master].[Documents] D ON D.ID = FWD.DocumentID
 	LEFT JOIN [User].[Users] U ON u.ID = A.ApprovedBy
 END
