@@ -11,5 +11,6 @@ namespace ThoughtFocus.Service.Interfaces
     public interface IUserLoginService
     {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
+        AuthenticateResponse AuthenticateSSO(string CSULBID);
     }
 }

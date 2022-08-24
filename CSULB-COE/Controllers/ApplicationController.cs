@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 using ThoughtFocus.Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using ThoughtFocus.Domain.Response.Application;
-
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class ApplicationController : ControllerBase
     {
         public ILogger<ApplicationController> _logger;
@@ -29,7 +31,13 @@ namespace CSULB_COE.Controllers
         {
             try
             {
+                #region Below code is to pull the claims from token , currently pulling just the UserID -------------------
+                //var user = User as ClaimsPrincipal;
+                //string userIdFromToken = user.Claims.Where(c => c.Type == "UserID")
+                //    .Select(x => x.Value).FirstOrDefault();
                 // gets the application list  
+                #endregion
+
                 List<ApplicationListResponse> response = _applicationService.GetApplications(userId);
                 return Ok(response);
             }

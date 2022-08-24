@@ -11,11 +11,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThoughtFocus.Common.Utilities.Implementation;
+using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.DocumentManager;
@@ -23,6 +27,10 @@ using ThoughtFocus.Repository.Implementation;
 using ThoughtFocus.Repository.Interfaces;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Identity.Web;
 
 namespace CSULB_COE
 {
@@ -38,7 +46,7 @@ namespace CSULB_COE
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddHttpClient();
             services.AddCors();
             services.AddControllers().AddNewtonsoftJson();
 
@@ -107,23 +115,55 @@ namespace CSULB_COE
             //document converter
             services.AddScoped<IFileConverter, FIleConverter>();
 
+            // notifications 
+            services.AddScoped<ISendMail, SendMail>();
+
 
 
 
             // Enable Swagger   
-            services.AddSwaggerGen(swagger =>
-            {
-                //This is to generate the Default UI of Swagger Documentation  
-                swagger.SwaggerDoc("v1", new OpenApiInfo
+            //services.AddSwaggerGen(swagger =>
+            //{
+            //    //This is to generate the Default UI of Swagger Documentation  
+            //    swagger.SwaggerDoc("v1", new OpenApiInfo
+            //    {
+            //        Title = "ThoughtFocus CSULB-CED",
+            //        Version = "v1",
+            //        Description = "ThoughtFocus CSULB-CED"
+            //    });
+            //});
+
+            services.AddSwaggerGen(c => {
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "ThoughtFocus CSULB-CED",
                     Version = "v1",
                     Description = "ThoughtFocus CSULB-CED"
                 });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                {
+                    new OpenApiSecurityScheme {
+                        Reference = new OpenApiReference {
+                            Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+                });
             });
 
 
-            }
+        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -132,6 +172,7 @@ namespace CSULB_COE
             {
                 app.UseDeveloperExceptionPage();
             }
+            
 
             // validate the appsettings for turning On/Off the http requests tracking
             string check=this.Configuration["TrackIncomingRequests"];

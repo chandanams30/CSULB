@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace ThoughtFocus.Domain.Request.FieldWork
+{
+    public class FieldWorkUpdateMetaDataRequest
+    {
+        public int UserID { get; set; }
+        public int FieldWorkAttachmentId { get; set; }
+        public DateTime ValidTill { get; set; }
+        public string Comments { get; set; }
+    }
+}

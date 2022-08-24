@@ -8,5 +8,12 @@ namespace ThoughtFocus.Domain.Request
     {
         public string UserName { get; set; }
         public string Password { get; set; }
+        public string CSULBID { get; set; }
     }
+    public class LoginSSORequest
+    {
+        public string Token { get; set; }
+
+    }
+
 }

@@ -6,6 +6,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
 {
     public class FieldWorkValidationRequest
     {
+        public int FieldWorkID { get; set; }
         public int FieldWorkAttachmentId { get; set; }
         public int ApproverUserId { get; set; }
         public bool ApprovalStatus { get; set; }

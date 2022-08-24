@@ -36,5 +36,9 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public byte[] FileContent { get; set; }
         public string RejectReason { get; set; }
         public string Comments { get; set; }
+        public string DocumentStatus { get; set; }
+        public string DocumentInfo { get; set; }
+        public bool CanUpload { get; set; }
+        public bool CanValidate { get; set; }
     }
 }

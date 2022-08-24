@@ -18,6 +18,7 @@ namespace ThoughtFocus.DataAccess.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
+        public string CSULBID { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public long CreatedByUserId { get; set; }
         public int? AuthenticationTypeId { get; set; }

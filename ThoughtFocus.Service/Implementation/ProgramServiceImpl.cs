@@ -68,9 +68,9 @@ namespace ThoughtFocus.Service.Implementation
                 return obj;
         }
 
-        public List<ProgramResponse> GetProgramList(int applicationTypeId,int semesterId,int stateId,int userId)
+        public List<ProgramListResponse> GetProgramList()
         {
-            List<ProgramResponse> obj = new List<ProgramResponse>();
+            List<ProgramListResponse> obj = new List<ProgramListResponse>();
 
             #region LINQ statement 
             //var obj = _context.Forms
@@ -90,21 +90,25 @@ namespace ThoughtFocus.Service.Implementation
             
             SqlParameter[] parameters =
                                         {
-                                          new SqlParameter("@ApplicationTypeId", SqlDbType.Int, 50) { Value = applicationTypeId },
-                                          new SqlParameter("@SemesterId", SqlDbType.Int, 50) { Value = semesterId },
-                                          new SqlParameter("@StateId", SqlDbType.Int, 50) { Value = stateId },
+                                          //new SqlParameter("@ApplicationTypeId", SqlDbType.Int, 50) { Value = applicationTypeId },
+                                          //new SqlParameter("@SemesterId", SqlDbType.Int, 50) { Value = semesterId },
+                                          //new SqlParameter("@StateId", SqlDbType.Int, 50) { Value = stateId },
                                         };
 
             DataTable dtProgramsList = _helper.GetDataTable("[dbo].[GetProgramList]", parameters);
             if (dtProgramsList.Rows.Count > 0)
             {
                 obj= dtProgramsList.AsEnumerable().Select(row =>
-                                         new ProgramResponse
+                                         new ProgramListResponse
                                          {
-                                             ProgramId = Convert.ToInt32(row["ProgramID"]),
-                                             ProgramName = Convert.ToString(row["Name"]),
-                                             ApplicationCount= Convert.ToInt32(row["ApplicationCount"]),
-                                             OfferedCount = Convert.ToInt32(row["OfferedCount"])
+                                             ApplicationProgramID= Convert.ToInt32(row["ID"]),
+                                             ProgramName= Convert.ToString(row["ProgramName"]),
+                                             TermCode= Convert.ToString(row["TermCode"]),
+                                             TermName= Convert.ToString(row["TermName"])
+                                             //ProgramId = Convert.ToInt32(row["ProgramID"]),
+                                             //ProgramName = Convert.ToString(row["Name"]),
+                                             //ApplicationCount= Convert.ToInt32(row["ApplicationCount"]),
+                                             //OfferedCount = Convert.ToInt32(row["OfferedCount"])
                                          }).ToList();
             }
             return obj;
@@ -268,6 +272,41 @@ namespace ThoughtFocus.Service.Implementation
                                               ReviewerName= Convert.ToString(row["ReviewerName"])
                                           }).ToList();
             }
+            return obj;
+        }
+
+        public ProgramProgramOpenFormCollectionResponse GetUserAppliedForms(int userId)
+        {
+            ProgramProgramOpenFormCollectionResponse obj = new ProgramProgramOpenFormCollectionResponse();
+            List<ProgramOpenFormCollection> collection = new List<ProgramOpenFormCollection>();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.Int, 50) { Value = userId }
+                                        };
+
+            DataTable dtProgramsFormCollection = _helper.GetDataTable("[dbo].[getProgramsOpenForFormCollection]", parameters);
+            if (dtProgramsFormCollection.Rows.Count > 0)
+            {
+                collection = dtProgramsFormCollection.AsEnumerable().Select(row =>
+                                          new ProgramOpenFormCollection
+                                          {
+                                              FormID = Convert.ToInt32(row["FormID"]),
+                                              ProgramName= Convert.ToString(row["ProgramName"]),
+                                              Term = Convert.ToString(row["Term"]),
+                                              FormState = Convert.ToInt32(row["FormState"]),
+                                              Status = Convert.ToString(row["Status"])
+
+                                          }).ToList();
+                obj.response = collection;
+                obj.IsSuccess = true;
+                obj.Message = "Program Data Retrieved Successfully";
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Program Data Not Present in DB";
+            }
+
             return obj;
         }
     }

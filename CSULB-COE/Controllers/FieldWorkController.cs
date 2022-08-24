@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+   // [Authorize]
     public class FieldWorkController : ControllerBase
     {
         public ILogger<FieldWorkController> _logger;
@@ -92,9 +94,7 @@ namespace CSULB_COE.Controllers
             #region testing with manual file , actual file will come as byte array 
             //-------------just for testing - comment it after testing
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
-            ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test500kb.pdf";
-            ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test1mb.pdf";
-            //////string filepath = "D:\\CSULB\\GitHub\\Documents\\Student Clearance Form Sample.pdf";
+            //string filepath = "D:\\CSULB\\GitHub\\Documents\\test500kb.pdf";
             //byte[] fileContent = null;
             //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
             //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
@@ -123,6 +123,13 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("UpdateFieldWorkMetaData")]
+        public BaseResponse UpdateFieldWorkMetaData(FieldWorkUploadDocumentsRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+
+            return response;
+        }
         [HttpGet("DownloadRequiredDocuments")]
         public IActionResult DownloadRequiredDocuments(int userId,int fieldworkAttachmentId)
         {
@@ -136,7 +143,8 @@ namespace CSULB_COE.Controllers
             string[] fileSplit = obj.FileName.Split('.');
 
             fileType = GetFileType(fileSplit[1]);
-
+            //Response.Headers.Add("Content-Disposition", "inline");
+            //return File(inputStream, fileType);
             return File(inputStream, fileType, fileName);
         }
         [HttpGet("GetFieldWorkActivityLog")]
@@ -246,6 +254,44 @@ namespace CSULB_COE.Controllers
 
             return File(inputStream, fileType, fileName);
         }
+        [HttpGet("GetCommunitySites")]
+        public FieldWorkCommunitySitesResponse GetCommunitySites()
+        {           
+            try
+            {
+                FieldWorkCommunitySitesResponse response = new FieldWorkCommunitySitesResponse();
+                response = _fieldWorkService.GetCommunitySites();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkCommunitySitesResponse response = new FieldWorkCommunitySitesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetCommunitySiteUsers")]
+        public FieldWorkCommunitySiteUsersResponse GetCommunitySiteUsers(int communitySiteId)
+        {
+            try
+            {
+                FieldWorkCommunitySiteUsersResponse response = new FieldWorkCommunitySiteUsersResponse();
+                response = _fieldWorkService.GetCommunitySiteUsers(communitySiteId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkCommunitySiteUsersResponse response = new FieldWorkCommunitySiteUsersResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         private string GetFolderName(int userId, int fieldWorkID)
         {
             string folderName = string.Empty;
@@ -263,6 +309,7 @@ namespace CSULB_COE.Controllers
             {
                 case "PDF":
                     contentType = "application/pdf";
+                    //contentType = "application/octet-stream";
                     break;
                 case "DOCX":
                     contentType = "Application/msword";

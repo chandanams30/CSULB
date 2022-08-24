@@ -24,12 +24,13 @@ namespace CSULB_COE.Controllers
             _logger = logger;
         }
 
-        [HttpGet("GetProgramsList")]
-        public IActionResult GetProgramsList(int applicationTypeId, int semesterId, int stateId, int userId)
+        [HttpGet("GetListOpenForFormCollection")]
+        //public IActionResult GetProgramsList(int applicationTypeId, int semesterId, int stateId, int userId)
+        public IActionResult GetProgramsList()
         {
             try
             {
-                List<ProgramResponse> response = _programService.GetProgramList(applicationTypeId,semesterId,stateId,userId);
+                List<ProgramListResponse> response = _programService.GetProgramList();
                 return Ok(response);
             }
             catch (Exception ex)
@@ -38,6 +39,24 @@ namespace CSULB_COE.Controllers
                 return BadRequest();
             }
 
+        }
+        [HttpGet("GetUserAppliedForms")]
+        public IActionResult GetUserAppliedForms(int userId)
+        {
+            ProgramProgramOpenFormCollectionResponse obj = new ProgramProgramOpenFormCollectionResponse();
+            try
+            {
+
+                obj = _programService.GetUserAppliedForms(userId);
+            }
+            catch(Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed";
+                obj.StackTrace = ex.Message;
+            }
+
+            return Ok(obj);
         }
 
         [HttpGet("GetProgram")]
@@ -67,5 +86,6 @@ namespace CSULB_COE.Controllers
 
             return Ok();
         }
+
     }
 }
