@@ -1,9 +1,4 @@
-﻿-- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE [dbo].[UpdateFieldWorkValidation]
+﻿CREATE PROCEDURE [dbo].[UpdateFieldWorkValidation]
 @FieldWorkID bigint,
 @IsApproved bit,
 @ApprovedBy bigint,
@@ -13,12 +8,23 @@ CREATE PROCEDURE [dbo].[UpdateFieldWorkValidation]
 @Comments nvarchar(Max)
 AS
 BEGIN
-	update [FieldWork].[Attachments] set 
-	IsApproved=@IsApproved,
-	ApprovedBy=@ApprovedBy,
-	ValidatedDate=@ValidatedDate,
-	ValidTill=@ValidTill,
-	RejectedReason=@RejectReason,
-	Comments=@Comments
-	where ID=@FieldWorkID
+	--update [FieldWork].[Attachments] set 
+	--IsApproved=@IsApproved,
+	--ApprovedBy=@ApprovedBy,
+	--ValidatedDate=@ValidatedDate,
+	--ValidTill=@ValidTill,
+	--RejectedReason=@RejectReason,
+	--Comments=@Comments
+	--where ID=@FieldWorkID
+
+
+	UPDATE [FieldWork].[Attachments]
+	SET IsApproved = @IsApproved
+		,ApprovedBy = @ApprovedBy
+		,ValidatedDate = @ValidatedDate
+		,ValidTill = @ValidTill
+		,RejectedReason = @RejectReason
+		,Comments = @Comments
+	WHERE ID = @FieldWorkID
+
 END

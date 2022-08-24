@@ -1,6 +1,4 @@
-﻿
--- exec UpdateFieldWorkRequiredDocuments 1545,2586,'',''
-CREATE PROCEDURE [dbo].[UpdateFieldWorkRequiredDocuments]
+﻿CREATE PROCEDURE [dbo].[UpdateFieldWorkRequiredDocuments]
 @UserId bigint,
 @FieldWorkAttachmentID bigint,
 @FileName varchar(250),
@@ -10,16 +8,31 @@ CREATE PROCEDURE [dbo].[UpdateFieldWorkRequiredDocuments]
 @Comments nvarchar(Max)
 AS
 BEGIN
-		declare @folderName varchar(100);
-		set @FolderName=CAST(@UserId as varchar(25))+'~'+@SavedFileName;
-	 --(select @folderName=CAST(ID as varchar(25))+trim(isnull(CSULBID,''))+TRIM(REPLACE(FirstName, ' ', '')) + TRIM(REPLACE(LastName, ' ', ''))
-		
-		--from [User].Users where ID=@UserId)
 
-	update [FieldWork].[Attachments]  set [FileName]=@FileName,FileExtn=@FileExtn,FolderName=@folderName, 
-	[IsApproved]=NULL,[ApprovedBy]=NULL, [ValidatedDate]=Null, [RejectedReason]=Null,
-	[ValidTill]=@ValidTill,[Comments]=@Comments
-	where ID=@FieldWorkAttachmentID;
+	DECLARE @folderName VARCHAR(100);
+	SET @FolderName = CAST(@UserId AS VARCHAR(25)) + '~' + @SavedFileName;
 
-	select * from [FieldWork].[Attachments] where ID=@FieldWorkAttachmentID;
+	IF (@SavedFileName IS NULL OR @SavedFileName = '')
+	BEGIN
+		UPDATE [FieldWork].[Attachments]
+		SET [ValidTill] = @ValidTill
+			,[Comments] = @Comments
+		WHERE ID = @FieldWorkAttachmentID;
+	END
+	ELSE
+	BEGIN
+		UPDATE [FieldWork].[Attachments]
+		SET [FileName] = @FileName
+			,FileExtn = @FileExtn
+			,FolderName = @folderName
+			,[IsApproved] = NULL
+			,[ApprovedBy] = NULL
+			,[ValidatedDate] = NULL
+			,[RejectedReason] = NULL
+			,[ValidTill] = @ValidTill
+			,[Comments] = NULL
+		WHERE ID = @FieldWorkAttachmentID;
+	END
+
+	SELECT *  FROM [FieldWork].[Attachments] WHERE ID = @FieldWorkAttachmentID;
 END

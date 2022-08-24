@@ -3,11 +3,11 @@
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE GetApplications 
+CREATE PROCEDURE [dbo].[GetApplications] 
 
 AS
 BEGIN
 
 	SET NOCOUNT ON;
-	select * from [Master].[ApplicationTypes]
+	SELECT * FROM [Master].[ApplicationTypes] WHERE [ID]=4
 END
