@@ -141,8 +141,9 @@ namespace CSULB_COE.Controllers
             fileName = obj.FileName;
             inputStream = obj.FileContent;
             string[] fileSplit = obj.FileName.Split('.');
-
-            fileType = GetFileType(fileSplit[1]);
+            string fileextension = obj.FileName.Split('.').Last();
+            fileType = GetFileType(fileextension);
+            //fileType = GetFileType(fileSplit[1]);
             //Response.Headers.Add("Content-Disposition", "inline");
             //return File(inputStream, fileType);
             return File(inputStream, fileType, fileName);
@@ -309,7 +310,6 @@ namespace CSULB_COE.Controllers
             {
                 case "PDF":
                     contentType = "application/pdf";
-                    //contentType = "application/octet-stream";
                     break;
                 case "DOCX":
                     contentType = "Application/msword";
