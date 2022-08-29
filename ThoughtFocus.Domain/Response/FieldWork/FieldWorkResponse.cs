@@ -17,7 +17,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string Section { get; set; }
         public string Term { get; set; }
         public int FieldWorkPrerequisiteStatus { get; set; }
-       // public string UIHandler { get; set; }
+        public string UIHandler { get; set; }
     }
 
     public class FieldWorkListResponse:BaseResponse

@@ -4,10 +4,22 @@ using System.Text;
 
 namespace ThoughtFocus.Domain.Response.FieldWork
 {
-    public class FieldWorkActivityLogResponse:BaseResponse
+    public class FieldWorkActivityLogResponse
     {
-        public int FieldWorkId { get; set; }
-        public string BaseSchema { get; set; }
-        public string ResponseSchema { get; set; }
+        public int ActivityLogID { get; set; }
+        public string DisplayID { get; set; }
+        public int FieldWorkID { get; set; }
+        public int CommunitySiteID { get; set; }
+        public string SiteName { get; set; }
+        public DateTime ActivityStartDate { get; set; }
+        public DateTime ActivityEndDate { get; set; }
+        public int Hours { get; set; }
+        public string status { get; set; }
+        //public string BaseSchema { get; set; }
+        //public string ResponseSchema { get; set; }
+    }
+    public class FieldWorkActivityLogListResponse : BaseResponse
+    {
+        public List<FieldWorkActivityLogResponse> fieldWorkList { get; set; }
     }
 }

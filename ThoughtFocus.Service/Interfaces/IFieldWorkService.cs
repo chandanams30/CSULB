@@ -14,11 +14,15 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateFieldWorkValidation(FieldWorkValidationRequest input);
         BaseResponse UpdateFieldWorkDocumentValidation(FieldWorkUploadDocumentsRequest input);
         FieldWorkProfileAttachments DownloadRequiredDocuments(int userId, int fieldworkAttachmentId);
-        FieldWorkActivityLogResponse GetFieldWorkActivityLog(int userId, int fieldworkId);
-        FieldWorkActivityLogResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input);
+        FieldWorkActivityLogListResponse GetFieldWorkActivityLog(int userId, int fieldworkId);
+        BaseResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input);
+        FieldWorkActivityLogByIDResponse GetFielWorkActivityLogByID(int userID, int activityLogID);
         FieldWorkAttachmentsResponse UploadFieldWorkActivityDocuments(FieldWorkAttachmentsRequest input);
         FieldWorkProfileAttachments DownloadActivityAttachments(int userId, int fieldworkAttachmentId, string savedFileName);
         FieldWorkCommunitySitesResponse GetCommunitySites();
         FieldWorkCommunitySiteUsersResponse GetCommunitySiteUsers(int communitySiteId);
+        FieldWorkStandardsResponse GetStandards(int userID, int fieldWorkID);
+        FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaType);
+        BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input);
     }
 }

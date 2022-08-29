@@ -149,17 +149,17 @@ namespace CSULB_COE.Controllers
             return File(inputStream, fileType, fileName);
         }
         [HttpGet("GetFieldWorkActivityLog")]
-        public FieldWorkActivityLogResponse GetFieldWorkActivityLog(int userId, int fieldWorkId)
+        public FieldWorkActivityLogListResponse GetFieldWorkActivityLog(int userId, int fieldWorkId)
         {
             try
             {
-                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                FieldWorkActivityLogListResponse response = new FieldWorkActivityLogListResponse();
                 response = _fieldWorkService.GetFieldWorkActivityLog(userId, fieldWorkId);
                 return response;
             }
             catch (Exception ex)
             {
-                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                FieldWorkActivityLogListResponse response = new FieldWorkActivityLogListResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
@@ -168,17 +168,36 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("UpdateFieldWorkActivityLog")]
-        public FieldWorkActivityLogResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
+        public BaseResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
         {
             try
             {
-                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                BaseResponse response = new BaseResponse();
                 response = _fieldWorkService.UpdateFieldWorkActivityLog(input);
                 return response;
             }
             catch (Exception ex)
             {
-                FieldWorkActivityLogResponse response = new FieldWorkActivityLogResponse();
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save Activity Log, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFielWorkActivityLogByID")]
+        public FieldWorkActivityLogByIDResponse GetFielWorkActivityLogByID(int userID,int activityLogID)
+        {
+            try
+            {
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
+                response = _fieldWorkService.GetFielWorkActivityLogByID(userID,activityLogID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to Save Activity Log, please try after sometime";
                 response.StackTrace = ex.Message;
@@ -288,6 +307,63 @@ namespace CSULB_COE.Controllers
                 FieldWorkCommunitySiteUsersResponse response = new FieldWorkCommunitySiteUsersResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetStandards")]
+        public FieldWorkStandardsResponse GetStandards(int userID,int fieldWorkID)
+        {
+            try
+            {
+                FieldWorkStandardsResponse response = new FieldWorkStandardsResponse();
+                response = _fieldWorkService.GetStandards(userID,fieldWorkID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkStandardsResponse response = new FieldWorkStandardsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFnCSchema")]
+        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID,int schemaType)
+        {
+            try
+            {
+                FieldWorkFnCSchemaResponse response = new FieldWorkFnCSchemaResponse();
+                response = _fieldWorkService.GetFnCSchema(userID, fieldWorkID,schemaType);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkFnCSchemaResponse response = new FieldWorkFnCSchemaResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFnCSchema")]
+        public BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpdateFnCSchema(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save the schema , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

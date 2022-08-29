@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Enumeration;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
@@ -55,7 +57,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   Section= Convert.ToString(row["Section"]),
                                                   Term = Convert.ToString(row["Term"]),
                                                   FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
-                                                 //,UIHandler=Convert.ToString(row["UIHandler"])
+                                                 ,UIHandler=Convert.ToString(row["UIHandler"])
                                               }).FirstOrDefault();
 
                     obj.FieldWorkRoles = dsFieldWorkData.Tables[1].AsEnumerable().Select(row =>
@@ -484,25 +486,34 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public FieldWorkActivityLogResponse GetFieldWorkActivityLog(int userId, int fieldworkId)
+        public FieldWorkActivityLogListResponse GetFieldWorkActivityLog(int userId, int fieldworkId)
         {
-            FieldWorkActivityLogResponse obj = new FieldWorkActivityLogResponse();
+            FieldWorkActivityLogListResponse obj = new FieldWorkActivityLogListResponse();
+            List<FieldWorkActivityLogResponse> objList = new List<FieldWorkActivityLogResponse>();
 
             SqlParameter[] parameters =
                                     {
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userId },
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldworkId }
                                      };
-            DataTable dtActivityLog = _helper.GetDataTable("[dbo].[GetFieldWorkActivityLog]", parameters);
+            //DataTable dtActivityLog = _helper.GetDataTable("[dbo].[GetFieldWorkActivityLog]", parameters);dbo.[GetFieldWorkActivityLogForFieldWorkUser]
+            DataTable dtActivityLog = _helper.GetDataTable("[dbo].[GetFieldWorkActivityLogList]", parameters);
             if (dtActivityLog.Rows.Count > 0)
             {
-                obj = dtActivityLog.AsEnumerable().Select(row =>
+                objList = dtActivityLog.AsEnumerable().Select(row =>
                                               new FieldWorkActivityLogResponse
                                               {
-                                                  FieldWorkId = Convert.ToInt32(row["FieldWorkID"]),
-                                                  BaseSchema = Convert.ToString(row["BaseSchema"]),
-                                                  ResponseSchema = Convert.ToString(row["ResponseSchema"])
-                                              }).FirstOrDefault();
+                                                  ActivityLogID = Convert.ToInt32(row["ID"]),
+                                                  DisplayID = Convert.ToString(row["DisplayID"]),
+                                                  FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                                  CommunitySiteID = Convert.ToInt32(row["CommunitySiteID"]),
+                                                  SiteName = Convert.ToString(row["Site"]),
+                                                  ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
+                                                  ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
+                                                  Hours = Convert.ToInt32(row["Hours"]),
+                                                  status = Convert.ToString(row["Status"])
+                                              }).ToList();
+                obj.fieldWorkList = objList;
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully";
             }
@@ -514,33 +525,112 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-
-        public FieldWorkActivityLogResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
+        private DataTable ToDataTable<T>(List<T> items)
         {
-            FieldWorkActivityLogResponse obj = new FieldWorkActivityLogResponse();
+            DataTable dataTable = new DataTable(typeof(T).Name);
+            //Get all the properties
+            PropertyInfo[] Props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (PropertyInfo prop in Props)
+            {
+                //Setting column names as Property names
+                dataTable.Columns.Add(prop.Name);
+            }
+            foreach (T item in items)
+            {
+                var values = new object[Props.Length];
+                for (int i = 0; i < Props.Length; i++)
+                {
+                    //inserting property values to datatable rows
+                    values[i] = Props[i].GetValue(item, null);
+                }
+                dataTable.Rows.Add(values);
+            }
+            //put a breakpoint here and check datatable
+            return dataTable;
+        }
+        public BaseResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
+        {
+            DataTable standardsTable = ToDataTable(input.standards);
+
+            BaseResponse obj = new BaseResponse();
 
             SqlParameter[] parameters =
                                     {
-                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserId },
-                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkId },
-                                          new SqlParameter("@ResponseSchema", SqlDbType.NVarChar) { Value = input.ResponseSchema }
+                                          new SqlParameter("@FieldWorkActivityLogID", SqlDbType.BigInt) { Value = input.ActivityLogID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
+                                          new SqlParameter("@CommunitySiteID", SqlDbType.BigInt) { Value = input.CommunitySiteID },
+                                          new SqlParameter("@CommunitySiteUsersID", SqlDbType.BigInt) { Value = input.CommunitySiteUserID },
+                                          new SqlParameter("@ActivityStartDate", SqlDbType.DateTime) { Value = input.ActivityStartDate },
+                                          new SqlParameter("@ActivityEndDate", SqlDbType.DateTime) { Value = input.ActivityEndDate },
+                                          new SqlParameter("@Hours", SqlDbType.Int) { Value = input.Hours },
+                                          new SqlParameter("@Status", SqlDbType.VarChar) { Value = input.status },
+                                          new SqlParameter("@LogStandards", SqlDbType.Structured) { Value = standardsTable }
                                      };
-            DataTable dtActivityLog = _helper.GetDataTable("[dbo].[UpdateFieldWorkActivityLog]", parameters);
-            if (dtActivityLog.Rows.Count > 0)
-            {
-                obj = dtActivityLog.AsEnumerable().Select(row =>
-                                              new FieldWorkActivityLogResponse
-                                              {
-                                                  FieldWorkId = Convert.ToInt32(row["FieldWorkID"]),
-                                                  BaseSchema = Convert.ToString(row["BaseSchema"]),
-                                                  ResponseSchema = Convert.ToString(row["ResponseSchema"])
-                                              }).FirstOrDefault();
-                obj.IsSuccess = true;
-                obj.Message = "Data Saved Successfully";
-            }
-          
+            //DataTable dtActivityLog = _helper.GetDataTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
+            int ID = _helper.InsertTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
+            #region Old Codes 
+            //if (dtActivityLog.Rows.Count > 0)
+            //{
+            //    obj = dtActivityLog.AsEnumerable().Select(row =>
+            //                                  new FieldWorkActivityLogResponse
+            //                                  {
+            //                                      //FieldWorkId = Convert.ToInt32(row["FieldWorkID"]),
+            //                                      //BaseSchema = Convert.ToString(row["BaseSchema"]),
+            //                                      //ResponseSchema = Convert.ToString(row["ResponseSchema"])
+            //                                  }).FirstOrDefault();
+            //    obj.IsSuccess = true;
+            //    obj.Message = "Data Saved Successfully";
+            //}
+            #endregion
 
+            obj.IsSuccess = true;
+            obj.Message = "Data Saved Successfully";
             return obj;
+        }
+        public FieldWorkActivityLogByIDResponse GetFielWorkActivityLogByID(int userID, int activityLogID)
+        {
+            FieldWorkActivityLogByIDResponse obj = new FieldWorkActivityLogByIDResponse();
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
+                                          new SqlParameter("@ActivityLogID", SqlDbType.BigInt) { Value = activityLogID }
+                                     };
+            DataSet dtActivityLogByID = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogByID]", parameters);
+            if (dtActivityLogByID.Tables.Count > 0)
+            {
+                obj.DataByID = dtActivityLogByID.Tables[0].AsEnumerable().Select(row =>
+                                          new FieldWorkActivityLogByID
+                                          {
+                                              ActivityLogID = Convert.ToInt32(row["ID"]),
+                                              FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                              CommunitySiteID = Convert.ToInt32(row["CommunitySiteID"]),
+                                              CommunitySiteUserID = Convert.ToInt32(row["CommunitySiteUsersID"]),
+                                              ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
+                                              ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
+                                              Hours = Convert.ToInt32(row["Hours"]),
+                                              Status = Convert.ToString(row["Status"])
+                                          }).FirstOrDefault();
+
+                obj.standardList = dtActivityLogByID.Tables[1].AsEnumerable().Select(row =>
+                                        new FieldWorkActivityLogStandardList
+                                        {
+                                            FieldWorkActivityLogID = Convert.ToInt32(row["FieldWorkActivityLogID"]),
+                                            FieldWorkCoursesCategoryStandardID = Convert.ToInt32(row["FieldWorkCoursesCategoryStandardID"]),
+                                            Hours = Convert.ToInt32(row["Hours"]),
+                                            Details = Convert.ToString(row["Details"])
+                                        }).ToList();
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully.";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data .";
+            }
+
+           
+          return obj;
         }
 
         public FieldWorkAttachmentsResponse UploadFieldWorkActivityDocuments(FieldWorkAttachmentsRequest input)
@@ -721,6 +811,107 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public FieldWorkStandardsResponse GetStandards(int userID,int fieldWorkID)
+        {
+            FieldWorkStandardsResponse obj = new FieldWorkStandardsResponse();
+            List<FieldWorkStandards> _standards = new List<FieldWorkStandards>();
+            SqlParameter[] parameters =
+                                      {
+                                          new SqlParameter("@UserID", SqlDbType.Int, 50) { Value = userID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.Int, 50) { Value = fieldWorkID }
+                                        };
+
+            DataTable dtUsersList = _helper.GetDataTable("[dbo].[GetStandardsList]", parameters);
+
+            if (dtUsersList.Rows.Count > 0)
+            {
+                _standards = dtUsersList.AsEnumerable().Select(row =>
+                                          new FieldWorkStandards
+                                          {
+                                              StandardID = Convert.ToInt32(row["ID"]),
+                                              standard = Convert.ToString(row["Standard"])
+
+                                          }).ToList();
+                obj.standards = _standards;
+                obj.IsSuccess = true;
+                obj.Message = "Data retrieved successfully";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data";
+            }
+            return obj;
+        }
+
+        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaTypeId)
+        {
+            FieldWorkFnCSchemaResponse obj = new FieldWorkFnCSchemaResponse();
+            string schemaType = getSchemaType(schemaTypeId);
+            if (schemaType != string.Empty)
+            {
+                SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@fieldWorkID", SqlDbType.NVarChar, 20) { Value = fieldWorkID.ToString() },
+                                          new SqlParameter("@schemaType", SqlDbType.NVarChar, 50) { Value = schemaType.ToString().Trim() }
+                                        };
+
+                DataTable dtUsersList = _helper.GetDataTable("[dbo].[GetFieldWorkFnCSchema]", parameters);
+
+                if (dtUsersList.Rows.Count > 0)
+                {
+                    obj = dtUsersList.AsEnumerable().Select(row =>
+                                              new FieldWorkFnCSchemaResponse
+                                              {
+                                                 schema= Convert.ToString(row["schema"])
+
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data retrieved successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data";
+                }
+            }
+            return obj;
+        }
+        public BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input)
+        {
+            BaseResponse obj = new BaseResponse();
+            string schemaType = getSchemaType(input.schemaTypeID);
+            if (schemaType != string.Empty)
+            {
+                SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@fieldWorkID", SqlDbType.NVarChar, 20) { Value = input.fieldWorkID.ToString() },
+                                          new SqlParameter("@schemaType", SqlDbType.NVarChar, 50) { Value = schemaType.ToString().Trim() },
+                                          new SqlParameter("@schema", SqlDbType.NVarChar, 4000) { Value = input.schema },
+                                        };
+
+                int retVal = _helper.InsertTable("[dbo].[UpdateFnCSchema]", parameters);
+                obj.IsSuccess = true;
+                obj.Message = "Data Saved Successfully";
+
+            }
+            return obj;
+        }
+        private string getSchemaType(int schemaTypeId)
+        {
+            string schemaType = string.Empty;
+            foreach (FnCSchema schema in Enum.GetValues(typeof(FnCSchema)))
+            {
+                if (schemaTypeId == (int)schema)
+                {
+                    schemaType = schema.ToString();
+                    break;
+                }
+            }
+            return schemaType;
+        }
     }
 
     public class EmailMessageModel
@@ -751,4 +942,5 @@ namespace ThoughtFocus.Service.Implementation
         public string FileName { get; set; }
         public string FileExtension { get; set; }
     }
+    
 }
