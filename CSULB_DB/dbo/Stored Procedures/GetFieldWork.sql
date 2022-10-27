@@ -1,8 +1,39 @@
-﻿-- exec [dbo].[GetFieldWork] 338, 37
+﻿-- exec [dbo].[GetFieldWork] 2162, 1
 CREATE PROCEDURE [dbo].[GetFieldWork] @UserId BIGINT
 	,@FieldWorkId BIGINT
 AS
 BEGIN
+
+DECLARE @UIHandler VARCHAR(MAX)
+DECLARE @RoleBasedHandle VARCHAR(MAX)
+
+SELECT @RoleBasedHandle = 
+CASE WHEN UR.RoleID=3 THEN ',"SummaryFnCEditable" :false,"EnterActivityLog" :true,"ShowPrerequisitesTab" : true' --Student
+WHEN UR.RoleID IN (9,10) THEN ',"SummaryFnCEditable" :true,"EnterActivityLog" :false,"ShowPrerequisitesTab" : false' --partner User
+ELSE ',"SummaryFnCEditable" :true,"EnterActivityLog" :false,"ShowPrerequisitesTab" : true'
+END
+FROM [User].[Users] U JOIN [User].[UserRoles] UR ON UR.[UserID] = U.[ID] WHERE U.[ID] = @UserId
+
+
+SELECT @UIHandler = '{' + 
+'"ShowSummaryTab" :' +  CASE WHEN FWCC.[EnableActivityLog] = 1 THEN 'true' ELSE 'false' END +
+',"ShowActivityLogTab" :' +  CASE WHEN FWCC.[EnableActivityLog] = 1 THEN 'true' ELSE 'false' END +
+--',"ShowPrerequisitesTab" : true' +
+',"ShowFacultySupervisorTab" : false,"ShowCommunityPartnerUSerTab" : false' +
+',"RecordByDate" :' + CASE WHEN FWCC.[RecordByDate] = 1 THEN 'true' ELSE 'false' END +
+',"AutoCompute" :' + CASE WHEN FWCC.[AutoCompute] = 1 THEN 'true' ELSE 'false' END +
+',"CategoryID" :' + CAST(FWCC.[CategoryID] AS VARCHAR(15)) + 
+ @RoleBasedHandle + 
+',"MaxHour" : 24' + 
+'}' 
+FROM [Master].[FieldWorkCoursesConfiguration] FWCC
+	JOIN [Master].[Courses] C ON C.[Subject] = FWCC.[Subject] AND C.[CourseNumber] = FWCC.[CourseNumber]
+	JOIN [Master].[CourseTerm] CT ON CT.[CourseID] = C.[ID]
+	JOIN [Master].[FieldWorkCourses] FWC ON FWC.[CourseTermID] = CT.[ID]
+	JOIN [FieldWork].[FieldWork] FW ON FW.[FieldWorkCourseID] = FWC.[ID] AND FW.[ID] = @FieldWorkId
+
+
+
 	SELECT FW.ID
 		,U.FirstName + ' ' + U.LastName AS [StudentName]
 		,C.[Name] as [CourseTitle]
@@ -12,6 +43,7 @@ BEGIN
 		,T.[Name] AS Term
 		,FWPS.[FieldWorkPrerequisiteStatus]
 		--,'{"ShowSummaryTab" : false,"ShowActivityLogTab" : false,"ShowPrerequisitesTab" : true,"ShowFacultySupervisorTab" : false,"ShowCommunityPartnerUSerTab" : false}' AS [UIHandler]
+		,@UIHandler AS [UIHandler]
 	FROM [FieldWork].[FieldWork] FW
 	JOIN [User].[Users] U ON U.ID = FW.UserID
 	LEFT JOIN [Master].[FieldWorkCourses] FWC ON FWC.ID =  FW.FieldWorkCourseID 
@@ -46,10 +78,10 @@ DECLARE @instruction8 VARCHAR(500) = '<P><b>Instruction</b><br/>' + 'Website scr
 		,A.[UserID]
 		,A.[DocumentID]
 		,D.[Name] DocumentName
-		--,A.[FileName]
-		,CASE WHEN A.[ValidTill] < GETDATE() THEN NULL ELSE A.[FileName] END AS [FileName]
-		--,A.[FileExtn]
-		,CASE WHEN A.[ValidTill] < GETDATE() THEN NULL ELSE A.[FileExtn] END AS [FileExtn]
+		,A.[FileName]
+		--,CASE WHEN A.[ValidTill] < GETDATE() THEN NULL ELSE A.[FileName] END AS [FileName]
+		,A.[FileExtn]
+		--,CASE WHEN A.[ValidTill] < GETDATE() THEN NULL ELSE A.[FileExtn] END AS [FileExtn]
 		,A.[FolderName]
 		--,A.[IsApproved]
 		,CASE WHEN A.[ValidTill] < GETDATE() THEN 0 ELSE A.[IsApproved] END AS [IsApproved]
@@ -57,7 +89,13 @@ DECLARE @instruction8 VARCHAR(500) = '<P><b>Instruction</b><br/>' + 'Website scr
 		,A.[ValidatedDate]
 		,A.[CreatedBy]
 		,A.[CreatedDate]
-		,ISNULL(A.[ValidTill], GETDATE() + 10) AS [ValidTill]
+		--,ISNULL(A.[ValidTill], GETDATE() + 10) AS [ValidTill]
+		--, CASE WHEN A.[FileName] IS NOT NULL and A.[ValidTill] < GETDATE() THEN GETDATE() + 10
+		--WHEN A.[ValidTill] is null THEN GETDATE() + 10
+		--ELSE A.[ValidTill] END AS [ValidTill] 
+		, CASE WHEN A.[FileName] IS NOT NULL and A.[ValidTill] < GETDATE() THEN NULL
+		WHEN A.[ValidTill] is null THEN NULL
+		ELSE A.[ValidTill] END AS [ValidTill] 
 		,A.[RejectedReason]
 		--,A.[Comments]
 		,CASE WHEN A.[ValidTill] < GETDATE() THEN NULL ELSE A.[Comments] END AS [Comments]
@@ -94,4 +132,43 @@ DECLARE @instruction8 VARCHAR(500) = '<P><b>Instruction</b><br/>' + 'Website scr
 	LEFT JOIN [User].[Users] U ON u.ID = A.ApprovedBy
 	order by A.[DocumentID]
 	--WHERE FWD.[IsRestricted] =  CASE WHEN EXISTS (SELECT * FROM [User].[Users] U JOIN [User].[UserRoles] UR ON UR.UserID = U.ID AND UR.RoleID IN(1,3,4) AND U.[ID] = @UserId) THEN   FWD.[IsRestricted] ELSE 0 END
+
+	--SUMMARY Hours
+	--[FieldWorkActivityLog] [Status] are Saved,Submitted,Approved,Not-Approved
+		DECLARE @ExpectedHours BIGINT
+		
+		SELECT @ExpectedHours=C.[FieldWorkHours] 
+			FROM [FieldWork].[FieldWork] FW
+				LEFT JOIN [Master].[FieldWorkCourses] FWC ON FWC.ID =  FW.FieldWorkCourseID 
+				JOIN [Master].[CourseTerm] CT ON FWC.CourseTermID = CT.ID
+				JOIN [Master].[Courses] C ON CT.CourseID = C.[ID]
+			WHERE FW.ID = @FieldWorkId;
+
+	IF EXISTS(SELECT * FROM [FieldWork].[FieldWorkActivityLog] FWAL WHERE FWAL.[FieldWorkID] = @FieldWorkId)
+	BEGIN
+		SELECT @ExpectedHours AS [ExpectedHours]
+			,SUM(FWAL.[Hours]) AS [LoggedHours]
+			,SUM(CASE WHEN [Status]='Submitted' THEN FWAL.[Hours] ELSE 0 END)AS [SentforApproval]
+			,SUM(CASE WHEN [Status]='Approved' THEN FWAL.[Hours] ELSE 0 END)AS [ApprovedHours]
+			,ROUND(SUM(CASE WHEN [Status]='Approved' THEN FWAL.[Hours] ELSE 0 END)/@ExpectedHours * 100, 2) AS [Approved]
+		FROM [FieldWork].[FieldWorkActivityLog] FWAL
+		WHERE FWAL.[FieldWorkID] = @FieldWorkId
+		GROUP BY FWAL.[FieldWorkID]
+	END
+	ELSE
+	BEGIN
+		SELECT @ExpectedHours AS [ExpectedHours]
+			,0 AS [LoggedHours]
+			,0 AS [SentforApproval]
+			,0 AS [ApprovedHours]
+			,0 AS [Approved]
+	END
+
+--	SELECT 
+--'25.00' AS [ExpectedHours]
+--,'11.50' AS [LoggedHours]
+--,'7.25' AS [SentforApproval]
+--,'5.75' AS [ApprovedHours]
+--,'23.00' AS [Approved]
+
 END

@@ -4,6 +4,10 @@
     [DocumentID]      BIGINT        NOT NULL,
     [CreatedDateTime] DATETIME2 (7) NOT NULL,
     [CreatedByUserID] BIGINT        NOT NULL,
+    [IsOptional]      BIT           CONSTRAINT [DF_ProgramDocuments_IsOptional] DEFAULT ((0)) NOT NULL,
+    [AllowMultiple]   BIT           NULL,
     CONSTRAINT [PK_ApplicationDocuments] PRIMARY KEY CLUSTERED ([ID] ASC)
 );
+
+
 

@@ -43,6 +43,12 @@ BEGIN
 					JOIN [Master].[CourseTerm] CT ON  CT.ID = FWC.[CourseTermID]
 					JOIN [Master].[ProgramCourse] PC ON PC.CourseID = CT.CourseID
 					JOIN [Master].[ProgramUsers] PU ON PU.ProgramID = PC.ProgramID AND PU.UserID = @UserId AND PU.[RoleID] = 4
+			UNION
+				--Community Site Users wise selecting [FieldWork]
+				SELECT FW.ID
+					FROM [FieldWork].[FieldWork] FW
+					JOIN [FieldWork].[FieldWorkActivityLog] FWAL ON  FWAL.[FieldWorkID] = FW.[ID] AND FWAL.CommunitySiteUsersID = @UserId 
+					JOIN [FieldWork].[CommunitySiteUsers] CSU ON CSU.UserID = FWAL.CommunitySiteUsersID
 			)
 			ORDER BY CASE WHEN FWPS.FieldWorkPrerequisiteStatus = 0 THEN 20 ELSE FWPS.FieldWorkPrerequisiteStatus END , U.FirstName, U.LastName
 
