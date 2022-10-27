@@ -12,35 +12,35 @@ CREATE PROCEDURE [dbo].[SaveForm]
 @State int,
 @ApplicationNumber nvarchar(100)
 AS
-if (@FormId=0)
-begin
-INSERT INTO [Application].[Forms]
-           ([UserID]
-           ,[ProgramID]
-           ,[SemesterID]
-           ,[Form]
-           ,[CreatedDateTime]
-           ,[CreatedByUserID]
-           ,[ModifiedDateTime]
-           ,[ModifiedBy]
-           ,[State]
-		   ,[ApplicationNumber])
-     VALUES
-           (@UserId
-		   ,@ProgramId
-		   ,@SemesterId
-		   ,@Form
-		   ,GETDATE()
-		   ,@UserId
-		   ,GETDATE()
-		   ,@UserId
-		   ,@State
-		   ,@ApplicationNumber)
+--if (@FormId=0)
+--begin
+--INSERT INTO [Application].[Forms]
+--           ([UserID]
+--           ,[ProgramID]
+--           ,[SemesterID]
+--           ,[Form]
+--           ,[CreatedDateTime]
+--           ,[CreatedByUserID]
+--           ,[ModifiedDateTime]
+--           ,[ModifiedBy]
+--           ,[State]
+--		   ,[ApplicationNumber])
+--     VALUES
+--           (@UserId
+--		   ,@ProgramId
+--		   ,@SemesterId
+--		   ,@Form
+--		   ,GETDATE()
+--		   ,@UserId
+--		   ,GETDATE()
+--		   ,@UserId
+--		   ,@State
+--		   ,@ApplicationNumber)
 
-end
-else
-begin 
-		update [Application].[Forms] set [Form]=@Form , [State]=@State , [ModifiedDateTime]=GETDATE(), [ModifiedBy]=@UserId
-	where [ID]=@FormId
+--end
+--else
+--begin 
+--		update [Application].[Forms] set [Form]=@Form , [State]=@State , [ModifiedDateTime]=GETDATE(), [ModifiedBy]=@UserId
+--	where [ID]=@FormId
 
-end
+--end 
