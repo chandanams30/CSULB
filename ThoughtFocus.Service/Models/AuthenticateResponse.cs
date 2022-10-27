@@ -19,6 +19,9 @@ namespace CSULB_COE.Models
         public List<Roles> Roles { get; set; }
         
         public string message { get; set; }
+
+        public bool IsSuccess { get; set; }
+
     }
 
     public class Roles

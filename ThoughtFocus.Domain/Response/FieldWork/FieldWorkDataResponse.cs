@@ -9,6 +9,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public FieldWorkResponse FieldWork { get; set; }
         public List<FieldWorkRoles> FieldWorkRoles { get; set; }
         public List<FieldWorkProfileAttachments> FieldWorkAttachments { get; set; }
+        public FieldWorkSummaryTabHours FieldWorkHours { get; set; }
     }
     public class FieldWorkRoles
     {
@@ -23,6 +24,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
     {
         public int FieldWorkAttachmentID { get; set; }
         public int UserID { get; set; }
+        public int DocumentID { get; set; }
         public string DocumentName { get; set; }
         public string FileName { get; set; }
         //public string FileExtn { get; set; }
@@ -40,5 +42,13 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string DocumentInfo { get; set; }
         public bool CanUpload { get; set; }
         public bool CanValidate { get; set; }
+    }
+    public class FieldWorkSummaryTabHours
+    {
+        public decimal ExpectedHours { get; set; }
+        public decimal LoggedHours { get; set; }
+        public decimal SentforApproval { get; set; }
+        public decimal ApprovedHours { get; set; }
+        public decimal Approved { get; set; }
     }
 }

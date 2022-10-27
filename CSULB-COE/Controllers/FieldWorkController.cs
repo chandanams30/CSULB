@@ -186,8 +186,51 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpGet("GetFielWorkActivityLogByID")]
-        public FieldWorkActivityLogByIDResponse GetFielWorkActivityLogByID(int userID,int activityLogID)
+        [HttpPost("UpdateFieldWorkActivityLogStatus")]
+        public BaseResponse UpdateFieldWorkActivityLogStatus(UpdateFieldWorkActivityLogStatusRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpdateFieldWorkActivityLogStatus(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Update Activity Log Status, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFieldWorkActivityLogStatusList")]
+        public BaseResponse UpdateFieldWorkActivityLogStatusList(UpdateFieldWorkActivityLogStatusListRequest inputs)
+        {
+            try
+            {
+                foreach (UpdateFieldWorkActivityLogStatusRequest input in inputs.logStatusList)
+                {
+                     _fieldWorkService.UpdateFieldWorkActivityLogStatus(input);
+                }
+                BaseResponse obj = new BaseResponse();
+                obj.IsSuccess = true;
+                obj.Message = "Activity Log Status Updated Successfully";
+                return obj;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Update Activity Log Status, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFieldWorkActivityLogByID")]
+        public FieldWorkActivityLogByIDResponse GetFielWorkActivityLogByID(int userID, int activityLogID)
         {
             try
             {
@@ -312,6 +355,66 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetFieldworkCommunityDistrict")]
+        public FieldWorkCommunityDistrictResponse GetFieldworkCommunityDistrict()
+        {
+            try
+            {
+                FieldWorkCommunityDistrictResponse response = new FieldWorkCommunityDistrictResponse();
+                response = _fieldWorkService.GetFieldworkCommunityDistrict();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkCommunityDistrictResponse response = new FieldWorkCommunityDistrictResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetFieldWorkCoursesCategorySchoolTypes")]
+        public GetFieldWorkCoursesCategorySchoolTypesResponse GetFieldWorkCoursesCategorySchoolTypes(int userID,int fieldWorkID)
+        {
+            try
+            {
+                GetFieldWorkCoursesCategorySchoolTypesResponse response = new GetFieldWorkCoursesCategorySchoolTypesResponse();
+                response = _fieldWorkService.GetFieldWorkCoursesCategorySchoolTypes(userID,fieldWorkID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetFieldWorkCoursesCategorySchoolTypesResponse response = new GetFieldWorkCoursesCategorySchoolTypesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetFieldworkCommunitySchoolSiteUsersByDistrict")]
+        public GetFieldworkCommunitySchoolSiteUsersByDistrictResponse GetFieldworkCommunitySchoolSiteUsersByDistrict(int CommunityDistrictID)
+        {
+            try
+            {
+                GetFieldworkCommunitySchoolSiteUsersByDistrictResponse response = new GetFieldworkCommunitySchoolSiteUsersByDistrictResponse();
+                response = _fieldWorkService.GetFieldworkCommunitySchoolSiteUsersByDistrict(CommunityDistrictID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetFieldworkCommunitySchoolSiteUsersByDistrictResponse response = new GetFieldworkCommunitySchoolSiteUsersByDistrictResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
         [HttpGet("GetStandards")]
         public FieldWorkStandardsResponse GetStandards(int userID,int fieldWorkID)
         {
@@ -332,12 +435,12 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetFnCSchema")]
-        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID,int schemaType)
+        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID,int schemaType, int fieldWorkActivityLogID)
         {
             try
             {
                 FieldWorkFnCSchemaResponse response = new FieldWorkFnCSchemaResponse();
-                response = _fieldWorkService.GetFnCSchema(userID, fieldWorkID,schemaType);
+                response = _fieldWorkService.GetFnCSchema(userID, fieldWorkID,schemaType,fieldWorkActivityLogID);
                 return response;
             }
             catch (Exception ex)

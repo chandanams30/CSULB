@@ -27,7 +27,7 @@ namespace CSULB_COE
 
             try
             {
-                Log.Information("Application Starting.");
+                //Log.Information("Application Starting.");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)

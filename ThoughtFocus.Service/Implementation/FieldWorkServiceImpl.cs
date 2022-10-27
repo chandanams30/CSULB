@@ -76,6 +76,7 @@ namespace ThoughtFocus.Service.Implementation
                                               {
                                                   FieldWorkAttachmentID = Convert.ToInt32(row["ID"]),
                                                   UserID = Convert.ToInt32(row["UserID"]),
+                                                  DocumentID= Convert.ToInt32(row["DocumentID"]),
                                                   DocumentName = Convert.ToString(row["DocumentName"]),
                                                   FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
                                               // FileExtn = Convert.ToString(row["FileExtn"]),
@@ -94,6 +95,17 @@ namespace ThoughtFocus.Service.Implementation
                                               CanUpload=Convert.ToBoolean(row["CanUpload"]),
                                               CanValidate = Convert.ToBoolean(row["CanValidate"])
                                               }).ToList();
+
+                    obj.FieldWorkHours = dsFieldWorkData.Tables[3].AsEnumerable().Select(row =>
+                                          new FieldWorkSummaryTabHours
+                                          {
+                                              ExpectedHours = Convert.ToDecimal(row["ExpectedHours"]),
+                                              LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
+                                              SentforApproval = Convert.ToDecimal(row["SentforApproval"]),
+                                              ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
+                                              Approved = Convert.ToDecimal(row["Approved"])
+
+                                          }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -213,7 +225,7 @@ namespace ThoughtFocus.Service.Implementation
                     StudentsDetails mailInfo = GetStudentDetailsFromFieldWorkId(input.FieldWorkID, input.FieldWorkAttachmentId);
                     ApproveRejectMailer approvedRejectMailer = GetEmailSubjectAndBody(input.ApprovalStatus, mailInfo.FileName, input.RejectedReason, input.Comments,mailInfo.DisplayName);
                     // send the approve / reject mail here 
-                    _sendMail.SendEmail(mailInfo.Email, "", approvedRejectMailer.Subject, approvedRejectMailer.Body, "");
+                    _sendMail.SendEmail(mailInfo.Email, "", approvedRejectMailer.Subject, approvedRejectMailer.Body , "");
                 }
                 catch (Exception ee)
                 {
@@ -395,6 +407,7 @@ namespace ThoughtFocus.Service.Implementation
             string userFolderName = string.Empty;
             string savedFileName = string.Empty;
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FieldWorkAttachmentId, input.DocumentID);
             if (input.FileName != string.Empty)
             {
                 //string[] fileSplit = input.FileName.Split('.');
@@ -402,9 +415,9 @@ namespace ThoughtFocus.Service.Implementation
                 //fileExtension = fileSplit[1].ToString();
                 //savedFileName = input.FieldWorkAttachmentId + fileSplit[0].ToString() + DateTime.Now.ToString("MMddyyyyHHmmss");
                 AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
-                fileName = fileDetails.FileName;
+               // fileName = fileDetails.FileName;
                 fileExtension = fileDetails.FileExtension;
-                savedFileName = input.FieldWorkAttachmentId+fileDetails.FileName.ToString()+DateTime.Now.ToString("MMddyyyyHHmmss");
+               // savedFileName = input.FieldWorkAttachmentId+fileDetails.FileName.ToString()+DateTime.Now.ToString("MMddyyyyHHmmss");
             }
             // call the current file name from DB  and delete the file from the file system and then run the below 
             // first time upload , the filename will be null 
@@ -413,9 +426,9 @@ namespace ThoughtFocus.Service.Implementation
                                       {
                                           new SqlParameter("@UserId", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@FieldWorkAttachmentID", SqlDbType.BigInt) { Value = input.FieldWorkAttachmentId },
-                                          new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileName },
+                                          new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileNames.FileName },
                                           new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
-                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = savedFileName },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
                                           new SqlParameter("@ValidTill", SqlDbType.DateTime) { Value = input.ValidTill },
                                           new SqlParameter("@Comments", SqlDbType.VarChar, -1) { Value = input.Comments }
                                         };
@@ -432,12 +445,12 @@ namespace ThoughtFocus.Service.Implementation
                     if (Directory.Exists(dirFieldWork))
                     {
                         // copy the file here 
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "."+fileExtension), input.FileContent);
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, fileNames.SavedFileName + "."+fileExtension), input.FileContent);
                     }
                     else
                     {
                         Directory.CreateDirectory(dirFieldWork);
-                        File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                        File.WriteAllBytes(Path.Combine(dirFieldWork, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
                     }
                 }
                 else
@@ -449,7 +462,7 @@ namespace ThoughtFocus.Service.Implementation
                     dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
                     dirFieldWorkFolder.SetAccessControl(dSecurity);
 
-                    File.WriteAllBytes(Path.Combine(dirFieldWork, savedFileName + "." + fileExtension), input.FileContent);
+                    File.WriteAllBytes(Path.Combine(dirFieldWork, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
                 }
                 // now delete the old file based on the file name return from DB call above 
             }
@@ -457,6 +470,27 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             response.Message = "Field Work Document Uploaded Successfully";
             return response;
+        }
+        private FormAttachmentFileNames GetFormAttachmentFileName(int formID, int documentID)
+        {
+            FormAttachmentFileNames fileNames = new FormAttachmentFileNames();
+            string savedFileName = string.Empty;
+            SqlParameter[] parameters =
+                                    {
+
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = documentID }
+                                    };
+            DataTable dtName = _helper.GetDataTable("[dbo].[GetFormAttachmentFileName]", parameters);
+
+            if (dtName.Rows.Count > 0)
+            {
+                fileNames.SavedFileName = Convert.ToString(dtName.Rows[0]["SavedFileName"]);
+                fileNames.FileName = Convert.ToString(dtName.Rows[0]["FileName"]);
+                fileNames.UserFolder = Convert.ToString(dtName.Rows[0]["UserFolder"]);
+            }
+
+            return fileNames;
         }
 
         public FieldWorkProfileAttachments DownloadRequiredDocuments(int userId, int fieldworkAttachmentId)
@@ -497,10 +531,10 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldworkId }
                                      };
             //DataTable dtActivityLog = _helper.GetDataTable("[dbo].[GetFieldWorkActivityLog]", parameters);dbo.[GetFieldWorkActivityLogForFieldWorkUser]
-            DataTable dtActivityLog = _helper.GetDataTable("[dbo].[GetFieldWorkActivityLogList]", parameters);
-            if (dtActivityLog.Rows.Count > 0)
+            DataSet dtActivityLog = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogList]", parameters);
+            if (dtActivityLog.Tables.Count > 0)
             {
-                objList = dtActivityLog.AsEnumerable().Select(row =>
+                objList = dtActivityLog.Tables[0].AsEnumerable().Select(row =>
                                               new FieldWorkActivityLogResponse
                                               {
                                                   ActivityLogID = Convert.ToInt32(row["ID"]),
@@ -510,9 +544,16 @@ namespace ThoughtFocus.Service.Implementation
                                                   SiteName = Convert.ToString(row["Site"]),
                                                   ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
                                                   ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
-                                                  Hours = Convert.ToInt32(row["Hours"]),
-                                                  status = Convert.ToString(row["Status"])
+                                                  Hours = Convert.ToDecimal(row["Hours"]),
+                                                  status = Convert.ToString(row["Status"]),
+                                                  ShowCheckbox = Convert.ToBoolean(row["ShowCheckbox"])
                                               }).ToList();
+                obj.activityLogHandler = dtActivityLog.Tables[1].AsEnumerable().Select(row =>
+                                       new FieldWorkActivityLogHandler
+                                       {
+                                           ActivityLogHandler = Convert.ToString(row["AcitivityLogHandler"])
+                                       }).FirstOrDefault();
+
                 obj.fieldWorkList = objList;
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully";
@@ -556,13 +597,15 @@ namespace ThoughtFocus.Service.Implementation
 
             SqlParameter[] parameters =
                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@FieldWorkActivityLogID", SqlDbType.BigInt) { Value = input.ActivityLogID },
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
-                                          new SqlParameter("@CommunitySiteID", SqlDbType.BigInt) { Value = input.CommunitySiteID },
+                                          new SqlParameter("@CommunityDistrictID", SqlDbType.BigInt) { Value = input.CommunityDistrictID },
+                                          new SqlParameter("@CommunitySchoolID", SqlDbType.BigInt) { Value = input.CommunitySchoolID },
                                           new SqlParameter("@CommunitySiteUsersID", SqlDbType.BigInt) { Value = input.CommunitySiteUserID },
                                           new SqlParameter("@ActivityStartDate", SqlDbType.DateTime) { Value = input.ActivityStartDate },
                                           new SqlParameter("@ActivityEndDate", SqlDbType.DateTime) { Value = input.ActivityEndDate },
-                                          new SqlParameter("@Hours", SqlDbType.Int) { Value = input.Hours },
+                                          new SqlParameter("@Hours", SqlDbType.Decimal) { Value = input.Hours },
                                           new SqlParameter("@Status", SqlDbType.VarChar) { Value = input.status },
                                           new SqlParameter("@LogStandards", SqlDbType.Structured) { Value = standardsTable }
                                      };
@@ -587,14 +630,19 @@ namespace ThoughtFocus.Service.Implementation
             obj.Message = "Data Saved Successfully";
             return obj;
         }
-        public FieldWorkActivityLogByIDResponse GetFielWorkActivityLogByID(int userID, int activityLogID)
+        public FieldWorkActivityLogByIDResponse GetFielWorkActivityLogByID(int userID,int activityLogID)
         {
             FieldWorkActivityLogByIDResponse obj = new FieldWorkActivityLogByIDResponse();
+         
             SqlParameter[] parameters =
                               {
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
+                                         // new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldWorkID },
                                           new SqlParameter("@ActivityLogID", SqlDbType.BigInt) { Value = activityLogID }
+                                          //new SqlParameter("@StartDate", SqlDbType.DateTime) { Value = startDate}
+
                                      };
+            
             DataSet dtActivityLogByID = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogByID]", parameters);
             if (dtActivityLogByID.Tables.Count > 0)
             {
@@ -603,11 +651,15 @@ namespace ThoughtFocus.Service.Implementation
                                           {
                                               ActivityLogID = Convert.ToInt32(row["ID"]),
                                               FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
-                                              CommunitySiteID = Convert.ToInt32(row["CommunitySiteID"]),
+                                              CommunityDistrictID = Convert.ToInt32(row["CommunityDistrictID"]),
+                                              CommunityDistrictName = Convert.ToString(row["CommunityDistrict"]),
+                                              CommunitySchoolID = Convert.ToInt32(row["CommunitySchoolID"]),
+                                              CommunitySchoolName = Convert.ToString(row["CommunitySchool"]),
                                               CommunitySiteUserID = Convert.ToInt32(row["CommunitySiteUsersID"]),
+                                              CommunitySiteUserName = Convert.ToString(row["CommunitySiteUser"]),
                                               ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
                                               ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
-                                              Hours = Convert.ToInt32(row["Hours"]),
+                                              Hours = Convert.ToDecimal(row["Hours"]),
                                               Status = Convert.ToString(row["Status"])
                                           }).FirstOrDefault();
 
@@ -616,9 +668,19 @@ namespace ThoughtFocus.Service.Implementation
                                         {
                                             FieldWorkActivityLogID = Convert.ToInt32(row["FieldWorkActivityLogID"]),
                                             FieldWorkCoursesCategoryStandardID = Convert.ToInt32(row["FieldWorkCoursesCategoryStandardID"]),
-                                            Hours = Convert.ToInt32(row["Hours"]),
+                                            FieldWorkCoursesCategoryStandard = Convert.ToString(row["FieldWorkCoursesCategoryStandard"]),
+                                            FieldWorkCoursesCategorySchoolTypeID = Convert.ToInt32(row["FieldWorkCoursesCategorySchoolTypeID"]),
+                                            FieldWorkCoursesCategorySchoolType = Convert.ToString(row["FieldWorkCoursesCategorySchoolType"]),
+                                            Hours = Convert.ToDecimal(row["Hours"]),
                                             Details = Convert.ToString(row["Details"])
                                         }).ToList();
+
+                obj.ActivityLogHandler = dtActivityLogByID.Tables[2].AsEnumerable().Select(row =>
+                                          new FieldWorkActivityLogHandler
+                                          {
+                                            ActivityLogHandler= Convert.ToString(row["AcitivityLogHandler"])
+                                          }).FirstOrDefault();
+
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully.";
 
@@ -845,16 +907,16 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaTypeId)
+        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaTypeId,int fieldWorkActivityLogID)
         {
             FieldWorkFnCSchemaResponse obj = new FieldWorkFnCSchemaResponse();
             string schemaType = getSchemaType(schemaTypeId);
-            if (schemaType != string.Empty)
-            {
+         
                 SqlParameter[] parameters =
                                     {
-                                          new SqlParameter("@fieldWorkID", SqlDbType.NVarChar, 20) { Value = fieldWorkID.ToString() },
-                                          new SqlParameter("@schemaType", SqlDbType.NVarChar, 50) { Value = schemaType.ToString().Trim() }
+                                          new SqlParameter("@fieldWorkID", SqlDbType.Int, 50) { Value = fieldWorkID },
+                                          new SqlParameter("@schemaType", SqlDbType.Int, 50) { Value = schemaTypeId },
+                                          new SqlParameter("@fieldWorkActivityLogID", SqlDbType.Int, 50) { Value = fieldWorkActivityLogID },
                                         };
 
                 DataTable dtUsersList = _helper.GetDataTable("[dbo].[GetFieldWorkFnCSchema]", parameters);
@@ -876,27 +938,26 @@ namespace ThoughtFocus.Service.Implementation
                     obj.IsSuccess = false;
                     obj.Message = "No Data";
                 }
-            }
+          
             return obj;
         }
         public BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input)
         {
             BaseResponse obj = new BaseResponse();
             string schemaType = getSchemaType(input.schemaTypeID);
-            if (schemaType != string.Empty)
-            {
+           
                 SqlParameter[] parameters =
                                     {
-                                          new SqlParameter("@fieldWorkID", SqlDbType.NVarChar, 20) { Value = input.fieldWorkID.ToString() },
-                                          new SqlParameter("@schemaType", SqlDbType.NVarChar, 50) { Value = schemaType.ToString().Trim() },
+                                          new SqlParameter("@fieldWorkID", SqlDbType.BigInt, 50) { Value = input.fieldWorkID },
+                                          new SqlParameter("@schemaType", SqlDbType.Int, 50) { Value = input.schemaTypeID },
                                           new SqlParameter("@schema", SqlDbType.NVarChar, 4000) { Value = input.schema },
+                                          new SqlParameter("@FieldWorkActivityLogID", SqlDbType.BigInt, 50) { Value = input.FieldWorkActivityLogID }
                                         };
 
                 int retVal = _helper.InsertTable("[dbo].[UpdateFnCSchema]", parameters);
                 obj.IsSuccess = true;
                 obj.Message = "Data Saved Successfully";
 
-            }
             return obj;
         }
         private string getSchemaType(int schemaTypeId)
@@ -911,6 +972,122 @@ namespace ThoughtFocus.Service.Implementation
                 }
             }
             return schemaType;
+        }
+
+        public FieldWorkCommunityDistrictResponse GetFieldworkCommunityDistrict()
+        {
+            FieldWorkCommunityDistrictResponse obj = new FieldWorkCommunityDistrictResponse();
+            List<FieldWorkCommunityDistrict> districts = new List<FieldWorkCommunityDistrict>();
+
+            SqlParameter[] parameters =
+                                        {
+                                        };
+
+            DataTable dtDistricts = _helper.GetDataTable("[dbo].[GetFieldworkCommunityDistrict]", parameters);
+
+            if (dtDistricts.Rows.Count > 0)
+            {
+                districts = dtDistricts.AsEnumerable().Select(row =>
+                                          new FieldWorkCommunityDistrict
+                                          {
+                                              CommunityDistrictID = Convert.ToInt32(row["CommunityDistrictID"]),
+                                              CommunityDistrictName = Convert.ToString(row["CommunityDistrictName"])
+
+                                          }).ToList();
+                obj.districts = districts;
+                obj.IsSuccess = true;
+                obj.Message = "Data retrieved successfully";
+            }
+
+
+            return obj;
+        }
+        public GetFieldWorkCoursesCategorySchoolTypesResponse GetFieldWorkCoursesCategorySchoolTypes(int userID, int fieldWorkID)
+        {
+            GetFieldWorkCoursesCategorySchoolTypesResponse obj = new GetFieldWorkCoursesCategorySchoolTypesResponse();
+            List<GetFieldWorkCoursesCategorySchoolTypes> schoolTypes = new List<GetFieldWorkCoursesCategorySchoolTypes>();
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt, 50) { Value = userID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt, 50) { Value = fieldWorkID }
+                                        };
+
+            DataTable dtSchoolTypes = _helper.GetDataTable("[dbo].[SchoolTypesList]", parameters);
+
+            if (dtSchoolTypes.Rows.Count > 0)
+            {
+                schoolTypes = dtSchoolTypes.AsEnumerable().Select(row =>
+                                          new GetFieldWorkCoursesCategorySchoolTypes
+                                          {
+                                              SchoolTypeID = Convert.ToInt32(row["ID"]),
+                                              SchoolType = Convert.ToString(row["SchoolType"])
+
+                                          }).ToList();
+                obj.schoolTypes = schoolTypes;
+                obj.IsSuccess = true;
+                obj.Message = "Data retrieved successfully";
+            }
+
+
+            return obj;
+        }
+
+        public GetFieldworkCommunitySchoolSiteUsersByDistrictResponse GetFieldworkCommunitySchoolSiteUsersByDistrict(int CommunityDistrictID)
+        {
+            GetFieldworkCommunitySchoolSiteUsersByDistrictResponse obj = new GetFieldworkCommunitySchoolSiteUsersByDistrictResponse();
+
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@CommunityDistrictID", SqlDbType.BigInt) { Value = CommunityDistrictID }
+
+                                     };
+
+            DataSet dtFieldWork = _helper.GetDataSet("[dbo].[GetFieldworkCommunitySchoolSiteUsersByDistrict]", parameters);
+            if (dtFieldWork.Tables.Count > 0)
+            {
+                obj.schools = dtFieldWork.Tables[0].AsEnumerable().Select(row =>
+                                          new GetFieldworkCommunitySchool
+                                          {
+                                              CommunitySchoolID = Convert.ToInt32(row["CommunitySchoolID"]),
+                                              CommunitySchoolName = Convert.ToString(row["CommunitySchoolName"])
+                                          }).ToList();
+
+                obj.users = dtFieldWork.Tables[1].AsEnumerable().Select(row =>
+                                        new GetFieldworkCommunitySiteUsers
+                                        {
+                                            CommunitySiteUserID = Convert.ToInt32(row["ID"]),
+                                            CommunitySiteUser = Convert.ToString(row["CommunitySiteUser"])
+                                        }).ToList();
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully.";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data .";
+            }
+
+
+            return obj;
+        }
+
+        public BaseResponse UpdateFieldWorkActivityLogStatus(UpdateFieldWorkActivityLogStatusRequest input)
+        {
+            BaseResponse obj = new BaseResponse();
+
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID }, 
+                                          new SqlParameter("@FieldWorkActivityLogID", SqlDbType.BigInt) { Value = input.FieldWorkActivityLogID },
+                                          new SqlParameter("@Status", SqlDbType.VarChar) { Value = input.Status }
+                                     };
+            int ID = _helper.InsertTable("[dbo].[UpdateFieldWorkActivityLogStatus]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "Activity Log Status Updated Successfully";
+            return obj;
         }
     }
 

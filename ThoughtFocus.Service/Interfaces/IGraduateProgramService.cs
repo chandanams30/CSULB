@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using ThoughtFocus.Domain.Request.GraduateProgram;
+using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.GraduateProgram;
+
+namespace ThoughtFocus.Service.Interfaces
+{
+    public interface IGraduateProgramService
+    {
+        ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode);
+        AppliedFormsResponse GetAppliedForms(int userID, int applicationTypeID);
+        AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID);
+        FormStatesResponse GetFormStates(int userID);
+        SemesterListResponse GetSemesterList();
+        GraduateProgramFormResponse GetForm(int userID, int formID, int programID, string termCode);
+        BaseResponse UpdatePersonalInfoSchema(FormPersonalInfoSchemaRequest input);
+        BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input);
+        BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input);
+        BaseResponse SaveForm(FormSaveRequest input);
+        BaseResponse UpdateFormState(FormStatusUpdateRequest input);
+        FormAttachments DownloadFormAttachments(int userID, int formattachmentID);
+        RecommendationAttachments GetFormRecommendations(int userID, int recommendationAttachmentID);
+        BaseResponse AddRecommender(FormAddRecommenderRequest input);
+        BaseResponse AddRecommendation(FormAddRecommendationRequest input);
+        AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier);
+        BaseResponse UpdateReviwerReview(FormReviewerReviewRequest input);
+        BaseResponse AssignFormToReviewers();
+        byte[] GetMergedDocument(int formID);
+    }
+}

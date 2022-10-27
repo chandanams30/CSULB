@@ -1,0 +1,1428 @@
+﻿using iTextSharp.text;
+using iTextSharp.text.html.simpleparser;
+using iTextSharp.text.pdf;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.Text;
+using ThoughtFocus.Common.Utilities.Interfaces;
+using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Request.GraduateProgram;
+using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Service.Interfaces;
+
+
+namespace ThoughtFocus.Service.Implementation
+{
+    public class GraduateProgramServiceImpl : IGraduateProgramService
+    {
+        private readonly ISqlDBUtility _helper;
+        private readonly IConfiguration _configuration;
+        private readonly ISendMail _sendMail;
+        public ILogger<GraduateProgramServiceImpl> _logger;
+        public GraduateProgramServiceImpl(ISqlDBUtility helper
+                                         , IConfiguration configuration
+                                         , ISendMail sendMail
+                                         , ILogger<GraduateProgramServiceImpl> logger)
+        {
+            _helper = helper;
+            _configuration = configuration;
+            _sendMail = sendMail;
+            _logger = logger;
+        }
+        public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
+        {
+            ApplicationProgramResponse obj = new ApplicationProgramResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
+                                          new SqlParameter("@ApplicationTypeID", SqlDbType.Int, 50) { Value = applicationTypeID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                        };
+
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationPrograms]", parameters);
+            try
+            {
+                if (dtApplicationPrograms.Tables.Count > 0)
+                {
+                    
+
+                    obj.ApplicationPrograms = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                              new ApplicationPrograms
+                                              {
+                                                  programID = Convert.ToInt32(row["ID"]),
+                                                  programName = Convert.ToString(row["Name"]),
+                                                  semester = Convert.ToString(row["Semester"]),
+                                                  applicationOpens = Convert.ToDateTime(row["ApplicationOpens"]),
+                                                  applicationCloseDate = Convert.ToDateTime(row["ApplicationCloseDate"]),
+                                                  TotalCount = Convert.ToInt32(row["TotalCount"]),
+                                                  AcceptedCount = Convert.ToInt32(row["AcceptedCount"]),
+                                                  showApply = Convert.ToBoolean(row["showApply"]),
+                                                  showView = Convert.ToBoolean(row["showView"])
+                                              }).ToList();
+
+                    obj.HeaderDetails= dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
+                                               new HeaderDetails
+                                               {
+                                                   semester = Convert.ToString(row["Semester"]),
+                                                   TermCode = Convert.ToString(row["TermCode"]),
+                                                   showApply = Convert.ToBoolean(row["showApply"]),
+                                                   showView = Convert.ToBoolean(row["showView"]),
+                                                   showAssignApplicationToReviewers= Convert.ToBoolean(row["showAssignApplicationToReviewers"])
+                                               }).FirstOrDefault();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public AppliedFormsResponse GetAppliedForms(int userID, int applicationTypeID)
+        {
+            AppliedFormsResponse obj = new AppliedFormsResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
+                                          new SqlParameter("@ApplicationTypeID", SqlDbType.Int, 50) { Value = applicationTypeID }
+                                        };
+
+            DataTable dtAppliedForms = _helper.GetDataTable("[dbo].[GetAppliedForms]", parameters);
+            try
+            {
+                if (dtAppliedForms.Rows.Count > 0)
+                {
+
+
+                    obj.appliedForms = dtAppliedForms.AsEnumerable().Select(row =>
+                                              new AppliedForms
+                                              {
+                                                  formID = Convert.ToInt32(row["ID"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  formStateID = Convert.ToInt32(row["FormStateID"]),
+                                                  status = Convert.ToString(row["Status"]),
+                                                  programName = Convert.ToString(row["Name"]),
+                                                  semester = Convert.ToString(row["Semester"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  appliedDate = Convert.ToDateTime(row["AppliedDate"])
+
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID)
+        {
+            AppliedFormsByProgramsResponse obj = new AppliedFormsByProgramsResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = termcode },
+                                          new SqlParameter("@FormStateID", SqlDbType.Int, 50) { Value = formStateID }
+                                        };
+
+            DataSet dsAppliedFormsByProgram = _helper.GetDataSet("[dbo].[GetAppliedFormsByPrograms]", parameters);
+            try
+            {
+                if (dsAppliedFormsByProgram.Tables.Count > 0)
+                {
+
+                    if (dsAppliedFormsByProgram.Tables[0].Rows.Count > 0)
+                    {
+                        obj.AppliedFormsByPrograms = dsAppliedFormsByProgram.Tables[0].AsEnumerable().Select(row =>
+                                              new AppliedFormsByPrograms
+                                              {
+                                                  FormID = Convert.ToInt32(row["ID"]),
+                                                  StudentName = Convert.ToString(row["StudentName"]),
+                                                  FormStateID = Convert.ToInt32(row["FormStateID"]),
+                                                  FormState = Convert.ToString(row["FormState"]),
+                                                  AppliedDate = Convert.ToDateTime(row["AppliedDate"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  ProgramName = Convert.ToString(row["ProgramName"]),
+                                                  Semester = Convert.ToString(row["Semester"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  CSULBID = Convert.ToString(row["CSULBID"])
+
+                                              }).ToList();
+                    }
+                    if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
+                    {
+                        obj.HeaderDetails = dsAppliedFormsByProgram.Tables[1].AsEnumerable().Select(row =>
+                                              new HeaderDetails
+                                              {
+                                                  semester = Convert.ToString(row["Semester"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  programName= Convert.ToString(row["ProgramName"]),
+                                                  programID=Convert.ToInt32(row["ProgramID"])
+
+                                              }).FirstOrDefault();
+                    }
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public FormStatesResponse GetFormStates(int userID)
+        {
+            FormStatesResponse obj = new FormStatesResponse();
+
+
+            SqlParameter[] parameters ={
+                                           new SqlParameter("@UserID", SqlDbType.NVarChar, 255) { Value = userID}
+                                       };
+
+            DataTable dtFormStates = _helper.GetDataTable("[dbo].[GetFormStates]", parameters);
+            try
+            {
+                if (dtFormStates.Rows.Count > 0)
+                {
+
+
+                    obj.FormStates = dtFormStates.AsEnumerable().Select(row =>
+                                              new FormStates
+                                              {
+                                                  StateID = Convert.ToInt32(row["StateID"]),
+                                                  StateName = Convert.ToString(row["StateName"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public SemesterListResponse GetSemesterList()
+        {
+            SemesterListResponse obj = new SemesterListResponse();
+
+
+            SqlParameter[] parameters = { };
+
+            DataTable dtSemesters = _helper.GetDataTable("[dbo].[GetSemesterList]", parameters);
+            try
+            {
+                if (dtSemesters.Rows.Count > 0)
+                {
+
+
+                    obj.Semesters = dtSemesters.AsEnumerable().Select(row =>
+                                              new Semester
+                                              {
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  TermName = Convert.ToString(row["Name"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GraduateProgramFormResponse GetForm(int userID, int formID, int programID, string termCode)
+        {
+            GraduateProgramFormResponse obj = new GraduateProgramFormResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserID", SqlDbType.Int, 50) { Value = userID },
+                                          new SqlParameter("@FormID", SqlDbType.Int, 50) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                        };
+
+            DataSet dtFormData = _helper.GetDataSet("[dbo].[GetForm]", parameters);
+            try
+            {
+                if (dtFormData.Tables.Count > 0)
+                {
+                    obj.FormBasicInformation = dtFormData.Tables[0].AsEnumerable().Select(row =>
+                                               new FormBasicInformation
+                                               {
+                                                   FormID = Convert.ToInt32(row["FormID"]),
+                                                   StudentID = Convert.ToInt32(row["StudentID"]),
+                                                   ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                   ProgramName = Convert.ToString(row["ProgramName"]),
+                                                   TermCode = Convert.ToString(row["TermCode"]),
+                                                   Semester = Convert.ToString(row["Semester"]),
+                                                   Form = Convert.ToString(row["Form"]),
+                                                   FormStateID = Convert.ToInt32(row["FormStateID"]),
+                                                   FormState = Convert.ToString(row["FormState"]),
+                                                   ApplicationNumber = Convert.ToString(row["ApplicationNumber"]),
+                                                   ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
+                                                   ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
+                                                   MessageBoard = Convert.ToString(row["MessageBoard"]),
+                                                   CompletingYourApplication = Convert.ToString(row["CompletingYourApplication"])
+
+                                               }).FirstOrDefault();
+
+                    obj.FormStateHandler = dtFormData.Tables[1].AsEnumerable().Select(row =>
+                                                new FormStateHandler
+                                                {
+                                                    StateHandler = Convert.ToString(row["StateHandler"])
+
+                                                }).FirstOrDefault();
+
+                    obj.FormAttachmentsInformation = dtFormData.Tables[2].AsEnumerable().Select(row =>
+                                       new FormAttachmentsInformation
+                                       {
+                                           FormAttachmentID = (row["FormAttachmentID"]==DBNull.Value)?0:Convert.ToInt32(row["FormAttachmentID"]),
+                                           DocumentID = Convert.ToInt32(row["DocumentID"]),
+                                           ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                           FormID = (row["FormID"]==DBNull.Value)?0:Convert.ToInt32(row["FormID"]),
+                                           AttachmentTitle = Convert.ToString(row["AttachmentTitle"]),
+                                           FileName = Convert.ToString(row["FileName"]),
+                                           FileExtn = Convert.ToString(row["FileExtn"]),
+                                           IsOptional = Convert.ToBoolean(row["IsOptional"])
+
+                                       }).ToList();
+
+                    obj.RecommendersInformation = dtFormData.Tables[3].AsEnumerable().Select(row =>
+                                       new RecommendersInformation
+                                       {
+                                            Recommendations= Convert.ToString(row["Recommendations"])
+
+                                       }).FirstOrDefault();
+
+                    obj.ReviewerInformation = dtFormData.Tables[4].AsEnumerable().Select(row =>
+                                  new ReviewerInformation
+                                  {
+                                      Reviewer = Convert.ToString(row["Reviewer"])
+
+                                  }).FirstOrDefault();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse UpdatePersonalInfoSchema(FormPersonalInfoSchemaRequest input)
+        {
+            BaseResponse obj = new BaseResponse();
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt, 50) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt, 50) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt, 50) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar, -1) { Value = input.FormSchema }
+                                        };
+        
+                int identity = _helper.InsertTable("[dbo].[UpdateFormPersonalInfoSchema]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "Personal Information Saved";
+
+            return obj;
+        }
+
+        public BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input)
+        {
+            BaseResponse obj = new BaseResponse();
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt, 50) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt, 50) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt, 50) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@MessageBoardSchema", SqlDbType.NVarChar, -1) { Value = input.MessageBoardSchema }
+                                        };
+
+            int identity = _helper.InsertTable("[dbo].[UpdateFormMessageBoardSchema]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "Message Board Information Saved";
+
+            return obj;
+        }
+
+        public BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string fileExtensionWord = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+                bool isNotPDFExtension = false;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+
+                // pull the saved file name format SP Below
+                FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FormID, input.DocumentID);
+                if (input.FileName != string.Empty)
+                {
+                    AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                    //fileName = fileDetails.FileName;
+                    fileExtension = fileDetails.FileExtension;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                       // isNotPDFExtension = true;
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                    if (fileExtension.ToUpper() == "DOC" || fileExtension.ToUpper() == "DOCX")
+                    {
+                        isNotPDFExtension = true;
+                        bool isFileSaved = SaveWordFileInTempFolder(input.FileContent, fileNames.FileName, fileExtension, workingFolderPath);
+                        fileExtensionWord = fileExtension;
+                        fileExtension = "pdf";
+                    }
+
+                }
+
+                SqlParameter[] parameters =
+                                         {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = input.DocumentID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertFormAttachment]", parameters);
+                if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+                {
+                    string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                    userFolderName = folderSplit[0].ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            // copy the file here 
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath,fileNames.FileName+"."+ fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+                        if (isNotPDFExtension)
+                        {
+                            byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                    // now delete the old file based on the file name return from DB call above 
+                }
+
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+
+                return response;
+            }
+        }
+        private bool SaveWordFileInTempFolder(byte[] fileContent,string fileName,string fileExtension,string workingFolderPath)
+        {
+            bool isFileSaved = false;
+            if (Directory.Exists(workingFolderPath))
+            {
+                File.WriteAllBytes(Path.Combine(workingFolderPath, fileName + "." + fileExtension), fileContent);
+                isFileSaved = true;
+            }
+            else
+            {
+                System.IO.Directory.CreateDirectory(workingFolderPath);
+                File.WriteAllBytes(Path.Combine(workingFolderPath, fileName + "." + fileExtension), fileContent);
+                isFileSaved = true;
+            }
+            return isFileSaved;
+        }
+        private byte[] word2PDF(object Source, object Target)
+        {
+            Microsoft.Office.Interop.Word.ApplicationClass MSdoc;
+            Byte[] InputStream = null;
+            //Use for the parameter whose type are not known or say Missing
+            object Unknown = Type.Missing;
+            //Creating the instance of Word Application
+            MSdoc = new Microsoft.Office.Interop.Word.ApplicationClass();
+
+            try
+            {
+                MSdoc.Visible = false;
+                MSdoc.Documents.Open(ref Source, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown, ref Unknown, ref Unknown);
+                MSdoc.Application.Visible = false;
+                MSdoc.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+
+                object format = Microsoft.Office.Interop.Word.WdSaveFormat.wdFormatPDF;
+
+                MSdoc.ActiveDocument.SaveAs(ref Target, ref format,
+                        ref Unknown, ref Unknown, ref Unknown,
+                        ref Unknown, ref Unknown, ref Unknown,
+                        ref Unknown, ref Unknown, ref Unknown,
+                        ref Unknown, ref Unknown, ref Unknown,
+                       ref Unknown, ref Unknown);
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show(e.Message);
+            }
+            finally
+            {
+                if (MSdoc != null)
+                {
+                    MSdoc.Documents.Close(ref Unknown, ref Unknown, ref Unknown);
+                    //WordDoc.Application.Quit(ref Unknown, ref Unknown, ref Unknown);
+                }
+                // for closing the application
+                MSdoc.Quit(ref Unknown, ref Unknown, ref Unknown);
+                // read the file stream 
+                System.IO.FileStream fsPDF = new System.IO.FileStream(Target.ToString(), System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                System.IO.BinaryReader binaryReaderPDF = new System.IO.BinaryReader(fsPDF);
+                long byteLengthPDF = new System.IO.FileInfo(Target.ToString()).Length;
+                InputStream = binaryReaderPDF.ReadBytes((Int32)byteLengthPDF);
+                fsPDF.Close();
+                fsPDF.Dispose();
+                binaryReaderPDF.Close();
+                // delete the source word file 
+                File.Delete(Source.ToString());
+
+            }
+            return InputStream;
+        }
+        private byte[] GetImageFilecontent(byte[] fileContent)
+        {
+            byte[] inputStream = null;
+            string documentName = string.Empty;
+            using (MemoryStream stream = new System.IO.MemoryStream())
+            {
+                //Initialize the PDF document object.
+                using (Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 10f))
+                {
+                    PdfWriter.GetInstance(pdfDoc, stream).SetFullCompression();
+                    pdfDoc.Open();
+
+                    //Add the Image file to the PDF document object.
+                    iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(fileContent);
+
+                    //Scaling the image
+                    if (pic.Height > pic.Width)
+                    {
+                        float percentage = 0.0f;
+                        percentage = 700 / pic.Height;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    else
+                    {
+                        float percentage = 0.0f;
+                        percentage = 540 / pic.Width;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    pdfDoc.Add(pic);
+                    pdfDoc.Close();
+                    inputStream = stream.ToArray();
+                }
+            }
+            return inputStream;
+        }
+
+        private AttachmentFileDetails GetAttachedFileSplitValues(string filename)
+        {
+            AttachmentFileDetails fileObject = new AttachmentFileDetails();
+            string uploadedFileName = filename;
+            string[] splitter = uploadedFileName.Split('.');
+            StringBuilder fileNameAppender = new StringBuilder();
+            string fileExtension = uploadedFileName.Split('.').Last();
+            int length = splitter.Length;
+            for (int i = 0; i < splitter.Length; i++)
+            {
+                if (i == length - 2 && length > 2)
+                    fileNameAppender.Append(splitter[i]);
+                else if (length == 2)
+                {
+                    fileNameAppender.Append(splitter[i]);
+                    break;
+                }
+                else
+                {
+                    if (i != length - 1)
+                        fileNameAppender.Append(splitter[i] + ".");
+                }
+            }
+            fileObject.FileName = fileNameAppender.ToString();
+            fileObject.FileExtension = fileExtension;
+            return fileObject;
+        }
+        private FormAttachmentFileNames GetFormRecommendAttachmentFileName(string recommenderIdentifier, int documentID)
+        {
+            FormAttachmentFileNames fileNames = new FormAttachmentFileNames();
+            string savedFileName = string.Empty;
+            SqlParameter[] parameters =
+                                    {
+
+                                          new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(recommenderIdentifier) },
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = documentID }
+                                    };
+            DataTable dtName = _helper.GetDataTable("[dbo].[GetFormRecommendAttachmentFileName]", parameters);
+
+            if (dtName.Rows.Count > 0)
+            {
+                fileNames.SavedFileName = Convert.ToString(dtName.Rows[0]["SavedFileName"]);
+                fileNames.FileName= Convert.ToString(dtName.Rows[0]["FileName"]);
+                fileNames.UserFolder= Convert.ToString(dtName.Rows[0]["UserFolder"]);
+            }
+
+
+            return fileNames;
+        }
+        private FormAttachmentFileNames GetFormAttachmentFileName(int formID, int documentID)
+        {
+            FormAttachmentFileNames fileNames = new FormAttachmentFileNames();
+            string savedFileName = string.Empty;
+            SqlParameter[] parameters =
+                                    {
+
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = documentID }
+                                    };
+            DataTable dtName = _helper.GetDataTable("[dbo].[GetFormAttachmentFileName]", parameters);
+
+            if (dtName.Rows.Count > 0)
+            {
+                fileNames.SavedFileName = Convert.ToString(dtName.Rows[0]["SavedFileName"]);
+                fileNames.FileName = Convert.ToString(dtName.Rows[0]["FileName"]);
+                fileNames.UserFolder = Convert.ToString(dtName.Rows[0]["UserFolder"]);
+            }
+
+            return fileNames;
+        }
+
+        public BaseResponse SaveForm(FormSaveRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+
+            //  1-call UpdatePersonalInfoSchema
+            FormPersonalInfoSchemaRequest pinfoRes = new FormPersonalInfoSchemaRequest();
+            pinfoRes.UserID = input.UserID;
+            pinfoRes.ProgramID = input.ProgramID;
+            pinfoRes.FormID = input.FormID;
+            pinfoRes.TermCode = input.TermCode;
+            pinfoRes.FormSchema = input.PersonalInfo.formSchema;
+
+            BaseResponse PersonalInfoResponse = UpdatePersonalInfoSchema(pinfoRes);
+            //  2-call UpsertFormAttachment
+            foreach(var attachment in input.FormAttachments)
+            {
+                if (attachment.FileContent != null && attachment.FileContent.Length > 0 && !string.IsNullOrEmpty(attachment.FileName))
+                {
+                    FormUpsertAttachmentRequest objAtt = new FormUpsertAttachmentRequest();
+                    objAtt.UserID = input.UserID;
+                    objAtt.ProgramID = input.ProgramID;
+                    objAtt.FormID = input.FormID;
+                    objAtt.TermCode = input.TermCode;
+                    objAtt.FileName = attachment.FileName;
+                    objAtt.FileContent = attachment.FileContent;
+                    objAtt.DocumentID = attachment.DocumentID;
+                    BaseResponse attachRes = UpsertFormAttachment(objAtt);
+                }
+            }
+            //  3-Call Add Recommender
+
+            foreach (var recommender in input.Recommenders)
+            {
+                if (!string.IsNullOrEmpty(recommender.RecommenderName)&& !string.IsNullOrEmpty(recommender.RecommenderEmail)) {
+                    FormAddRecommenderRequest objRec = new FormAddRecommenderRequest();
+                    objRec.UserID = input.UserID;
+                    objRec.ProgramID = input.ProgramID;
+                    objRec.FormID = input.FormID;
+                    objRec.TermCode = input.TermCode;
+                    objRec.RecommenderName = recommender.RecommenderName;
+                    objRec.RecommenderEmail = recommender.RecommenderEmail;
+                    BaseResponse attachRes = AddRecommender(objRec);
+                }
+            }
+            // update the form status from open to draft , check and update SP from backend 
+            // call checkAndUpdateFormState
+            checkAndUpdateFormState(input.UserID,input.FormID,input.ProgramID,input.TermCode);
+            response.IsSuccess = true;
+            response.Message = "Form Saved Successfully";
+
+            return response;
+        }
+
+        private void checkAndUpdateFormState(int userID, int formID, int programID, string termCode)
+        {
+            SqlParameter[] parameters =
+                                  {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID},
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                        };
+
+            int id = _helper.InsertTable("[dbo].[checkAndUpdateFormState]", parameters);
+
+        }
+
+        public BaseResponse UpdateFormState(FormStatusUpdateRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FormStateID", SqlDbType.Int) { Value = input.FormStateID }
+                                        };
+            int id = _helper.InsertTable("[dbo].[UpdateFormState]", parameters);
+            // check if the form state ID is submit then Send mails to Recommenders and applicant .
+            // getFormDetailsByFormID
+            if (input.FormStateID == 3)
+            {
+                sendFormSubmitted(input.UserID,input.FormID,input.ProgramID,input.TermCode);
+            }
+            response.IsSuccess = true;
+            response.Message = "Data updated successfully";
+            return response;
+        }
+
+        private void sendFormSubmitted(int userID, int formID, int programID, string termCode)
+        {
+            // call SP getFormDetailsByFormID
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value =userID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }    
+            };
+
+            DataSet dsRec = _helper.GetDataSet("[dbo].[getFormDetailsByFormID]", parameters);
+            try
+            {
+                if (dsRec.Tables[0].Rows.Count > 0)
+                {
+                    // applicant mail
+                    string logoText = "cid:myImageID";
+                    string applicantsName = string.Empty;
+                    string toMail = string.Empty;
+                    string ccMail = string.Empty;
+                    string subject = string.Empty;
+                    string body = string.Empty;
+                    string programName = string.Empty;
+                    
+                    applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
+                    toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
+                    ccMail= Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
+                    programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
+                    subject = "Application Submitted";
+                    body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
+                    body = body.Replace("[[logoPath]]", logoText)
+                               .Replace("[[ApplicantName]]", applicantsName)
+                               .Replace("[[programName]]", programName);
+                    byte[] inputStr = null;
+                    _sendMail.SendEmail(toMail, ccMail, subject, body, inputStr);
+                }
+
+                if (dsRec.Tables[1].Rows.Count > 0)
+                {
+                    // loop through the data table for recommender mail
+                    for (int i = 0; i < dsRec.Tables[1].Rows.Count; i++) 
+                    {
+                        // send mail to the recommender with the attachment and the URL link  
+                    string logoText = "cid:myImageID";
+                    string userFolderPath = string.Empty;
+                    string templateFileName = string.Empty;
+                    string recommenderName = string.Empty;
+                    string recommenderEmail = string.Empty;
+                    string recommenderURL = string.Empty;
+                    string applicantsName = string.Empty;
+                    DateTime applicationDeadline;
+                    string body = string.Empty;
+                    string link = string.Empty;
+
+                    recommenderURL = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderURL"]);
+                    body = Convert.ToString(dsRec.Tables[1].Rows[i]["MailBody"]);
+                    recommenderName = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderName"]);
+                    recommenderEmail = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderEmail"]);
+                    applicantsName = Convert.ToString(dsRec.Tables[1].Rows[i]["ApplicantName"]);
+                    applicationDeadline = Convert.ToDateTime(dsRec.Tables[1].Rows[i]["ApplicationDeadline"]);
+                    link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+                    body = body.Replace("[[logoPath]]", logoText)
+                        .Replace("[[RecommenderName]]", recommenderName)
+                        .Replace("[[applicantname]]", applicantsName)
+                        .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
+                        .Replace("[[link]]", link)
+                        ;
+                    //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
+                    userFolderPath = "SupportFiles/EmailAttachments";
+                    templateFileName = "Recommender_Template.pdf";
+                    byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                    string subject = "Attention: CSULB Recommendation Request";
+                    if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                    {
+                        if (fileContent != null && fileContent.Length > 0)
+                        {
+                            _sendMail.SendEmail(recommenderEmail, "", subject, body, fileContent);
+                        }
+                    }
+                }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex.StackTrace);
+            }
+        }
+
+        public FormAttachments DownloadFormAttachments(int userID, int formattachmentID)
+        {
+            FormAttachments obj = new FormAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
+                                          new SqlParameter("@FormAttachmentID", SqlDbType.BigInt) { Value = formattachmentID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetFormAttachment]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new FormAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        public RecommendationAttachments GetFormRecommendations(int userID, int recommendationAttachmentID)
+        {
+            RecommendationAttachments obj = new RecommendationAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
+                                          new SqlParameter("@RecommendationttachmentID", SqlDbType.BigInt) { Value = recommendationAttachmentID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetFormRecommendations]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new RecommendationAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        public byte[] GetFileContent(string userFolderPath, string fileName)
+        {
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            string filepath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, fileName));
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
+        }
+        
+        public byte[] GetAttachmentContent(string userFolderPath, string fileName)
+        {
+            string filepath = Path.Combine(userFolderPath, fileName);
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(Path.GetFullPath(filepath), System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
+        }
+        private string GetAttachmentsFolderName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string userFolderName = folderSplit[0].ToString();
+            return userFolderName;
+        }
+        private string GetAttachmentsSavedFileName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string savedFileName = folderSplit[1].ToString();
+            return savedFileName;
+        }
+
+        public BaseResponse AddRecommender(FormAddRecommenderRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@RecommenderName", SqlDbType.NVarChar, 250) { Value = input.RecommenderName },
+                                          new SqlParameter("@RecommenderEmail", SqlDbType.NVarChar, 250) { Value = input.RecommenderEmail },
+
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = DBNull.Value },
+                                          new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier, 250) { Value = DBNull.Value },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = DBNull.Value },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = DBNull.Value },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = DBNull.Value }
+                                        };
+
+            // int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
+            DataTable dtRec = _helper.GetDataTable("[dbo].[UpsertFormRecommend]", parameters);
+            //try
+            //{
+
+
+            //    if (dtRec.Rows.Count > 0)
+            //    {
+            //        // send mail to the recommender with the attachment and the URL link 
+
+            //        // Pull the attachment and email template from supporting files folder 
+            //        string logoText = "cid:myImageID";
+            //        string userFolderPath = string.Empty;
+            //        string templateFileName = string.Empty;
+            //        string recommenderName = string.Empty;
+            //        string recommenderEmail = string.Empty;
+            //        string recommenderURL = string.Empty;
+            //        string applicantsName = string.Empty;
+            //        DateTime applicationDeadline;
+            //        string body = string.Empty;
+            //        string link = string.Empty;
+
+            //        recommenderURL = Convert.ToString(dtRec.Rows[0]["RecommenderURL"]);
+            //        body = Convert.ToString(dtRec.Rows[0]["MailBody"]);
+            //        recommenderName = Convert.ToString(dtRec.Rows[0]["RecommenderName"]);
+            //        recommenderEmail = Convert.ToString(dtRec.Rows[0]["RecommenderEmail"]);
+            //        applicantsName = Convert.ToString(dtRec.Rows[0]["ApplicantName"]);
+            //        applicationDeadline = Convert.ToDateTime(dtRec.Rows[0]["ApplicationDeadline"]);
+            //        link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+            //        body = body.Replace("[[logoPath]]", logoText)
+            //            .Replace("[[RecommenderName]]", recommenderName)
+            //            .Replace("[[applicantname]]", applicantsName)
+            //            .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
+            //            .Replace("[[link]]", link)
+            //            ;
+            //        //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
+            //        userFolderPath = "SupportFiles/EmailAttachments";
+            //        templateFileName = "Recommender_Template.pdf";
+            //        byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+            //        string subject = "Attention: CSULB Recommendation Request";
+            //        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body))) 
+            //            {
+            //            if (fileContent != null && fileContent.Length > 0)
+            //            {
+            //                _sendMail.SendEmail(recommenderEmail, "", subject, body, fileContent);
+            //            }
+            //        }
+
+            //    }
+            //}
+            //catch (Exception)
+            //{
+
+            //}
+
+            response.IsSuccess = true;
+            response.Message = "Recommender Added Successfully";
+
+            return response;
+        }
+        private string GetMailBodyTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/EmailTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
+        }
+        public BaseResponse UpdateReviwerReview(FormReviewerReviewRequest input)
+        {
+            BaseResponse obj = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ReviewID", SqlDbType.BigInt) { Value = input.ReviewID },
+                                          new SqlParameter("@ReviewerID", SqlDbType.BigInt) { Value = input.ReviewerID },
+                                          new SqlParameter("@ReviewerRecommendation", SqlDbType.NVarChar, 200) { Value = input.ReviewerRecommendation },
+                                          new SqlParameter("@ReviewerComments", SqlDbType.NVarChar, 2000) { Value = input.ReviewerComments },
+
+                                        };
+
+            int id = _helper.InsertTable("[dbo].[UpdateReviewerReview]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "Review Saved Successfully";
+            return obj;
+        }
+
+        public BaseResponse AddRecommendation(FormAddRecommendationRequest input)
+        {
+            BaseResponse response= new BaseResponse(); 
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            bool sendMail = false;
+
+            foreach (var attachment in input.FormAddRecommendationRequestAttachment)
+            {
+                //response = new BaseResponse();
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+
+                // pull the saved file name format SP Below
+                FormAttachmentFileNames fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                if (!string.IsNullOrEmpty(fileNames.FileName) && attachment.FileContent != null && !string.IsNullOrEmpty(attachment.FileName))
+                {
+                    if (!sendMail) { sendMail = true; }
+
+                    if (attachment.FileName != string.Empty)
+                    {
+                        AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(attachment.FileName);
+                        //fileName = fileDetails.FileName;
+                        fileExtension = fileDetails.FileExtension;
+                    }
+
+                    SqlParameter[] parameters =
+                                            {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = DBNull.Value },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = DBNull.Value },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = DBNull.Value },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = DBNull.Value },
+                                          new SqlParameter("@RecommenderName", SqlDbType.NVarChar, 250) { Value = DBNull.Value },
+                                          new SqlParameter("@RecommenderEmail", SqlDbType.NVarChar, 250) { Value = DBNull.Value },
+
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = attachment.DocumentID },
+                                          new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier, 250) { Value = new Guid(input.RecommenderIdentifier) },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName }
+                                        };
+
+                    //int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
+                    DataTable dtRec = _helper.GetDataTable("[dbo].[UpsertFormRecommend]", parameters);
+
+                    // save the file in physicalpath
+                    // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
+                    //string[] folderSplit = fileNames.SavedFileName.ToString().Split('~');
+                    userFolderName = fileNames.UserFolder.ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            // copy the file here 
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+
+                        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                    }
+                    // pull the applicant details based on the recommenderIdentifier 
+                    // call getApplicantByRecommenderIdentifier
+                    
+                    response.IsSuccess = true;
+                    response.Message = "Recommendation attached successfully";
+                }
+                //else
+                //{
+                //    response.IsSuccess = false;
+                //    response.Message = "Failed to attach recommendations";
+                    
+                //}
+            }
+
+            if (sendMail)
+            {
+                // send mail to the applicant 
+                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier);
+            }
+
+
+            return response;
+        }
+
+        private void SendRecommendedConfirmMailToApplicant(string recommenderIdentifier)
+        {
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(recommenderIdentifier) }
+                                     };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[getApplicantByRecommenderIdentifier]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                string applicantsName = string.Empty;
+                string toMail = string.Empty;
+                string ccMail = string.Empty;
+                string subject = string.Empty;
+                string body = string.Empty;
+                string logoText = "cid:myImageID";
+                applicantsName= Convert.ToString(dtResponse.Rows[0]["ApplicantName"]);
+                toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
+                ccMail= Convert.ToString(dtResponse.Rows[0]["altEmail"]);
+                subject = "Recommendation Submitted";
+                body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
+                body = body.Replace("[[logoPath]]", logoText)
+                           .Replace("[[ApplicantName]]", applicantsName);
+                _sendMail.SendEmail(toMail, ccMail, subject, body, "");
+            }
+        }
+
+        public AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier)
+        {
+            AuthorizeRecommenderResponse obj = new AuthorizeRecommenderResponse();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(recommenderIdentifier) }
+                                     };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[AutharizeRecommender]", parameters);
+
+            obj = dtResponse.AsEnumerable().Select(row =>
+                                          new AuthorizeRecommenderResponse
+                                          {
+                                              recommendations = Convert.ToString(row["Recommendations"])
+
+                                          }).FirstOrDefault();
+            obj.IsSuccess = true;
+            obj.Message = "Data retrieved succesfully ";
+            return obj;
+        }
+
+        public byte[] GetMergedDocument(int formID)
+        {
+            byte[] mergedFileStream=null;
+            List<FormAttachmentEntity> objList = new List<FormAttachmentEntity>();
+            DataTable dtPersonalInfo = null;
+            string UserFolderName = string.Empty;
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID }
+                                        };
+
+            DataSet dsDoc = _helper.GetDataSet("[dbo].[GetFormAttachmentsForMerge]", parameters);
+            if (dsDoc.Tables.Count > 0)
+            {
+                if (dsDoc.Tables[0].Rows.Count > 0)
+                {
+                    dtPersonalInfo = dsDoc.Tables[0].Copy();
+                }
+                if (dsDoc.Tables[1].Rows.Count > 0)
+                {
+                    objList = dsDoc.Tables[1].AsEnumerable().Select(row =>
+                                 new FormAttachmentEntity
+                                 {
+                                     FileName = Convert.ToString(row["FileName"]),
+                                     FileExtension = Convert.ToString(row["FileExtn"]),
+                                     FolderName = Convert.ToString(row["FolderName"])
+
+                                 }).ToList();
+                }
+                if (dsDoc.Tables[2].Rows.Count > 0)
+                {
+                    UserFolderName = Convert.ToString(dsDoc.Tables[2].Rows[0]["UserFolder"]);
+                }
+            }
+
+            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo);
+
+            return mergedFileStream;
+        }
+        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo)
+        {
+            byte[] inputStream = null;
+            var folderPath = _configuration["ApplicationKeys:FileRepository"];
+            string userFolderName = Path.Combine(folderPath, UserFolderName);
+            string workingFolderName= Path.Combine(userFolderName, "Form");
+            string MergedPDFFolderName = Path.Combine(userFolderName, "Form");
+            string OutFile = Path.Combine(MergedPDFFolderName, "Merged"+DateTime.Now.ToString("MMddyyyyHHmmss")+".pdf");
+            iTextSharp.text.Document document = new iTextSharp.text.Document();
+            PdfCopy copyProvider;
+
+            if ((new FileInfo(OutFile)).Exists)
+            {
+                copyProvider = new PdfCopy(document, new System.IO.FileStream(OutFile, System.IO.FileMode.Append));
+            }
+            else
+            {
+                copyProvider = new PdfCopy(document, new System.IO.FileStream(OutFile, System.IO.FileMode.Create));
+            }
+            document.Open();
+            // first phase is to draw the HTML
+            //string fileList=GetFileList(lstAttachments);
+            GetHTMLForPersonalInfo(dtPersonalInfo,copyProvider,workingFolderName,"");
+
+            foreach (var attachment in lstAttachments)
+            {
+                string fileName = string.Empty;
+                string[] splitter = attachment.FolderName.Split('~');
+                fileName = splitter[1].ToString()+".pdf";
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(Path.Combine(workingFolderName,fileName));
+                    //pdfReader.setUnethicalReading(true);
+                    copyProvider.AddDocument(pdfReader);
+                    pdfReader.Close();
+                }
+            }
+            document.Close();
+            System.IO.FileStream fsPDF = new System.IO.FileStream(OutFile, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReaderPDF = new System.IO.BinaryReader(fsPDF);
+            long byteLengthPDF = new System.IO.FileInfo(OutFile).Length;
+            inputStream = binaryReaderPDF.ReadBytes((Int32)byteLengthPDF);
+            fsPDF.Close();
+            fsPDF.Dispose();
+            binaryReaderPDF.Close();
+            return inputStream;
+        }
+        private string GetFileList(List<FormAttachmentEntity> lstAttachments)
+        {
+            string strFileList = string.Empty;
+            System.Text.StringBuilder sbFiles = new System.Text.StringBuilder();
+            sbFiles.Append("<ol>");
+            foreach (var attachment in lstAttachments)
+            {
+                string fileName = string.Empty;
+                fileName = attachment.FileName + ".pdf";
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    sbFiles.Append("<li>"+fileName+"</li>");
+                }
+            }
+            sbFiles.Append("</ol>");
+            return sbFiles.ToString();
+        }
+        private void GetHTMLForPersonalInfo(DataTable dtPersonalInfo,PdfCopy copyprovider,string fileStoringPath, string fileList)
+        {
+            string htmlString = string.Empty;
+            string body = string.Empty;
+            String firstName = string.Empty;
+            String lastName = string.Empty;
+            String preferredName = string.Empty;
+            String otherName = string.Empty;
+            String cusulbEmail = string.Empty;
+            String altEmail = string.Empty;
+            String phoneNumber = string.Empty;
+            String csulbCampusId = string.Empty;
+            String Semester = string.Empty;
+            String Program = string.Empty;
+            String languages = string.Empty;
+
+            string filepath = Path.Combine("SupportFiles/DocumentTemplates", "MergedDocumentTemplate.html");
+         
+            if (dtPersonalInfo.Rows.Count > 0)
+            {
+                firstName = Convert.ToString(dtPersonalInfo.Rows[0]["firstName"]);
+                lastName = Convert.ToString(dtPersonalInfo.Rows[0]["lastName"]);
+                preferredName = Convert.ToString(dtPersonalInfo.Rows[0]["preferredName"]);
+                otherName = Convert.ToString(dtPersonalInfo.Rows[0]["otherName"]);
+                cusulbEmail = Convert.ToString(dtPersonalInfo.Rows[0]["cusulbEmail"]);
+                altEmail = Convert.ToString(dtPersonalInfo.Rows[0]["altEmail"]);
+                phoneNumber = Convert.ToString(dtPersonalInfo.Rows[0]["phoneNumber"]);
+                csulbCampusId = Convert.ToString(dtPersonalInfo.Rows[0]["csulbCampusId"]);
+                Semester = Convert.ToString(dtPersonalInfo.Rows[0]["Semester"]);
+                Program = Convert.ToString(dtPersonalInfo.Rows[0]["Program"]);
+                languages = Convert.ToString(dtPersonalInfo.Rows[0]["languages"]);
+                using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+                {
+                    body = reader.ReadToEnd();
+                }
+                htmlString = body.Replace("[[firstName]]", firstName).Replace("[[lastName]]", lastName).Replace("[[preferredName]]", preferredName).Replace("[[otherName]]", otherName).Replace("[[cusulbEmail]]", cusulbEmail).Replace("[[altEmail]]", altEmail).Replace("[[phoneNumber]]", phoneNumber).Replace("[[csulbCampusId]]", csulbCampusId).Replace("[[Semester]]", Semester).Replace("[[Program]]", Program).Replace("[[languages]]", languages);
+
+                StringReader sr = new StringReader(htmlString.ToString());
+                Document pdfDoc = new Document(PageSize.A4, 50f, 50f, 200f, 0f);
+                HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+                byte[] htmlContent = null;
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    PdfWriter writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                    pdfDoc.Open();
+
+                    htmlparser.Parse(sr);
+                    pdfDoc.Close();
+
+                    htmlContent = memoryStream.ToArray();
+                    memoryStream.Close();
+                }
+                string html2PDFFilePath = Path.Combine(fileStoringPath, "PersonalInfo" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                File.WriteAllBytes(html2PDFFilePath, htmlContent);
+                iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(html2PDFFilePath);
+                //pdfReader.setUnethicalReading(true);
+                copyprovider.AddDocument(pdfReader);
+                pdfReader.Close();
+
+            }
+
+            //return htmlString;
+        }
+
+        public BaseResponse AssignFormToReviewers()
+        {
+            BaseResponse obj = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {  };
+
+            int id = _helper.InsertTable("[dbo].[AssignFormToReviewers]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "Reviewers Assigned Successfully";
+            return obj;
+        }
+    }
+    public class FormAttachmentFileNames
+    {
+        public string SavedFileName { get; set; }
+        public string FileName { get; set; }
+        public string UserFolder { get; set; }
+    }
+    public class FormAttachmentEntity
+    {
+        public string FileName { get; set; }
+        public string FileExtension { get; set; }
+        public string FolderName { get; set; }
+    }
+}

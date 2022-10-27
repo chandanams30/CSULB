@@ -16,6 +16,8 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Microsoft.Graph;
 using Google.Apis.Json;
+using ThoughtFocus.Domain.Request.Login;
+using ThoughtFocus.Domain.Response;
 
 namespace CSULB_COE.Controllers
 {
@@ -54,6 +56,7 @@ namespace CSULB_COE.Controllers
         [HttpPost("AuthenticateSSOToken")]
         public async Task<IActionResult> AuthenticateSSOToken([FromBody] LoginSSORequest request)
         {
+            AuthenticateResponse response = new AuthenticateResponse();
             try
             {
                 _logger.LogInformation(request.Token.ToString(), request);
@@ -62,6 +65,10 @@ namespace CSULB_COE.Controllers
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
                 var graphResponse = await _client.GetAsync("https://graph.microsoft.com/beta/me");
                 string emplid = string.Empty;
+                string displayName = string.Empty;
+                string mail = string.Empty;
+                string LastName = string.Empty;
+                string FirstName = string.Empty;
                 if (graphResponse.IsSuccessStatusCode)
                 {
                     
@@ -73,15 +80,33 @@ namespace CSULB_COE.Controllers
                         if (data.Name == "employeeId")
                         {
                             emplid = data.Value;
-                            break;
+                        }
+                        if (data.Name == "displayName")
+                        {
+                            displayName = data.Value;
+                        }
+                        if (data.Name == "mail")
+                        {
+                            mail = data.Value;
+                        }
+                        if (data.Name == "surname")
+                        {
+                            LastName = data.Value;
+                        }
+                        if (data.Name == "givenName")
+                        {
+                            FirstName = data.Value;
                         }
                     }
-                    var response = _userLoginService.AuthenticateSSO(emplid);
+                    response = _userLoginService.AuthenticateSSO(emplid,displayName,mail,LastName,FirstName);
                     return Ok(response);
                 }
                 else
                 {
-                    return BadRequest("Authentication Failed");
+
+                    response.IsSuccess = false;
+                    response.message = "Authentication Failed";
+                    return BadRequest(response);
                 }
                    
                 
@@ -93,6 +118,7 @@ namespace CSULB_COE.Controllers
             }
         }
 
+        #region AuthenticateSSO old method 
         //[HttpPost("AuthenticateSSO")]
         //public IActionResult AuthenticateSSO(string CSULBID)
         //{
@@ -116,6 +142,22 @@ namespace CSULB_COE.Controllers
         //        return BadRequest();
         //    }
         //}
+        #endregion
 
+        [HttpPost("SaveUserRegistration")]
+        public BaseResponse SaveUserRegistration([FromBody] LoginUserRegistrationRequest request)
+        {
+            try
+            {
+                var response = _userLoginService.SaveUserRegistration(request);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

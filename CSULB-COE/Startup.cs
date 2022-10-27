@@ -47,7 +47,18 @@ namespace CSULB_COE
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpClient();
-            services.AddCors();
+            //services.AddCors(); default CORS 
+            // Default Policy added recently for lunerability tests
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:8080", "http://180.151.61.78:7852", "http://20.25.58.133", "https://ced-tf01d.campus.ad.csulb.edu", "https://myced.ced.csulb.edu") // prod also needs to be added here 
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
+                    });
+            });
             services.AddControllers().AddNewtonsoftJson();
 
 
@@ -118,6 +129,9 @@ namespace CSULB_COE
             // notifications 
             services.AddScoped<ISendMail, SendMail>();
 
+            // Graduate Programs 
+            services.AddScoped<IGraduateProgramService, GraduateProgramServiceImpl>();
+
 
 
 
@@ -184,12 +198,34 @@ namespace CSULB_COE
 
             app.UseRouting();
 
-            // global cors policy
-            app.UseCors(x => x
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .SetIsOriginAllowed(origin => true) // allow any origin
-                .AllowCredentials()); // allow credentials
+            #region CORS Old codes allowing all origins 
+            // global cors policy allowing all the origins 
+            //app.UseCors(x => x
+            //    .AllowAnyMethod()
+            //    .AllowAnyHeader()
+            //    .SetIsOriginAllowed(origin => true) // allow any origin
+            //    .AllowCredentials()); // allow credentials
+            #endregion
+
+            // added the CORS policy above in configure services section
+            app.UseCors();
+
+            // Content Security Policy implemented for security vulnerability
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self';"); // provide "default-src 'self' cdn.jsdelivr.net;" if you want to load the resources from the CDN 
+            //    await next();
+            //});
+
+            // Anti click-jacking headers X-Frame-Headers vulnerability 
+            // ------------------uncomment after testing --------------
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("Content-Security-Policy", "default-src 'self';"); // provide "default-src 'self' cdn.jsdelivr.net;" if you want to load the resources from the CDN 
+                context.Response.Headers.Add("X-Frame-Options", "DENY"); // if framed then "SAMEORIGIN" if not framed then "DENY"
+                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                await next();
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();

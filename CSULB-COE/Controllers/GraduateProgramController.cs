@@ -1,0 +1,466 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ThoughtFocus.Domain.Request.GraduateProgram;
+using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Service.Interfaces;
+
+namespace CSULB_COE.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class GraduateProgramController : ControllerBase
+    {
+        public ILogger<GraduateProgramController> _logger;
+        public IGraduateProgramService _graduateProgramService;
+        private readonly IConfiguration _configuration;
+        public GraduateProgramController(IGraduateProgramService graduateProgramService ,
+              ILogger<GraduateProgramController> logger
+            , IConfiguration configuration)
+        {
+            _logger = logger;
+            _graduateProgramService = graduateProgramService;
+            _configuration = configuration;
+        }
+        [HttpGet("GetApplicationPrograms")]
+        public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
+        {
+            try
+            {
+                ApplicationProgramResponse response = _graduateProgramService.GetApplicationPrograms(userID, applicationTypeID,termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramResponse response = new ApplicationProgramResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetAppliedForms")]
+        public AppliedFormsResponse GetAppliedForms(int userID, int applicationTypeID)
+        {
+            try
+            {
+                AppliedFormsResponse response = _graduateProgramService.GetAppliedForms(userID, applicationTypeID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AppliedFormsResponse response = new AppliedFormsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetAppliedFormsByPrograms")]
+        public AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID,string termCode,int formStateID)
+        {
+            try
+            {
+                AppliedFormsByProgramsResponse response = _graduateProgramService.GetAppliedFormsByPrograms(userID, programID,termCode,formStateID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AppliedFormsByProgramsResponse response = new AppliedFormsByProgramsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetFormStates")]
+        public FormStatesResponse GetFormStates(int userID)
+        {
+            try
+            {
+                FormStatesResponse response = _graduateProgramService.GetFormStates(userID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormStatesResponse response = new FormStatesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetSemesterList")]
+        public SemesterListResponse GetSemesterList()
+        {
+            try
+            {
+                SemesterListResponse response = _graduateProgramService.GetSemesterList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                SemesterListResponse response = new SemesterListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetForm")]
+        public GraduateProgramFormResponse GetForm(int userID,int formID,int programID,string termCode)
+        {
+            try
+            {
+                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID,formID,programID,termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GraduateProgramFormResponse response = new GraduateProgramFormResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("UpdatePersonalInfoSchema")]
+        public BaseResponse UpdatePersonalInfoSchema(FormPersonalInfoSchemaRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdatePersonalInfoSchema(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("UpdateMessageBoardSchema")]
+        public BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateMessageBoardSchema(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+
+        [HttpPost("UpsertFormAttachment")]
+        public BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MYDOCS.png";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\pic2.jpg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                BaseResponse response = _graduateProgramService.UpsertFormAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+
+        [HttpPost("SaveForm")]
+        public BaseResponse SaveForm(FormSaveRequest input)
+        {
+            try
+            {
+            
+                BaseResponse response = _graduateProgramService.SaveForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("UpdateFormState")]
+        public BaseResponse UpdateFormState(FormStatusUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateFormState(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("AddRecommender")]
+        public BaseResponse AddRecommender(FormAddRecommenderRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.AddRecommender(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("DownloadFormAttachments")]
+        public IActionResult DownloadFormAttachments(int userID, int formattachmentID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                FormAttachments obj = _graduateProgramService.DownloadFormAttachments(userID, formattachmentID);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetFormRecommendations")]
+        public IActionResult GetFormRecommendations(int userID, int recommendationAttachmentID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                RecommendationAttachments obj = _graduateProgramService.GetFormRecommendations(userID, recommendationAttachmentID);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("UpdateReviwerReview")]
+        public BaseResponse UpdateReviwerReview(FormReviewerReviewRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.UpdateReviwerReview(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("AssignFormToReviewers")]
+        public BaseResponse AssignFormToReviewers()
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.AssignFormToReviewers();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMergedDocument")]
+        public IActionResult GetMergedDocument(int formID)
+        {
+            Byte[] InputStream = null;
+            //string documentName = string.Empty;
+            //InputStream = _documentService.GetMergedDocument(userId);
+             InputStream = _graduateProgramService.GetMergedDocument(formID);
+            string documentName = string.Empty;
+            documentName = "MergedDocument";
+            return File(InputStream, "application/pdf;", documentName + ".pdf");
+
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost("AddRecommendation")]
+        public BaseResponse AddRecommendation(FormAddRecommendationRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                //foreach(var attachment in input.FormAddRecommendationRequestAttachment)
+                //{
+                //    FormAddRecommendationRequest obj = new FormAddRecommendationRequest();
+                //    obj.FormID = input.FormID;
+                //    obj.RecommenderIdentifier = input.RecommenderIdentifier;
+                //    obj.FileName = attachment.FileName;
+                //    obj.FileContent = attachment.FileContent;
+                //    obj.DocumentID = attachment.DocumentID;
+                //    response = _graduateProgramService.AddRecommendation(obj);
+                //}
+                response = _graduateProgramService.AddRecommendation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("AuthorizeRecommender")]
+        public AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier)
+        {
+            try
+            {
+                AuthorizeRecommenderResponse response = new AuthorizeRecommenderResponse();
+                response = _graduateProgramService.GetDetailsForRecommendation(recommenderIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AuthorizeRecommenderResponse response = new AuthorizeRecommenderResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+
+
+        private string GetFileType(string fileExt)
+        {
+            string contentType = string.Empty;
+            switch (fileExt.ToUpper())
+            {
+                case "PDF":
+                    contentType = "application/pdf";
+                    break;
+                case "DOCX":
+                    contentType = "Application/msword";
+                    break;
+                case "DOC":
+                    contentType = "Application/msword";
+                    break;
+                case "XLSX":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "XLS":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "JPG":
+                    contentType = "image/jpeg";
+                    break;
+                case "JPEG":
+                    contentType = "image/jpeg";
+                    break;
+
+            }
+            return contentType;
+        }
+
+    }
+}

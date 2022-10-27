@@ -43,9 +43,11 @@ namespace ThoughtFocus.Service.Implementation
             List<ApplicationListResponse> obj = new List<ApplicationListResponse>();
 
             SqlParameter[] parameters =
-                                  { };
+                                  {
+                                    new SqlParameter("@UserID", SqlDbType.NVarChar, 255) { Value = userId}
+                                  };
 
-            DataTable dtApplications = _helper.GetDataTable("[dbo].[GetApplications]", null);
+            DataTable dtApplications = _helper.GetDataTable("[dbo].[GetApplications]", parameters);
             if (dtApplications.Rows.Count > 0)
             {
                 obj = dtApplications.AsEnumerable().Select(row =>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Paddings;
@@ -19,9 +20,11 @@ namespace ThoughtFocus.Common.Utilities.Implementation
     public class SendMail:ISendMail
     {
         private readonly IConfiguration _configuration;
-        public SendMail(IConfiguration configuration)
+        public ILogger<SendMail> _logger;
+        public SendMail(IConfiguration configuration, ILogger<SendMail> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
         #region fields
         private const int DerivationIterations = 1000;
@@ -72,21 +75,90 @@ namespace ThoughtFocus.Common.Utilities.Implementation
                     mail.Attachments.Add(new Attachment(stream, "TB/CTC_Approval.pdf"));
                 }
 
-              
+
                 // Can set to false, if you are sending pure text. 
-                using (SmtpClient smtp = new SmtpClient(smtpAddress, Convert.ToInt32(portNumber)))
+                try
                 {
-                    if (!String.IsNullOrEmpty(fromUserName) || !String.IsNullOrEmpty(fromUserPassword))
+                    using (SmtpClient smtp = new SmtpClient(smtpAddress, Convert.ToInt32(portNumber)))
                     {
-                        smtp.Credentials = new NetworkCredential(fromUserName, fromUserPassword);
+                        if (!String.IsNullOrEmpty(fromUserName) || !String.IsNullOrEmpty(fromUserPassword))
+                        {
+                            smtp.Credentials = new NetworkCredential(fromUserName, fromUserPassword);
+                        }
+                        smtp.EnableSsl = enableSSL;
+                        smtp.Send(mail);
+
                     }
-                    smtp.EnableSsl = enableSSL;
-                    smtp.Send(mail);
-                   
+                }
+                catch(Exception ex)
+                {
+                    _logger.Log(LogLevel.Error, ex.Message + " " + userEmail + " " + subject);
                 }
             }
         }
+        public void SendEmail(string userEmail, string cc, string subject, string body, byte[] attachment)
+        {
+            var fromUserName = _configuration["EmailNotifications:EmailUserName"];
+            var fromUserPassword = _configuration["EmailNotifications:EmailPassword"];
+            var fromEmail = _configuration["EmailNotifications:FromAddress"];
+            var smtpAddress = _configuration["EmailNotifications:SMTPSever"];
+            var portNumber = _configuration["EmailNotifications:PortNumber"];
+            bool enableSSL = Convert.ToBoolean(_configuration["EmailNotifications:enableSSL"]);
+            string emailTo = userEmail;
 
+            using (MailMessage mail = new MailMessage())
+            {
+                mail.IsBodyHtml = true;
+                //create Alrternative HTML view
+                AlternateView htmlView = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
+
+                string imagePath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
+                //Add Image
+                LinkedResource theEmailImage = new LinkedResource(imagePath, MediaTypeNames.Image.Jpeg);
+                theEmailImage.ContentId = "myImageID";
+
+                //Add the Image to the Alternate view
+                htmlView.LinkedResources.Add(theEmailImage);
+
+                //Add view to the Email Message
+                mail.AlternateViews.Add(htmlView);
+
+                mail.From = new MailAddress(fromEmail);
+                mail.To.Add(emailTo);
+                mail.Subject = subject;
+                //mail.Body = body;
+                if (!String.IsNullOrEmpty(cc))
+                {
+                    mail.CC.Add(cc);
+                }
+                if (attachment!=null)
+                {
+                   // byte[] file = getAttachmentContent(attachmentBody);
+                    Stream stream = new MemoryStream(attachment);
+                    mail.Attachments.Add(new Attachment(stream, "Recommendation_Template.pdf"));
+                }
+
+
+                // Can set to false, if you are sending pure text. 
+                try
+                {
+                    using (SmtpClient smtp = new SmtpClient(smtpAddress, Convert.ToInt32(portNumber)))
+                    {
+                        if (!String.IsNullOrEmpty(fromUserName) || !String.IsNullOrEmpty(fromUserPassword))
+                        {
+                            smtp.Credentials = new NetworkCredential(fromUserName, fromUserPassword);
+                        }
+                        smtp.EnableSsl = enableSSL;
+                        smtp.Send(mail);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Log(LogLevel.Error, ex.Message + " " + userEmail + " " + subject);
+                }
+            }
+        }
         private byte[] getAttachmentContent(string attachmentBody)
         {
             byte[] content = null;

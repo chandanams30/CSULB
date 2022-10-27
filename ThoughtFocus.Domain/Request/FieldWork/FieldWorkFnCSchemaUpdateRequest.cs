@@ -10,5 +10,6 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public int fieldWorkID { get; set; }
         public int schemaTypeID { get; set; }
         public string schema { get; set; }
+        public int FieldWorkActivityLogID { get; set; }
     }
 }
