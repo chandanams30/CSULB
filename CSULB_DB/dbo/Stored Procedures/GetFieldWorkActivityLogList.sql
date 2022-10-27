@@ -50,7 +50,7 @@ BEGIN
 		--FAL.[Status] = CASE WHEN @CommunitySite > 0 OR @CommunityPartner > 0 THEN  'Not-Approved' ELSE FAL.[Status] END)
 		--@UserID
 	ORDER BY
-		[ActivityStartDate], [ID]
+		[ActivityStartDate], FAL.[ID]
 
 		  ----STATE HANDLER
 --DECLARE @FWALStatus AS VARCHAR(50)
