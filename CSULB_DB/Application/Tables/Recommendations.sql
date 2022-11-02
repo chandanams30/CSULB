@@ -8,6 +8,9 @@
     [RecommenderURL]          NVARCHAR (200)   NOT NULL,
     [RecommenderURLValidTill] DATETIME         NULL,
     [AllowUpload]             BIT              CONSTRAINT [DF_Recomendations_AllowUpload] DEFAULT ((0)) NOT NULL,
-    [RecommenderIdentifier]   UNIQUEIDENTIFIER NULL
+    [RecommenderIdentifier]   UNIQUEIDENTIFIER NULL,
+    [isMailSent]              BIT              DEFAULT ((0)) NULL
 );
+
+
 
