@@ -17,11 +17,18 @@ BEGIN
 	DECLARE @CommunityPartner bigint = 0
 	DECLARE @CommunitySite bigint = 0
 
-	IF NOT EXISTS (SELECT * FROM [User].[UserRoles] UR WHERE UserID = @UserID AND [RoleID] IN (5))
+	IF NOT EXISTS (SELECT * FROM [User].[UserRoles] UR WHERE UserID = @UserID AND [RoleID] IN (1,4,5))
 	BEGIN
 		SELECT @CommunityPartner =[UserID] FROM [FieldWork].[CommunitySiteUsers] WHERE [UserID] = @UserID AND [RoleID]=9;
 		SELECT @CommunitySite =[CommunityDistrictID] FROM [FieldWork].[CommunitySiteUsers] WHERE [UserID] = @UserID AND [RoleID]=10;
 	END
+
+	DECLARE @canApproveHours as bit = 0
+	IF EXISTS (SELECT * FROM [User].[UserRoles] UR WHERE UserID = @UserID AND [RoleID] IN (1,4,5))
+	BEGIN
+		set @canApproveHours = 1
+	END
+
 	
 	SELECT 
 		FAL.[ID]
@@ -33,7 +40,8 @@ BEGIN
 		,FAL.[ActivityEndDate]
 		,FAL.[Hours]
 		,FAL.[Status] 
-		,CASE WHEN FAL.[Status] = 'Submitted' AND FAL.[CommunitySiteUsersID] = @UserID THEN 1 ELSE 0 END AS [ShowCheckbox]
+		,CASE WHEN FAL.[Status] = 'Saved' AND (FAL.[CommunitySiteUsersID] = @UserID OR @canApproveHours = 1) THEN 1
+		ELSE 0 END AS [ShowCheckbox]
 		--1 AS [ShowCheckbox]
 	FROM
 		[FieldWork].[FieldWork] FW 
@@ -64,8 +72,8 @@ BEGIN
 			  ,[showApproveHours]
 		   FROM [Master].[AcitivityLogHandler] ALH
 		  JOIN [User].[UserRoles] UR ON ALH.[RoleID] = ur.[RoleID] 
-			WHERE [Status] = 'Submitted'
-			AND UR.RoleID IN (9,10)
+			WHERE [Status] = 'Saved'
+			AND UR.RoleID IN (1,4,5,9,10)
 			AND UR.UserID=@UserID
 		  ORDER BY ALH.[RoleID]
 		  FOR JSON AUTO) AS [AcitivityLogHandler];
