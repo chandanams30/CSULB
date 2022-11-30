@@ -762,5 +762,9 @@
     </Build>
     <Build Include="FieldWork\User Defined Types\FieldWorkActivityLogStandardsType_old_20221025.sql" />
     <Build Include="FieldWork\User Defined Types\FieldWorkActivityLogStandardsType.sql" />
+    <Build Include="dbo\Stored Procedures\getFormRecommenderDetailsByFormID.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
   </ItemGroup>
 </Project>

@@ -52,8 +52,21 @@ BEGIN
   ----STATE HANDLER
 DECLARE @FWALStatus AS VARCHAR(50), @isCommunityUser AS BIT
 SELECT @FWALStatus = FWAL.[Status], 
-@isCommunityUser = CASE WHEN FWAL.[Status] = 'Submitted' AND FWAL.[CommunitySiteUsersID] = @UserID THEN 1 ELSE 0 END 
+@isCommunityUser = CASE WHEN FWAL.[Status] = 'Saved' AND FWAL.[CommunitySiteUsersID] = @UserID THEN 1 ELSE 0 END 
 FROM [FieldWork].[FieldWorkActivityLog] FWAL WHERE FWAL.[ID] = isnull(@ActivityLogID,FWAL.[ID])
+
+		--SELECT (
+		--SELECT [showClose]
+		--	  ,[showEdit]
+		--	  ,[showSubmit]
+		--	  ,[showRejectHours]
+		--	  ,[showApproveHours]
+		--  FROM [Master].[AcitivityLogHandler] ALH
+		--  JOIN [User].[UserRoles] UR ON UR.UserID=@UserID AND ALH.RoleID = CASE WHEN @isCommunityUser=1 THEN 9 ELSE UR.RoleID END
+		--	WHERE [Status] = @FWALStatus
+		--	AND  UR.RoleID NOT IN (9,10) 
+		--  ORDER BY ALH.[RoleID]
+		--  FOR JSON AUTO) AS [AcitivityLogHandler];
 
 		SELECT (
 		SELECT [showClose]
@@ -62,9 +75,9 @@ FROM [FieldWork].[FieldWorkActivityLog] FWAL WHERE FWAL.[ID] = isnull(@ActivityL
 			  ,[showRejectHours]
 			  ,[showApproveHours]
 		  FROM [Master].[AcitivityLogHandler] ALH
-		  JOIN [User].[UserRoles] UR ON UR.UserID=@UserID AND ALH.RoleID = CASE WHEN @isCommunityUser=1 THEN 9 ELSE UR.RoleID END
+		  JOIN [User].[UserRoles] UR ON UR.UserID=@UserID AND ALH.RoleID = UR.RoleID --CASE WHEN @isCommunityUser=1 THEN 9 ELSE UR.RoleID END
 			WHERE [Status] = @FWALStatus
-			AND  UR.RoleID NOT IN (2,9,10) 
+			--AND  UR.RoleID NOT IN (9,10) 
 		  ORDER BY ALH.[RoleID]
 		  FOR JSON AUTO) AS [AcitivityLogHandler];
 
