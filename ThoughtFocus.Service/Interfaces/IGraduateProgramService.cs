@@ -24,7 +24,9 @@ namespace ThoughtFocus.Service.Interfaces
         RecommendationAttachments GetFormRecommendations(int userID, int recommendationAttachmentID);
         BaseResponse AddRecommender(FormAddRecommenderRequest input);
         BaseResponse AddRecommendation(FormAddRecommendationRequest input);
+        BaseResponse AddRecommendationForm(FormAddRecommendation input);
         AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier);
+        BaseResponse SendReminderToRecommender(int recommendationID);
         BaseResponse UpdateReviwerReview(FormReviewerReviewRequest input);
         BaseResponse AssignFormToReviewers();
         byte[] GetMergedDocument(int formID);

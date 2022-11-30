@@ -16,7 +16,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class GraduateProgramController : ControllerBase
     {
         public ILogger<GraduateProgramController> _logger;
@@ -300,6 +300,7 @@ namespace CSULB_COE.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpGet("GetFormRecommendations")]
         public IActionResult GetFormRecommendations(int userID, int recommendationAttachmentID)
         {
@@ -322,6 +323,25 @@ namespace CSULB_COE.Controllers
 
                 _logger.LogError(ex, ex.Message);
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("SendReminderToRecommender")]
+        public BaseResponse SendReminderToRecommender(int recommendationID)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.SendReminderToRecommender(recommendationID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
             }
         }
         [HttpPost("UpdateReviwerReview")]
@@ -395,6 +415,37 @@ namespace CSULB_COE.Controllers
                 //    response = _graduateProgramService.AddRecommendation(obj);
                 //}
                 response = _graduateProgramService.AddRecommendation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("AddRecommendationForm")]
+        public BaseResponse AddRecommendationForm(FormAddRecommendation input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                //foreach(var attachment in input.FormAddRecommendationRequestAttachment)
+                //{
+                //    FormAddRecommendationRequest obj = new FormAddRecommendationRequest();
+                //    obj.FormID = input.FormID;
+                //    obj.RecommenderIdentifier = input.RecommenderIdentifier;
+                //    obj.FileName = attachment.FileName;
+                //    obj.FileContent = attachment.FileContent;
+                //    obj.DocumentID = attachment.DocumentID;
+                //    response = _graduateProgramService.AddRecommendation(obj);
+                //}
+                response = _graduateProgramService.AddRecommendationForm(input);
                 return response;
             }
             catch (Exception ex)

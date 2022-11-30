@@ -11,6 +11,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public List<FormAttachmentsInformation> FormAttachmentsInformation { get; set; }
         public RecommendersInformation RecommendersInformation { get; set; }
         public ReviewerInformation ReviewerInformation { get; set; }
+        public FormControlHandler FormControlHandler { get; set; }
     }
     public class FormBasicInformation
     {
@@ -28,6 +29,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public int ModifiedBy { get; set; }
         public string MessageBoard { get; set; }
         public string CompletingYourApplication { get; set; }
+        public int ApplicationTypeID { get; set; }
+        public string ProgramFormIdentifier { get; set; }
     }
     public class FormStateHandler
     {
@@ -68,5 +71,9 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     public class ReviewerInformation
     {
         public string Reviewer { get; set; }
+    }
+    public class FormControlHandler
+    {
+        public string FormControls { get; set; }
     }
 }

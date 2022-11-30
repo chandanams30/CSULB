@@ -33,7 +33,7 @@ namespace ThoughtFocus.Common.Utilities.Implementation
         // We divide this by 8 within the code below to get the equivalent number of bytes.
         private const int Keysize = 256;
         #endregion
-        public void SendEmail(string userEmail, string cc, string subject, string body,string attachmentBody)
+        public void SendEmail(string userEmail, string cc,string BCCType, string subject, string body,string attachmentBody)
         {
             var fromUserName = _configuration["EmailNotifications:EmailUserName"];
             var fromUserPassword = _configuration["EmailNotifications:EmailPassword"];
@@ -41,6 +41,8 @@ namespace ThoughtFocus.Common.Utilities.Implementation
             var smtpAddress = _configuration["EmailNotifications:SMTPSever"];
             var portNumber = _configuration["EmailNotifications:PortNumber"];
             bool enableSSL = Convert.ToBoolean(_configuration["EmailNotifications:enableSSL"]);
+            var BCCRecommenderMail = _configuration["EmailNotifications:BCCRecommender"];
+            var BCCCommonMails = _configuration["EmailNotifications:BCCCommon"];
             string emailTo = userEmail;
 
             using (MailMessage mail = new MailMessage())
@@ -67,6 +69,11 @@ namespace ThoughtFocus.Common.Utilities.Implementation
                 if (!String.IsNullOrEmpty(cc))
                 {
                     mail.CC.Add(cc);
+                }
+                if (!String.IsNullOrEmpty(BCCType))
+                {
+                    if (BCCType.ToUpper() == "RECOMMENDER") { mail.Bcc.Add(BCCRecommenderMail); }
+                    if (BCCType.ToUpper() == "COMMON") { mail.Bcc.Add(BCCCommonMails); }
                 }
                 if (!String.IsNullOrEmpty(attachmentBody))
                 {
@@ -96,7 +103,7 @@ namespace ThoughtFocus.Common.Utilities.Implementation
                 }
             }
         }
-        public void SendEmail(string userEmail, string cc, string subject, string body, byte[] attachment)
+        public void SendEmail(string userEmail, string cc, string BCCType, string subject, string body, byte[] attachment)
         {
             var fromUserName = _configuration["EmailNotifications:EmailUserName"];
             var fromUserPassword = _configuration["EmailNotifications:EmailPassword"];
@@ -104,6 +111,8 @@ namespace ThoughtFocus.Common.Utilities.Implementation
             var smtpAddress = _configuration["EmailNotifications:SMTPSever"];
             var portNumber = _configuration["EmailNotifications:PortNumber"];
             bool enableSSL = Convert.ToBoolean(_configuration["EmailNotifications:enableSSL"]);
+            var BCCRecommenderMail = _configuration["EmailNotifications:BCCRecommender"];
+            var BCCCommonMails = _configuration["EmailNotifications:BCCCommon"];
             string emailTo = userEmail;
 
             using (MailMessage mail = new MailMessage())
@@ -131,9 +140,14 @@ namespace ThoughtFocus.Common.Utilities.Implementation
                 {
                     mail.CC.Add(cc);
                 }
+                if (!String.IsNullOrEmpty(BCCType))
+                {
+                    if (BCCType.ToUpper() == "RECOMMENDER") { mail.Bcc.Add(BCCRecommenderMail); }
+                    if (BCCType.ToUpper() == "COMMON") { mail.Bcc.Add(BCCCommonMails); }
+                }
                 if (attachment!=null)
                 {
-                   // byte[] file = getAttachmentContent(attachmentBody);
+                    //_logger.LogInformation("Attachment not null");
                     Stream stream = new MemoryStream(attachment);
                     mail.Attachments.Add(new Attachment(stream, "Recommendation_Template.pdf"));
                 }
@@ -148,9 +162,9 @@ namespace ThoughtFocus.Common.Utilities.Implementation
                         {
                             smtp.Credentials = new NetworkCredential(fromUserName, fromUserPassword);
                         }
-                        smtp.EnableSsl = enableSSL;
-                        smtp.Send(mail);
-
+                            smtp.EnableSsl = enableSSL;
+                            smtp.Send(mail);
+                        
                     }
                 }
                 catch (Exception ex)

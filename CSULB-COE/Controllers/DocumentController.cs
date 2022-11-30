@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThoughtFocus.Service.Interfaces;
+using ThoughtFocus.Domain.TemplateModels;
 
 namespace CSULB_COE.Controllers
 {
@@ -323,9 +324,134 @@ namespace CSULB_COE.Controllers
             Byte[] InputStream = null;
             //string documentName = string.Empty;
             //InputStream = _documentService.GetMergedDocument(userId);
-            InputStream = Merge(DocumentName + ".pdf");
+            //InputStream = Merge(DocumentName + ".pdf");
             return File(InputStream, "application/pdf;", DocumentName + ".pdf");
             
         }
+        [HttpGet("GetPDFFromJSON")]
+        public IActionResult GetPDFFromJSON(string JSON,string documentName)
+        {
+            Byte[] InputStream = null;
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+            var fileName = documentName + "_" + DateTime.Now.ToString("MMddyyyyHHmmss")+".pdf";
+            // get the json , map it to the entities 
+            TemplateStore<GraduateProgramRecommenderForm> store = new TemplateStore<GraduateProgramRecommenderForm>();
+            GraduateProgramRecommenderForm obj = new GraduateProgramRecommenderForm();
+            obj=store.GetDeserializedTemplate(JSON);
+            // get the html template and fill in the values from the entities
+            string recommenderFormTemplate = GetFormTemplate("GraduateApplicationRecommendationTemplate.html");
+            recommenderFormTemplate = recommenderFormTemplate.Replace("[[STUDENT_NAME]]", obj.personalInfo.studentName)
+                                                             .Replace("[[recommender_name]]", obj.personalInfo.recommenderName)
+                                                             .Replace("[[occupation]]", obj.personalInfo.occupation)
+                                                             .Replace("[[jobTitle]]", obj.personalInfo.jobTitle)
+                                                             .Replace("[[organization]]", obj.personalInfo.organization)
+                                                             .Replace("[[email]]", obj.personalInfo.email)
+                                                             .Replace("[[phone]]", obj.personalInfo.email)
+                                                             .Replace("[[applicantKnowTime]]", obj.relationshipToApplicant.applicationKnowTime)
+                                                             .Replace("[[applicationKnowSource]]", obj.relationshipToApplicant.applicationKnowSource)
+                                                             .Replace("[[communicationSkillsOral]]", obj.referrenceRatings.communicationSkillsOral)
+                                                             .Replace("[[communicationSkillsWritten]]", obj.referrenceRatings.communicationSkillsWritten)
+                                                             .Replace("[[TechnologySkills]]", obj.referrenceRatings.TechnologySkills)
+                                                             .Replace("[[Initiative]]", obj.referrenceRatings.Initiative)
+                                                             .Replace("[[Maturity]]", obj.referrenceRatings.Maturity)
+                                                             .Replace("[[MotivationForTheProgramOfStudy]]", obj.referrenceRatings.MotivationForTheProgramOfStudy)
+                                                             .Replace("[[Creativity]]", obj.referrenceRatings.Creativity)
+                                                             .Replace("[[AbilityToWorkWithOthers]]", obj.referrenceRatings.AbilityToWorkWithOthers)
+                                                             .Replace("[[IntellectualPotential]]", obj.referrenceRatings.IntellectualPotential)
+                                                             .Replace("[[PresentAcademicPerformance]]", obj.referrenceRatings.PresentAcademicPerformance)
+                                                             .Replace("[[PotentialForGraduateWork]]", obj.referrenceRatings.PotentialForGraduateWork)
+                                                             .Replace("[[overAllRecommendation]]", obj.overAllRecommendation);
+
+            // convert the html to pdf and save it to file system 
+            InputStream = ConvertHTMLToPDF(recommenderFormTemplate,fileName, workingFolderPath);
+            return File(InputStream, "application/pdf;", fileName + ".pdf");
+
+        }
+        private byte[] ConvertHTMLToPDF(string fileContent,string fileName, string destinationFilePath)
+        {
+            Byte[] fileStream = null;
+            var physicalFilepath = Path.Combine(destinationFilePath,fileName);
+            TextReader reader = new StringReader(fileContent);
+
+            // step 1: creation of a document-object
+            iTextSharp.text.Document document = new iTextSharp.text.Document(PageSize.A4, 30, 30, 30, 30);
+
+            // step 2:
+            // we create a writer that listens to the document
+            iTextSharp.text.pdf.PdfWriter.GetInstance(document, new FileStream(physicalFilepath, FileMode.Create));
+
+            // step 3: we create a worker parse the document
+            iTextSharp.text.html.simpleparser.HTMLWorker worker = new iTextSharp.text.html.simpleparser.HTMLWorker(document);
+
+            // step 4: we open document and start the worker on the document
+            document.Open();
+            worker.StartDocument();
+
+            // step 5: parse the html into the document
+            worker.Parse(reader);
+
+            // step 6: close the document and the worker
+            worker.EndDocument();
+            worker.Close();
+            document.Close();
+            //--------------------read the saved file and return the byte array as filecontent
+            
+            System.IO.FileStream fs = new System.IO.FileStream(physicalFilepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(physicalFilepath).Length;
+            fileStream = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+
+            return fileStream;
+        }
+        private string GetFormTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/DocumentTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
+        }
+    }
+    public class GraduateProgramRecommenderForm
+    {
+        public personalInfo personalInfo { get; set; }
+        public relationshipToApplicant relationshipToApplicant { get; set; }
+        public referrenceRatings referrenceRatings { get; set; }
+        public string overAllRecommendation { get; set; }
+    }
+    public class personalInfo
+    {
+        public string studentName { get; set; }
+        public string recommenderName { get; set; }
+        public string occupation { get; set; }
+        public string jobTitle { get; set; }
+        public string organization { get; set; }
+        public string email { get; set; }
+        public string phone { get; set; }
+    }
+    public class relationshipToApplicant
+    {
+        public string applicationKnowTime { get; set; }
+        public string applicationKnowSource { get; set; }
+    }
+    public class referrenceRatings
+    {
+        public string communicationSkillsOral { get; set; }
+        public string communicationSkillsWritten { get; set; }
+        public string TechnologySkills { get; set; }
+        public string Initiative { get; set; }
+        public string Maturity { get; set; }
+        public string MotivationForTheProgramOfStudy { get; set; }
+        public string Creativity { get; set; }
+        public string AbilityToWorkWithOthers { get; set; }
+        public string IntellectualPotential { get; set; }
+        public string PresentAcademicPerformance { get; set; }
+        public string PotentialForGraduateWork { get; set; }
     }
 }

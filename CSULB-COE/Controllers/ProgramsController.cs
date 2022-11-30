@@ -13,7 +13,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ProgramsController : ControllerBase
+    public abstract class ProgramsController : ControllerBase
     {
         public ILogger<ProgramsController> _logger;
         private readonly IProgramsService _programService;

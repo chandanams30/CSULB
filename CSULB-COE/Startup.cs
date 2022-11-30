@@ -49,7 +49,7 @@ namespace CSULB_COE
             services.AddHttpClient();
             //services.AddCors(); default CORS 
             // Default Policy added recently for lunerability tests
-            services.AddCors(options =>
+            services.AddCors(options => 
             {
                 options.AddDefaultPolicy(
                     builder =>
@@ -131,6 +131,9 @@ namespace CSULB_COE
 
             // Graduate Programs 
             services.AddScoped<IGraduateProgramService, GraduateProgramServiceImpl>();
+
+            // Initial Credential Programs
+            services.AddScoped<IInitialCredentialProgramService, InitialCredentialProgramService>();
 
 
 
@@ -219,13 +222,13 @@ namespace CSULB_COE
 
             // Anti click-jacking headers X-Frame-Headers vulnerability 
             // ------------------uncomment after testing --------------
-            app.Use(async (context, next) =>
-            {
-                context.Response.Headers.Add("Content-Security-Policy", "default-src 'self';"); // provide "default-src 'self' cdn.jsdelivr.net;" if you want to load the resources from the CDN 
-                context.Response.Headers.Add("X-Frame-Options", "DENY"); // if framed then "SAMEORIGIN" if not framed then "DENY"
-                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-                await next();
-            });
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self';"); // provide "default-src 'self' cdn.jsdelivr.net;" if you want to load the resources from the CDN 
+            //    context.Response.Headers.Add("X-Frame-Options", "DENY"); // if framed then "SAMEORIGIN" if not framed then "DENY"
+            //    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+            //    await next();
+            //});
 
             app.UseAuthentication();
             app.UseAuthorization();

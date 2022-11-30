@@ -13,7 +13,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FormsController : ControllerBase
+    public abstract class FormsController : ControllerBase
     {
         public ILogger<FormsController> _logger;
         private readonly IFormsService _formsService;

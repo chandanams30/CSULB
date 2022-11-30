@@ -281,7 +281,7 @@ namespace ThoughtFocus.Service.Implementation
                     body = body.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", request.FirstName + " " + request.LastName)
                                .Replace("[[Password]]", userPassword);
-                    _sendMail.SendEmail(request.Email, "", subject, body,"");
+                    _sendMail.SendEmail(request.Email, "","COMMON", subject, body,"");
                     obj.IsSuccess = true;
                     obj.Message = message;
                 }

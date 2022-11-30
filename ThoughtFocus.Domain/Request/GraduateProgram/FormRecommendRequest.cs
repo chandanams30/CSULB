@@ -11,6 +11,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int DocumentID { get; set; }
         public string FileName { get; set; }
         public byte[] FileContent { get; set; }
+
         public List<FormAddRecommendationRequestAttachment> FormAddRecommendationRequestAttachment { get; set; }
     }
     public class FormAddRecommendationRequestAttachment
@@ -19,5 +20,13 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
 
         public string FileName { get; set; }
         public byte[] FileContent { get; set; }
+    }
+    public class FormAddRecommendation
+    {
+        public int FormID { get; set; }
+        public string RecommenderIdentifier { get; set; }
+        public string LetterOfRecommendationJSON { get; set; }
+
+        public List<FormAddRecommendationRequestAttachment> FormAddRecommendationRequestAttachment { get; set; }
     }
 }

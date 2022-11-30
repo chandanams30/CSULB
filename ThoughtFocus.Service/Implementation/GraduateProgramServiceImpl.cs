@@ -63,6 +63,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   programID = Convert.ToInt32(row["ID"]),
                                                   programName = Convert.ToString(row["Name"]),
                                                   semester = Convert.ToString(row["Semester"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
                                                   applicationOpens = Convert.ToDateTime(row["ApplicationOpens"]),
                                                   applicationCloseDate = Convert.ToDateTime(row["ApplicationCloseDate"]),
                                                   TotalCount = Convert.ToInt32(row["TotalCount"]),
@@ -80,6 +81,15 @@ namespace ThoughtFocus.Service.Implementation
                                                    showView = Convert.ToBoolean(row["showView"]),
                                                    showAssignApplicationToReviewers= Convert.ToBoolean(row["showAssignApplicationToReviewers"])
                                                }).FirstOrDefault();
+
+                    obj.Semesters = dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
+                                             new Semester
+                                             {
+                                                 TermCode = Convert.ToString(row["TermCode"]),
+                                                 TermName = Convert.ToString(row["Semester"])
+                                             }).ToList();
+
+
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -328,7 +338,9 @@ namespace ThoughtFocus.Service.Implementation
                                                    ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
                                                    ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                    MessageBoard = Convert.ToString(row["MessageBoard"]),
-                                                   CompletingYourApplication = Convert.ToString(row["CompletingYourApplication"])
+                                                   CompletingYourApplication = Convert.ToString(row["CompletingYourApplication"]),
+                                                   ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
+                                                   ProgramFormIdentifier = Convert.ToString(row["ProgramFormIdentifier"])
 
                                                }).FirstOrDefault();
 
@@ -366,6 +378,13 @@ namespace ThoughtFocus.Service.Implementation
                                       Reviewer = Convert.ToString(row["Reviewer"])
 
                                   }).FirstOrDefault();
+
+                    obj.FormControlHandler = dtFormData.Tables[5].AsEnumerable().Select(row =>
+                               new FormControlHandler
+                               {
+                                   FormControls = Convert.ToString(row["FormControlHandler"])
+
+                               }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -767,6 +786,8 @@ namespace ThoughtFocus.Service.Implementation
             // update the form status from open to draft , check and update SP from backend 
             // call checkAndUpdateFormState
             checkAndUpdateFormState(input.UserID,input.FormID,input.ProgramID,input.TermCode);
+            // for sending recommender mail 
+            sendFormRecommender(input.UserID, input.FormID, input.ProgramID, input.TermCode);
             response.IsSuccess = true;
             response.Message = "Form Saved Successfully";
 
@@ -846,52 +867,121 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[ApplicantName]]", applicantsName)
                                .Replace("[[programName]]", programName);
                     byte[] inputStr = null;
-                    _sendMail.SendEmail(toMail, ccMail, subject, body, inputStr);
+                    _sendMail.SendEmail(toMail, ccMail,"COMMON", subject, body, inputStr);
                 }
+                // commented to restrict multiple mails to recommender 
+                //if (dsRec.Tables[1].Rows.Count > 0)
+                //{
+                //    // loop through the data table for recommender mail
+                //    for (int i = 0; i < dsRec.Tables[1].Rows.Count; i++) 
+                //    {
+                //        // send mail to the recommender with the attachment and the URL link  
+                //    string logoText = "cid:myImageID";
+                //    string userFolderPath = string.Empty;
+                //    string templateFileName = string.Empty;
+                //    string recommenderName = string.Empty;
+                //    string recommenderEmail = string.Empty;
+                //    string recommenderURL = string.Empty;
+                //    string applicantsName = string.Empty;
+                //    DateTime applicationDeadline;
+                //    string body = string.Empty;
+                //    string link = string.Empty;
 
-                if (dsRec.Tables[1].Rows.Count > 0)
+                //    recommenderURL = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderURL"]);
+                //    body = Convert.ToString(dsRec.Tables[1].Rows[i]["MailBody"]);
+                //    recommenderName = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderName"]);
+                //    recommenderEmail = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderEmail"]);
+                //    applicantsName = Convert.ToString(dsRec.Tables[1].Rows[i]["ApplicantName"]);
+                //    applicationDeadline = Convert.ToDateTime(dsRec.Tables[1].Rows[i]["ApplicationDeadline"]);
+                //    link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+                //    body = body.Replace("[[logoPath]]", logoText)
+                //        .Replace("[[RecommenderName]]", recommenderName)
+                //        .Replace("[[applicantname]]", applicantsName)
+                //        .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
+                //        .Replace("[[link]]", link)
+                //        ;
+                //    //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
+                //    userFolderPath = "SupportFiles/EmailAttachments";
+                //    templateFileName = "Recommender_Template.pdf";
+                //    byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                //    string subject = "Attention: CSULB Recommendation Request";
+                //    if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                //    {
+                //        if (fileContent != null && fileContent.Length > 0)
+                //        {
+                //            _sendMail.SendEmail(recommenderEmail, "", subject, body, fileContent);
+                //        }
+                //    }
+                //}
+
+                //}
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void sendFormRecommender(int userID, int formID, int programID, string termCode)
+        {
+            // call SP getFormDetailsByFormID
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value =userID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+            };
+
+            DataSet dsRec = _helper.GetDataSet("[dbo].[getFormRecommenderDetailsByFormID]", parameters);
+            try
+            {
+                if (dsRec.Tables[0].Rows.Count > 0)
                 {
+                   
                     // loop through the data table for recommender mail
-                    for (int i = 0; i < dsRec.Tables[1].Rows.Count; i++) 
+                    for (int i = 0; i < dsRec.Tables[0].Rows.Count; i++)
                     {
                         // send mail to the recommender with the attachment and the URL link  
-                    string logoText = "cid:myImageID";
-                    string userFolderPath = string.Empty;
-                    string templateFileName = string.Empty;
-                    string recommenderName = string.Empty;
-                    string recommenderEmail = string.Empty;
-                    string recommenderURL = string.Empty;
-                    string applicantsName = string.Empty;
-                    DateTime applicationDeadline;
-                    string body = string.Empty;
-                    string link = string.Empty;
+                        string logoText = "cid:myImageID";
+                        string userFolderPath = string.Empty;
+                        string templateFileName = string.Empty;
+                        string recommenderName = string.Empty;
+                        string recommenderEmail = string.Empty;
+                        string recommenderURL = string.Empty;
+                        string applicantsName = string.Empty;
+                        DateTime applicationDeadline;
+                        string body = string.Empty;
+                        string link = string.Empty;
 
-                    recommenderURL = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderURL"]);
-                    body = Convert.ToString(dsRec.Tables[1].Rows[i]["MailBody"]);
-                    recommenderName = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderName"]);
-                    recommenderEmail = Convert.ToString(dsRec.Tables[1].Rows[i]["RecommenderEmail"]);
-                    applicantsName = Convert.ToString(dsRec.Tables[1].Rows[i]["ApplicantName"]);
-                    applicationDeadline = Convert.ToDateTime(dsRec.Tables[1].Rows[i]["ApplicationDeadline"]);
-                    link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
-                    body = body.Replace("[[logoPath]]", logoText)
-                        .Replace("[[RecommenderName]]", recommenderName)
-                        .Replace("[[applicantname]]", applicantsName)
-                        .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
-                        .Replace("[[link]]", link)
-                        ;
-                    //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
-                    userFolderPath = "SupportFiles/EmailAttachments";
-                    templateFileName = "Recommender_Template.pdf";
-                    byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                    string subject = "Attention: CSULB Recommendation Request";
-                    if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
-                    {
-                        if (fileContent != null && fileContent.Length > 0)
+                        recommenderURL = Convert.ToString(dsRec.Tables[0].Rows[i]["RecommenderURL"]);
+                        body = Convert.ToString(dsRec.Tables[0].Rows[i]["MailBody"]);
+                        recommenderName = Convert.ToString(dsRec.Tables[0].Rows[i]["RecommenderName"]);
+                        recommenderEmail = Convert.ToString(dsRec.Tables[0].Rows[i]["RecommenderEmail"]);
+                        applicantsName = Convert.ToString(dsRec.Tables[0].Rows[i]["ApplicantName"]);
+                        applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[i]["ApplicationDeadline"]);
+                        link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+                        body = body.Replace("[[logoPath]]", logoText)
+                            .Replace("[[RecommenderName]]", recommenderName)
+                            .Replace("[[applicantname]]", applicantsName)
+                            .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
+                            .Replace("[[link]]", link)
+                            ;
+                        //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
+                        userFolderPath = "SupportFiles/EmailAttachments";
+                        templateFileName = "Recommender_Template.pdf";
+                        byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                        //_logger.LogInformation(fileContent.Length.ToString());
+                        string subject = "Attention: CSULB Recommendation Request";
+                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
                         {
-                            _sendMail.SendEmail(recommenderEmail, "", subject, body, fileContent);
+                            if (fileContent != null && fileContent.Length > 0)
+                            {
+                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
+                            }
                         }
                     }
-                }
 
                 }
             }
@@ -1069,6 +1159,70 @@ namespace ThoughtFocus.Service.Implementation
             }
             return body;
         }
+        public BaseResponse SendReminderToRecommender(int recommendationID)
+        {
+            BaseResponse obj = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@RecommendationID", SqlDbType.BigInt) { Value = recommendationID }
+
+                                   };
+            DataSet dsRec = _helper.GetDataSet("[dbo].[getFormRecommenderDetailsByID]", parameters);
+            try
+            {
+                if (dsRec.Tables[0].Rows.Count > 0)
+                {
+                        // send mail to the recommender with the attachment and the URL link  
+                        string logoText = "cid:myImageID";
+                        string userFolderPath = string.Empty;
+                        string templateFileName = string.Empty;
+                        string recommenderName = string.Empty;
+                        string recommenderEmail = string.Empty;
+                        string recommenderURL = string.Empty;
+                        string applicantsName = string.Empty;
+                        DateTime applicationDeadline;
+                        string body = string.Empty;
+                        string link = string.Empty;
+
+                        recommenderURL = Convert.ToString(dsRec.Tables[0].Rows[0]["RecommenderURL"]);
+                        body = Convert.ToString(dsRec.Tables[0].Rows[0]["MailBody"]);
+                        recommenderName = Convert.ToString(dsRec.Tables[0].Rows[0]["RecommenderName"]);
+                        recommenderEmail = Convert.ToString(dsRec.Tables[0].Rows[0]["RecommenderEmail"]);
+                        applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
+                        applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[0]["ApplicationDeadline"]);
+                        link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+                        body = body.Replace("[[logoPath]]", logoText)
+                            .Replace("[[RecommenderName]]", recommenderName)
+                            .Replace("[[applicantname]]", applicantsName)
+                            .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
+                            .Replace("[[link]]", link)
+                            ;
+                        //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
+                        userFolderPath = "SupportFiles/EmailAttachments";
+                        templateFileName = "Recommender_Template.pdf";
+                        byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                        //_logger.LogInformation(fileContent.Length.ToString());
+                        string subject = "Attention: CSULB Recommendation Request";
+                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                        {
+                            if (fileContent != null && fileContent.Length > 0)
+                            {
+                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
+                                obj.IsSuccess = true;
+                                obj.Message = "Mail sent successfully !";
+                            }
+                        }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Error sending mail , please try after sometime !";
+                _logger.LogError(ex.Message, ex.StackTrace);
+            }
+            return obj;
+        }
         public BaseResponse UpdateReviwerReview(FormReviewerReviewRequest input)
         {
             BaseResponse obj = new BaseResponse();
@@ -1080,7 +1234,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ReviewerRecommendation", SqlDbType.NVarChar, 200) { Value = input.ReviewerRecommendation },
                                           new SqlParameter("@ReviewerComments", SqlDbType.NVarChar, 2000) { Value = input.ReviewerComments },
 
-                                        };
+                                   };
 
             int id = _helper.InsertTable("[dbo].[UpdateReviewerReview]", parameters);
             obj.IsSuccess = true;
@@ -1093,7 +1247,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response= new BaseResponse(); 
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-
+            
             foreach (var attachment in input.FormAddRecommendationRequestAttachment)
             {
                 //response = new BaseResponse();
@@ -1187,6 +1341,107 @@ namespace ThoughtFocus.Service.Implementation
 
             return response;
         }
+        public BaseResponse AddRecommendationForm(FormAddRecommendation input)
+        {
+            BaseResponse response = new BaseResponse();
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            bool sendMail = false;
+            // convert JSON to PDF - delete the existing letter of recommendation and create new 
+            // update the JSON and save to DB - call [dbo].[UpdateApplicationRecommendations]
+            // FormAddRecommendationRequestAttachment
+            foreach (var attachment in input.FormAddRecommendationRequestAttachment)
+            {
+                //response = new BaseResponse();
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+
+                // pull the saved file name format SP Below
+                FormAttachmentFileNames fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                if (!string.IsNullOrEmpty(fileNames.FileName) && attachment.FileContent != null && !string.IsNullOrEmpty(attachment.FileName))
+                {
+                    if (!sendMail) { sendMail = true; }
+
+                    if (attachment.FileName != string.Empty)
+                    {
+                        AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(attachment.FileName);
+                        //fileName = fileDetails.FileName;
+                        fileExtension = fileDetails.FileExtension;
+                    }
+
+                    SqlParameter[] parameters =
+                                            {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = DBNull.Value },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = DBNull.Value },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = DBNull.Value },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = DBNull.Value },
+                                          new SqlParameter("@RecommenderName", SqlDbType.NVarChar, 250) { Value = DBNull.Value },
+                                          new SqlParameter("@RecommenderEmail", SqlDbType.NVarChar, 250) { Value = DBNull.Value },
+
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = attachment.DocumentID },
+                                          new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier, 250) { Value = new Guid(input.RecommenderIdentifier) },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName }
+                                        };
+
+                    //int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
+                    DataTable dtRec = _helper.GetDataTable("[dbo].[UpsertFormRecommend]", parameters);
+
+                    // save the file in physicalpath
+                    // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
+                    //string[] folderSplit = fileNames.SavedFileName.ToString().Split('~');
+                    userFolderName = fileNames.UserFolder.ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            // copy the file here 
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+
+                        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                    }
+                    // pull the applicant details based on the recommenderIdentifier 
+                    // call getApplicantByRecommenderIdentifier
+
+                    response.IsSuccess = true;
+                    response.Message = "Recommendation attached successfully";
+                }
+                //else
+                //{
+                //    response.IsSuccess = false;
+                //    response.Message = "Failed to attach recommendations";
+
+                //}
+            }
+
+            if (sendMail)
+            {
+                // send mail to the applicant 
+                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier);
+            }
+
+
+            return response;
+        }
 
         private void SendRecommendedConfirmMailToApplicant(string recommenderIdentifier)
         {
@@ -1210,7 +1465,7 @@ namespace ThoughtFocus.Service.Implementation
                 body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
                 body = body.Replace("[[logoPath]]", logoText)
                            .Replace("[[ApplicantName]]", applicantsName);
-                _sendMail.SendEmail(toMail, ccMail, subject, body, "");
+                _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, "");
             }
         }
 
@@ -1222,15 +1477,23 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(recommenderIdentifier) }
                                      };
             DataTable dtResponse = _helper.GetDataTable("[dbo].[AutharizeRecommender]", parameters);
+            if (dtResponse.Rows.Count > 0 && !string.IsNullOrEmpty(dtResponse.Rows[0]["Recommendations"].ToString()))
+            {
+                    obj = dtResponse.AsEnumerable().Select(row =>
+                                                  new AuthorizeRecommenderResponse
+                                                  {
+                                                      recommendations = Convert.ToString(row["Recommendations"])
 
-            obj = dtResponse.AsEnumerable().Select(row =>
-                                          new AuthorizeRecommenderResponse
-                                          {
-                                              recommendations = Convert.ToString(row["Recommendations"])
-
-                                          }).FirstOrDefault();
-            obj.IsSuccess = true;
-            obj.Message = "Data retrieved succesfully ";
+                                                  }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data retrieved succesfully ";
+             
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "The page you are trying to reach has either expired or is not valid.";
+            }
             return obj;
         }
 
@@ -1304,8 +1567,8 @@ namespace ThoughtFocus.Service.Implementation
                 fileName = splitter[1].ToString()+".pdf";
                 if (!string.IsNullOrEmpty(fileName))
                 {
+                    PdfReader.unethicalreading = true;
                     iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(Path.Combine(workingFolderName,fileName));
-                    //pdfReader.setUnethicalReading(true);
                     copyProvider.AddDocument(pdfReader);
                     pdfReader.Close();
                 }

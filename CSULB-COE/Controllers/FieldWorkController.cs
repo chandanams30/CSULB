@@ -17,7 +17,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class FieldWorkController : ControllerBase
     {
         public ILogger<FieldWorkController> _logger;
@@ -168,17 +168,17 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("UpdateFieldWorkActivityLog")]
-        public BaseResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
+        public FieldWorkActivityLogByIDResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
         {
             try
             {
-                BaseResponse response = new BaseResponse();
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
                 response = _fieldWorkService.UpdateFieldWorkActivityLog(input);
                 return response;
             }
             catch (Exception ex)
             {
-                BaseResponse response = new BaseResponse();
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to Save Activity Log, please try after sometime";
                 response.StackTrace = ex.Message;
@@ -236,6 +236,25 @@ namespace CSULB_COE.Controllers
             {
                 FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
                 response = _fieldWorkService.GetFielWorkActivityLogByID(userID,activityLogID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save Activity Log, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFieldWorkActivityLogforAdd")]
+        public FieldWorkActivityLogByIDResponse GetFieldWorkActivityLogforAdd(int userID, int fieldWorkID)
+        {
+            try
+            {
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
+                response = _fieldWorkService.GetFieldWorkActivityLogforAdd(userID, fieldWorkID);
                 return response;
             }
             catch (Exception ex)
@@ -460,6 +479,25 @@ namespace CSULB_COE.Controllers
             {
                 BaseResponse response = new BaseResponse();
                 response = _fieldWorkService.UpdateFnCSchema(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save the schema , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFieldworkCommunityUsersforCreation")]
+        public BaseResponse UpdateFieldworkCommunityUsersforCreation()
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpdateFieldworkCommunityUsersforCreation();
                 return response;
             }
             catch (Exception ex)

@@ -24,4 +24,6 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public List<FieldWorkActivityLogResponse> fieldWorkList { get; set; }
         public FieldWorkActivityLogHandler activityLogHandler { get; set; }
     }
+  
+
 }

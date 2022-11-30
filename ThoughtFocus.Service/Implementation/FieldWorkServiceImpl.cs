@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using PasswordGenerator;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -225,7 +226,7 @@ namespace ThoughtFocus.Service.Implementation
                     StudentsDetails mailInfo = GetStudentDetailsFromFieldWorkId(input.FieldWorkID, input.FieldWorkAttachmentId);
                     ApproveRejectMailer approvedRejectMailer = GetEmailSubjectAndBody(input.ApprovalStatus, mailInfo.FileName, input.RejectedReason, input.Comments,mailInfo.DisplayName);
                     // send the approve / reject mail here 
-                    _sendMail.SendEmail(mailInfo.Email, "", approvedRejectMailer.Subject, approvedRejectMailer.Body , "");
+                    _sendMail.SendEmail(mailInfo.Email, "","COMMON", approvedRejectMailer.Subject, approvedRejectMailer.Body , "");
                 }
                 catch (Exception ee)
                 {
@@ -249,7 +250,7 @@ namespace ThoughtFocus.Service.Implementation
                         string logoText = "cid:myImageID";
                         body = body.Replace("[[logoPath]]", logoText).Replace("[[ApplicantName]]", emailModel.ApplicantName);
                         string subject = "MyCED prerequisites review completed";
-                        _sendMail.SendEmail(toUser, "", subject, body, emailModel.Body);
+                        _sendMail.SendEmail(toUser, "","COMMON", subject, body, emailModel.Body);
                         response.Message = "";
                         response.Message = "Fieldwork prerequisites reviewed and mail sent to " + emailModel.ApplicantName;
                     }
@@ -589,11 +590,11 @@ namespace ThoughtFocus.Service.Implementation
             //put a breakpoint here and check datatable
             return dataTable;
         }
-        public BaseResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
+        public FieldWorkActivityLogByIDResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
         {
             DataTable standardsTable = ToDataTable(input.standards);
-
-            BaseResponse obj = new BaseResponse();
+            
+            //BaseResponse obj = new BaseResponse();
 
             SqlParameter[] parameters =
                                     {
@@ -609,8 +610,16 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@Status", SqlDbType.VarChar) { Value = input.status },
                                           new SqlParameter("@LogStandards", SqlDbType.Structured) { Value = standardsTable }
                                      };
-            //DataTable dtActivityLog = _helper.GetDataTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
-            int ID = _helper.InsertTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
+            DataTable dtActivityLog = _helper.GetDataTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
+
+            int activityLogID = Convert.ToInt32(dtActivityLog.Rows[0]["FieldWorkActivityLogID"]);
+
+            FieldWorkActivityLogByIDResponse obj = new FieldWorkActivityLogByIDResponse();
+
+            obj = GetFielWorkActivityLogByID(input.UserID, activityLogID);
+
+
+            //int ID = _helper.InsertTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
             #region Old Codes 
             //if (dtActivityLog.Rows.Count > 0)
             //{
@@ -693,6 +702,69 @@ namespace ThoughtFocus.Service.Implementation
 
            
           return obj;
+        }
+
+        public FieldWorkActivityLogByIDResponse GetFieldWorkActivityLogforAdd(int userID, int fieldWorkID)
+        {
+            FieldWorkActivityLogByIDResponse obj = new FieldWorkActivityLogByIDResponse();
+
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
+                                         new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldWorkID }
+
+                                     };
+
+            DataSet dtActivityLogByID = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogforAdd]", parameters);
+            if (dtActivityLogByID.Tables.Count > 0)
+            {
+                obj.DataByID = dtActivityLogByID.Tables[0].AsEnumerable().Select(row =>
+                                          new FieldWorkActivityLogByID
+                                          {
+                                              ActivityLogID = Convert.ToInt32(row["ID"]),
+                                              FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                              CommunityDistrictID = Convert.ToInt32(row["CommunityDistrictID"]),
+                                              CommunityDistrictName = Convert.ToString(row["CommunityDistrict"]),
+                                              CommunitySchoolID = Convert.ToInt32(row["CommunitySchoolID"]),
+                                              CommunitySchoolName = Convert.ToString(row["CommunitySchool"]),
+                                              CommunitySiteUserID = Convert.ToInt32(row["CommunitySiteUsersID"]),
+                                              CommunitySiteUserName = Convert.ToString(row["CommunitySiteUser"]),
+                                              ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
+                                              ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
+                                              Hours = Convert.ToDecimal(row["Hours"]),
+                                              Status = Convert.ToString(row["Status"])
+                                          }).FirstOrDefault();
+
+                obj.standardList = dtActivityLogByID.Tables[1].AsEnumerable().Select(row =>
+                                        new FieldWorkActivityLogStandardList
+                                        {
+                                            FieldWorkActivityLogID = Convert.ToInt32(row["FieldWorkActivityLogID"]),
+                                            FieldWorkCoursesCategoryStandardID = Convert.ToInt32(row["FieldWorkCoursesCategoryStandardID"]),
+                                            FieldWorkCoursesCategoryStandard = Convert.ToString(row["FieldWorkCoursesCategoryStandard"]),
+                                            FieldWorkCoursesCategorySchoolTypeID = Convert.ToInt32(row["FieldWorkCoursesCategorySchoolTypeID"]),
+                                            FieldWorkCoursesCategorySchoolType = Convert.ToString(row["FieldWorkCoursesCategorySchoolType"]),
+                                            Hours = Convert.ToDecimal(row["Hours"]),
+                                            Details = Convert.ToString(row["Details"])
+                                        }).ToList();
+
+                obj.ActivityLogHandler = dtActivityLogByID.Tables[2].AsEnumerable().Select(row =>
+                                          new FieldWorkActivityLogHandler
+                                          {
+                                              ActivityLogHandler = Convert.ToString(row["AcitivityLogHandler"])
+                                          }).FirstOrDefault();
+
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully.";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data .";
+            }
+
+
+            return obj;
         }
 
         public FieldWorkAttachmentsResponse UploadFieldWorkActivityDocuments(FieldWorkAttachmentsRequest input)
@@ -960,6 +1032,69 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
+        public BaseResponse UpdateFieldworkCommunityUsersforCreation()
+        {
+            BaseResponse obj = new BaseResponse();
+            SqlParameter[] parameters =
+                                { };
+
+            DataTable dtNewPartners = _helper.GetDataTable("[dbo].[GetFieldworkCommunityUsersforCreation]", parameters);
+            if (dtNewPartners.Rows.Count > 0)
+            {
+                for (int i = 0; i < dtNewPartners.Rows.Count; i++)
+                {
+                    string partnerName = string.Empty;
+                    string userName = string.Empty;
+                    string userPassword = string.Empty;
+                    string partnerUserEmail = string.Empty;
+                    int userID;
+                    // get the autogenerated password here 
+                    var pwd = new Password(includeLowercase: true, includeUppercase: true, includeNumeric: true, includeSpecial: true, passwordLength: 12);
+                    userPassword = pwd.Next();
+                    partnerName = Convert.ToString(dtNewPartners.Rows[i]["FirstName"]) + " " + Convert.ToString(dtNewPartners.Rows[i]["LastName"]);
+                    partnerUserEmail= Convert.ToString(dtNewPartners.Rows[i]["Email"]);
+                    userID= Convert.ToInt32(dtNewPartners.Rows[i]["ID"]);
+                    // update user crentials 
+                    bool isPartnerUserAdded = AddPartnerUserCredentials(userID, partnerUserEmail, userPassword);
+                    // fire an email to community partneruser
+                    if (isPartnerUserAdded)
+                    {
+                        string logoText = "cid:myImageID";
+                        string body = GetMailBodyTemplate("PartnerUser_Cred.html");
+                        string subject = "Credentials for MyCED Application";
+                        body = body.Replace("[[logoPath]]", logoText)
+                                   .Replace("[[PartnerUserName]]", partnerName)
+                                   .Replace("[[Password]]", userPassword);
+                        _sendMail.SendEmail(partnerUserEmail, "","COMMON", subject, body, "");
+                    }
+                }
+                obj.IsSuccess = true;
+                obj.Message = "Community Partner User's added successfully";
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No New Community Partner User's to be assigned";
+            }
+
+            return obj;
+        }
+
+        private bool AddPartnerUserCredentials(int userID,string userName,string password)
+        {
+            bool isAdded = false;
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt, 50) { Value = userID },
+                                          new SqlParameter("@UserName", SqlDbType.NVarChar, 50) { Value = userName },
+                                          new SqlParameter("@Password", SqlDbType.NVarChar, 50) { Value = password }
+                                        };
+
+            int retVal = _helper.InsertTable("[dbo].[UpdateFieldworkCommunityUsersforCreation]", parameters);
+            isAdded = true;
+            return isAdded;
+        }
+     
         private string getSchemaType(int schemaTypeId)
         {
             string schemaType = string.Empty;

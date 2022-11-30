@@ -8,12 +8,14 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
       public List<ApplicationPrograms> ApplicationPrograms { get; set; }
       public HeaderDetails HeaderDetails { get; set; }
+      public List<Semester> Semesters { get; set; }
     }
     public class ApplicationPrograms
     {
         public int programID { get; set; }
         public string programName { get; set; }
         public string semester { get; set; }
+        public string TermCode { get; set; }
         public DateTime applicationOpens { get; set; }
         public DateTime applicationCloseDate { get; set; }
         public int TotalCount { get; set; }

@@ -10,7 +10,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public abstract class UsersController : ControllerBase
     {
         public ILogger<UsersController> _logger;
         public UsersController(ILogger<UsersController> logger)
