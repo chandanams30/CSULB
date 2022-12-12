@@ -1,20 +1,27 @@
-﻿CREATE PROCEDURE [dbo].[AutharizeRecommender]
+﻿-- =============================================
+-- Author:		ThoughtFocus
+-- Create date: 09/19/2022
+-- Description:	Autharize Recommender by RecommenderIdentifier
+-- =============================================
+
+CREATE PROCEDURE [dbo].[AutharizeRecommender]
 	@RecommenderIdentifier uniqueidentifier
 AS
 BEGIN
    
   SELECT(
 				SELECT R.[ID] AS [RecommendationID]
-					--,R.[FormID]
 					,U.FirstName + ' ' + U.LastName AS [StudentName]
+					,U.FirstName AS [StudentFirstName]
+					,U.LastName AS [StudentLastName]
+					,U.[CSULBID]
+					,U.[Email] AS [StudentEmail]
 					,R.[RecommenderName]
-					--,R.[RecommenderEmail]
-					--,R.[CreatedBy]
-					--,R.[CreatedDate]
-					--,R.[RecommenderURL]
-					--,R.[RecommenderURLValidTill]
 					,R.[AllowUpload]
-					--,R.[RecommenderIdentifier]
+					,P.[ProgramFormIdentifier]
+					,R.[LetterOfRecommendationJSON]
+					,P.[Name] AS [ProgramName]
+					,T.[Name] AS [TermName]
 					,JSON_QUERY((
 							SELECT 
 								--RA.[ID] AS [RecomendationAttachmentID],
@@ -31,9 +38,12 @@ BEGIN
 							)) AS [Attachments]
 				FROM [Application].[Recommendations] R
 				JOIN [Application].[Forms] F ON F.[ID] = R.[FormID]
+				JOIN [Master].[Programs] P ON P.[ID] = F.[ProgramID]
+				JOIN [Master].[Term] T ON T.[TermCode] = F.[TermCode]
 				JOIN [User].[Users] U ON U.[ID] = F.[UserID] 
 				WHERE R.[RecommenderIdentifier] = @RecommenderIdentifier
-				FOR JSON PATH) AS [Recommendations];
+				--and 1 = case when @RecommenderIdentifier = '4C8FABD2-6D9B-47FB-8341-A198C87B2308' then 0 else 1 end
+				FOR JSON PATH,INCLUDE_NULL_VALUES) AS [Recommendations];
 
 
 END
@@ -42,5 +52,7 @@ END
 SELECT * from [Application].[Recommendations] R
 
 
-exec [dbo].[AutharizeRecommender] 'E67B96FE-ADFA-4A69-A256-6470CB0D1B5'
+
+
+exec [dbo].[AutharizeRecommender] '2C643C51-34B6-4470-836B-20773C8C2DC7'
 */

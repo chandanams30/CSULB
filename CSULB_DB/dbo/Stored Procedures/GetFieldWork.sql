@@ -137,7 +137,7 @@ DECLARE @instruction8 VARCHAR(500) = '<P><b>Instruction</b><br/>' + 'Website scr
 	--[FieldWorkActivityLog] [Status] are Saved,Submitted,Approved,Not-Approved
 		DECLARE @ExpectedHours BIGINT
 		
-		SELECT @ExpectedHours=C.[FieldWorkHours] 
+		SELECT @ExpectedHours=isnull(C.[FieldWorkHours],0)
 			FROM [FieldWork].[FieldWork] FW
 				LEFT JOIN [Master].[FieldWorkCourses] FWC ON FWC.ID =  FW.FieldWorkCourseID 
 				JOIN [Master].[CourseTerm] CT ON FWC.CourseTermID = CT.ID
@@ -150,7 +150,11 @@ DECLARE @instruction8 VARCHAR(500) = '<P><b>Instruction</b><br/>' + 'Website scr
 			,SUM(FWAL.[Hours]) AS [LoggedHours]
 			,SUM(CASE WHEN [Status]='Submitted' THEN FWAL.[Hours] ELSE 0 END)AS [SentforApproval]
 			,SUM(CASE WHEN [Status]='Approved' THEN FWAL.[Hours] ELSE 0 END)AS [ApprovedHours]
-			,ROUND(SUM(CASE WHEN [Status]='Approved' THEN FWAL.[Hours] ELSE 0 END)/@ExpectedHours * 100, 2) AS [Approved]
+			--,ROUND(SUM(CASE WHEN [Status]='Approved' THEN FWAL.[Hours] ELSE 0 END)/@ExpectedHours * 100, 2) AS [Approved]
+			,CASE WHEN @ExpectedHours > 0 THEN
+				ROUND(SUM(CASE WHEN [Status]='Approved' THEN FWAL.[Hours] ELSE 0 END)/@ExpectedHours * 100, 2) 
+				ELSE @ExpectedHours END 			
+			AS [Approved]
 		FROM [FieldWork].[FieldWorkActivityLog] FWAL
 		WHERE FWAL.[FieldWorkID] = @FieldWorkId
 		GROUP BY FWAL.[FieldWorkID]

@@ -40,7 +40,8 @@ BEGIN
 		,FAL.[ActivityEndDate]
 		,FAL.[Hours]
 		,FAL.[Status] 
-		,CASE WHEN FAL.[Status] = 'Saved' AND (FAL.[CommunitySiteUsersID] = @UserID OR @canApproveHours = 1) THEN 1
+		--,CASE WHEN FAL.[Status] = 'Saved' THEN 'Submitted' ELSE FAL.[Status] END AS [Status] 
+		,CASE WHEN FAL.[Status] = 'Submitted' AND (FAL.[CommunitySiteUsersID] = @UserID OR @canApproveHours = 1) THEN 1
 		ELSE 0 END AS [ShowCheckbox]
 		--1 AS [ShowCheckbox]
 	FROM
@@ -72,7 +73,7 @@ BEGIN
 			  ,[showApproveHours]
 		   FROM [Master].[AcitivityLogHandler] ALH
 		  JOIN [User].[UserRoles] UR ON ALH.[RoleID] = ur.[RoleID] 
-			WHERE [Status] = 'Saved'
+			WHERE [Status] = 'Submitted'
 			AND UR.RoleID IN (1,4,5,9,10)
 			AND UR.UserID=@UserID
 		  ORDER BY ALH.[RoleID]

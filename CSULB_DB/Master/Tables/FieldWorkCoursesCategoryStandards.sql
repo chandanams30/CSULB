@@ -4,6 +4,9 @@
     [Description]     VARCHAR (MAX) NULL,
     [CategoryID]      BIGINT        NOT NULL,
     [CreatedDateTime] DATETIME      DEFAULT (getdate()) NOT NULL,
-    [CreatedByUserID] BIGINT        NOT NULL
+    [CreatedByUserID] BIGINT        NOT NULL,
+    [SortingOrder]    BIGINT        NULL
 );
+
+
 

@@ -1,13 +1,18 @@
 ﻿--EXEC [dbo].[GetFieldWorkActivityLogByID] 1, 1
-CREATE PROCEDURE [dbo].[GetFieldWorkActivityLogByID] 
+--EXEC [dbo].[GetFieldWorkActivityLogforAdd] 346, 737
+CREATE PROCEDURE [dbo].[GetFieldWorkActivityLogforAdd] 
 	@UserID bigint,
-	--@FieldWorkID bigint,
-	@ActivityLogID bigint,
-	@StartDate datetime = NULL
+	@FieldWorkID bigint
+	--@ActivityLogID bigint,
+	--@StartDate datetime = NULL
 
 AS
 BEGIN
 	SET NOCOUNT ON
+
+	DECLARE @ActivityLogID bigint;
+	SELECT @ActivityLogID = FWAL.[ID] FROM [FieldWork].[FieldWorkActivityLog] FWAL WHERE FWAL.[FieldWorkID] = @FieldWorkID ORDER BY FWAL.[ActivityStartDate], FWAL.[ID];
+
 
 	SELECT FWAL.[ID]
       ,FWAL.[FieldWorkID]
@@ -28,32 +33,43 @@ BEGIN
   JOIN [User].[Users] U ON U.[ID]=FWAL.[CommunitySiteUsersID]
   WHERE 
   --FWAL.[FieldWorkID]=@FieldWorkID AND 
-  FWAL.[ID] = isnull(@ActivityLogID,FWAL.[ID]) AND
-  FWAL.[ActivityStartDate]=CASE WHEN @ActivityLogID IS NULL THEN @StartDate ELSE FWAL.ActivityStartDate END
+  --FWAL.[ID] = isnull(@ActivityLogID,FWAL.[ID]) 
+  FWAL.[ID] = @ActivityLogID
+  --AND FWAL.[ActivityStartDate]=CASE WHEN @ActivityLogID IS NULL THEN @StartDate ELSE FWAL.ActivityStartDate END
 
-
-  SELECT FWALS.[FieldWorkActivityLogID]
-      ,FWALS.[FieldWorkCoursesCategoryStandardID]
-	  ,FWALS.[FieldWorkCoursesCategorySchoolTypeID]
-	  ,FWCCS.[Standard] AS [FieldWorkCoursesCategoryStandard]
-	  ,FWCCST.[SchoolType] AS [FieldWorkCoursesCategorySchoolType]
-      ,FWALS.[Details]
-      ,FWALS.[Hours]
-  FROM 
-  [FieldWork].[FieldWorkActivityLog] FWAL
-  JOIN [FieldWork].[FieldWorkActivityLogStandards] FWALS ON FWALS.[FieldWorkActivityLogID] = FWAL.[ID]
-  JOIN [Master].[FieldWorkCoursesCategoryStandards] FWCCS ON FWCCS.[ID] = FWALS.[FieldWorkCoursesCategoryStandardID]
-  JOIN [Master].[FieldWorkCoursesCategorySchoolTypes] FWCCST ON FWCCST.[ID] = FWALS.[FieldWorkCoursesCategorySchoolTypeID]
-  WHERE 
-  --FWAL.[FieldWorkID]=@FieldWorkID AND 
-  FWAL.[ID] = isnull(@ActivityLogID,FWAL.[ID]) AND
-  FWAL.[ActivityStartDate]=CASE WHEN @ActivityLogID IS NULL THEN @StartDate ELSE FWAL.ActivityStartDate END
+  IF EXISTS (SELECT * FROM [FieldWork].[FieldWorkActivityLog] FWAL WHERE FWAL.[ID] = @ActivityLogID)
+	  BEGIN
+		  SELECT FWALS.[FieldWorkActivityLogID]
+			  ,FWALS.[FieldWorkCoursesCategoryStandardID]
+			  ,FWALS.[FieldWorkCoursesCategorySchoolTypeID]
+			  ,FWCCS.[Standard] AS [FieldWorkCoursesCategoryStandard]
+			  ,FWCCST.[SchoolType] AS [FieldWorkCoursesCategorySchoolType]
+			  ,FWALS.[Details]
+			  ,FWALS.[Hours]
+		  FROM 
+		  [FieldWork].[FieldWorkActivityLog] FWAL
+		  JOIN [FieldWork].[FieldWorkActivityLogStandards] FWALS ON FWALS.[FieldWorkActivityLogID] = FWAL.[ID]
+		  JOIN [Master].[FieldWorkCoursesCategoryStandards] FWCCS ON FWCCS.[ID] = FWALS.[FieldWorkCoursesCategoryStandardID]
+		  JOIN [Master].[FieldWorkCoursesCategorySchoolTypes] FWCCST ON FWCCST.[ID] = FWALS.[FieldWorkCoursesCategorySchoolTypeID]
+		  WHERE 
+		  FWAL.[ID] = @ActivityLogID
+	  END
+  ELSE
+	  BEGIN
+		  SELECT NULL AS [FieldWorkActivityLogID]
+			  ,NULL AS [FieldWorkCoursesCategoryStandardID]
+			  ,NULL AS [FieldWorkCoursesCategorySchoolTypeID]
+			  ,NULL AS [FieldWorkCoursesCategoryStandard]
+			  ,NULL AS [FieldWorkCoursesCategorySchoolType]
+			  ,NULL AS [Details]
+			  ,NULL AS [Hours]
+	  END
 
 
   ----STATE HANDLER
 DECLARE @FWALStatus AS VARCHAR(50), @isCommunityUser AS BIT
 SELECT @FWALStatus = FWAL.[Status], 
-@isCommunityUser = CASE WHEN FWAL.[Status] = 'Submitted' AND FWAL.[CommunitySiteUsersID] = @UserID THEN 1 ELSE 0 END 
+@isCommunityUser = CASE WHEN FWAL.[Status] = 'Saved' AND FWAL.[CommunitySiteUsersID] = @UserID THEN 1 ELSE 0 END 
 FROM [FieldWork].[FieldWorkActivityLog] FWAL WHERE FWAL.[ID] = isnull(@ActivityLogID,FWAL.[ID])
 
 		--SELECT (

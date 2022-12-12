@@ -1,7 +1,7 @@
 ﻿-- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
+-- Author:		ThoughtFocus
+-- Create date: 19-May-2022
+-- Description:	Applications list for the user
 -- =============================================
 /*
 EXEC [dbo].[GetApplications]
@@ -58,13 +58,13 @@ BEGIN
 
 DECLARE @RoleIDs varchar(50)
 SELECT @RoleIDs = STRING_AGG(
-	CASE WHEN [RoleID] = 1 THEN '2,4' --Administrator 
-		WHEN [RoleID] = 3 THEN '2,4' --Student
-		WHEN [RoleID] = 4 THEN '2,4' --ProgramAdmin
-		WHEN [RoleID] = 5 THEN '4' --Faculty/Supervisor
-		WHEN [RoleID] = 6 THEN '2' --Reviewer
-		WHEN [RoleID] = 7 THEN '2' --Instructor
-		WHEN [RoleID] = 8 THEN '2' --Interviewer
+	CASE WHEN [RoleID] = 1 THEN '1,2,4' --Administrator 
+		WHEN [RoleID] = 3 THEN '1,2,4' --Student
+		WHEN [RoleID] = 4 THEN '1,2,4' --ProgramAdmin
+		WHEN [RoleID] = 5 THEN '1,4' --Faculty/Supervisor
+		WHEN [RoleID] = 6 THEN '1,2' --Reviewer
+		WHEN [RoleID] = 7 THEN '1,2' --Instructor
+		WHEN [RoleID] = 8 THEN '1,2' --Interviewer
 		WHEN [RoleID] = 9 THEN '4' --CommunityPartnerUser
 		WHEN [RoleID] = 10 THEN '4' --CommunitySupervisor
 		ELSE '0' END, ', ') 

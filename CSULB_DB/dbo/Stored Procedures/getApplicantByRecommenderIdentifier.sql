@@ -1,7 +1,7 @@
 ﻿-- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
+-- Author:		Thoughtfocus
+-- Create date: 03-Oct-2022
+-- Description:	returns Applicant email to by Recommender Identifier
 -- =============================================
 CREATE PROCEDURE [dbo].[getApplicantByRecommenderIdentifier]
 	@RecommenderIdentifier uniqueidentifier 
@@ -9,7 +9,7 @@ AS
 BEGIN
 	
 	SELECT T.[firstName] + ' ' + T.[lastName] AS [ApplicantName]
-		--,T.[cusulbEmail]
+		--,U.[Email] AS [cusulbEmail]
 		--,T.[altEmail]
 		,'venkatesan.shanmugam@thoughtfocus.com' as [cusulbEmail]
 		,'asif.khan@thoughtfocus.com' as [altEmail]
@@ -27,6 +27,7 @@ BEGIN
 			   ,Semester nvarchar(500)
 			   ,Program nvarchar(500)
 			  )T JOIN [Application].[Recommendations] R ON R.[FormID] = F.[ID]
+			  JOIN [User].[Users] U ON U.[ID] = F.[UserID]
 			  WHERE R.[RecommenderIdentifier] = @RecommenderIdentifier
    
 END

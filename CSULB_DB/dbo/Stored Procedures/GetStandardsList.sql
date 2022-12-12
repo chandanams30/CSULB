@@ -1,4 +1,10 @@
-﻿CREATE PROCEDURE [dbo].[GetStandardsList] 
+﻿-- =============================================
+-- Author:		ThoughtFocus
+-- Create date: 2022-Aug-26
+-- Description:	Return Standards List
+-- =============================================
+--exec [dbo].[GetStandardsList] 1,1
+CREATE PROCEDURE [dbo].[GetStandardsList] 
 	@UserID bigint,
 	@FieldWorkID bigint
 AS
@@ -13,4 +19,5 @@ BEGIN
 		JOIN [Master].[CourseTerm] CT ON CT.[CourseID]=C.[ID]
 		JOIN [Master].[FieldWorkCourses] FWC ON FWC.[CourseTermID]=CT.[ID]
 		JOIN [FieldWork].[FieldWork] FW ON FW.[FieldWorkCourseID] = FWC.[ID] AND FW.[ID] = @FieldWorkID --AND FW.[UserID]=@UserID 
+	ORDER BY [SortingOrder]
 END

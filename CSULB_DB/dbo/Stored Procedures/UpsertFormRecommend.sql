@@ -55,8 +55,13 @@ CREATE PROCEDURE [dbo].[UpsertFormRecommend]
 	,@FileName varchar(250)
 	,@FileExtn varchar(20)
 	,@SavedFileName nvarchar(100)
+	,@LetterOfRecommendationJSON nvarchar(MAX) = NULL
 AS
 BEGIN
+
+	SET @LetterOfRecommendationJSON = case when @LetterOfRecommendationJSON='' THEN NULL ELSE @LetterOfRecommendationJSON END;
+
+
 	IF ((@RecommenderIdentifier IS NOT NULL) AND (@FileName IS NOT NULL) AND (@FileExtn IS NOT NULL) AND (@SavedFileName IS NOT NULL) AND (@DocumentID IS NOT NULL))
 		BEGIN
 			PRINT '[RecommenderIdentifier] IS NOT NULL - enter attachments'
@@ -82,6 +87,11 @@ BEGIN
 					FROM [Application].[RecommendationAttachments]  RA
 						JOIN [Application].[Recommendations] R ON R.[ID] = RA.[RecomendationID]
 					WHERE RA.[DocumentID] = @DocumentID AND R.[RecommenderIdentifier]=@RecommenderIdentifier --AND R.[RecommenderEmail] = @RecommenderEmail
+
+					IF (@LetterOfRecommendationJSON IS NOT NULL)
+						BEGIN
+							UPDATE [Application].[Recommendations] SET [LetterOfRecommendationJSON] = @LetterOfRecommendationJSON WHERE [RecommenderIdentifier]=@RecommenderIdentifier
+						END
 				END
 			ELSE
 				BEGIN
@@ -95,6 +105,11 @@ BEGIN
 					   ,[UploadedDate])
 					   (SELECT R.[ID], @DocumentID, @FileName, @FileExtn, @FolderName, GETDATE() FROM [Application].[Recommendations] R
 							WHERE R.[RecommenderIdentifier]=@RecommenderIdentifier) --AND R.[RecommenderEmail] = @RecommenderEmail)
+						
+						IF (@LetterOfRecommendationJSON IS NOT NULL)
+						BEGIN
+							UPDATE [Application].[Recommendations] SET [LetterOfRecommendationJSON] = @LetterOfRecommendationJSON WHERE [RecommenderIdentifier]=@RecommenderIdentifier
+						END
 			   END
 		END
 
@@ -156,8 +171,5 @@ IF (ISNULL(@FormID,0)<>0) AND (NOT EXISTS (SELECT R.[ID] FROM [Application].[Rec
 		  WHERE R.[ID]=@newRecomendationID
 
 	END	
-
-
-
-   
+	   	    
 END

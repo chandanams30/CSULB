@@ -1,10 +1,9 @@
 ﻿-- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
+-- Author:		ThoughtFocus
+-- Create date: 2022-Sep-19
+-- Description:	Returns the form details 
 -- =============================================
---EXEC 
---EXEC [dbo].[GetForm] 37,107,15,2234
+--EXEC [dbo].[GetForm] 340,0,7,2234
 CREATE PROCEDURE [dbo].[GetForm]
 @UserID bigint
 ,@FormID bigint
@@ -34,10 +33,13 @@ BEGIN
 					SELECT @newSemester = [Name] FROM [Master].[Term] WHERE [TermCode] = @TermCode
 					SELECT @newProgram = [Name] FROM [Master].[Programs] WHERE [ID] = @ProgramID
 					
-						SELECT @newForm='{"firstName": "'+ U.[FirstName] +'","lastName": "'+ U.[LastName] +'",
-							"preferredName": "","otherName": "","altEmail": "","phoneNumber": "","csulbCampusId": "'+ U.[CSULBID] +'", 
-							"cusulbEmail": "'+ U.[Email] +'","casId": "","languages": [""],"Semester": "'+ @newSemester +'","Program": "'+ @newProgram +'"}' FROM  [User].[Users] U WHERE U.[ID] = @UserID
+						--SELECT @newForm='{"firstName": "'+ U.[FirstName] +'","lastName": "'+ U.[LastName] +'",
+						--	"preferredName": "","otherName": "","altEmail": "","phoneNumber": "","csulbCampusId": "'+ U.[CSULBID] +'", 
+						--	"cusulbEmail": "'+ U.[Email] +'","casId": "","languages": [""],"Semester": "'+ @newSemester +'","Program": "'+ @newProgram +'"}' FROM  [User].[Users] U WHERE U.[ID] = @UserID
 							--'+ U.[CSULBID] +'
+
+							SELECT @newForm=[dbo].[fnGetNewFormJson] (@UserID,@ProgramID,@TermCode);
+
 						INSERT INTO [Application].[Forms]
 							   ([UserID]
 							   ,[ProgramID]
@@ -92,6 +94,8 @@ BEGIN
 			  ,F.[ModifiedBy]
 			  ,F.[MessageBoard]
 			  ,PC.[CompletingYourApplication]
+			  ,pc.[ApplicationTypeID]
+			  ,P.[ProgramFormIdentifier]
 		FROM [Application].[Forms] F 
 		JOIN [Master].[FormState] FS ON FS.[ID] = F.[FormStateID]
 		JOIN [Master].[Programs] P ON P.[ID] = F.[ProgramID] 
@@ -126,6 +130,7 @@ BEGIN
 		  ORDER BY FSH.[RoleID]
 		  FOR JSON AUTO) AS [StateHandler];
 		--
+					
 
 		-- Attachments
 		SELECT 
@@ -333,4 +338,10 @@ BEGIN
 		  WHERE REV.[FormID]=@FormID 
 		  AND REV.[ReviewerID] = (CASE WHEN  @ReviewerRoleID in (1,4) THEN REV.[ReviewerID] WHEN @ReviewerRoleID=6 THEN @UserID ELSE 0 END)
 		  FOR JSON PATH, INCLUDE_NULL_VALUES) AS [Reviewer]
+
+		--Form Control Handler
+		SELECT(SELECT [ControlName], [showControl] 
+			FROM [Master].[FormControlHandler] FCH
+			JOIN [Master].[Programs] P ON P.[ProgramFormIdentifier] = FCH.[ProgramFormIdentifier] 
+			WHERE P.[ID]=@ProgramID FOR JSON AUTO)  AS [FormControlHandler]	
 END
