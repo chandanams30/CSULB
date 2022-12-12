@@ -4,6 +4,7 @@ using iTextSharp.text.pdf;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,9 +15,11 @@ using System.Security.Principal;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.FormModels;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Domain.TemplateModels;
 using ThoughtFocus.Service.Interfaces;
 
 
@@ -863,7 +866,7 @@ namespace ThoughtFocus.Service.Implementation
                     programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                     subject = "Application Submitted";
                     body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
-                    body = body.Replace("[[logoPath]]", logoText)
+                    body = body.Replace("[[logoPath]]", logoText) // body.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", applicantsName)
                                .Replace("[[programName]]", programName);
                     byte[] inputStr = null;
@@ -954,6 +957,7 @@ namespace ThoughtFocus.Service.Implementation
                         DateTime applicationDeadline;
                         string body = string.Empty;
                         string link = string.Empty;
+                        bool RecommenderMailTemplateAttachement = false;
 
                         recommenderURL = Convert.ToString(dsRec.Tables[0].Rows[i]["RecommenderURL"]);
                         body = Convert.ToString(dsRec.Tables[0].Rows[i]["MailBody"]);
@@ -961,6 +965,8 @@ namespace ThoughtFocus.Service.Implementation
                         recommenderEmail = Convert.ToString(dsRec.Tables[0].Rows[i]["RecommenderEmail"]);
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[i]["ApplicantName"]);
                         applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[i]["ApplicationDeadline"]);
+                        RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
+
                         link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                         body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[RecommenderName]]", recommenderName)
@@ -968,17 +974,28 @@ namespace ThoughtFocus.Service.Implementation
                             .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
                             .Replace("[[link]]", link)
                             ;
-                        //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
-                        userFolderPath = "SupportFiles/EmailAttachments";
-                        templateFileName = "Recommender_Template.pdf";
-                        byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                        //_logger.LogInformation(fileContent.Length.ToString());
+
                         string subject = "Attention: CSULB Recommendation Request";
-                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                        if (RecommenderMailTemplateAttachement)
                         {
-                            if (fileContent != null && fileContent.Length > 0)
+                            userFolderPath = "SupportFiles/EmailAttachments";
+                            templateFileName = "Recommender_Template.pdf";
+                            byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                          
+                            if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
                             {
-                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
+                                if (fileContent != null && fileContent.Length > 0)
+                                {
+                                    _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                            {
+                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, "");
+
                             }
                         }
                     }
@@ -1091,6 +1108,7 @@ namespace ThoughtFocus.Service.Implementation
 
             // int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
             DataTable dtRec = _helper.GetDataTable("[dbo].[UpsertFormRecommend]", parameters);
+            #region Old Codes
             //try
             //{
 
@@ -1143,7 +1161,7 @@ namespace ThoughtFocus.Service.Implementation
             //{
 
             //}
-
+            #endregion
             response.IsSuccess = true;
             response.Message = "Recommender Added Successfully";
 
@@ -1153,6 +1171,27 @@ namespace ThoughtFocus.Service.Implementation
         {
             string body = string.Empty;
             string filepath = Path.Combine("SupportFiles/EmailTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
+        }
+
+        private string GetDocumentBodyTemplate(string programIdentifier)
+        {
+            string body = string.Empty;
+            string templateName = string.Empty;
+            if (programIdentifier.ToUpper() == "SSCP")
+                templateName = "SSCPRecommendationFormTemplate.htm";
+            if (programIdentifier.ToUpper() == "MSCP")
+                templateName = "MSCPRecommendationFormTemplate.htm";
+            if (programIdentifier.ToUpper() == "UDCP")
+                templateName = "UDCPRecommendationFormTemplate.htm";
+            if (programIdentifier.ToUpper() == "ESCP")
+                templateName = "ESCPRecommendationFormTemplate.htm";
+
+            string filepath = Path.Combine("SupportFiles/DocumentTemplates", templateName);
             using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
             {
                 body = reader.ReadToEnd();
@@ -1183,6 +1222,7 @@ namespace ThoughtFocus.Service.Implementation
                         DateTime applicationDeadline;
                         string body = string.Empty;
                         string link = string.Empty;
+                        bool RecommenderMailTemplateAttachement = false;
 
                         recommenderURL = Convert.ToString(dsRec.Tables[0].Rows[0]["RecommenderURL"]);
                         body = Convert.ToString(dsRec.Tables[0].Rows[0]["MailBody"]);
@@ -1190,6 +1230,7 @@ namespace ThoughtFocus.Service.Implementation
                         recommenderEmail = Convert.ToString(dsRec.Tables[0].Rows[0]["RecommenderEmail"]);
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                         applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[0]["ApplicationDeadline"]);
+                        RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
                         link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                         body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[RecommenderName]]", recommenderName)
@@ -1197,12 +1238,14 @@ namespace ThoughtFocus.Service.Implementation
                             .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
                             .Replace("[[link]]", link)
                             ;
-                        //body = "Body section needs to be revisited with format and <a href=\"" + recommenderURL + "\" target=\"_blank\">the URL</a> for adding recommendations";
+                    string subject = "Attention: CSULB Recommendation Request";
+                    if (RecommenderMailTemplateAttachement)
+                    {
                         userFolderPath = "SupportFiles/EmailAttachments";
                         templateFileName = "Recommender_Template.pdf";
                         byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
                         //_logger.LogInformation(fileContent.Length.ToString());
-                        string subject = "Attention: CSULB Recommendation Request";
+                        
                         if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
                         {
                             if (fileContent != null && fileContent.Length > 0)
@@ -1212,6 +1255,17 @@ namespace ThoughtFocus.Service.Implementation
                                 obj.Message = "Mail sent successfully !";
                             }
                         }
+                    }
+                    else
+                    {
+                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                        {
+                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, "");
+                                obj.IsSuccess = true;
+                                obj.Message = "Mail sent successfully !";
+                            
+                        }
+                    }
 
                 }
             }
@@ -1347,8 +1401,10 @@ namespace ThoughtFocus.Service.Implementation
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
+            byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
+            //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
             // update the JSON and save to DB - call [dbo].[UpdateApplicationRecommendations]
-            // FormAddRecommendationRequestAttachment
+            // FormAddRecommendationRequestAttachment - add file content to this class 
             foreach (var attachment in input.FormAddRecommendationRequestAttachment)
             {
                 //response = new BaseResponse();
@@ -1356,9 +1412,16 @@ namespace ThoughtFocus.Service.Implementation
                 string fileExtension = string.Empty;
                 string userFolderName = string.Empty;
                 string savedFileName = string.Empty;
-
+                string letterOfRecommendationJSON = string.Empty;
                 // pull the saved file name format SP Below
                 FormAttachmentFileNames fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                if (attachment.DocumentID == 3)
+                {
+                    letterOfRecommendationJSON = input.LetterOfRecommendationJSON;
+                    attachment.FileContent =fileContentJSONToPDF;
+                    attachment.FileName = fileNames.FileName + ".pdf";
+                }
+           
                 if (!string.IsNullOrEmpty(fileNames.FileName) && attachment.FileContent != null && !string.IsNullOrEmpty(attachment.FileName))
                 {
                     if (!sendMail) { sendMail = true; }
@@ -1383,7 +1446,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier, 250) { Value = new Guid(input.RecommenderIdentifier) },
                                           new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
                                           new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
-                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName }
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
+                                          new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = letterOfRecommendationJSON },
                                         };
 
                     //int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
@@ -1441,6 +1505,239 @@ namespace ThoughtFocus.Service.Implementation
 
 
             return response;
+        }
+        private byte[] GetPDFFromJSON(string jsonString,string programIdentifier)
+        {
+            byte[] pdfFileContent = null;
+            string recommendationTemplateBody = string.Empty;
+            JObject schema = JObject.Parse(jsonString);
+            if (programIdentifier.ToUpper()=="MSCP"|| programIdentifier.ToUpper() == "SSCP"| programIdentifier.ToUpper() == "UDCP")
+            {
+                //TemplateStore<SSCP_MSCP_UDCP_Model> store = new TemplateStore<SSCP_MSCP_UDCP_Model>();
+                //SSCP_MSCP_UDCP_Model obj = new SSCP_MSCP_UDCP_Model();
+                //obj = store.GetDeserializedTemplate(jsonString);
+
+                string applicantFirstName = string.Empty;
+                string applicantLastName = string.Empty;
+                string credentialSubjectArea = string.Empty;
+                string campusID = string.Empty;
+                string recommenderFirstName = string.Empty;
+                string recommenderLastName = string.Empty;
+                string institution = string.Empty;
+                string position_title = string.Empty;
+                string telephoneContact = string.Empty;
+                string email = string.Empty;
+
+                string answer1 = string.Empty;
+                string answer2 = string.Empty;
+                string answer3 = string.Empty;
+                string answer4 = string.Empty;
+                string intellectualCapacity = string.Empty;
+                string maturity = string.Empty;
+                string potentialForTeaching = string.Empty;
+                string professionalConductDeposition = string.Empty;
+                string abilityToWorkWithOthers = string.Empty;
+                string recommendationForLongBeach = string.Empty;
+                string signature = string.Empty;
+                string date = string.Empty;
+                string comment = string.Empty;
+
+                
+                JObject personalInfo = (JObject)schema["personalInfo"];
+                JObject answers= (JObject)schema["applicantRelatedAnswers"];
+                JObject signatureOfRecommender = (JObject)schema["signatureOfRecommender"];
+                JArray answer5 = (JArray)answers["answer5"];
+                //JArray recommendationsForLB = (JArray)schema["recommendationForLongBeach"];
+
+                // section for personal info 
+                applicantFirstName = Convert.ToString(personalInfo.GetValue("applicantFirstName"));
+                applicantLastName = Convert.ToString(personalInfo.GetValue("applicantLastName"));
+                credentialSubjectArea = Convert.ToString(personalInfo.GetValue("credentialSubjectArea"));
+                campusID = Convert.ToString(personalInfo.GetValue("campusID"));
+                recommenderFirstName = Convert.ToString(personalInfo.GetValue("recommenderFirstName"));
+                recommenderLastName = Convert.ToString(personalInfo.GetValue("recommenderLastName"));
+                institution = Convert.ToString(personalInfo.GetValue("institution"));
+                position_title = Convert.ToString(personalInfo.GetValue("position_title"));
+                telephoneContact = Convert.ToString(personalInfo.GetValue("telephoneContact"));
+                email = Convert.ToString(personalInfo.GetValue("email"));
+                // section for answers 1 to 4
+                answer1 = Convert.ToString(answers.GetValue("answer1"));
+                answer2 = Convert.ToString(answers.GetValue("answer2"));
+                answer3 = Convert.ToString(answers.GetValue("answer3"));
+                answer4 = Convert.ToString(answers.GetValue("answer4"));
+                recommendationForLongBeach= Convert.ToString(answers.GetValue("answer6"));
+                comment= Convert.ToString(schema.GetValue("comments"));
+                signature = Convert.ToString(signatureOfRecommender.GetValue("name"));
+                date = Convert.ToString(signatureOfRecommender.GetValue("date"));
+
+                // section for answer 5
+                foreach (JObject content in answer5.Children<JObject>())
+                {
+                    if(content["qualities"].ToString()== "Intellectual Capacity")
+                    {
+                        intellectualCapacity = Convert.ToString(content.GetValue("value"));
+                   
+                    }
+                    if (content["qualities"].ToString() == "Ability To Work With Others")
+                    {
+                        abilityToWorkWithOthers= Convert.ToString(content.GetValue("value"));
+                    
+                    }
+                    if (content["qualities"].ToString() == "Maturity")
+                    {
+                        maturity= Convert.ToString(content.GetValue("value"));
+                      
+                    }
+                    if (content["qualities"].ToString() == "Potential for Teaching")
+                    {
+                        potentialForTeaching= Convert.ToString(content.GetValue("value"));
+                   
+                    }
+                    if (content["qualities"].ToString() == "Professional Conduct / Deposition")
+                    {
+                        professionalConductDeposition= Convert.ToString(content.GetValue("value"));
+                    
+                    }
+                }
+                
+                recommendationTemplateBody = GetDocumentBodyTemplate(programIdentifier);
+                // replace the values in the template 
+                recommendationTemplateBody = recommendationTemplateBody.Replace("[[ApplicantLastName]]", applicantLastName)
+                                                                     .Replace("[[ApplicantFirstName]]", applicantFirstName)
+                                                                     .Replace("[[CredentialSubjectArea]]", credentialSubjectArea)
+                                                                     .Replace("[[CampusID]]", campusID)
+                                                                     .Replace("[[RecommenderLastName]]", recommenderLastName)
+                                                                     .Replace("[[RecommenderFirstName]]", recommenderFirstName)
+                                                                     .Replace("[[Institution]]", institution)
+                                                                     .Replace("[[PositionTitle]]", position_title)
+                                                                     .Replace("[[ContactNumber]]", telephoneContact)
+                                                                     .Replace("[[EmailID]]", email)
+                                                                     .Replace("[[Answer1]]", answer1)
+                                                                     .Replace("[[Answer2]]", answer2)
+                                                                     .Replace("[[Answer3]]", answer3)
+                                                                     .Replace("[[Answer4]]", answer4)
+                                                                     .Replace("[[IntellectualCapacity]]", intellectualCapacity)
+                                                                     .Replace("[[AbilityToWorkWithOthers]]", abilityToWorkWithOthers)
+                                                                     .Replace("[[Maturity]]", maturity)
+                                                                     .Replace("[[PotentialForTeaching]]", potentialForTeaching)
+                                                                     .Replace("[[ProfessionalConductDisposition]]", professionalConductDeposition)
+                                                                     .Replace("[[RecommendationForLongBeach]]", recommendationForLongBeach)
+                                                                     .Replace("[[SignatureOfRecommender]]", signature)
+                                                                     .Replace("[[Date]]", date)
+                                                                     .Replace("[[Comments]]", comment);
+                // get the filecontent
+                pdfFileContent = GetPDFFileContent(recommendationTemplateBody);
+
+            }
+            else if (programIdentifier.ToUpper() == "ESCP")
+            {
+                //fields for report generation 
+                string recommenderName = string.Empty;
+                string applicantName = string.Empty;
+                string positionTitle = string.Empty;
+                string campusID = string.Empty;
+                string email = string.Empty;
+                string signatureName = string.Empty;
+                string signatureDate = string.Empty;
+                string academicCompetencyComments = string.Empty;
+                string academicCompetencyScale = string.Empty;
+                string professionalismComments = string.Empty;
+                string professionalismScale = string.Empty;
+                string dispositionsPersonalityCharacterComments = string.Empty;
+                string dispositionsPersonalityCharacterScale = string.Empty;
+                string specialEducationComments = string.Empty;
+                string specialEducationScale = string.Empty;
+                string studentOverAllRank = string.Empty;
+
+                JObject personalInfo = (JObject)schema["personalInfo"];
+                JObject signatureOfRecommender = (JObject)schema["signatureOfRecommender"];
+                JObject academicCompetency = (JObject)schema["academicCompetency"];
+                JObject professionalism = (JObject)schema["professionalism"];
+                JObject dispositionsPersonalityCharacter = (JObject)schema["dispositionsPersonalityCharacter"];
+                JObject specialEducation = (JObject)schema["specialEducation"];
+
+                // personalInfo 
+                recommenderName = Convert.ToString(personalInfo.GetValue("recommenderFirstName"));
+                applicantName = Convert.ToString(personalInfo.GetValue("studentName"));
+                positionTitle = Convert.ToString(personalInfo.GetValue("position_title"));
+                campusID = Convert.ToString(personalInfo.GetValue("campusID"));
+                email = Convert.ToString(personalInfo.GetValue("email"));
+                // signature of recommender 
+                signatureName = Convert.ToString(signatureOfRecommender.GetValue("name"));
+                signatureDate = Convert.ToString(signatureOfRecommender.GetValue("date"));
+                // academicCompetency
+                academicCompetencyComments = Convert.ToString(academicCompetency.GetValue("comments"));
+                academicCompetencyScale = Convert.ToString(academicCompetency.GetValue("scale"));
+                // professionalism
+                professionalismComments = Convert.ToString(professionalism.GetValue("comments"));
+                professionalismScale = Convert.ToString(professionalism.GetValue("scale"));
+                //dispositionsPersonalityCharacter
+                dispositionsPersonalityCharacterComments = Convert.ToString(dispositionsPersonalityCharacter.GetValue("comments"));
+                dispositionsPersonalityCharacterScale = Convert.ToString(dispositionsPersonalityCharacter.GetValue("scale"));
+                //specialEducation
+                specialEducationComments = Convert.ToString(specialEducation.GetValue("comments"));
+                specialEducationScale = Convert.ToString(specialEducation.GetValue("scale"));
+                //studentOverAllRank
+                studentOverAllRank= Convert.ToString(schema.GetValue("studentOverAllRank"));
+
+                recommendationTemplateBody = GetDocumentBodyTemplate(programIdentifier);
+                // replace the values in the template 
+                recommendationTemplateBody = recommendationTemplateBody.Replace("[[ApplicantName]]", applicantName)
+                                                                     .Replace("[[CampusID]]", campusID)
+                                                                     .Replace("[[EmailAddress]]", email)
+                                                                     .Replace("[[RecommenderName]]", recommenderName)
+                                                                     .Replace("[[PositionTitle]]", positionTitle)
+                                                                     .Replace("[[RecommenderSignature]]", signatureName)
+                                                                     .Replace("[[Date]]", signatureDate)
+                                                                     .Replace("[[academicCompetencyScale]]", academicCompetencyScale)
+                                                                     .Replace("[[academicCompetencyComments]]", academicCompetencyComments)
+                                                                     .Replace("[[professionalismScale]]", professionalismScale)
+                                                                     .Replace("[[professionalismComments]]", professionalismComments)
+                                                                     .Replace("[[dispositionsPersonalityCharacterScale]]", dispositionsPersonalityCharacterScale)
+                                                                     .Replace("[[dispositionsPersonalityCharacterComments]]", dispositionsPersonalityCharacterComments)
+                                                                     .Replace("[[specialEducationScale]]", specialEducationScale)
+                                                                     .Replace("[[specialEducationComments]]", specialEducationComments)
+                                                                     .Replace("[[studentOverAllRank]]", studentOverAllRank);
+
+                // get the filecontent
+                pdfFileContent = GetPDFFileContent(recommendationTemplateBody);
+            }
+            return pdfFileContent;
+        }
+
+        private byte[] GetPDFFileContent(string htmlFormBody)
+        {
+            byte[] fileContent = null;
+            StringReader sr = new StringReader(htmlFormBody); // workable code uncomment after testing 
+            //TextReader sr = new StringReader(htmlFormBody);
+            //Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 0f);
+            Document pdfDoc = new Document(PageSize.A4, 50, 50, 50, 50);
+            HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                PdfWriter writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                pdfDoc.Open();
+
+                htmlparser.Parse(sr);
+                pdfDoc.Close();
+
+                fileContent = memoryStream.ToArray();
+                memoryStream.Close();
+            }
+            return fileContent;
+        }
+        private byte[] GetFileContent(string templateName)
+        {
+            byte[] fileContent = null;
+            string filepath = Path.Combine("SupportFiles/EmailAttachments", templateName);
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
         }
 
         private void SendRecommendedConfirmMailToApplicant(string recommenderIdentifier)

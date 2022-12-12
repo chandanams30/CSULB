@@ -26,7 +26,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int FormID { get; set; }
         public string RecommenderIdentifier { get; set; }
         public string LetterOfRecommendationJSON { get; set; }
-
+        public string ProgramFormIdentifier { get; set; }
         public List<FormAddRecommendationRequestAttachment> FormAddRecommendationRequestAttachment { get; set; }
     }
 }

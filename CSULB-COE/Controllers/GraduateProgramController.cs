@@ -435,16 +435,7 @@ namespace CSULB_COE.Controllers
             try
             {
                 BaseResponse response = new BaseResponse();
-                //foreach(var attachment in input.FormAddRecommendationRequestAttachment)
-                //{
-                //    FormAddRecommendationRequest obj = new FormAddRecommendationRequest();
-                //    obj.FormID = input.FormID;
-                //    obj.RecommenderIdentifier = input.RecommenderIdentifier;
-                //    obj.FileName = attachment.FileName;
-                //    obj.FileContent = attachment.FileContent;
-                //    obj.DocumentID = attachment.DocumentID;
-                //    response = _graduateProgramService.AddRecommendation(obj);
-                //}
+            
                 response = _graduateProgramService.AddRecommendationForm(input);
                 return response;
             }
