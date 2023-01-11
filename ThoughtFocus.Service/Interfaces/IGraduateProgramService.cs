@@ -18,9 +18,12 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdatePersonalInfoSchema(FormPersonalInfoSchemaRequest input);
         BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input);
         BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input);
+        BaseResponse DeleteFormAttachment(DeleteFormAttachmentRequest input);
         BaseResponse SaveForm(FormSaveRequest input);
         BaseResponse UpdateFormState(FormStatusUpdateRequest input);
         FormAttachments DownloadFormAttachments(int userID, int formattachmentID);
+        InstructorAttachments GetInstructionAttachment(int UserID, int InstructionAttachmentID);
+        InterviewerAttachments GetInterviewAttachments(int UserID, int InterviewAttachmentID);
         RecommendationAttachments GetFormRecommendations(int userID, int recommendationAttachmentID);
         BaseResponse AddRecommender(FormAddRecommenderRequest input);
         BaseResponse AddRecommendation(FormAddRecommendationRequest input);
@@ -28,7 +31,13 @@ namespace ThoughtFocus.Service.Interfaces
         AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier);
         BaseResponse SendReminderToRecommender(int recommendationID);
         BaseResponse UpdateReviwerReview(FormReviewerReviewRequest input);
-        BaseResponse AssignFormToReviewers();
+        BaseResponse AssignFormToReviewers(int programID);
         byte[] GetMergedDocument(int formID);
+        BaseResponse UpdateInstructorFeedback(UpdateInstructorFeedbackRequest input);
+        BaseResponse UpdateInterviewerFeedback(UpdateInterviewerFeedbackRequest input);
+        BaseResponse AddInstructorToForm(AddInstructorRequest input);
+        BaseResponse AddInterviewerToForm(AddInterviewerRequest input);
+        InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input);
+        InterviewerListResponse GetInterviewerList(GetInstructorInterviewerListRequest input);
     }
 }

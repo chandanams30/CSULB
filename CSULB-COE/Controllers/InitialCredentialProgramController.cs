@@ -15,7 +15,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class InitialCredentialProgramController : ControllerBase
     {
         public ILogger<InitialCredentialProgramController> _logger;

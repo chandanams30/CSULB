@@ -14,4 +14,14 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public byte[] FileContent { get; set; }
         public string Filename { get; set; }
     }
+    public class InterviewerAttachments
+    {
+        public byte[] FileContent { get; set; }
+        public string Filename { get; set; }
+    }
+    public class InstructorAttachments
+    {
+        public byte[] FileContent { get; set; }
+        public string Filename { get; set; }
+    }
 }

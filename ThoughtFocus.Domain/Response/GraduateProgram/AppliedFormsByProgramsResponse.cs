@@ -13,6 +13,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public int FormID { get; set; }
         public string StudentName { get; set; }
+        public string StudentFirstName { get; set; }
+        public string StudentLastName { get; set; }
         public int FormStateID { get; set; }
         public string FormState { get; set; }
         public DateTime AppliedDate { get; set; }

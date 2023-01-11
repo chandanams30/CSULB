@@ -54,7 +54,7 @@ namespace CSULB_COE
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:8080", "http://180.151.61.78:7852", "http://20.25.58.133", "https://ced-tf01d.campus.ad.csulb.edu", "https://myced.ced.csulb.edu") // prod also needs to be added here 
+                        builder.WithOrigins("http://localhost:8081", "http://180.151.61.78:7852", "http://20.25.58.133", "https://ced-tf01d.campus.ad.csulb.edu", "https://myced.ced.csulb.edu") // prod also needs to be added here 
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                     });
@@ -135,20 +135,8 @@ namespace CSULB_COE
             // Initial Credential Programs
             services.AddScoped<IInitialCredentialProgramService, InitialCredentialProgramService>();
 
-
-
-
-            // Enable Swagger   
-            //services.AddSwaggerGen(swagger =>
-            //{
-            //    //This is to generate the Default UI of Swagger Documentation  
-            //    swagger.SwaggerDoc("v1", new OpenApiInfo
-            //    {
-            //        Title = "ThoughtFocus CSULB-CED",
-            //        Version = "v1",
-            //        Description = "ThoughtFocus CSULB-CED"
-            //    });
-            //});
+            // Search Application
+            services.AddScoped<ISearchApplication, SearchApplicationImpl>();
 
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo

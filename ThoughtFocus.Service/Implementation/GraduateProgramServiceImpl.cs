@@ -181,6 +181,8 @@ namespace ThoughtFocus.Service.Implementation
                                               {
                                                   FormID = Convert.ToInt32(row["ID"]),
                                                   StudentName = Convert.ToString(row["StudentName"]),
+                                                  StudentFirstName = Convert.ToString(row["StudentFirstName"]),
+                                                  StudentLastName = Convert.ToString(row["StudentLastName"]),
                                                   FormStateID = Convert.ToInt32(row["FormStateID"]),
                                                   FormState = Convert.ToString(row["FormState"]),
                                                   AppliedDate = Convert.ToDateTime(row["AppliedDate"]),
@@ -199,8 +201,9 @@ namespace ThoughtFocus.Service.Implementation
                                               {
                                                   semester = Convert.ToString(row["Semester"]),
                                                   TermCode = Convert.ToString(row["TermCode"]),
-                                                  programName= Convert.ToString(row["ProgramName"]),
-                                                  programID=Convert.ToInt32(row["ProgramID"])
+                                                  programName = Convert.ToString(row["ProgramName"]),
+                                                  programID = Convert.ToInt32(row["ProgramID"]),
+                                                  showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"])
 
                                               }).FirstOrDefault();
                     }
@@ -343,7 +346,9 @@ namespace ThoughtFocus.Service.Implementation
                                                    MessageBoard = Convert.ToString(row["MessageBoard"]),
                                                    CompletingYourApplication = Convert.ToString(row["CompletingYourApplication"]),
                                                    ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
-                                                   ProgramFormIdentifier = Convert.ToString(row["ProgramFormIdentifier"])
+                                                   ProgramFormIdentifier = Convert.ToString(row["ProgramFormIdentifier"]),
+                                                   CreatedDateTime = Convert.ToDateTime(row["CreatedDateTime"]),
+                                                   SubmittedDateTime = Convert.ToDateTime(row["SubmittedDateTime"] == DBNull.Value ? null : row["SubmittedDateTime"])
 
                                                }).FirstOrDefault();
 
@@ -388,6 +393,20 @@ namespace ThoughtFocus.Service.Implementation
                                    FormControls = Convert.ToString(row["FormControlHandler"])
 
                                }).FirstOrDefault();
+
+                    obj.Instructor = dtFormData.Tables[6].AsEnumerable().Select(row =>
+                               new InstructorInformation
+                               {
+                                   Instructor = Convert.ToString(row["Instructor"])
+
+                               }).FirstOrDefault();
+
+                    obj.Interviewer = dtFormData.Tables[7].AsEnumerable().Select(row =>
+                            new InterviwerInformation
+                            {
+                                Interviewer = Convert.ToString(row["Interviewer"])
+
+                            }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -562,6 +581,31 @@ namespace ThoughtFocus.Service.Implementation
 
                 return response;
             }
+        }
+        public BaseResponse DeleteFormAttachment(DeleteFormAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = input.DocumentID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FormAttachmentID ", SqlDbType.BigInt) { Value = input.FormAttachmentID },
+                                        };
+            DataTable dtDeleteAttachment = _helper.GetDataTable("[dbo].[deleteFormAttachment]", parameters);
+            if (dtDeleteAttachment.Rows.Count > 0)
+            {
+                response.Message = "Attachment Deleted Successfully";
+                response.IsSuccess = true;
+            }
+            else
+            {
+                response.Message = "Failed To Delete Attachment";
+                response.IsSuccess = false;
+            }
+            return response;
         }
         private bool SaveWordFileInTempFolder(byte[] fileContent,string fileName,string fileExtension,string workingFolderPath)
         {
@@ -1020,6 +1064,44 @@ namespace ThoughtFocus.Service.Implementation
 
             obj = dtAttachments.AsEnumerable().Select(row =>
                                           new FormAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        public InstructorAttachments GetInstructionAttachment(int UserID, int InstructionAttachmentID)
+        {
+            InstructorAttachments obj = new InstructorAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@InstructionAttachmentID", SqlDbType.BigInt) { Value = InstructionAttachmentID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetInstructionAttachment]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new InstructorAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        public InterviewerAttachments GetInterviewAttachments(int UserID, int InterviewAttachmentID)
+        {
+            InterviewerAttachments obj = new InterviewerAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@InterviewAttachmentID", SqlDbType.BigInt) { Value = InterviewAttachmentID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetInterviewAttachments]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new InterviewerAttachments
                                           {
                                               Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
                                               FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
@@ -1961,15 +2043,379 @@ namespace ThoughtFocus.Service.Implementation
             //return htmlString;
         }
 
-        public BaseResponse AssignFormToReviewers()
+        public BaseResponse AssignFormToReviewers(int programID)
         {
             BaseResponse obj = new BaseResponse();
             SqlParameter[] parameters =
-                                   {  };
+                                   { new SqlParameter("@ProgramId", SqlDbType.Int) { Value = programID } };
 
             int id = _helper.InsertTable("[dbo].[AssignFormToReviewers]", parameters);
             obj.IsSuccess = true;
             obj.Message = "Reviewers Assigned Successfully";
+            return obj;
+        }
+
+        public BaseResponse UpdateInstructorFeedback(UpdateInstructorFeedbackRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string fileExtensionWord = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+                bool isNotPDFExtension = false;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+
+                // pull the saved file name format SP Below
+                FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FormID, 26);
+                if (input.FileName != string.Empty)
+                {
+                    AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                    //fileName = fileDetails.FileName;
+                    fileExtension = fileDetails.FileExtension;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // isNotPDFExtension = true;
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                    if (fileExtension.ToUpper() == "DOC" || fileExtension.ToUpper() == "DOCX")
+                    {
+                        isNotPDFExtension = true;
+                        bool isFileSaved = SaveWordFileInTempFolder(input.FileContent, fileNames.FileName, fileExtension, workingFolderPath);
+                        fileExtensionWord = fileExtension;
+                        fileExtension = "pdf";
+                    }
+
+                }
+
+                SqlParameter[] parameters =
+                                         {
+                                          new SqlParameter("@InstructionID", SqlDbType.BigInt) { Value = input.InstructionID },
+                                          new SqlParameter("@InstructorUserID", SqlDbType.BigInt) { Value = input.InstructorID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@InstructionAttachmentID", SqlDbType.BigInt) { Value = input.InstructionAttachmentID },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName }
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[updateInstructorFeedback]", parameters);
+                if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+                {
+                    string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                    userFolderName = folderSplit[0].ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            // copy the file here 
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+                        if (isNotPDFExtension)
+                        {
+                            byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                    // now delete the old file based on the file name return from DB call above 
+                }
+
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+
+                return response;
+            }
+        }
+
+        public BaseResponse UpdateInterviewerFeedback(UpdateInterviewerFeedbackRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string fileExtensionWord = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+                bool isNotPDFExtension = false;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+
+                // pull the saved file name format SP Below
+                FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FormID, 27);
+                if (input.FileName != string.Empty)
+                {
+                    AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                    //fileName = fileDetails.FileName;
+                    fileExtension = fileDetails.FileExtension;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // isNotPDFExtension = true;
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                    if (fileExtension.ToUpper() == "DOC" || fileExtension.ToUpper() == "DOCX")
+                    {
+                        isNotPDFExtension = true;
+                        bool isFileSaved = SaveWordFileInTempFolder(input.FileContent, fileNames.FileName, fileExtension, workingFolderPath);
+                        fileExtensionWord = fileExtension;
+                        fileExtension = "pdf";
+                    }
+
+                }
+
+                SqlParameter[] parameters =
+                                         {
+                                          new SqlParameter("@InterviewID", SqlDbType.BigInt) { Value = input.InterviewID },
+                                          new SqlParameter("@InterviewerUserID", SqlDbType.BigInt) { Value = input.InterviewerID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@InterviewAttachmentID", SqlDbType.BigInt) { Value = input.InterviewAttachmentID },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName }
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[updateInterviewerFeedback]", parameters);
+                if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+                {
+                    string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                    userFolderName = folderSplit[0].ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            // copy the file here 
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+                        if (isNotPDFExtension)
+                        {
+                            byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                    // now delete the old file based on the file name return from DB call above 
+                }
+
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+
+                return response;
+            }
+        }
+
+        public BaseResponse AddInstructorToForm(AddInstructorRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@InstructorUserID", SqlDbType.BigInt) { Value = input.InstructorUserID }
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[AddInstructorToForm]", parameters);
+            response.Message = "Instructor Added Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public BaseResponse AddInterviewerToForm(AddInterviewerRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@InterviewerUserID", SqlDbType.BigInt) { Value = input.InterviewerUserID }
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[AddInterviewerToForm]", parameters);
+            response.Message = "Interviewer Added Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input)
+        {
+            InstructorListResponse obj = new InstructorListResponse();
+            SqlParameter[] parameters = {  
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode }
+                                        };
+
+            DataTable dtInstructors = _helper.GetDataTable("[dbo].[getInstructorList]", parameters);
+            try
+            {
+                if (dtInstructors.Rows.Count > 0)
+                {
+
+
+                    obj.InstructorList = dtInstructors.AsEnumerable().Select(row =>
+                                              new InstructorList
+                                              {
+                                                  InstructorUserID = Convert.ToInt32(row["InstructorUserID"]),
+                                                  InstructorName = Convert.ToString(row["InstructorName"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public InterviewerListResponse GetInterviewerList(GetInstructorInterviewerListRequest input)
+        {
+            InterviewerListResponse obj = new InterviewerListResponse();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode }
+                                        };
+
+            DataTable dtInterviewers = _helper.GetDataTable("[dbo].[getInterviewerList]", parameters);
+            try
+            {
+                if (dtInterviewers.Rows.Count > 0)
+                {
+
+
+                    obj.InterviewerList = dtInterviewers.AsEnumerable().Select(row =>
+                                              new InterviewerList
+                                              {
+                                                  InterviewerUserID = Convert.ToInt32(row["InterviewerUserID"]),
+                                                  InterviewerName = Convert.ToString(row["InterviewerName"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
             return obj;
         }
     }

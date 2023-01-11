@@ -16,7 +16,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class GraduateProgramController : ControllerBase
     {
         public ILogger<GraduateProgramController> _logger;
@@ -216,6 +216,39 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("DeleteFormAttachment")]
+        public BaseResponse DeleteFormAttachment(DeleteFormAttachmentRequest input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MYDOCS.png";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\pic2.jpg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                BaseResponse response = _graduateProgramService.DeleteFormAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
 
         [HttpPost("SaveForm")]
@@ -363,13 +396,13 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("AssignFormToReviewers")]
-        public BaseResponse AssignFormToReviewers()
+        [HttpGet("AssignFormToReviewers")]
+        public BaseResponse AssignFormToReviewers(int programID)
         {
             try
             {
                 BaseResponse response = new BaseResponse();
-                response = _graduateProgramService.AssignFormToReviewers();
+                response = _graduateProgramService.AssignFormToReviewers(programID);
                 return response;
             }
             catch (Exception ex)
@@ -396,6 +429,197 @@ namespace CSULB_COE.Controllers
 
         }
 
+        [HttpPost("UpdateInstructorFeedback")]
+        public BaseResponse UpdateInstructorFeedback(UpdateInstructorFeedbackRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _graduateProgramService.UpdateInstructorFeedback(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("UpdateInterviewerFeedback")]
+        public BaseResponse UpdateInterviewerFeedback(UpdateInterviewerFeedbackRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.UpdateInterviewerFeedback(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("AddInstructorToForm")]
+        public BaseResponse AddInstructorToForm(AddInstructorRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.AddInstructorToForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+
+        [HttpPost("AddInterviewerToForm")]
+        public BaseResponse AddInterviewerToForm(AddInterviewerRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.AddInterviewerToForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("GetInstructorList")]
+        public InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input)
+        {
+            try
+            {
+                InstructorListResponse response = new InstructorListResponse();
+                response = _graduateProgramService.GetInstructorList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                InstructorListResponse response = new InstructorListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetInterviewerList")]
+        public InterviewerListResponse GetInterviewerList(GetInstructorInterviewerListRequest input)
+        {
+            try
+            {
+                InterviewerListResponse response = new InterviewerListResponse();
+                response = _graduateProgramService.GetInterviewerList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                InterviewerListResponse response = new InterviewerListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetInstructionAttachment")]
+        public IActionResult GetInstructionAttachment(int UserID,int InstructionAttachmentID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                InstructorAttachments obj = _graduateProgramService.GetInstructionAttachment(UserID, InstructionAttachmentID);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetInterviewAttachments")]
+        public IActionResult GetInterviewAttachments(int UserID, int InterviewAttachmentID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                InterviewerAttachments obj = _graduateProgramService.GetInterviewAttachments(UserID, InterviewAttachmentID);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet("AuthorizeRecommender")]
+        public AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier)
+        {
+            try
+            {
+                AuthorizeRecommenderResponse response = new AuthorizeRecommenderResponse();
+                response = _graduateProgramService.GetDetailsForRecommendation(recommenderIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AuthorizeRecommenderResponse response = new AuthorizeRecommenderResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
 
         [AllowAnonymous]
         [HttpPost("AddRecommendation")]
@@ -404,16 +628,6 @@ namespace CSULB_COE.Controllers
             try
             {
                 BaseResponse response = new BaseResponse();
-                //foreach(var attachment in input.FormAddRecommendationRequestAttachment)
-                //{
-                //    FormAddRecommendationRequest obj = new FormAddRecommendationRequest();
-                //    obj.FormID = input.FormID;
-                //    obj.RecommenderIdentifier = input.RecommenderIdentifier;
-                //    obj.FileName = attachment.FileName;
-                //    obj.FileContent = attachment.FileContent;
-                //    obj.DocumentID = attachment.DocumentID;
-                //    response = _graduateProgramService.AddRecommendation(obj);
-                //}
                 response = _graduateProgramService.AddRecommendation(input);
                 return response;
             }
@@ -435,34 +649,13 @@ namespace CSULB_COE.Controllers
             try
             {
                 BaseResponse response = new BaseResponse();
-            
+
                 response = _graduateProgramService.AddRecommendationForm(input);
                 return response;
             }
             catch (Exception ex)
             {
                 BaseResponse response = new BaseResponse();
-                response.IsSuccess = false;
-                response.Message = "Failed to save data , please try after sometime";
-                response.StackTrace = ex.Message;
-                _logger.LogError(ex, ex.Message);
-                return response;
-            }
-        }
-
-        [AllowAnonymous]
-        [HttpGet("AuthorizeRecommender")]
-        public AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier)
-        {
-            try
-            {
-                AuthorizeRecommenderResponse response = new AuthorizeRecommenderResponse();
-                response = _graduateProgramService.GetDetailsForRecommendation(recommenderIdentifier);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                AuthorizeRecommenderResponse response = new AuthorizeRecommenderResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;

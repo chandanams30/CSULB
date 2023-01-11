@@ -12,6 +12,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public RecommendersInformation RecommendersInformation { get; set; }
         public ReviewerInformation ReviewerInformation { get; set; }
         public FormControlHandler FormControlHandler { get; set; }
+        public InstructorInformation Instructor { get; set; }
+        public InterviwerInformation Interviewer { get; set; }
     }
     public class FormBasicInformation
     {
@@ -31,6 +33,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string CompletingYourApplication { get; set; }
         public int ApplicationTypeID { get; set; }
         public string ProgramFormIdentifier { get; set; }
+        public DateTime CreatedDateTime { get; set; }
+        public DateTime? SubmittedDateTime { get; set; }
     }
     public class FormStateHandler
     {
@@ -75,5 +79,13 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     public class FormControlHandler
     {
         public string FormControls { get; set; }
+    }
+    public class InstructorInformation
+    {
+        public string Instructor { get; set; }
+    }
+    public class InterviwerInformation
+    {
+        public string Interviewer { get; set; }
     }
 }
