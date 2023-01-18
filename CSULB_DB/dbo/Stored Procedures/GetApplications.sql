@@ -33,6 +33,7 @@ BEGIN
 --8	Interviewer
 --9	CommunityPartnerUser
 --10	CommunitySupervisor
+--11	Program Coordinator
 --*/
 
 
@@ -58,15 +59,16 @@ BEGIN
 
 DECLARE @RoleIDs varchar(50)
 SELECT @RoleIDs = STRING_AGG(
-	CASE WHEN [RoleID] = 1 THEN '1,2,4' --Administrator 
+	CASE WHEN [RoleID] = 1 THEN '1,2,4,5' --Administrator 
 		WHEN [RoleID] = 3 THEN '1,2,4' --Student
-		WHEN [RoleID] = 4 THEN '1,2,4' --ProgramAdmin
+		WHEN [RoleID] = 4 THEN '1,2,4,5' --ProgramAdmin
 		WHEN [RoleID] = 5 THEN '1,4' --Faculty/Supervisor
 		WHEN [RoleID] = 6 THEN '1,2' --Reviewer
 		WHEN [RoleID] = 7 THEN '1,2' --Instructor
 		WHEN [RoleID] = 8 THEN '1,2' --Interviewer
 		WHEN [RoleID] = 9 THEN '4' --CommunityPartnerUser
 		WHEN [RoleID] = 10 THEN '4' --CommunitySupervisor
+		WHEN [RoleID] = 11 THEN '1' --Program Coordinator
 		ELSE '0' END, ', ') 
 	FROM [User].[UserRoles] UR WHERE UR.[UserID]=@UserID AND UR.[RoleID] <> 2
 

@@ -6,8 +6,11 @@
     [AliasNames]            NVARCHAR (MAX) NULL,
     [CreatedDateTime]       DATETIME       NOT NULL,
     [CreatedByUserID]       BIGINT         NOT NULL,
-    [ProgramFormIdentifier] VARCHAR (10)   NULL
+    [ProgramFormIdentifier] VARCHAR (10)   NULL,
+    [AcademicPlanCode]      NVARCHAR (20)  NULL
 );
+
+
 
 
 

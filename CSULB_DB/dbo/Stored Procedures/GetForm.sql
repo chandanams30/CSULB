@@ -4,6 +4,9 @@
 -- Description:	Returns the form details 
 -- =============================================
 --EXEC [dbo].[GetForm] 340,0,7,2234
+--EXEC [dbo].[GetForm] @UserID = 401, @FormID =2, @ProgramID=8,@TermCode=2234 
+--EXEC [dbo].[GetForm] @UserID = 401, @FormID =4, @ProgramID=13,@TermCode=2234 
+
 CREATE PROCEDURE [dbo].[GetForm]
 @UserID bigint
 ,@FormID bigint
@@ -69,13 +72,61 @@ BEGIN
 								BEGIN
 									SELECT @FormID = @@IDENTITY; 
 								END
+
+
 						PRINT 'NEW FORM GENERATED'
+
+						--ADD Instructor
+						IF (@ProgramID = 4) --4	CED - SSCP Clinical Program
+							BEGIN 
+								PRINT 'Insert Instructor for 4	CED - SSCP Clinical Program'
+
+								INSERT INTO [Application].[Instructor]
+								   ([FormID]
+								   ,[InstructorUserID])
+								(
+									SELECT @FormID, FWU.[UserID]
+										FROM 
+											[FieldWork].[FieldWorkUsers] FWU
+											JOIN [FieldWork].[FieldWork] F ON F.[ID] = FWU.[FieldWorkID]
+											JOIN [Master].[FieldWorkCourses] FWC ON FWC.[ID] = F.FieldWorkCourseID
+											JOIN [Master].[CourseTerm] CT ON CT.[ID] = FWC.[CourseTermID]
+											JOIN [Master].[Courses] C ON C.[ID] = CT.[CourseID]
+										WHERE 
+										FWU.[RoleID]=5
+										AND C.[Subject] = 'EDSS'
+										AND C.[CourseNumber] LIKE '300%'
+										AND F.[UserID] = @UserID
+								)
+		 
+								 DECLARE @InstructionID AS BIGINT
+									 IF (@@ERROR = 0)
+										BEGIN
+											SELECT @InstructionID = @@IDENTITY; 
+										
+											INSERT INTO [Application].[InstructorAttachments]
+											   ([InstructorID]
+											   ,[DocumentID])
+											 VALUES
+											   (@InstructionID,26) --26	EDSS 300 Instructor Assessment
+										END
+							END 
+							--ADD Instructor
+
 					END
 			END
 		END
 
 		-----------------
 		--DATA SELECTION
+		DECLARE @SubmittedDate as datetime;
+		--SELECT @SubmittedDate = [ModifiedDateTime] FROM [Application].[FormsHistory] WHERE [FormsID] = @FormID AND [FormStateID] = 3 ORDER BY [ModifiedDateTime] asc
+		SELECT TOP 1 @SubmittedDate = [ModifiedDateTime]  FROM 
+			(
+				SELECT [ModifiedDateTime] FROM [Application].[Forms] WHERE [FormStateID]=3 AND [ID]=@FormID
+				UNION
+				SELECT [ModifiedDateTime] FROM [Application].[FormsHistory] WHERE [FormsID] = @FormID AND [FormStateID] = 3 
+			) T ORDER BY T.[ModifiedDateTime] ASC
 
 		SELECT 
 		F.[ID] AS [FormID]
@@ -88,7 +139,8 @@ BEGIN
 			  ,F.[FormStateID]
 			  ,FS.[Name] AS [FormState]
 			  ,F.[ApplicationNumber]
-			  --,[CreatedDateTime]
+			  ,F.[CreatedDateTime]
+			  ,@SubmittedDate AS [SubmittedDateTime]
 			  --,[CreatedByUserID]
 			  ,F.[ModifiedDateTime]
 			  ,F.[ModifiedBy]
@@ -105,13 +157,30 @@ BEGIN
 
 
 		--STATE HANDLER
+		DECLARE @ApplicationTypeID as bigint;
+		SELECT @ApplicationTypeID = [ApplicationTypeID] FROM [Master].[ProgramApplicationType] WHERE [ProgramID] = @ProgramID;
+
+		Declare @showAddInterviewer as bit = 0;
+		IF EXISTS(SELECT [ID] FROM [Master].[ProgramUsers] WHERE [UserID] = @UserID AND [ProgramID]=@ProgramID AND [RoleID] in (11,1,4))
+		BEGIN
+			SET @showAddInterviewer = 1
+		END
+
+		IF ([dbo].[fnIsRoleValid] (@Userid,'1') = 1)
+		BEGIN
+			SET @showAddInterviewer = 1
+		END
+		
+
 		SELECT (
 		SELECT TOP 1 FSH.[RoleID]
 			  ,FSH.[FormStateID]
 			  ,FSH.[showCancel]
 			  ,FSH.[showSave]
 			  ,FSH.[showEdit]
-			  ,FSH.[showSubmit]
+			  ,CASE WHEN UR.RoleID =3 AND F.[FormStateID] IN (1,2,4) THEN CAST(1 AS BIT) else  CAST(0 AS BIT) end AS [showSubmit]
+			  ,FSH.[showSubmit] AS [enableSubmit]
+			  --,FSH.[showSubmit]
 			  ,FSH.[showDecline]
 			  ,FSH.[showAccept]
 			  ,FSH.[showRequestformoreInfo]
@@ -123,7 +192,14 @@ BEGIN
 			  ,FSH.[showCompletingYourApplication]
 			  ,FSH.[showReviewerSection]
 			  ,FSH.[editReviewerSection]
+			  --,FSH.[showAddInterviewer]
+			  --,FSH.[showAddInstructor]
+			  ,CASE WHEN @ApplicationTypeID=1 AND @showAddInterviewer=1  THEN FSH.[showAddInterviewer] ELSE  CAST(0 AS BIT) END AS [showAddInterviewer]
+			  ,CASE WHEN @ApplicationTypeID=2 THEN CAST(0 AS BIT) else  FSH.[editReviewerSection] end AS [editReviewerSection]
+			  ,FSH.[showInReview]
 			  ,CASE WHEN UR.RoleID = 3 THEN CONVERT(BIT, 0) ELSE  CONVERT(BIT, 1) END AS [showMessageBoard]
+			  --,CONVERT(BIT, 1) AS [showMessageBoard]
+			  ,CASE WHEN UR.RoleID = 3 THEN CONVERT(BIT, 0) ELSE  CONVERT(BIT, 1) END AS [showPreviousNext]
 		  FROM [Master].[FormStateHandler] FSH
 		  JOIN [User].[UserRoles] UR ON UR.UserID=@UserID AND UR.RoleID <> 2 AND UR.RoleID=FSH.RoleID
 		  JOIN [Application].[Forms] F ON F.[ID] = @FormID AND F.[FormStateID]=FSH.[FormStateID]
@@ -146,7 +222,8 @@ BEGIN
 		[Master].[ProgramDocuments] PD 
 		JOIN [Master].[Documents] D ON D.[ID] = PD.[DocumentID]
 		LEFT JOIN [Application].[FormAttachments] FA ON FA.[ProgramDocumentID] = PD.[ID] AND FA.[FormID]=@FormID
-		WHERE PD.[ProgramID]=@ProgramID and PD.[DocumentID] not in (3,6) --6	Unofficial Transcripts, 3	Letters of Recommendation
+		WHERE PD.[ProgramID]=@ProgramID and PD.[DocumentID] not in (3,6,18) --6	Unofficial Transcripts, 3	Letters of Recommendation, 18	Recommendation Letter
+		ORDER BY PD.[SortingOrder]
 
 		--Recomendation
 		DECLARE @rCOUNT AS INT
@@ -344,4 +421,72 @@ BEGIN
 			FROM [Master].[FormControlHandler] FCH
 			JOIN [Master].[Programs] P ON P.[ProgramFormIdentifier] = FCH.[ProgramFormIdentifier] 
 			WHERE P.[ID]=@ProgramID FOR JSON AUTO)  AS [FormControlHandler]	
+
+
+	-------------------------------------------------------------------------------------------------------------------
+	--INSTRUCTOR
+	SELECT
+		(
+				SELECT INS.[FormID] 
+						,INS.[ID] AS [InstructionID]
+						,INS.[InstructorUserID] AS [InstructorUserID]
+						,U.[FirstName] + ' ' + U.[LastName] AS [InstructorName]
+						,R.[Name] AS [RoleName]
+						,CAST(CASE WHEN INS.[InstructorUserID] =@UserID THEN 1 ELSE 0 END AS bit) AS [editInstructorSection]
+						 ,JSON_QUERY((
+									SELECT 
+										IA.[ID] AS [InstructionAttachmentID]
+										,D.[Name] AS [DocumentName]
+										,IA.[DocumentID]
+										,REPLACE(IA.[FileName],'_', ' ') AS [FileName]
+										,IA.[FileExtn]
+										,IA.[FolderName]
+										,IA.[UploadedDate]
+										,CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'1,4') = 1 THEN 'true' ELSE 'false' END AS [CanView]
+									FROM [Application].[InstructorAttachments] IA 
+									JOIN [Master].[Documents] D ON D.[ID] = IA.[DocumentID]
+									WHERE IA.[ID] = INS.[ID]
+									FOR JSON PATH,INCLUDE_NULL_VALUES
+									)) AS [Attachments]
+					FROM [Application].[Instructor] INS
+					JOIN [User].[Users] U ON U.[ID] = INS.[InstructorUserID]
+					JOIN [User].[UserRoles] UR ON UR.[UserID] = U.[ID]  AND UR.RoleID=7
+					JOIN [Master].[Role] R ON R.[ID] = UR.RoleID AND UR.[ID]<>2
+				  WHERE INS.[FormID]=@FormID 
+				  AND INS.[InstructorUserID] = (CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'1,4,3') = 1 THEN INS.[InstructorUserID] WHEN  [dbo].[fnIsRoleValid] (@Userid,'7') = 1 THEN @UserID ELSE 0 END)
+				  FOR JSON PATH, INCLUDE_NULL_VALUES) AS [Instructor]
+	-------------------------------------------------------------------------------------------------------------------
+	--Interviewer
+	SELECT
+		(
+			SELECT INS.[FormID] 
+			,INS.[ID] AS [InterviewID]
+			,INS.[InterviewerUserID] AS [InterviewerUserID]
+			,U.[FirstName] + ' ' + U.[LastName] AS [InterviewerName]
+			,R.[Name] AS [RoleName]
+			,CAST(CASE WHEN INS.[InterviewerUserID] =@UserID THEN 1 ELSE 0 END AS bit) AS [editInterviewSection]
+			,JSON_QUERY((
+				SELECT 
+				IA.[ID] AS [InterviewAttachmentID]
+				,D.[Name] AS [DocumentName]
+				,IA.[DocumentID]
+				,REPLACE(IA.[FileName],'_', ' ') AS [FileName]
+				,IA.[FileExtn]
+				,IA.[FolderName]
+				,IA.[UploadedDate]
+				,CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'1,4') = 1 THEN 'true' ELSE 'false' END AS [CanView]
+				FROM [Application].[InterviewerAttachments] IA 
+					JOIN [Master].[Documents] D ON D.[ID] = IA.[DocumentID]
+				WHERE IA.[ID] = INS.[ID]
+					FOR JSON PATH,INCLUDE_NULL_VALUES
+				)) AS [Attachments]
+			FROM [Application].[Interviewer] INS
+				JOIN [User].[Users] U ON U.[ID] = INS.[InterviewerUserID]
+				JOIN [User].[UserRoles] UR ON UR.[UserID] = U.[ID]  AND UR.RoleID=8
+				JOIN [Master].[Role] R ON R.[ID] = UR.RoleID AND UR.[ID]<>2
+			WHERE INS.[FormID]=@FormID 
+				AND INS.[InterviewerUserID] = (CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'1,4') = 1 THEN INS.[InterviewerUserID] WHEN  [dbo].[fnIsRoleValid] (@Userid,'8') = 1 THEN @UserID ELSE 0 END)
+		FOR JSON PATH, INCLUDE_NULL_VALUES) AS [Interviewer]
+
+	--------------------------------------------------------------------------------------------------------------------
 END

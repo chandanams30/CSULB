@@ -21,7 +21,8 @@ BEGIN
 		--SELECT @ProgramDocumentID
 
 		DECLARE @folderName VARCHAR(100);
-		SET @FolderName = CAST(@UserId AS VARCHAR(25)) + '~' + @SavedFileName;
+		--SET @FolderName = CAST(@UserId AS VARCHAR(25)) + '~' + @SavedFileName;
+		SELECT @FolderName = CAST(UserID AS VARCHAR(25)) + '~' + @SavedFileName FROM [Application].[Forms] WHERE [ID] = @FormID;
 
 		--CHECK IF [FormID] AND [ProgramDocumentID] EXISTS IN [Application].[FormAttachments]
 

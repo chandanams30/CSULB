@@ -16,6 +16,11 @@
     [showMergeandDownloadAttachments] BIT    NOT NULL,
     [showCompletingYourApplication]   BIT    CONSTRAINT [DF_FormStateHandler_showCompletingYourApplication] DEFAULT ((0)) NOT NULL,
     [showReviewerSection]             BIT    CONSTRAINT [DF_FormStateHandler_showReviewerSection] DEFAULT ((0)) NOT NULL,
-    [editReviewerSection]             BIT    CONSTRAINT [DF_FormStateHandler_editReviewerSection] DEFAULT ((0)) NOT NULL
+    [editReviewerSection]             BIT    CONSTRAINT [DF_FormStateHandler_editReviewerSection] DEFAULT ((0)) NOT NULL,
+    [showAddInterviewer]              BIT    CONSTRAINT [DF_Table_Test_showAddInterviewer] DEFAULT ((0)) NOT NULL,
+    [showAddInstructor]               BIT    CONSTRAINT [DF_Table_Test_showAddInstructor] DEFAULT ((0)) NOT NULL,
+    [showInReview]                    BIT    CONSTRAINT [DF_Table_Test_showInReview] DEFAULT ((0)) NOT NULL
 );
+
+
 

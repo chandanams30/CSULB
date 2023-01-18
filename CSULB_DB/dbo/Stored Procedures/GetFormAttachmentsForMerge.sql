@@ -1,9 +1,9 @@
 ﻿-- =============================================
--- Author:		<Author,,Name>
+-- Author:		ThoughtFocus
 -- Create date: <Create Date,,>
--- Description:	<Description,,>
+-- Description:	Returns attachments by sorting for merge
 -- =============================================
---EXEC 
+
 --EXEC [dbo].[GetFormAttachmentsForMerge] 2
 CREATE PROCEDURE [dbo].[GetFormAttachmentsForMerge]
 @FormID BIGINT
@@ -30,11 +30,40 @@ FROM OPENJSON(@json)
    ,Program nvarchar(500)
   )T CROSS JOIN   (SELECT STRING_AGG([value], ',') as languages
       FROM OPENJSON(@json, '$.languages') where [value] <> '') T2;
-	  
-SELECT FA.[FormID], FA.[FileName], FA.[FileExtn], FA.[FolderName] FROM [Application].[FormAttachments] FA WHERE FA.[FormID]=@FormID
-UNION
-SELECT R.[FormID], RA.[FileName], RA.[FileExtn], RA.[FolderName] FROM [Application].[RecommendationAttachments] RA JOIN [Application].[Recommendations] R ON R.[ID] = RA.[RecomendationID] WHERE R.[FormID]=@FormID
 
+----------------------------------------------
+
+--SELECT T.[FormID], T.[FileName], T.[FileExtn], T.[FolderName] from (
+--SELECT FA.[FormID], FA.[FileName], FA.[FileExtn], FA.[FolderName], PD.[DocumentID] FROM [Application].[FormAttachments] FA 
+--JOIN [Master].[ProgramDocuments] PD ON PD.[ID] = FA.[ProgramDocumentID]
+--WHERE FA.[FormID]=@FormID
+--UNION
+--SELECT R.[FormID], RA.[FileName], RA.[FileExtn], RA.[FolderName], RA.[DocumentID]
+--FROM [Application].[RecommendationAttachments] RA JOIN [Application].[Recommendations] R ON R.[ID] = RA.[RecomendationID] WHERE R.[FormID]=@FormID
+--)T
+--JOIN [Application].[Forms] F ON F.[ID] = T.[FormID]
+--JOIN [Master].[ProgramDocuments] PD ON PD.[ProgramID] = F.[ProgramID] AND PD.[DocumentID] = T.[DocumentID]
+--WHERE PD.[isRequiredForMerge]=1
+--ORDER BY PD.[SortingOrder]
+
+SELECT T.[FormID], T.[FileName], T.[FileExtn], T.[FolderName]
+--,T.[DocumentID], T.RecomendationID, PD.[SortingOrder] 
+FROM (
+SELECT FA.[FormID], FA.[FileName], FA.[FileExtn], FA.[FolderName], PD.[DocumentID], 0 AS [RecomendationID] FROM [Application].[FormAttachments] FA 
+JOIN [Master].[ProgramDocuments] PD ON PD.[ID] = FA.[ProgramDocumentID]
+WHERE FA.[FormID]=@FormID
+UNION
+SELECT R.[FormID], RA.[FileName], RA.[FileExtn], RA.[FolderName], RA.[DocumentID], RA.[RecomendationID]
+FROM [Application].[RecommendationAttachments] RA JOIN [Application].[Recommendations] R ON R.[ID] = RA.[RecomendationID] WHERE R.[FormID]=@FormID
+)T
+JOIN [Application].[Forms] F ON F.[ID] = T.[FormID]
+JOIN [Master].[ProgramDocuments] PD ON PD.[ProgramID] = F.[ProgramID] AND PD.[DocumentID] = T.[DocumentID]
+WHERE PD.[isRequiredForMerge]=1
+ORDER BY PD.[SortingOrder],T.RecomendationID,t.[DocumentID]
+----------------------------------------------
+
+----------------------------------------------
 SELECT [UserID] as UserFolder FROM [Application].[Forms] where [ID]=@FormID
+----------------------------------------------
 
 END

@@ -27,8 +27,10 @@ LEFT JOIN [Master].[ProgramApplicationType] PAT ON PAT.[ProgramID] = F.[ProgramI
 LEFT JOIN [Master].[Programs] P ON P.[ID] = F.[ProgramID]
 LEFT JOIN [Master].[Term] T ON T.[TermCode] = F.[TermCode]
 JOIN [Master].[FormState] FS ON FS.[ID] = F.[FormStateID]
+JOIN [Master].[ProgramApplicationDates] PAD ON PAD.[ProgramID] = F.[ProgramID] AND PAD.[TermCode] = F.[TermCode]
 WHERE F.UserID = @Userid
 AND PAT.[ApplicationTypeID]=@ApplicationTypeID
+AND PAD.[ApplicationCloseDate] > (CASE WHEN F.[FormStateID] IN (1,2) THEN GETDATE() -1 ELSE PAD.[ApplicationCloseDate] -1  END)
 	
 		
 END

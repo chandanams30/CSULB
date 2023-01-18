@@ -35,7 +35,7 @@ SELECT @ApplicationTypeID = [ApplicationTypeID]  FROM [Master].[ProgramApplicati
 IF(@ApplicationTypeID = 1) --1	Initial Teacher Credential Programs
 	BEGIN
 		DECLARE @ProgramFormIdentifier as VARCHAR(10)
-		SELECT @ProgramFormIdentifier = ProgramFormIdentifier FROM [Master].[Programs] WHERE [ID] = 1
+		SELECT @ProgramFormIdentifier = ProgramFormIdentifier FROM [Master].[Programs] WHERE [ID] = @ProgramID
 
 		IF(@ProgramFormIdentifier = 'ESCP') --Graduate / Advanced Credential Programs
 			BEGIN
@@ -108,7 +108,7 @@ PRINT 'ESCPValidation';
 IF NOT EXISTS(SELECT J.* FROM [Application].[Forms] F
 			CROSS APPLY OPENJSON(F.[FORM]) AS J 
 			WHERE [ID] = @FormID AND (J.[VALUE] IS NULL OR J.[VALUE]='')
-			AND J.[key] not in ('middleName'))
+			AND J.[key] not in ('middleName', 'casId','otherName','preferredName','state'))
 	BEGIN
 		PRINT 'GOTO Attachment Validation';
 		GOTO AttachmentValidation;
@@ -123,7 +123,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 MSCPValidation:
 PRINT 'MSCPValidation';
-IF NOT EXISTS (SELECT * FROM [dbo].[tvfMSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfMSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state'))
 --(SELECT J.* FROM [Application].[Forms] F
 --			CROSS APPLY OPENJSON(F.[FORM]) AS J 
 --			WHERE [ID] = @FormID AND (J.[VALUE] IS NULL OR J.[VALUE]='')
@@ -141,7 +141,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 SSCPValidation:
 PRINT 'SSCPValidation';
-IF NOT EXISTS (SELECT * FROM [dbo].[tvfSSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfSSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state'))
 	BEGIN
 		GOTO AttachmentValidation;
 	END
@@ -155,7 +155,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 UDCPValidation:
 PRINT 'UDCPValidation';
-IF NOT EXISTS (SELECT * FROM [dbo].[tvfUDCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfUDCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state'))
 	BEGIN
 		GOTO AttachmentValidation;
 	END
@@ -203,7 +203,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 OpenState:
 PRINT 'OpenState';
-UPDATE [Application].[Forms] SET [FormStateID] = 1 WHERE [ID]=@FormID;
+UPDATE [Application].[Forms] SET [FormStateID] = (CASE WHEN [FormStateID]=4 THEN [FormStateID] ELSE 1 END) WHERE [ID]=@FormID;
 ------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------
 --Set form to Open State
