@@ -17,7 +17,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class DocumentController : ControllerBase
+    public class DocumentController : ControllerBase
     {
         public ILogger<DocumentController> _logger;
         public IDocumentService _documentService;

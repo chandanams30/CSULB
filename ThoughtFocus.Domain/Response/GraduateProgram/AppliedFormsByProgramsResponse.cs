@@ -23,6 +23,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string Semester { get; set; }
         public string TermCode { get; set; }
         public string CSULBID { get; set; }
+        public string ReviewersName { get; set; }
     }
 
   

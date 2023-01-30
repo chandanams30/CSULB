@@ -190,7 +190,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   ProgramName = Convert.ToString(row["ProgramName"]),
                                                   Semester = Convert.ToString(row["Semester"]),
                                                   TermCode = Convert.ToString(row["TermCode"]),
-                                                  CSULBID = Convert.ToString(row["CSULBID"])
+                                                  CSULBID = Convert.ToString(row["CSULBID"]),
+                                                  ReviewersName = Convert.ToString(row["ReviewersName"])
 
                                               }).ToList();
                     }
