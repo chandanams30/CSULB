@@ -58,7 +58,7 @@ FROM [Application].[RecommendationAttachments] RA JOIN [Application].[Recommenda
 )T
 JOIN [Application].[Forms] F ON F.[ID] = T.[FormID]
 JOIN [Master].[ProgramDocuments] PD ON PD.[ProgramID] = F.[ProgramID] AND PD.[DocumentID] = T.[DocumentID]
-WHERE PD.[isRequiredForMerge]=1
+WHERE PD.[isRequiredForMerge]=1 AND T.[FileName] IS NOT NULL
 ORDER BY PD.[SortingOrder],T.RecomendationID,t.[DocumentID]
 ----------------------------------------------
 

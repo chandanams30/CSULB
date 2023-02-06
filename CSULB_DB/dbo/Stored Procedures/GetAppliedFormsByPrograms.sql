@@ -1,5 +1,9 @@
-﻿
---exec [GetAppliedFormsByPrograms] 1, 9, 2234,3
+﻿-- =============================================
+-- Author:		ThoughtFocus
+-- Create date: 2022-Sep-13
+-- Description:	Returns Applied Forms List by Programs 
+-- =============================================
+--exec [GetAppliedFormsByPrograms] 1, 8, 2234,0
 CREATE PROCEDURE [dbo].[GetAppliedFormsByPrograms]
 @Userid bigint,
 @ProgramID bigint,
@@ -78,6 +82,19 @@ AND F.[TermCode]=@TermCode
 AND F.[FormStateID] = ISNULL(@FormStateID, F.[FormStateID])
 
 -------------------------------------------------------------------------------------------------------------------------------
+--Reviewers List as comma seperated 
+SELECT R.[FormID]
+	,STRING_AGG(RU.[FirstName] + ' ' + RU.[LastName], ', ') WITHIN
+GROUP (
+		ORDER BY RU.[FirstName]
+		) AS [ReviewersName]
+INTO #tempReviewerName
+FROM [Application].[Reviewer] R 
+JOIN [User].[Users] RU ON R.[ReviewerID] = RU.[ID]
+WHERE R.[FormID] in (SELECT [FormID] FROM #tempFormIDs)
+GROUP BY R.[FormID];
+-------------------------------------------------------------------------------------------------------------------------------
+
 
 SELECT 
 F.[ID]
@@ -94,12 +111,14 @@ F.[ID]
 ,P.[Name] AS [ProgramName]
 ,T.[Name] AS [Semester]
 ,F.[TermCode]
+,RN.[ReviewersName]
 FROM [Application].[Forms] F
 JOIN [User].[Users] U ON U.ID = F.UserID
 LEFT JOIN [Master].[Programs] P ON P.[ID] = F.[ProgramID]
 LEFT JOIN [Master].[Term] T ON T.[TermCode] = F.[TermCode]
 JOIN [Master].[FormState] FS ON FS.[ID] = F.[FormStateID]
 JOIN [Master].[ProgramApplicationDates] PAD ON PAD.[ProgramID] = F.[ProgramID] AND PAD.[TermCode] = F.[TermCode]
+LEFT JOIN #tempReviewerName RN ON RN.[FormID] = F.[ID]
 WHERE F.[ID] in (SELECT [FormID] FROM #tempFormIDs)
 AND PAD.[ApplicationCloseDate] > (CASE WHEN F.[FormStateID] IN (1,2) THEN GETDATE() -1 ELSE PAD.[ApplicationCloseDate] -1  END)
 
@@ -131,7 +150,10 @@ AND PAD.[ApplicationCloseDate] > (CASE WHEN F.[FormStateID] IN (1,2) THEN GETDAT
 -------------------------------------------------------------------------------------------------------------------------------
 DECLARE @showAssignApplicationToReviewers AS BIT
 --SELECT @showAssignApplicationToReviewers = CASE WHEN [RoleID] in (1,4) THEN 1 ELSE 0 END FROM [User].[UserRoles] UR WHERE UR.[UserID]=@Userid AND UR.[RoleID] <>2
-SELECT @showAssignApplicationToReviewers = CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END FROM [User].[UserRoles] UR WHERE UR.[UserID]=@Userid AND [RoleID] IN (1,4);
+--SELECT @showAssignApplicationToReviewers = CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END FROM [User].[UserRoles] UR WHERE UR.[UserID]=@Userid AND [RoleID] IN (1,4);
+SELECT @showAssignApplicationToReviewers =[dbo].[fnIsRoleValid] (@Userid,'1,4');
+
+--select @showAssignApplicationToReviewers;
 
 SELECT T.[Name] AS [Semester], T.[TermCode], P.[ID] AS [ProgramID], p.[Name] AS [ProgramName], @showAssignApplicationToReviewers AS [showAssignApplicationToReviewers]
 	from [Master].[Term] T CROSS JOIN

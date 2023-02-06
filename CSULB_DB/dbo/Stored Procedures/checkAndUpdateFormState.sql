@@ -105,10 +105,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 ESCPValidation:
 PRINT 'ESCPValidation';
-IF NOT EXISTS(SELECT J.* FROM [Application].[Forms] F
-			CROSS APPLY OPENJSON(F.[FORM]) AS J 
-			WHERE [ID] = @FormID AND (J.[VALUE] IS NULL OR J.[VALUE]='')
-			AND J.[key] not in ('middleName', 'casId','otherName','preferredName','state'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfMSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state'))
 	BEGIN
 		PRINT 'GOTO Attachment Validation';
 		GOTO AttachmentValidation;
@@ -141,7 +138,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 SSCPValidation:
 PRINT 'SSCPValidation';
-IF NOT EXISTS (SELECT * FROM [dbo].[tvfSSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfSSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state','altEmail'))
 	BEGIN
 		GOTO AttachmentValidation;
 	END
@@ -155,7 +152,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 UDCPValidation:
 PRINT 'UDCPValidation';
-IF NOT EXISTS (SELECT * FROM [dbo].[tvfUDCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfUDCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state','subjectMatterCompetenceVia','altEmail'))
 	BEGIN
 		GOTO AttachmentValidation;
 	END
@@ -170,7 +167,8 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 AttachmentValidation:
 PRINT 'AttachmentValidation';
-IF NOT EXISTS (SELECT * FROM [Master].[ProgramDocuments] PD JOIN [Application].[Forms] F ON F.[ProgramID] = PD.[ProgramID] LEFT JOIN [Application].[FormAttachments] FA ON FA.[FormID] = F.[ID] WHERE F.[ID]=@FormID AND PD.[IsOptional]=0 AND FA.[ID] IS NULL)
+--IF NOT EXISTS (SELECT * FROM [Master].[ProgramDocuments] PD JOIN [Application].[Forms] F ON F.[ProgramID] = PD.[ProgramID] LEFT JOIN [Application].[FormAttachments] FA ON FA.[FormID] = F.[ID] WHERE F.[ID]=@FormID AND PD.[IsOptional]=0 AND (FA.[ID] IS NULL OR FA.[FileName] is NULL))
+IF NOT EXISTS (SELECT * FROM [Master].[ProgramDocuments] PD JOIN [Application].[Forms] F ON F.[ProgramID] = PD.[ProgramID] LEFT JOIN [Application].[FormAttachments] FA ON FA.[FormID] = F.[ID] AND PD.[ID] = FA.[ProgramDocumentID] WHERE F.[ID]=@FormID AND PD.[IsOptional]=0 AND (FA.[ID] IS NULL OR FA.[FileName] is NULL))
 	BEGIN
 		GOTO RecommendationValidation;
 	END
