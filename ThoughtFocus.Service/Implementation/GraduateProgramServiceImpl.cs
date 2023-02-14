@@ -370,7 +370,8 @@ namespace ThoughtFocus.Service.Implementation
                                            AttachmentTitle = Convert.ToString(row["AttachmentTitle"]),
                                            FileName = Convert.ToString(row["FileName"]),
                                            FileExtn = Convert.ToString(row["FileExtn"]),
-                                           IsOptional = Convert.ToBoolean(row["IsOptional"])
+                                           IsOptional = Convert.ToBoolean(row["IsOptional"]),
+                                           Instruction = Convert.ToString(row["Instruction"])
 
                                        }).ToList();
 
@@ -2332,6 +2333,42 @@ namespace ThoughtFocus.Service.Implementation
             return response;
         }
 
+        public BaseResponse AddReviewerToForm(AddReviewerRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@ReviewerID", SqlDbType.BigInt) { Value = input.ReviewerID }
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[AddReviewerToForm]", parameters);
+            response.Message = "Reviewer Added Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public BaseResponse RemoveReviewerFromForm(AddReviewerRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@ReviewerID", SqlDbType.BigInt) { Value = input.ReviewerID }
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[RemoveReviewerFromForm]", parameters);
+            response.Message = "Reviewer Removed Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
         public InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input)
         {
             InstructorListResponse obj = new InstructorListResponse();
@@ -2419,7 +2456,54 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+
+        public ReviewerListResponse GetReviewerList(GetReviewerListRequest input)
+        {
+            ReviewerListResponse obj = new ReviewerListResponse();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode }
+                                        };
+
+            DataTable dtInterviewers = _helper.GetDataTable("[dbo].[getReviewerList]", parameters);
+            try
+            {
+                if (dtInterviewers.Rows.Count > 0)
+                {
+
+
+                    obj.ReviewerList = dtInterviewers.AsEnumerable().Select(row =>
+                                              new ReviewerList
+                                              {
+                                                  ReviewerID = Convert.ToInt32(row["ReviewerID"]),
+                                                  ReviewerName = Convert.ToString(row["ReviewerName"]),
+                                                  isAssigned= Convert.ToBoolean(row["isAssigned"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
     }
+
+
     public class FormAttachmentFileNames
     {
         public string SavedFileName { get; set; }

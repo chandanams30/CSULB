@@ -50,6 +50,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string FileName { get; set; }
         public string FileExtn { get; set; }
         public bool IsOptional { get; set; }
+        public string Instruction { get; set; }
     }
     public class RecommendersInformation
     {

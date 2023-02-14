@@ -511,6 +511,46 @@ namespace CSULB_COE.Controllers
             }
         }
 
+        [HttpPost("AddReviewerToForm")]
+        public BaseResponse AddReviewerToForm(AddReviewerRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.AddReviewerToForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("RemoveReviewerFromForm")]
+        public BaseResponse RemoveReviewerFromForm(AddReviewerRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.RemoveReviewerFromForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
         [HttpPost("GetInstructorList")]
         public InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input)
         {
@@ -543,7 +583,27 @@ namespace CSULB_COE.Controllers
             {
                 InterviewerListResponse response = new InterviewerListResponse();
                 response.IsSuccess = false;
-                response.Message = "Failed to save data , please try after sometime";
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("GetReviewerList")]
+        public ReviewerListResponse GetReviewerList(GetReviewerListRequest input)
+        {
+            try
+            {
+                ReviewerListResponse response = new ReviewerListResponse();
+                response = _graduateProgramService.GetReviewerList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ReviewerListResponse response = new ReviewerListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

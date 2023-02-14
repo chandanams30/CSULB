@@ -37,7 +37,10 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateInterviewerFeedback(UpdateInterviewerFeedbackRequest input);
         BaseResponse AddInstructorToForm(AddInstructorRequest input);
         BaseResponse AddInterviewerToForm(AddInterviewerRequest input);
+        BaseResponse AddReviewerToForm(AddReviewerRequest input);
+        BaseResponse RemoveReviewerFromForm(AddReviewerRequest input);
         InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input);
         InterviewerListResponse GetInterviewerList(GetInstructorInterviewerListRequest input);
+        ReviewerListResponse GetReviewerList(GetReviewerListRequest input);
     }
 }

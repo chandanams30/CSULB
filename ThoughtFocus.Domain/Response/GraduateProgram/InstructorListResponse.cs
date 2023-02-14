@@ -22,4 +22,15 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public int InterviewerUserID { get; set; }
         public string InterviewerName { get; set; }
     }
+
+    public class ReviewerListResponse : BaseResponse
+    {
+        public List<ReviewerList> ReviewerList { get; set; }
+    }
+    public class ReviewerList
+    {
+        public int ReviewerID { get; set; }
+        public string ReviewerName { get; set; }
+        public bool isAssigned { get; set; }
+    }
 }

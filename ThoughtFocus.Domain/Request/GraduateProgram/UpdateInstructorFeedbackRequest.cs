@@ -38,8 +38,25 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public string TermCode { get; set; }
         public int InterviewerUserID { get; set; }
     }
+    public class AddReviewerRequest
+    {
+        public int UserID { get; set; }
+        public int FormID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public int ReviewerID { get; set; }
+    }
 
     public class GetInstructorInterviewerListRequest
+    {
+        public int UserID { get; set; }
+        public int FormID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+
+    }
+
+    public class GetReviewerListRequest
     {
         public int UserID { get; set; }
         public int FormID { get; set; }
