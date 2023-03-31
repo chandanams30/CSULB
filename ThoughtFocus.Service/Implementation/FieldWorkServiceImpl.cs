@@ -1064,6 +1064,7 @@ namespace ThoughtFocus.Service.Implementation
                         string subject = "Credentials for MyCED Application";
                         body = body.Replace("[[logoPath]]", logoText)
                                    .Replace("[[PartnerUserName]]", partnerName)
+                                   .Replace("[[UserName]]", partnerUserEmail)
                                    .Replace("[[Password]]", userPassword);
                         _sendMail.SendEmail(partnerUserEmail, "","COMMON", subject, body, "");
                     }

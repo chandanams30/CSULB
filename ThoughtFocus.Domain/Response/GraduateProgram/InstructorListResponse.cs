@@ -12,6 +12,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public int InstructorUserID { get; set; }
         public string InstructorName { get; set; }
+        public bool isAssigned { get; set; }
     }
     public class InterviewerListResponse:BaseResponse
     {
@@ -21,6 +22,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public int InterviewerUserID { get; set; }
         public string InterviewerName { get; set; }
+        public bool isAssigned { get; set; }
     }
 
     public class ReviewerListResponse : BaseResponse

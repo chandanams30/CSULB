@@ -29,6 +29,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public int InstructorUserID { get; set; }
+        public bool isAssigned { get; set; }
     }
     public class AddInterviewerRequest
     {
@@ -37,6 +38,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public int InterviewerUserID { get; set; }
+        public bool isAssigned { get; set; }
     }
     public class AddReviewerRequest
     {

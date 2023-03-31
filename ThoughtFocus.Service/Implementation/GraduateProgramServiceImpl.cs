@@ -72,7 +72,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   TotalCount = Convert.ToInt32(row["TotalCount"]),
                                                   AcceptedCount = Convert.ToInt32(row["AcceptedCount"]),
                                                   showApply = Convert.ToBoolean(row["showApply"]),
-                                                  showView = Convert.ToBoolean(row["showView"])
+                                                  showView = Convert.ToBoolean(row["showView"]),
+                                                  ProgramSetting = Convert.ToString(row["ProgramSetting"])
                                               }).ToList();
 
                     obj.HeaderDetails= dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
@@ -82,7 +83,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    TermCode = Convert.ToString(row["TermCode"]),
                                                    showApply = Convert.ToBoolean(row["showApply"]),
                                                    showView = Convert.ToBoolean(row["showView"]),
-                                                   showAssignApplicationToReviewers= Convert.ToBoolean(row["showAssignApplicationToReviewers"])
+                                                   showAssignApplicationToReviewers= Convert.ToBoolean(row["showAssignApplicationToReviewers"]),
+                                                   showSettings = Convert.ToBoolean(row["showSettings"])
                                                }).FirstOrDefault();
 
                     obj.Semesters = dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
@@ -911,8 +913,11 @@ namespace ThoughtFocus.Service.Implementation
                     ccMail= Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
                     programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                     subject = "Application Submitted";
-                    body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
-                    body = body.Replace("[[logoPath]]", logoText) // body.Replace("[[logoPath]]", logoText)
+                    if(programID==6)
+                        body = GetMailBodyTemplate("Student_FormSubmit_Confirmation_UDCP.html");
+                    else
+                        body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
+                    body = body.Replace("[[logoPath]]", logoText) 
                                .Replace("[[ApplicantName]]", applicantsName)
                                .Replace("[[programName]]", programName);
                     byte[] inputStr = null;
@@ -1883,6 +1888,7 @@ namespace ThoughtFocus.Service.Implementation
             byte[] mergedFileStream=null;
             List<FormAttachmentEntity> objList = new List<FormAttachmentEntity>();
             DataTable dtPersonalInfo = null;
+            DataTable dtEducationInfo = null;
             string UserFolderName = string.Empty;
             SqlParameter[] parameters =
                                    {
@@ -1911,13 +1917,14 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     UserFolderName = Convert.ToString(dsDoc.Tables[2].Rows[0]["UserFolder"]);
                 }
+                dtEducationInfo= dsDoc.Tables[3].Copy();
             }
 
-            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo);
+            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo,dtEducationInfo);
 
             return mergedFileStream;
         }
-        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo)
+        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo,DataTable dtEducationInfo)
         {
             byte[] inputStream = null;
             var folderPath = _configuration["ApplicationKeys:FileRepository"];
@@ -1939,10 +1946,11 @@ namespace ThoughtFocus.Service.Implementation
             document.Open();
             // first phase is to draw the HTML
             //string fileList=GetFileList(lstAttachments);
-            GetHTMLForPersonalInfo(dtPersonalInfo,copyProvider,workingFolderName,"");
+            GetHTMLForPersonalInfo(dtPersonalInfo,copyProvider,workingFolderName,"", dtEducationInfo);
 
             foreach (var attachment in lstAttachments)
             {
+
                 string fileName = string.Empty;
                 string[] splitter = attachment.FolderName.Split('~');
                 fileName = splitter[1].ToString()+".pdf";
@@ -1981,9 +1989,10 @@ namespace ThoughtFocus.Service.Implementation
             sbFiles.Append("</ol>");
             return sbFiles.ToString();
         }
-        private void GetHTMLForPersonalInfo(DataTable dtPersonalInfo,PdfCopy copyprovider,string fileStoringPath, string fileList)
+        private void GetHTMLForPersonalInfo(DataTable dtPersonalInfo,PdfCopy copyprovider,string fileStoringPath, string fileList,DataTable dtEducationInfo)
         {
             string htmlString = string.Empty;
+            string htmlStringEducationalInfo = string.Empty;
             string body = string.Empty;
             String firstName = string.Empty;
             String lastName = string.Empty;
@@ -2012,11 +2021,16 @@ namespace ThoughtFocus.Service.Implementation
                 Semester = Convert.ToString(dtPersonalInfo.Rows[0]["Semester"]);
                 Program = Convert.ToString(dtPersonalInfo.Rows[0]["Program"]);
                 languages = Convert.ToString(dtPersonalInfo.Rows[0]["languages"]);
+                // costruct html for EducationalInfo
+                if (dtEducationInfo.Rows.Count > 0)
+                {
+                    htmlStringEducationalInfo = ConstructHTMLforEducationInfo(dtEducationInfo, dtPersonalInfo);
+                }
                 using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
                 {
                     body = reader.ReadToEnd();
                 }
-                htmlString = body.Replace("[[firstName]]", firstName).Replace("[[lastName]]", lastName).Replace("[[preferredName]]", preferredName).Replace("[[otherName]]", otherName).Replace("[[cusulbEmail]]", cusulbEmail).Replace("[[altEmail]]", altEmail).Replace("[[phoneNumber]]", phoneNumber).Replace("[[csulbCampusId]]", csulbCampusId).Replace("[[Semester]]", Semester).Replace("[[Program]]", Program).Replace("[[languages]]", languages);
+                htmlString = body.Replace("[[firstName]]", firstName).Replace("[[lastName]]", lastName).Replace("[[preferredName]]", preferredName).Replace("[[otherName]]", otherName).Replace("[[cusulbEmail]]", cusulbEmail).Replace("[[altEmail]]", altEmail).Replace("[[phoneNumber]]", phoneNumber).Replace("[[csulbCampusId]]", csulbCampusId).Replace("[[Semester]]", Semester).Replace("[[Program]]", Program).Replace("[[languages]]", languages).Replace("[[EducationInfo]]", htmlStringEducationalInfo);
 
                 StringReader sr = new StringReader(htmlString.ToString());
                 Document pdfDoc = new Document(PageSize.A4, 50f, 50f, 200f, 0f);
@@ -2043,6 +2057,28 @@ namespace ThoughtFocus.Service.Implementation
             }
 
             //return htmlString;
+        }
+        private string ConstructHTMLforEducationInfo(DataTable dtEducationalInfo,DataTable dtPersonalInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+            string bachelorDegreeMajor = string.Empty;
+            string institution = string.Empty;
+            string highestDegreeEarned = string.Empty;
+            bachelorDegreeMajor = Convert.ToString(dtPersonalInfo.Rows[0]["bachelorDegreeMajor"]);
+            institution = Convert.ToString(dtPersonalInfo.Rows[0]["institution"]);
+            highestDegreeEarned = Convert.ToString(dtPersonalInfo.Rows[0]["highestDegreeEarned"]);
+            sb.Append("<table border='1' ><tr><td colspan='2'style='padding: 15px;'><br/></td></tr><tr><td colspan='2'>Education Information</td></tr><tr><td style='width: 10 %;'>Bachelor's Degree Major</td><td>" + bachelorDegreeMajor + "</td></tr><tr><td>Institution</td><td>"+ institution + "</td></tr><tr><td>Highest Degree Earned</td><td>"+ highestDegreeEarned + "</td></tr><tr><td colspan='2'><table><tr><td>College/University</td><td>Degree/Credential Earned</td><td>State</td><td>Dates Attended</td></tr>");
+            for(int i = 0; i < dtEducationalInfo.Rows.Count; i++)
+            {
+                sb.Append("<tr>");
+                sb.Append("<td>"+ Convert.ToString(dtEducationalInfo.Rows[i]["college"]) + "</td>");
+                sb.Append("<td>" + Convert.ToString(dtEducationalInfo.Rows[i]["degree"]) + "</td>");
+                sb.Append("<td>" + Convert.ToString(dtEducationalInfo.Rows[i]["state"]) + "</td>");
+                sb.Append("<td>" + Convert.ToDateTime(dtEducationalInfo.Rows[i]["dateFrom"]).ToString("MM/dd/yyyy") + " to "+ Convert.ToDateTime(dtEducationalInfo.Rows[i]["dateTo"]).ToString("MM/dd/yyyy") + "</td>");
+                sb.Append("</tr>");
+            }
+            sb.Append("</table></td></tr></table>");
+            return sb.ToString();
         }
 
         public BaseResponse AssignFormToReviewers(int programID)
@@ -2306,7 +2342,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@InstructorUserID", SqlDbType.BigInt) { Value = input.InstructorUserID }
+                                          new SqlParameter("@InstructorUserID", SqlDbType.BigInt) { Value = input.InstructorUserID },
+                                          new SqlParameter("@isAssigned", SqlDbType.Bit) { Value = input.isAssigned }
                                         };
 
             int ID = _helper.InsertTable("[dbo].[AddInstructorToForm]", parameters);
@@ -2324,7 +2361,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@InterviewerUserID", SqlDbType.BigInt) { Value = input.InterviewerUserID }
+                                          new SqlParameter("@InterviewerUserID", SqlDbType.BigInt) { Value = input.InterviewerUserID },
+                                          new SqlParameter("@isAssigned", SqlDbType.Bit) { Value = input.isAssigned }
                                         };
 
             int ID = _helper.InsertTable("[dbo].[AddInterviewerToForm]", parameters);
@@ -2390,7 +2428,8 @@ namespace ThoughtFocus.Service.Implementation
                                               new InstructorList
                                               {
                                                   InstructorUserID = Convert.ToInt32(row["InstructorUserID"]),
-                                                  InstructorName = Convert.ToString(row["InstructorName"])
+                                                  InstructorName = Convert.ToString(row["InstructorName"]),
+                                                  isAssigned = Convert.ToBoolean(row["isAssigned"])
                                               }).ToList();
 
 
@@ -2434,7 +2473,8 @@ namespace ThoughtFocus.Service.Implementation
                                               new InterviewerList
                                               {
                                                   InterviewerUserID = Convert.ToInt32(row["InterviewerUserID"]),
-                                                  InterviewerName = Convert.ToString(row["InterviewerName"])
+                                                  InterviewerName = Convert.ToString(row["InterviewerName"]),
+                                                  isAssigned= Convert.ToBoolean(row["isAssigned"])
                                               }).ToList();
 
 

@@ -129,6 +129,9 @@ namespace CSULB_COE
             // notifications 
             services.AddScoped<ISendMail, SendMail>();
 
+            // common utilities
+            services.AddScoped<ICommonUtils, CommonUtils>();
+
             // Graduate Programs 
             services.AddScoped<IGraduateProgramService, GraduateProgramServiceImpl>();
 
@@ -137,6 +140,12 @@ namespace CSULB_COE
 
             // Search Application
             services.AddScoped<ISearchApplication, SearchApplicationImpl>();
+
+            // Admin
+            services.AddScoped<IAdminService, AdminServiceImpl>();
+
+            // Milestones
+            services.AddScoped<IMilestonesService, MilestonesServiceImpl>();
 
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo

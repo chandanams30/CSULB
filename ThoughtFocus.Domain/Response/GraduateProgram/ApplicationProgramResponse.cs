@@ -22,6 +22,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public int AcceptedCount { get; set; }
         public bool showApply { get; set; }
         public bool showView { get; set; }
+        public string ProgramSetting { get; set; }
     }
 
     public class HeaderDetails
@@ -31,6 +32,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public bool showApply { get; set; }
         public bool showView { get; set; }
         public bool showAssignApplicationToReviewers { get; set; }
+        public bool showSettings { get; set; }
         public string programName { get; set; }
         public int programID { get; set; }
     }

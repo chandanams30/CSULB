@@ -280,6 +280,7 @@ namespace ThoughtFocus.Service.Implementation
                     string subject = "Password for MyCED Application";
                     body = body.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", request.FirstName + " " + request.LastName)
+                               .Replace("[[UserName]]", request.CSULBID)
                                .Replace("[[Password]]", userPassword);
                     _sendMail.SendEmail(request.Email, "","COMMON", subject, body,"");
                     obj.IsSuccess = true;
