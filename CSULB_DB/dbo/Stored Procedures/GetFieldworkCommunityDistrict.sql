@@ -15,5 +15,6 @@ SELECT [ID] AS [CommunityDistrictID]
       --,[CreatedBy]
       --,[CreatedDate]
   FROM [FieldWork].[CommunityDistrict]
+  ORDER BY [Name]
    
 END

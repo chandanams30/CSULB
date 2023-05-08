@@ -36,9 +36,9 @@ WHERE U.[FirstName] LIKE @FirstName OR U.[LastName] LIKE @LastName OR U.[Email] 
 ----
 --SELECT * FROM #TempUsers
 
-SELECT [ID], [FirstName], [LastName], [EMAIL], [CSULBID], [Type], [UserID], [TermCode], [ProgramID], [ApplicationTypeID] 
+SELECT [ID], [FirstName], [LastName], [EMAIL], [CSULBID], isnull([Type],'-') AS [Type] , [UserID], [TermCode], [ProgramID], [ApplicationTypeID] 
 FROM (
-	SELECT [ID], [FirstName], [LastName], [EMAIL], [CSULBID], [Type], [UserID], [TermCode], [ProgramID], [ApplicationTypeID]  
+	SELECT [ID], [FirstName], [LastName], [EMAIL], [CSULBID], [Type] , [UserID], [TermCode], [ProgramID], [ApplicationTypeID]  
 	FROM #TempUsers
 	UNION 
 	SELECT NULL AS [ID], U.[FirstName], U.[LastName], U.[EMAIL], U.[CSULBID], NULL  AS [Type], U.[ID] AS [UserID], NULL AS [TermCode], NULL AS [ProgramID], NULL AS [ApplicationTypeID] 
@@ -49,4 +49,10 @@ FROM (
 	) T ORDER BY [FirstName], [LastName], [CSULBID]
 
 DROP TABLE #TempUsers
+-- =============================================
+-- Example to execute the stored procedure
+-- =============================================
+--EXECUTE [dbo].[SearchStudent] @searchString = venk
+--exec [dbo].[SearchStudent] @searchString=N'venka'
+
 END

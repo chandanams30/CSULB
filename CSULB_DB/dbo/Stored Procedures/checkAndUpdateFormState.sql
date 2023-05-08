@@ -138,7 +138,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 SSCPValidation:
 PRINT 'SSCPValidation';
-IF NOT EXISTS (SELECT * FROM [dbo].[tvfSSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state','altEmail'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfSSCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','altEmail','state'))
 	BEGIN
 		GOTO AttachmentValidation;
 	END
@@ -152,7 +152,7 @@ ELSE
 ------------------------------------------------------------------------------------------------------
 UDCPValidation:
 PRINT 'UDCPValidation';
-IF NOT EXISTS (SELECT * FROM [dbo].[tvfUDCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state','subjectMatterCompetenceVia','altEmail'))
+IF NOT EXISTS (SELECT * FROM [dbo].[tvfUDCPKeyValues](@FormID) WHERE [value] IS NULL AND [key] not in ('middleName', 'casId','otherName','preferredName','state','subjectMatterCompetenceVia','altEmail','apartment'))
 	BEGIN
 		GOTO AttachmentValidation;
 	END

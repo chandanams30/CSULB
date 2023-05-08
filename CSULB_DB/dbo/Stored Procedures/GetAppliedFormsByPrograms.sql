@@ -4,6 +4,7 @@
 -- Description:	Returns Applied Forms List by Programs 
 -- =============================================
 --exec [GetAppliedFormsByPrograms] 1, 8, 2234,0
+--exec [dbo].[GetAppliedFormsByPrograms] @UserId=1,@ProgramID=6,@TermCode=N'2234',@FormStateID=0
 CREATE PROCEDURE [dbo].[GetAppliedFormsByPrograms]
 @Userid bigint,
 @ProgramID bigint,
@@ -44,6 +45,7 @@ AND F.[ProgramID]=@ProgramID
 AND F.[TermCode]=@TermCode 
 AND F.[FormStateID] = ISNULL(@FormStateID, F.[FormStateID])
 AND PU.UserID = @Userid
+AND PU.[RoleID] = 4
 UNION
 --6	Reviewer
 SELECT F.[ID] FROM [Application].[Forms] F 
@@ -53,6 +55,7 @@ AND F.[ProgramID]=@ProgramID
 AND F.[TermCode]=@TermCode 
 AND F.[FormStateID] in (5) --'5,4' --Reviewer
 AND R.[ReviewerID] = @Userid
+AND r.[isAssigned]=1
 UNION
 --7	Instructor 
 SELECT F.[ID] FROM [Application].[Forms] F 
@@ -63,6 +66,7 @@ AND F.[TermCode]=@TermCode
 AND F.[FormStateID] = ISNULL(@FormStateID, F.[FormStateID])
 --AND F.[FormStateID] in (1,2) --'1,2' --Instructor
 AND INS.[InstructorUserID] = @Userid
+AND INS.[isAssigned]=1
 UNION
 --8	Interviewer  
 SELECT F.[ID] FROM [Application].[Forms] F 
@@ -73,13 +77,14 @@ AND F.[TermCode]=@TermCode
 AND F.[FormStateID] = ISNULL(@FormStateID, F.[FormStateID])
 --AND F.[FormStateID] = 7 --7	Schedule Interview
 AND INVR.[InterviewerUserID] = @Userid
+AND INVR.[isAssigned]=1
 UNION
 --11	Program Coordinator
 SELECT F.[ID] AS [FormID] FROM [Application].[Forms] F 
 WHERE [dbo].[fnIsRoleValid] (@Userid,'11') = 1 --11	Program Coordinator
 AND F.[ProgramID]=@ProgramID 
 AND F.[TermCode]=@TermCode 
-AND F.[FormStateID] = ISNULL(@FormStateID, F.[FormStateID])
+AND F.[FormStateID] = ISNULL(@FormStateID, F.[FormStateID]);
 
 -------------------------------------------------------------------------------------------------------------------------------
 --Reviewers List as comma seperated 
@@ -89,10 +94,26 @@ GROUP (
 		ORDER BY RU.[FirstName]
 		) AS [ReviewersName]
 INTO #tempReviewerName
-FROM [Application].[Reviewer] R 
+FROM [Application].[Forms] F 
+JOIN [Application].[Reviewer] R ON R.[FormID] = F.[ID]
 JOIN [User].[Users] RU ON R.[ReviewerID] = RU.[ID]
-WHERE R.[FormID] in (SELECT [FormID] FROM #tempFormIDs)
+JOIN [User].[UserRoles] UR ON UR.[UserID] = RU.[ID] AND UR.[RoleID]=6  -- 6 Reviewer
+JOIN [Master].[ProgramUsers] PU ON PU.[UserID] = RU.[ID] AND PU.[RoleID]=6  AND PU.[ProgramID] = F.[ProgramID] -- 6 Reviewer
+WHERE R.[FormID] IN (SELECT [FormID] FROM #tempFormIDs)
+AND R.[isAssigned] = 1
 GROUP BY R.[FormID];
+
+--WITH Reviewer_Row_Number AS (
+--  SELECT
+--    *,
+--    ROW_NUMBER() OVER(PARTITION BY R.[FormID] ORDER BY [ReviewerID]  DESC) AS row_number
+--  FROM [Application].[Reviewer] R WHERE R.[FormID] IN (SELECT [FormID] FROM #tempFormIDs) AND [isAssigned] = 1)
+--SELECT
+--  RRN.[FormID], RU.[FirstName] + ' ' + RU.[LastName] AS [ReviewersName]
+--  INTO #tempReviewerName
+--FROM Reviewer_Row_Number RRN
+--JOIN [User].[Users] RU ON RRN.[ReviewerID] = RU.[ID]
+--WHERE row_number = 1;
 -------------------------------------------------------------------------------------------------------------------------------
 
 

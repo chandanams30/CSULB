@@ -1,5 +1,6 @@
 ﻿-- exec [dbo].[GetFieldWork] 2162, 1
-CREATE PROCEDURE [dbo].[GetFieldWork] @UserId BIGINT
+CREATE PROCEDURE [dbo].[GetFieldWork] 
+	@UserId BIGINT
 	,@FieldWorkId BIGINT
 AS
 BEGIN
@@ -7,13 +8,34 @@ BEGIN
 DECLARE @UIHandler VARCHAR(MAX)
 DECLARE @RoleBasedHandle VARCHAR(MAX)
 
+----------------
+DECLARE @FieldWorkPrerequisiteStatus AS INT
+SELECT @FieldWorkPrerequisiteStatus = [FieldWorkPrerequisiteStatus] FROM [dbo].[View_FieldWorkPrerequisiteStatus] FWPS WHERE FWPS.FieldWorkID = @FieldWorkId;
+--SELECT @FieldWorkPrerequisiteStatus;
+----------------
+
+--SELECT @RoleBasedHandle = 
+--CASE WHEN UR.RoleID=3 THEN ',"SummaryFnCEditable" :false,"EnterActivityLog" :true,"ShowPrerequisitesTab" : true' --Student
+--WHEN UR.RoleID IN (9,10) THEN ',"SummaryFnCEditable" :true,"EnterActivityLog" :false,"ShowPrerequisitesTab" : false' --partner User
+--ELSE ',"SummaryFnCEditable" :true,"EnterActivityLog" :false,"ShowPrerequisitesTab" : true'
+--END
+--FROM [User].[Users] U JOIN [User].[UserRoles] UR ON UR.[UserID] = U.[ID] WHERE U.[ID] = @UserId
+
+--select * from [Master].[Role]
+
 SELECT @RoleBasedHandle = 
-CASE WHEN UR.RoleID=3 THEN ',"SummaryFnCEditable" :false,"EnterActivityLog" :true,"ShowPrerequisitesTab" : true' --Student
+CASE 
+--WHEN UR.RoleID=3 THEN ',"SummaryFnCEditable" :false,"EnterActivityLog" :true,"ShowPrerequisitesTab" : true' --Student
+WHEN UR.RoleID=3 AND @FieldWorkPrerequisiteStatus = 3  THEN ',"SummaryFnCEditable" :false,"EnterActivityLog" :true,"ShowPrerequisitesTab" : false' --Student
+WHEN UR.RoleID=3 AND @FieldWorkPrerequisiteStatus <> 3 THEN ',"SummaryFnCEditable" :false,"EnterActivityLog" :true,"ShowPrerequisitesTab" : true' --Student
 WHEN UR.RoleID IN (9,10) THEN ',"SummaryFnCEditable" :true,"EnterActivityLog" :false,"ShowPrerequisitesTab" : false' --partner User
+WHEN UR.RoleID IN (1)  THEN ',"SummaryFnCEditable" :true,"EnterActivityLog" :true,"ShowPrerequisitesTab" : true' --administrator
+WHEN UR.RoleID NOT IN (3,9,10) AND @FieldWorkPrerequisiteStatus = 3  THEN ',"SummaryFnCEditable" :true,"EnterActivityLog" :false,"ShowPrerequisitesTab" : false' --other users
 ELSE ',"SummaryFnCEditable" :true,"EnterActivityLog" :false,"ShowPrerequisitesTab" : true'
 END
 FROM [User].[Users] U JOIN [User].[UserRoles] UR ON UR.[UserID] = U.[ID] WHERE U.[ID] = @UserId
 
+--SELECT @RoleBasedHandle;
 
 SELECT @UIHandler = '{' + 
 '"ShowSummaryTab" :' +  CASE WHEN FWCC.[EnableActivityLog] = 1 THEN 'true' ELSE 'false' END +
@@ -130,6 +152,7 @@ DECLARE @instruction8 VARCHAR(500) = '<P><b>Instruction</b><br/>' + 'Website scr
 	JOIN [Master].[FieldWorkDocuments] FWD ON FWD.CourseID = CT.CourseID AND A.DocumentID = FWD.DocumentID
 	JOIN [Master].[Documents] D ON D.ID = FWD.DocumentID
 	LEFT JOIN [User].[Users] U ON u.ID = A.ApprovedBy
+	WHERE FWD.[isRequiredPrerequisite]=1
 	order by A.[DocumentID]
 	--WHERE FWD.[IsRestricted] =  CASE WHEN EXISTS (SELECT * FROM [User].[Users] U JOIN [User].[UserRoles] UR ON UR.UserID = U.ID AND UR.RoleID IN(1,3,4) AND U.[ID] = @UserId) THEN   FWD.[IsRestricted] ELSE 0 END
 

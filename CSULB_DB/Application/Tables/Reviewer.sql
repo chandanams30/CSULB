@@ -6,6 +6,9 @@
     [ReviewerComments]       NVARCHAR (MAX) NULL,
     [ReviewedOn]             DATETIME       NULL,
     [CreatedBy]              BIGINT         NOT NULL,
-    [CreatedDate]            DATETIME       NOT NULL
+    [CreatedDate]            DATETIME       NOT NULL,
+    [isAssigned]             BIT            CONSTRAINT [DF_Reviewer_isAssigned] DEFAULT ((1)) NOT NULL
 );
+
+
 
