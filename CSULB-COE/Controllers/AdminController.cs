@@ -16,7 +16,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class AdminController : ControllerBase
     {
         private ILogger<AdminController> _logger;
