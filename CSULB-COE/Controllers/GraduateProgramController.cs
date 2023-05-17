@@ -16,7 +16,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+   // [Authorize]
     public class GraduateProgramController : ControllerBase
     {
         public ILogger<GraduateProgramController> _logger;
@@ -655,6 +655,44 @@ namespace CSULB_COE.Controllers
             {
                 _logger.LogError(ex, ex.Message);
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetFormStudentMessageBoard")]
+        public StudentMessageBoardResponse GetFormStudentMessageBoard(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                StudentMessageBoardResponse response = new StudentMessageBoardResponse();
+                response = _graduateProgramService.GetFormStudentMessageBoard(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentMessageBoardResponse response = new StudentMessageBoardResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFormStudentMessageBoard")]
+        public BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.UpdateFormStudentMessageBoard(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
             }
         }
 

@@ -42,5 +42,7 @@ namespace ThoughtFocus.Service.Interfaces
         InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input);
         InterviewerListResponse GetInterviewerList(GetInstructorInterviewerListRequest input);
         ReviewerListResponse GetReviewerList(GetReviewerListRequest input);
+        StudentMessageBoardResponse GetFormStudentMessageBoard(int UserID, int FormID, int ProgramID, string TermCode);
+        BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input);
     }
 }

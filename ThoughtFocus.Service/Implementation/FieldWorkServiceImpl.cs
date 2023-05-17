@@ -669,7 +669,9 @@ namespace ThoughtFocus.Service.Implementation
                                               ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
                                               ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
                                               Hours = Convert.ToDecimal(row["Hours"]),
-                                              Status = Convert.ToString(row["Status"])
+                                              Status = Convert.ToString(row["Status"]),
+                                              ApprovedByUser = row["ApprovedByUser"]==DBNull.Value?null:Convert.ToString(row["ApprovedByUser"]),
+                                              ApprovedDateTime = row["ApprovedDateTime"]==DBNull.Value? (DateTime?)null:Convert.ToDateTime(row["ApprovedDateTime"])
                                           }).FirstOrDefault();
 
                 obj.standardList = dtActivityLogByID.Tables[1].AsEnumerable().Select(row =>
