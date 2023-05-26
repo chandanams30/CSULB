@@ -114,6 +114,36 @@ namespace ThoughtFocus.Common.Utilities.Implementation
             binaryReader.Close();
             return fileContent;
         }
+        public string GetFileType(string fileExt)
+        {
+            string contentType = string.Empty;
+            switch (fileExt.ToUpper())
+            {
+                case "PDF":
+                    contentType = "application/pdf";
+                    break;
+                case "DOCX":
+                    contentType = "Application/msword";
+                    break;
+                case "DOC":
+                    contentType = "Application/msword";
+                    break;
+                case "XLSX":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "XLS":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "JPG":
+                    contentType = "image/jpeg";
+                    break;
+                case "JPEG":
+                    contentType = "image/jpeg";
+                    break;
+
+            }
+            return contentType;
+        }
     }
     public class AttachmentFileDetails
     {

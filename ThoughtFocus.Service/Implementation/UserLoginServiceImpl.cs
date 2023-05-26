@@ -312,5 +312,21 @@ namespace ThoughtFocus.Service.Implementation
             return body;
         }
 
+        public BaseResponse SaveAuditLog(AuditLogRequest request)
+        {
+            BaseResponse obj = new BaseResponse();
+            SqlParameter[] parameters =
+                                        {
+                                          
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = request.UserID },
+                                          new SqlParameter("@Type", SqlDbType.NVarChar, 25) { Value = request.Type },
+                                          new SqlParameter("@IPAddress", SqlDbType.NVarChar, 25) { Value = request.IPAddress },
+                                          new SqlParameter("@AuthenticationType", SqlDbType.NVarChar, 25) { Value = request.AuthenticationType }
+                                        };
+            int ID = _helper.InsertTable("[User].[InsertLoginLogout]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "";
+            return obj;
+        }
     }
 }

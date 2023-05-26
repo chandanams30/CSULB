@@ -31,6 +31,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace CSULB_COE
 {
@@ -186,7 +187,12 @@ namespace CSULB_COE
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+            // for http request headers
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                ForwardedHeaders.XForwardedProto
+            });
 
             // validate the appsettings for turning On/Off the http requests tracking
             string check=this.Configuration["TrackIncomingRequests"];
