@@ -16,7 +16,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   // [Authorize]
+    [Authorize]
     public class GraduateProgramController : ControllerBase
     {
         public ILogger<GraduateProgramController> _logger;

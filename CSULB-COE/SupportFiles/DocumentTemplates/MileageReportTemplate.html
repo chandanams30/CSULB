@@ -1,0 +1,81 @@
+<html>
+	<head>    
+	<meta charset='utf-8'>
+	</head>
+		<body>
+		<table border="1" style="margin-bottom: 20px">
+			<tr>
+			<td><img src='SupportFiles\Img\logo.png' /></td>
+			<td><h4 align="center">Business Mileage Log - Privately Owned Vehicle</h4></td>
+			</tr>
+		</table>
+		<br/>
+		<table border="1" style="margin-bottom: 20px">
+			
+				<tr bgcolor='#D3D3D3'>
+					<td width='38%'>Payee/Vendor Information</td>
+					<td width='38%'>Reporting Dates</td>
+					<td colspan=2>Employee ID #</td>
+				</tr>
+				<tr>
+					<td width='38%'><input type = "checkbox" name = "payee" value = "Employee, Campus" checked="true" disabled>Employee, Campus</td>
+					<td width='38%'>[[reportingDates]]</td>
+					<td colspan=2>[[CSULBID]]</td>
+				</tr>
+				<tr bgcolor="#D3D3D3">
+					<td width='38%'>Employee Name</td>
+					<td width='38%'>Email</td>
+					<td colspan=2>Phone</td>
+				</tr>
+					<tr>
+					<td width='38%'>[[employeeName]]</td>
+					<td width='38%'>[[Email]]</td>
+					<td colspan=2>[[phone]]</td>
+				</tr>
+					<tr bgcolor="#D3D3D3">
+					<td width='38%'>Employee Mailing Address</td>
+					<td width='38%'>City</td>
+					<td>State</td>
+					<td>Zip</td>
+				</tr>
+					<tr>
+					<td width='38%'>[[MailingAddress]]</td>
+					<td width='38%'>[[City]]</td>
+					<td>[[State]]</td>
+					<td>[[Zip]]</td>
+				</tr>
+		</table>
+		<br/>
+		<table border="1" style="margin-bottom: 20px">
+			<tr>
+					<td colspan=7>
+						<b>BUSINESS MILES FOR REIMBURSEMENT</b>
+					</td>
+				</tr>
+		<tr>
+		<th>Travel Date</th>
+		<th>Source</th>
+		<th>Destination</th>
+		<th>Purpose</th>
+		<th>Miles</th>
+		<th>Rate</th>
+		<th>Amount</th>
+		</tr>		
+				[[dataLogs]]
+				
+		</table>
+		<br/>
+			<table border="1" >
+					<tr>
+					<td colspan=2>
+						<b>UNIQUE TRAVEL TRIPS</b>
+					</td>
+				</tr>
+				[[dataRows]]
+				
+			</table>
+		
+		
+		</body>
+	</html>
+

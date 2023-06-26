@@ -144,6 +144,18 @@ namespace ThoughtFocus.Common.Utilities.Implementation
             }
             return contentType;
         }
+        public string GetAttachmentsFolderName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string userFolderName = folderSplit[0].ToString();
+            return userFolderName;
+        }
+        public string GetAttachmentsSavedFileName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string savedFileName = folderSplit[1].ToString();
+            return savedFileName;
+        }
     }
     public class AttachmentFileDetails
     {

@@ -47,9 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ThoughtFocus.Common.Utilities\ThoughtFocus.Common.Utilities.csproj" />
-    <ProjectReference Include="..\ThoughtFocus.DataAccess\ThoughtFocus.DataAccess.csproj" />
-    <ProjectReference Include="..\ThoughtFocus.Repository\ThoughtFocus.Repository.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Domain\ThoughtFocus.Domain.csproj" />
     <ProjectReference Include="..\ThoughtFocus.Service\ThoughtFocus.Service.csproj" />
   </ItemGroup>
 
