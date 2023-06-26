@@ -18,6 +18,7 @@ using Microsoft.Graph;
 using Google.Apis.Json;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace CSULB_COE.Controllers
 {
@@ -45,6 +46,16 @@ namespace CSULB_COE.Controllers
             try
             {
                 var response = _userLoginService.Authenticate(authModel);
+                if (response.IsSuccess == true)
+                {
+                    AuditLogRequest req = new AuditLogRequest();
+                    req.UserID = response.UserId;
+                    req.Type = "Login";
+                    req.IPAddress = GetClientIPAddress();
+                    req.AuthenticationType = "Basic";
+                    var auditResponse = _userLoginService.SaveAuditLog(req);
+
+                }
                 return Ok(response);
             }
             catch (Exception ex)
@@ -99,6 +110,16 @@ namespace CSULB_COE.Controllers
                         }
                     }
                     response = _userLoginService.AuthenticateSSO(emplid,displayName,mail,LastName,FirstName);
+                    if (response.IsSuccess == true)
+                    {
+                        AuditLogRequest req = new AuditLogRequest();
+                        req.UserID = response.UserId;
+                        req.Type = "Login";
+                        req.IPAddress=GetClientIPAddress();
+                        req.AuthenticationType = "SSO";
+                        var auditResponse = _userLoginService.SaveAuditLog(req);
+
+                    }
                     return Ok(response);
                 }
                 else
@@ -158,6 +179,28 @@ namespace CSULB_COE.Controllers
                 _logger.LogError(ex, ex.Message);
                 return response;
             }
+        }
+        [HttpPost("SaveAuditLog")]
+        public BaseResponse SaveAuditLog(AuditLogRequest request)
+        {
+            try
+            {
+                var response = _userLoginService.SaveAuditLog(request);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        private string GetClientIPAddress()
+        {
+            var ip = string.Empty;
+            ip= Convert.ToString(Request.HttpContext.Connection.RemoteIpAddress);  
+            return ip.ToString();
+
         }
     }
 }

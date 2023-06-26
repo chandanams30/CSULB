@@ -12,5 +12,8 @@ namespace ThoughtFocus.Common.Utilities.Interfaces
         AttachmentFileDetails GetAttachedFileSplitValues(string filename);
         byte[] GetImageFilecontent(byte[] fileContent);
         byte[] GetFileContent(string repoPath, string userFolderPath, string fileName);
+        string GetFileType(string fileExt);
+        string GetAttachmentsFolderName(string combinedString);
+        string GetAttachmentsSavedFileName(string combinedString);
     }
 }
