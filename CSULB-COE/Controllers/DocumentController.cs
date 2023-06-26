@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ThoughtFocus.Service.Interfaces;
 using ThoughtFocus.Domain.TemplateModels;
+using Newtonsoft.Json.Linq;
+using iTextSharp.text.html.simpleparser;
 
 namespace CSULB_COE.Controllers
 {
@@ -33,6 +35,163 @@ namespace CSULB_COE.Controllers
             _documentService = documentService;
             _configuration = configuration;
         }
+
+        [HttpPost("GetTravelDocument")]
+        public IActionResult GetTravelDocument(MileageReportRequest input)
+        {
+
+            // First fetch the start and end location
+            Byte[] InputStream = null;
+            StringBuilder strRows = new StringBuilder();
+            JArray fields = JArray.Parse(input.DirectionsJSON);
+            foreach (JObject jObject in fields)
+            {
+                string turnTypePath = string.Empty;
+                string tableData = string.Empty;
+                string mapImage = string.Empty;
+                string narrative = (string)jObject["narrative"];
+                int turnType=(int)jObject["turnType"];
+                // get image based on turn type
+                turnTypePath = GetTurnTypeImage(turnType);
+
+                // get the start and end destination
+
+                // get the sub template and bind data - only directions from JSON
+                tableData = BindDataToRows(turnType,narrative);
+                // bind the image after the directions
+                strRows.Append(tableData);
+
+            }
+            StringBuilder rawData = new StringBuilder();
+            rawData.Append(strRows.ToString());
+            // get the final template and bind the sub template data to it 
+            rawData.Append(GetMileageMapImage("MileageImageTest.png"));
+            string template = GetMileageReportTemplate("MileageReportTemplate.html");
+            template = template.Replace("[[dataRows]]", rawData.ToString());
+
+            // call the method to convert the template to PDF and create the input stream 
+            InputStream=GetPDFFileContent(template);
+
+            return File(InputStream, "application/pdf;", "Mileage-Report-"+ DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+        }
+
+        private string GetMileageMapImage(string imageFileName)
+        {
+            string fullImagePath = string.Empty;
+            string repoPath = "SupportFiles/Img"; // pull this from config
+            fullImagePath = Path.Combine(repoPath, imageFileName);
+            StringBuilder strImage = new StringBuilder();
+            strImage.Append("<tr>");
+            strImage.Append("<td colspan=2><img src=" + fullImagePath + " /></td>");
+            strImage.Append("</tr>");
+            return strImage.ToString();
+        }
+        private byte[] GetPDFFileContent(string htmlFormBody)
+        {
+            byte[] fileContent = null;
+            StringReader sr = new StringReader(htmlFormBody); // workable code uncomment after testing 
+            //TextReader sr = new StringReader(htmlFormBody);
+            //Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 0f);
+            Document pdfDoc = new Document(PageSize.A4, 50, 50, 50, 50);
+            HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                PdfWriter writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                pdfDoc.Open();
+
+                htmlparser.Parse(sr);
+                pdfDoc.Close();
+
+                fileContent = memoryStream.ToArray();
+                memoryStream.Close();
+            }
+            return fileContent;
+        }
+
+        private string GetMileageReportTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/DocumentTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
+        }
+
+        private string BindDataToRows(int turnType,string narrative)
+        {
+            string tableData = string.Empty;
+            string imagePath = string.Empty;
+            imagePath=GetTurnTypeImage(turnType);
+            tableData = ConstructTableData(imagePath, narrative);
+            return tableData;
+        }
+
+        private string ConstructTableData(string imagePath,string narrative)
+        {
+            StringBuilder strTableData = new StringBuilder();
+            strTableData.Append("<tr>");
+            strTableData.Append("<td><img src="+imagePath+" /></td>");
+            strTableData.Append("<td>"+narrative+"</td>");
+            strTableData.Append("</tr>");
+            return strTableData.ToString();
+        }
+        private string GetTurnTypeImage(int turnType)
+        {
+            string imgPath = string.Empty;
+            switch(turnType){
+                case 0:
+                    imgPath = "STRAIGHT.png";// straight
+                    break;
+                case 1:
+                    imgPath = "SLIGHT_RIGHT.png";// slight right
+                    break;
+                case 2:
+                    imgPath = "TURN_RIGHT.png";// right
+                    break;
+                case 3:
+                    imgPath = "SHARP_RIGHT.png";// sharp right
+                    break;
+                case 6:
+                    imgPath = "TURN_LEFT.png";// left
+                    break;
+                case 7:
+                    imgPath = "SLIGHT_LEFT.png";// slight left
+                    break;
+                case 8:
+                    imgPath = "U_TURN_RIGHT.png";// right U turn
+                    break;
+                case 9:
+                    imgPath = "U_TURN_LEFT.png";// left U turn
+                    break;
+                case 10:
+                    imgPath = "MERGE.png";// right merge
+                    break;
+                case 11:
+                    imgPath = "MERGE.png";// left merge
+                    break;
+                case 12:
+                    imgPath = "RAMP_RIGHT.png";// right on ramp
+                    break;
+                case 13:
+                    imgPath = "RAMP_LEFT.png";// left on ramp
+                    break;
+                case 16:
+                    imgPath = "FORK_RIGHT.png";// right fork
+                    break;
+                case 17:
+                    imgPath = "FORK_LEFT.png";// left fork
+                    break;
+                default:
+                    imgPath = "STRAIGHT.png";// straight
+                    break;
+            }
+            string filepath = Path.Combine("SupportFiles/Img", imgPath);
+            return filepath;
+            
+        }
+
         [HttpGet("GetDocument")]
         //public IActionResult GetMergedDocument(int userId,int formId)
         public IActionResult GetDocument(string filename)
@@ -453,5 +612,10 @@ namespace CSULB_COE.Controllers
         public string IntellectualPotential { get; set; }
         public string PresentAcademicPerformance { get; set; }
         public string PotentialForGraduateWork { get; set; }
+    }
+    public class MileageReportRequest
+    {
+        public string DirectionsJSON { get; set; }
+        //public byte[] MapContent { get; set; }
     }
 }

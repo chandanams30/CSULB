@@ -275,14 +275,20 @@ namespace ThoughtFocus.Service.Implementation
                 if (status == 1)
                 {
                     string logoText = "cid:myImageID";
-                    // trigger email with the password 
-                    string body = GetMailBodyTemplate("Student_Password.html");
-                    string subject = "Password for MyCED Application";
-                    body = body.Replace("[[logoPath]]", logoText)
+                    // trigger email with the user name 
+                    string bodyUsername = GetMailBodyTemplate("Student_Username.html");
+                    string subjectUserName = "Username for MyCED Application";
+                    bodyUsername = bodyUsername.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", request.FirstName + " " + request.LastName)
-                               .Replace("[[UserName]]", request.CSULBID)
+                               .Replace("[[UserName]]", request.CSULBID);
+                    _sendMail.SendEmail(request.Email, "", "COMMON", subjectUserName, bodyUsername, "");
+                    // trigger email with the password 
+                    string bodyPassword = GetMailBodyTemplate("Student_Password.html");
+                    string subjectPassword = "Password for MyCED Application";
+                    bodyPassword = bodyPassword.Replace("[[logoPath]]", logoText)
+                               .Replace("[[ApplicantName]]", request.FirstName + " " + request.LastName)
                                .Replace("[[Password]]", userPassword);
-                    _sendMail.SendEmail(request.Email, "","COMMON", subject, body,"");
+                    _sendMail.SendEmail(request.Email, "","COMMON", subjectPassword, bodyPassword, "");
                     obj.IsSuccess = true;
                     obj.Message = message;
                 }
@@ -306,5 +312,21 @@ namespace ThoughtFocus.Service.Implementation
             return body;
         }
 
+        public BaseResponse SaveAuditLog(AuditLogRequest request)
+        {
+            BaseResponse obj = new BaseResponse();
+            SqlParameter[] parameters =
+                                        {
+                                          
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = request.UserID },
+                                          new SqlParameter("@Type", SqlDbType.NVarChar, 25) { Value = request.Type },
+                                          new SqlParameter("@IPAddress", SqlDbType.NVarChar, 25) { Value = request.IPAddress },
+                                          new SqlParameter("@AuthenticationType", SqlDbType.NVarChar, 25) { Value = request.AuthenticationType }
+                                        };
+            int ID = _helper.InsertTable("[User].[InsertLoginLogout]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "";
+            return obj;
+        }
     }
 }

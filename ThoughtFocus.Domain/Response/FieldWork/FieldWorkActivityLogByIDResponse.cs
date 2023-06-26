@@ -34,6 +34,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public DateTime ActivityEndDate { get; set; }
         public decimal Hours { get; set; }
         public string Status { get; set; }
+        public string ApprovedByUser { get; set; }
+        public DateTime? ApprovedDateTime { get; set; }
     }
     public class FieldWorkActivityLogHandler
     {

@@ -2074,7 +2074,7 @@ namespace ThoughtFocus.Service.Implementation
                 sb.Append("<td>"+ Convert.ToString(dtEducationalInfo.Rows[i]["college"]) + "</td>");
                 sb.Append("<td>" + Convert.ToString(dtEducationalInfo.Rows[i]["degree"]) + "</td>");
                 sb.Append("<td>" + Convert.ToString(dtEducationalInfo.Rows[i]["state"]) + "</td>");
-                sb.Append("<td>" + Convert.ToDateTime(dtEducationalInfo.Rows[i]["dateFrom"]).ToString("MM/dd/yyyy") + " to "+ Convert.ToDateTime(dtEducationalInfo.Rows[i]["dateTo"]).ToString("MM/dd/yyyy") + "</td>");
+                sb.Append("<td>" + Convert.ToString(dtEducationalInfo.Rows[i]["dateFrom"]) + " to "+ Convert.ToString(dtEducationalInfo.Rows[i]["dateTo"]) + "</td>");
                 sb.Append("</tr>");
             }
             sb.Append("</table></td></tr></table>");
@@ -2540,6 +2540,71 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+
+        public StudentMessageBoardResponse GetFormStudentMessageBoard(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            StudentMessageBoardResponse obj = new StudentMessageBoardResponse();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = TermCode }
+                                        };
+
+            DataTable dtMessageBoard = _helper.GetDataTable("[dbo].[getFormStudentMessageBoard]", parameters);
+            try
+            {
+                if (dtMessageBoard.Rows.Count > 0)
+                {
+
+
+                    obj = dtMessageBoard.AsEnumerable().Select(row =>
+                                              new StudentMessageBoardResponse
+                                              {
+                                                  FormID = Convert.ToInt32(row["ID"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  StudentMessageBoard = Convert.ToString(row["StudentMessageBoard"])
+                                              }).FirstOrDefault();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@StudentMessageBoard", SqlDbType.NVarChar,-1) { Value = input.StudentMessageBoard }
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[updateFormStudentMessageBoard]", parameters);
+            response.Message = "Message board updated Successfully";
+            response.IsSuccess = true;
+            return response;
         }
     }
 

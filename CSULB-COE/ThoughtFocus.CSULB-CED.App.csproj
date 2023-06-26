@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>CSULB_COE</RootNamespace>
   </PropertyGroup>
 
@@ -13,8 +13,8 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Core" Version="1.57.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.24" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.18" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
@@ -47,9 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ThoughtFocus.Common.Utilities\ThoughtFocus.Common.Utilities.csproj" />
-    <ProjectReference Include="..\ThoughtFocus.DataAccess\ThoughtFocus.DataAccess.csproj" />
-    <ProjectReference Include="..\ThoughtFocus.Repository\ThoughtFocus.Repository.csproj" />
+    <ProjectReference Include="..\ThoughtFocus.Domain\ThoughtFocus.Domain.csproj" />
     <ProjectReference Include="..\ThoughtFocus.Service\ThoughtFocus.Service.csproj" />
   </ItemGroup>
 
