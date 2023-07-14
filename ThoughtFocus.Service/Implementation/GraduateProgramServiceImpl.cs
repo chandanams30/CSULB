@@ -2109,7 +2109,7 @@ namespace ThoughtFocus.Service.Implementation
                 var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
 
                 // pull the saved file name format SP Below
-                FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FormID, 26);
+                FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FormID, input.DocumentID);
                 if (input.FileName != string.Empty)
                 {
                     AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);

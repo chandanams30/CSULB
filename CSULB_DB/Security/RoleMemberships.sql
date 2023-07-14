@@ -1,2 +1,2 @@
-﻿ALTER ROLE [db_datareader] ADD MEMBER [paul];
+﻿--ALTER ROLE [db_datareader] ADD MEMBER [paul];
 

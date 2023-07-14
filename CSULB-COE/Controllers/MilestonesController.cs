@@ -124,6 +124,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
         [HttpGet("GetMilestoneApproverUserList")]
         public MilestoneApproverUserListResponse GetMilestoneApproverUserList()
         {
@@ -199,6 +200,175 @@ namespace CSULB_COE.Controllers
                 BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMilestoneTypes")]
+        public MilestoneTypesResponse GetMilestoneTypes()
+        {
+            try
+            {
+                MilestoneTypesResponse response = _milestonesService.GetMilestoneTypes();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneTypesResponse response = new MilestoneTypesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("UpsertMilestoneTemplate")]
+        public BaseResponse UpsertMilestoneTemplate(UpsertMilestoneTemplateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _milestonesService.UpsertMilestoneTemplate(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetMilestoneTemplateList")]
+        public MilestoneTemplateListResponse GetMilestoneTemplateList(bool isReadyToPublish)
+        { 
+            try
+            {
+                MilestoneTemplateListResponse response = _milestonesService.GetMilestoneTemplateList(isReadyToPublish);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneTemplateListResponse response = new MilestoneTemplateListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMilestoneTemplateByID")]
+        public MilestoneTemplateByIDResponse GetMilestoneTemplateByID(int MilestoneTemplateID)
+        {
+            try
+            {
+                MilestoneTemplateByIDResponse response = _milestonesService.GetMilestoneTemplateByID(MilestoneTemplateID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneTemplateByIDResponse response = new MilestoneTemplateByIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetMilestoneApproverTypes")]
+        public MilestonesApproverTypesResponse GetMilestoneApproverTypes()
+        {
+            try
+            {
+                MilestonesApproverTypesResponse response = _milestonesService.GetMilestoneApproverTypes();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestonesApproverTypesResponse response = new MilestonesApproverTypesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("PublishMilestoneForm")]
+        public BaseResponse PublishMilestoneForm(PublishMilestoneFormRequest input)
+        {
+            try
+            {
+                BaseResponse response = _milestonesService.PublishMilestoneForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMilestoneUsersList")]
+        public MilestoneUsersListResponse GetMilestoneUsersList(int RoleID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                MilestoneUsersListResponse response = _milestonesService.GetMilestoneUsersList(RoleID,ProgramID,TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneUsersListResponse response = new MilestoneUsersListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMilestoneProgramTermList")]
+        public MilestoneProgramTermListResponse GetMilestoneProgramTermList()
+        {
+            try
+            {
+                MilestoneProgramTermListResponse response = _milestonesService.GetMilestoneProgramTermList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneProgramTermListResponse response = new MilestoneProgramTermListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMilestonePublishedFormsList")]
+        public MilestonePublishedFormsListResponse GetMilestonePublishedFormsList(int UserID)
+        {
+            try
+            {
+                MilestonePublishedFormsListResponse response = _milestonesService.GetMilestonePublishedFormsList(UserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestonePublishedFormsListResponse response = new MilestonePublishedFormsListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

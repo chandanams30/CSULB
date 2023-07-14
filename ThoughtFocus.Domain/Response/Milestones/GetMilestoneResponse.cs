@@ -20,6 +20,8 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedByName { get; set; }
+        public int MilestoneTypeID { get; set; }
+        public string MilestoneTypeName { get; set; }
     }
     public class ApproverDetails
     {

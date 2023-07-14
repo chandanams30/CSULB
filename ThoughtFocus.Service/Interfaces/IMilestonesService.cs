@@ -18,5 +18,14 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID);
         GetMilestoneResponse GetMilestone(int MilestoneID);
         MilestoneApproverUserListResponse GetMilestoneApproverUserList();
+        MilestoneTypesResponse GetMilestoneTypes();
+        BaseResponse UpsertMilestoneTemplate(UpsertMilestoneTemplateRequest input);
+        MilestoneTemplateListResponse GetMilestoneTemplateList(bool isReadyToPublish);
+        MilestoneTemplateByIDResponse GetMilestoneTemplateByID(int MilestoneTemplateID);
+        MilestonesApproverTypesResponse GetMilestoneApproverTypes();
+        BaseResponse PublishMilestoneForm(PublishMilestoneFormRequest input);
+        MilestoneUsersListResponse GetMilestoneUsersList(int RoleID, int ProgramID, string TermCode);
+        MilestoneProgramTermListResponse GetMilestoneProgramTermList();
+        MilestonePublishedFormsListResponse GetMilestonePublishedFormsList(int UserID);
     }
 }
