@@ -1889,6 +1889,7 @@ namespace ThoughtFocus.Service.Implementation
             List<FormAttachmentEntity> objList = new List<FormAttachmentEntity>();
             DataTable dtPersonalInfo = null;
             DataTable dtEducationInfo = null;
+            DataTable dtDisposition = null;
             string UserFolderName = string.Empty;
             SqlParameter[] parameters =
                                    {
@@ -1918,19 +1919,27 @@ namespace ThoughtFocus.Service.Implementation
                     UserFolderName = Convert.ToString(dsDoc.Tables[2].Rows[0]["UserFolder"]);
                 }
                 dtEducationInfo= dsDoc.Tables[3].Copy();
+
+                if(dsDoc.Tables[3]!=null && dsDoc.Tables[3].Rows.Count > 0)
+                {
+                    dtDisposition = dsDoc.Tables[3].Copy();
+                }
             }
 
-            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo,dtEducationInfo);
+            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo,dtEducationInfo,dtDisposition);
 
             return mergedFileStream;
         }
-        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo,DataTable dtEducationInfo)
+        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo,DataTable dtEducationInfo,DataTable dtDisposition)
         {
             byte[] inputStream = null;
             var folderPath = _configuration["ApplicationKeys:FileRepository"];
             string userFolderName = Path.Combine(folderPath, UserFolderName);
             string workingFolderName= Path.Combine(userFolderName, "Form");
             string MergedPDFFolderName = Path.Combine(userFolderName, "Form");
+            string dispositionsAssessmentForm = string.Empty;
+            int formDispositionAssessmentID;
+            string programIdentifier = string.Empty;
             string OutFile = Path.Combine(MergedPDFFolderName, "Merged"+DateTime.Now.ToString("MMddyyyyHHmmss")+".pdf");
             iTextSharp.text.Document document = new iTextSharp.text.Document();
             PdfCopy copyProvider;
@@ -1962,6 +1971,19 @@ namespace ThoughtFocus.Service.Implementation
                     pdfReader.Close();
                 }
             }
+            // Section to add disposition assessments
+            if (dtDisposition.Rows.Count > 0)
+            {
+                // check if the program is not Graduate or SSCP and ESCP
+                if (!string.IsNullOrEmpty(Convert.ToString(dtDisposition.Rows[0]["DispositionsAssessmentForm"])))
+                {
+                    dispositionsAssessmentForm = Convert.ToString(dtDisposition.Rows[0]["DispositionsAssessmentForm"]);
+                    formDispositionAssessmentID = Convert.ToInt32(dtDisposition.Rows[0]["FormDispositionsAssessmentID"]);
+                    programIdentifier= Convert.ToString(dtDisposition.Rows[0]["ProgramFormIdentifier"]);
+                    // call the method to generate the dispositions document 
+                    GenerateDispositionDocument(copyProvider,formDispositionAssessmentID,dispositionsAssessmentForm,programIdentifier);
+                }
+            }
             document.Close();
             System.IO.FileStream fsPDF = new System.IO.FileStream(OutFile, System.IO.FileMode.Open, System.IO.FileAccess.Read);
             System.IO.BinaryReader binaryReaderPDF = new System.IO.BinaryReader(fsPDF);
@@ -1971,6 +1993,11 @@ namespace ThoughtFocus.Service.Implementation
             fsPDF.Dispose();
             binaryReaderPDF.Close();
             return inputStream;
+        }
+
+        private void GenerateDispositionDocument(PdfCopy copyprovider,int dispositionAttachmentID,string dispositionForm,string programIdentifier)
+        {
+            
         }
         private string GetFileList(List<FormAttachmentEntity> lstAttachments)
         {
