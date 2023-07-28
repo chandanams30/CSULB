@@ -13,6 +13,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
+using System.Text.Json;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.FormModels;
@@ -1266,6 +1267,16 @@ namespace ThoughtFocus.Service.Implementation
             }
             return body;
         }
+        private string GetDocumentTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/DocumentTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
+        }
 
         private string GetDocumentBodyTemplate(string programIdentifier)
         {
@@ -1981,7 +1992,7 @@ namespace ThoughtFocus.Service.Implementation
                     formDispositionAssessmentID = Convert.ToInt32(dtDisposition.Rows[0]["FormDispositionsAssessmentID"]);
                     programIdentifier= Convert.ToString(dtDisposition.Rows[0]["ProgramFormIdentifier"]);
                     // call the method to generate the dispositions document 
-                    GenerateDispositionDocument(copyProvider,formDispositionAssessmentID,dispositionsAssessmentForm,programIdentifier);
+                    GenerateDispositionDocument(copyProvider,formDispositionAssessmentID,dispositionsAssessmentForm,programIdentifier, workingFolderName);
                 }
             }
             document.Close();
@@ -1995,9 +2006,346 @@ namespace ThoughtFocus.Service.Implementation
             return inputStream;
         }
 
-        private void GenerateDispositionDocument(PdfCopy copyprovider,int dispositionAttachmentID,string dispositionForm,string programIdentifier)
+        private void GenerateDispositionDocument(PdfCopy copyprovider,int dispositionAttachmentID,string dispositionForm,string programIdentifier,string fileStoringPath)
+        {
+            if (programIdentifier.ToUpper() == "MSCP")
+            {
+                DispositionMSCPList data = JsonSerializer.Deserialize<DispositionMSCPList>(dispositionForm);
+                DataTable dataTable = new DataTable();
+                DataTable dataTable1 = new DataTable();
+                DataTable dataTable2 = new DataTable();
+                dataTable.Columns.Add("professionalColumnA");
+                dataTable.Columns.Add("professionalColumnB");
+                dataTable.Columns.Add("professionalColumnC");
+                dataTable1.Columns.Add("attendanceColumnA");
+                dataTable1.Columns.Add("attendanceColumnB");
+                dataTable1.Columns.Add("attendanceColumnC");
+                dataTable2.Columns.Add("communicationColumnA");
+                dataTable2.Columns.Add("communicationColumnB");
+                dataTable2.Columns.Add("communicationColumnC");
+                foreach (var professional in data.professionals.ToList())
+                {
+                    DataRow newRow = dataTable.NewRow();
+                    if (professional.options.Count >= 3)
+                    {
+                        newRow["professionalColumnA"] = professional.options[0].label;
+                        newRow["professionalColumnB"] = professional.options[1].label;
+                        newRow["professionalColumnC"] = professional.options[2].label;
+                    }
+                    dataTable.Rows.Add(newRow);
+                }
+                foreach (var attendance in data.attendance.ToList())
+                {
+                    DataRow newRow = dataTable1.NewRow();
+                    if (attendance.options.Count >= 3)
+                    {
+                        newRow["attendanceColumnA"] = attendance.options[0].label;
+                        newRow["attendanceColumnB"] = attendance.options[1].label;
+                        newRow["attendanceColumnC"] = attendance.options[2].label;
+                    }
+
+                    dataTable1.Rows.Add(newRow);
+                }
+                foreach (var communication in data.communication.ToList())
+                {
+                    DataRow newRow = dataTable2.NewRow();
+                    if (communication.options.Count >= 3)
+                    {
+                        newRow["communicationColumnA"] = communication.options[0].label;
+                        newRow["communicationColumnB"] = communication.options[1].label;
+                        newRow["communicationColumnC"] = communication.options[2].label;
+                    }
+
+                    dataTable2.Rows.Add(newRow);
+                }
+                StringBuilder sbProffesionalData = new StringBuilder();
+                StringBuilder sbAttendanceData = new StringBuilder();
+                StringBuilder sbCommunicationData = new StringBuilder();
+                for (int y = 0; y < dataTable.Rows.Count; y++)
+                {
+                    string proffesionalValueA = string.Empty;
+                    string proffesionalValueB = string.Empty;
+                    string proffesionalValueC = string.Empty;
+                    proffesionalValueA = Convert.ToString(dataTable.Rows[y]["professionalColumnA"]);
+                    proffesionalValueB = Convert.ToString(dataTable.Rows[y]["professionalColumnB"]);
+                    proffesionalValueC = Convert.ToString(dataTable.Rows[y]["professionalColumnC"]);
+
+                    string strProffesional = ConstructDataRowsForProffesional(data.professionals[y], proffesionalValueA, proffesionalValueB, proffesionalValueC);
+                    sbProffesionalData.Append(strProffesional);
+                }
+                for (int y = 0; y < dataTable1.Rows.Count; y++)
+                {
+                    string attendanceValueA = string.Empty;
+                    string attendanceValueB = string.Empty;
+                    string attendanceValueC = string.Empty;
+                    attendanceValueA = Convert.ToString(dataTable1.Rows[y]["attendanceColumnA"]);
+                    attendanceValueB = Convert.ToString(dataTable1.Rows[y]["attendanceColumnB"]);
+                    attendanceValueC = Convert.ToString(dataTable1.Rows[y]["attendanceColumnC"]);
+
+                    string strAttendance = ConstructDataRowsForAttendance(data.attendance[y], attendanceValueA, attendanceValueB, attendanceValueC);
+                    sbAttendanceData.Append(strAttendance);
+                }
+                for (int y = 0; y < dataTable2.Rows.Count; y++)
+                {
+                    string communicationValueA = string.Empty;
+                    string communicationValueB = string.Empty;
+                    string communicationValueC = string.Empty;
+                    communicationValueA = Convert.ToString(dataTable2.Rows[y]["communicationColumnA"]);
+                    communicationValueB = Convert.ToString(dataTable2.Rows[y]["communicationColumnB"]);
+                    communicationValueC = Convert.ToString(dataTable2.Rows[y]["communicationColumnC"]);
+
+                    string strCommunication = ConstructDataRowsForCommunication(data.communication[y], communicationValueA, communicationValueB, communicationValueC);
+                    sbCommunicationData.Append(strCommunication);
+                }
+                string rating1 = string.Empty;
+                string rating2 = string.Empty;
+                string rating3 = string.Empty;
+                string rating4 = string.Empty;
+                foreach (var rating in data.ratings)
+                {
+                    switch (rating.label)
+                    {
+                        case "Rating 1":
+                            rating1 = rating.value;
+                            break;
+                        case "Rating 2":
+                            rating2 = rating.value;
+                            break;
+                        case "Rating 3":
+                            rating3 = rating.value;
+                            break;
+                        case "Rating 4":
+                            rating4 = rating.value;
+                            break;
+
+                    }
+                }
+                var htmlBody = GetMailBodyTemplate("GeneratePdfReport.html");
+                htmlBody = htmlBody.Replace("[[professionalList]]", sbProffesionalData.ToString())
+                                   .Replace("[[attendanceList]]", sbAttendanceData.ToString())
+                                   .Replace("[[communicationList]]", sbCommunicationData.ToString())
+                                   .Replace("[[rating1]]", rating1.ToString())
+                                   .Replace("[[rating2]]", rating2.ToString())
+                                   .Replace("[[rating3]]", rating3.ToString())
+                                   .Replace("[[rating4]]", rating4.ToString());
+                
+
+                StringReader sr = new StringReader(htmlBody.ToString());
+                Document pdfDoc = new Document(PageSize.A4, 50f, 50f, 200f, 0f);
+                HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+                byte[] htmlContent = null;
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    PdfWriter writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                    pdfDoc.Open();
+
+                    htmlparser.Parse(sr);
+                    pdfDoc.Close();
+
+                    htmlContent = memoryStream.ToArray();
+                    memoryStream.Close();
+                }
+               
+                string html2PDFFilePath = Path.Combine(fileStoringPath, "Disposition_MSCP" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                File.WriteAllBytes(html2PDFFilePath, htmlContent);
+                iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(html2PDFFilePath);
+                //pdfReader.setUnethicalReading(true);
+                copyprovider.AddDocument(pdfReader);
+                pdfReader.Close();
+
+            }
+            else 
+            {
+                DispositionUDCP udcpData = JsonSerializer.Deserialize<DispositionUDCP>(dispositionForm);
+                DataTable dt = new DataTable();
+                dt.Columns.Add("Professional Disposition");
+                dt.Columns.Add("Proficiency");
+                dt.Columns.Add("Evidence");
+                foreach (var data in udcpData.basicCredentials.ToList())
+                {
+                    DataRow newRow = dt.NewRow();
+                    newRow["Professional Disposition"] = data.label;
+                    newRow["Proficiency"] = data.value;
+                    newRow["Evidence"] = data.comment;
+                    dt.Rows.Add(newRow);
+                }
+                StringBuilder sb = new StringBuilder();
+                for (int y = 0; y < dt.Rows.Count; y++)
+                {
+                    string label = string.Empty;
+                    string val = string.Empty;
+                    string comment = string.Empty;
+                    label = Convert.ToString(dt.Rows[y]["Professional Disposition"]);
+                    val = Convert.ToString(dt.Rows[y]["Proficiency"]);
+                    comment = Convert.ToString(dt.Rows[y]["Evidence"]);
+                    string rowValues = ConstructDataRows(label, val, comment);
+                    sb.Append(rowValues);
+                }
+               
+
+                    var htmlBody = GetDocumentTemplate("DispositionUDCPTemplate.html");
+
+                    htmlBody = htmlBody.Replace("[[UDCPData]]", sb.ToString());
+                    StringReader sr = new StringReader(htmlBody.ToString());
+                    Document pdfDoc = new Document(PageSize.A4, 50f, 50f, 200f, 0f);
+                    HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+                    byte[] htmlContent = null;
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        PdfWriter writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                        pdfDoc.Open();
+
+                        htmlparser.Parse(sr);
+                        pdfDoc.Close();
+
+                        htmlContent = memoryStream.ToArray();
+                        memoryStream.Close();
+                    }
+
+                    string html2PDFFilePath = Path.Combine(fileStoringPath, "Disposition_UDCP" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                    File.WriteAllBytes(html2PDFFilePath, htmlContent);
+                    iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(html2PDFFilePath);
+                    //pdfReader.setUnethicalReading(true);
+                    copyprovider.AddDocument(pdfReader);
+                    pdfReader.Close();
+
+                
+            }
+            
+        }
+        private string ConstructDataRowsForProffesional(ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata.Professional data, string proffesionalValueA, string proffesionalValueB, string proffesionalValueC)
         {
             
+            StringBuilder sbRows = new StringBuilder();
+            sbRows.Append("<tr>");
+            foreach (var keyvalue in data.options)
+            {
+                if (keyvalue.value == data.value)
+                {
+                    if (proffesionalValueA == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' > <b>" + proffesionalValueA + "</b></td>");
+                    }
+                    else if (proffesionalValueB == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' ><b>" + proffesionalValueB + "</b></td>");
+                    }
+                    else
+                    {
+                        sbRows.Append("<td width='20%' ><b>" + proffesionalValueC + "</b></td>");
+                    }
+                }
+                else
+                {
+                    if (proffesionalValueA == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' >" + proffesionalValueA + "</td>");
+                    }
+                    else if (proffesionalValueB == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' >" + proffesionalValueB + "</td>");
+                    }
+                    else
+                    {
+                        sbRows.Append("<td width='20%' >" + proffesionalValueC + "</td>");
+                    }
+                }
+
+            }
+            sbRows.Append("</tr>");
+            return sbRows.ToString();
+        }
+        private string ConstructDataRowsForAttendance(ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata.Attendance data, string attendanceValueA, string attendanceValueB, string attendanceValueC)
+        {
+            StringBuilder sbRows = new StringBuilder();
+            sbRows.Append("<tr>");
+            foreach (var keyvalue in data.options)
+            {
+                if (keyvalue.value == data.value)
+                {
+                    if (attendanceValueA == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' > <b>" + attendanceValueA + "</b></td>");
+                    }
+                    else if (attendanceValueB == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' ><b>" + attendanceValueB + "</b></td>");
+                    }
+                    else
+                    {
+                        sbRows.Append("<td width='20%' ><b>" + attendanceValueC + "</b></td>");
+                    }
+                }
+                else
+                {
+                    if (attendanceValueA == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' >" + attendanceValueA + "</td>");
+                    }
+                    else if (attendanceValueB == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' >" + attendanceValueB + "</td>");
+                    }
+                    else
+                    {
+                        sbRows.Append("<td width='20%' >" + attendanceValueC + "</td>");
+                    }
+                }
+
+            }
+            sbRows.Append("</tr>");
+            return sbRows.ToString();
+        }
+        private string ConstructDataRowsForCommunication(ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata.Communication data, string communicationValueA, string communicationValueB, string communicationValueC)
+        {
+            StringBuilder sbRows = new StringBuilder();
+            sbRows.Append("<tr>");
+            foreach (var keyvalue in data.options)
+            {
+                if (keyvalue.value == data.value)
+                {
+                    if (communicationValueA == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' > <b>" + communicationValueA + "</b></td>");
+                    }
+                    else if (communicationValueB == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' ><b>" + communicationValueB + "</b></td>");
+                    }
+                    else
+                    {
+                        sbRows.Append("<td width='20%' ><b>" + communicationValueC + "</b></td>");
+                    }
+                }
+                else
+                {
+                    if (communicationValueA == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' >" + communicationValueA + "</td>");
+                    }
+                    else if (communicationValueB == keyvalue.label)
+                    {
+                        sbRows.Append("<td width='20%' >" + communicationValueB + "</td>");
+                    }
+                    else
+                    {
+                        sbRows.Append("<td width='20%' >" + communicationValueC + "</td>");
+                    }
+                }
+
+            }
+            sbRows.Append("</tr>");
+            return sbRows.ToString();
+        }
+        private string ConstructDataRows(string label, string val, string comment)
+        {
+            StringBuilder sbRows = new StringBuilder();
+            sbRows.Append("<tr>");
+            sbRows.Append("<td width='30%'>" + label + "</td>");
+            sbRows.Append("<td width='10%'>" + val + "</td>");
+            sbRows.Append("<td width='22%'>" + comment + "</td>");
+            sbRows.Append("</tr>");
+            return sbRows.ToString();
         }
         private string GetFileList(List<FormAttachmentEntity> lstAttachments)
         {
