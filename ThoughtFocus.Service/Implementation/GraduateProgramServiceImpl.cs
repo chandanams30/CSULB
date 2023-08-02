@@ -1931,9 +1931,9 @@ namespace ThoughtFocus.Service.Implementation
                 }
                 dtEducationInfo= dsDoc.Tables[3].Copy();
 
-                if(dsDoc.Tables[3]!=null && dsDoc.Tables[3].Rows.Count > 0)
+                if(dsDoc.Tables[4]!=null && dsDoc.Tables[4].Rows.Count > 0)
                 {
-                    dtDisposition = dsDoc.Tables[3].Copy();
+                    dtDisposition = dsDoc.Tables[4].Copy();
                 }
             }
 
@@ -1983,7 +1983,7 @@ namespace ThoughtFocus.Service.Implementation
                 }
             }
             // Section to add disposition assessments
-            if (dtDisposition.Rows.Count > 0)
+            if (dtDisposition != null && dtDisposition.Rows.Count > 0)
             {
                 // check if the program is not Graduate or SSCP and ESCP
                 if (!string.IsNullOrEmpty(Convert.ToString(dtDisposition.Rows[0]["DispositionsAssessmentForm"])))
@@ -2105,22 +2105,23 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     switch (rating.label)
                     {
-                        case "Rating 1":
+                        case "Goal 1":
                             rating1 = rating.value;
                             break;
-                        case "Rating 2":
+                        case "Goal 2":
                             rating2 = rating.value;
                             break;
-                        case "Rating 3":
+                        case "Goal 3":
                             rating3 = rating.value;
                             break;
-                        case "Rating 4":
+                        case "Goal 4":
                             rating4 = rating.value;
                             break;
 
                     }
                 }
-                var htmlBody = GetMailBodyTemplate("GeneratePdfReport.html");
+                //var htmlBody = GetMailBodyTemplate("GeneratePdfReport.html");
+                var htmlBody = GetDocumentTemplate("DispositionMSCPTemplate.html");
                 htmlBody = htmlBody.Replace("[[professionalList]]", sbProffesionalData.ToString())
                                    .Replace("[[attendanceList]]", sbAttendanceData.ToString())
                                    .Replace("[[communicationList]]", sbCommunicationData.ToString())

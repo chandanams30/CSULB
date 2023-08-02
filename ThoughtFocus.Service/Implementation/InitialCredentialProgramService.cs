@@ -920,11 +920,16 @@ namespace ThoughtFocus.Service.Implementation
                             File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
                         }
                     }
+                    response.FileName = Convert.ToString(dtFormAttachment.Rows[0]["FileName"]);
+                    response.FileExtn = Convert.ToString(dtFormAttachment.Rows[0]["FileExtn"]);
+                    response.UniqueID = (Guid)(dtFormAttachment.Rows[0]["UniqueID"]);
+                    response.FormEducationInformationAttachmentID = Convert.ToInt32(dtFormAttachment.Rows[0]["FormEducationInformationAttachmentID"]);
+                    response.FormID = Convert.ToInt32(dtFormAttachment.Rows[0]["FormID"]);
+                    response.IsSuccess = true;
+                    response.Message = "Form attachment Uploaded Successfully";
                     // now delete the old file based on the file name return from DB call above 
                 }
-
-                response.IsSuccess = true;
-                response.Message = "Form attachment Uploaded Successfully";
+        
 
                 return response;
             }
