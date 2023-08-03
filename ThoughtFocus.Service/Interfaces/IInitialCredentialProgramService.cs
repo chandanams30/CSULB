@@ -29,7 +29,8 @@ namespace ThoughtFocus.Service.Interfaces
         DownloadEducationalInformationalAttachment GetFormEducationInformationAttachment(int FormID, Guid UniqueID);
         BaseResponse UpdateFormSubSectionApproveral(UpdateFormSubSectionApproveralRequest input);
         FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers);
-
+        AdditionalOfficialDocumentsResponse GetAdditionalOfficialDocuments(int UserID, int FormID, int ProgramID, string TermCode);
+        BaseResponse UpdateAdditionalOfficialDocument(UpdateAdditionalOfficialDocumentRequest input);
 
     }
 }

@@ -11,8 +11,11 @@ using System.Security.Principal;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
+using ThoughtFocus.Domain.Request.Travel;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
@@ -43,7 +46,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             ApplicationProgramResponse obj = new ApplicationProgramResponse();
 
-
+            
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
@@ -1046,6 +1049,144 @@ namespace ThoughtFocus.Service.Implementation
             }
 
             return obj;
+        }
+        public AdditionalOfficialDocumentsResponse GetAdditionalOfficialDocuments(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            AdditionalOfficialDocumentsResponse obj = new AdditionalOfficialDocumentsResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode }
+                                     };
+            DataTable dtOfficialDocumentsDetails = _helper.GetDataTable("[dbo].[GetAdditionalOfficialDocuments]", parameters);
+            try
+            {
+                if (dtOfficialDocumentsDetails.Rows.Count > 0)
+                {
+
+
+                    obj.AdditionalOfficialDocuments = dtOfficialDocumentsDetails.AsEnumerable().Select(row =>
+                                              new AdditionalOfficialDocuments
+                                              {
+                                                  AdditionalOfficialDocumentID = Convert.ToInt32(row["AdditionalOfficialDocumentID"]),
+                                                  FormID = Convert.ToInt32(row["FormID"]),
+                                                  DocumentID = Convert.ToInt32(row["DocumentID"]),
+                                                  FileName = Convert.ToString(row["FileName"] == DBNull.Value ? null : row["FileName"]),
+                                                  FileExtn = Convert.ToString(row["FileExtn"] == DBNull.Value ? null : row["FileExtn"]),
+                                                  FolderName = Convert.ToString(row["FolderName"] == DBNull.Value ? null : row["FolderName"]),
+                                                  UploadedBy = Convert.ToInt32(row["UploadedBy"] == DBNull.Value ? null : row["UploadedBy"]),
+                                                  UploadedDate = Convert.ToDateTime(row["UploadedDate"] == DBNull.Value ? null : row["UploadedDate"]),
+                                                  UploadedByName = Convert.ToString(row["UploadedByName"] == DBNull.Value ? null : row["UploadedByName"]),
+                                                  CanView = Convert.ToString(row["CanView"])
+                                              }).ToList();
+
+                    
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+
+        }
+        public BaseResponse UpdateAdditionalOfficialDocument(UpdateAdditionalOfficialDocumentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            string fileName = string.Empty;
+            string fileExtension = string.Empty;
+            string userFolderName = string.Empty;
+            string savedFileName = string.Empty;
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+            // pull the saved file name format SP Below
+            FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FormID, input.DocumentID);
+            if (input.FileName != string.Empty)
+            {
+                AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                //fileName = fileDetails.FileName;
+                fileExtension = fileDetails.FileExtension;
+            }
+            SqlParameter[] parameters =
+                                      {
+                                          new SqlParameter("@AdditionalOfficialDocumentID", SqlDbType.BigInt) { Value = input.AdditionalOfficialDocumentID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@FileName", SqlDbType.VarChar, 250) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID }
+                                      };
+            DataTable dtFormAttachment = _helper.GetDataTable("[Application].[UpdateAdditionalOfficialDocument]", parameters);
+            if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+            {
+                string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                userFolderName = folderSplit[0].ToString();
+                string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                if (Directory.Exists(dirUserFolderPath))
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    if (Directory.Exists(dirForm))
+                    {
+                        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                        
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(dirForm);
+                        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                        
+                    }
+                }
+                else
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                    DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                    DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                    dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                    dirFieldWorkFolder.SetAccessControl(dSecurity);
+                    File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    
+                }
+                // now delete the old file based on the file name return from DB call above 
+            }
+
+            response.IsSuccess = true;
+            response.Message = "Document Uploaded Successfully";
+            return response;
+        }
+        private FormAttachmentFileNames GetFormAttachmentFileName(int formID, int documentID)
+        {
+            FormAttachmentFileNames fileNames = new FormAttachmentFileNames();
+            string savedFileName = string.Empty;
+            SqlParameter[] parameters =
+                                    {
+
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = documentID }
+                                    };
+            DataTable dtName = _helper.GetDataTable("[dbo].[GetFormAttachmentFileName]", parameters);
+
+            if (dtName.Rows.Count > 0)
+            {
+                fileNames.SavedFileName = Convert.ToString(dtName.Rows[0]["SavedFileName"]);
+                fileNames.FileName = Convert.ToString(dtName.Rows[0]["FileName"]);
+                fileNames.UserFolder = Convert.ToString(dtName.Rows[0]["UserFolder"]);
+            }
+
+            return fileNames;
         }
     }
 }

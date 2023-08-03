@@ -3,16 +3,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Interfaces;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CSULB_COE.Controllers
 {
@@ -442,6 +446,53 @@ namespace CSULB_COE.Controllers
                 FormSectionApprovalDetailsResponse response = new FormSectionApprovalDetailsResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetAdditionalOfficialDocuments")]
+        public AdditionalOfficialDocumentsResponse GetAdditionalOfficialDocuments(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                AdditionalOfficialDocumentsResponse response = _initialCredentialProgramService.GetAdditionalOfficialDocuments(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdditionalOfficialDocumentsResponse response = new AdditionalOfficialDocumentsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateAdditionalOfficialDocument")]
+        public BaseResponse UpdateAdditionalOfficialDocument(UpdateAdditionalOfficialDocumentRequest input)
+        {
+            byte[] fileContent = null;
+            string filepath = "D:\\CSULB\\Document\\test.pdf";
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            input.FileContent = fileContent;
+            
+            try
+            {
+                BaseResponse response = _initialCredentialProgramService.UpdateAdditionalOfficialDocument(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;
