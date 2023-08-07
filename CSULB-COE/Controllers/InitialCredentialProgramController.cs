@@ -472,17 +472,19 @@ namespace CSULB_COE.Controllers
         [HttpPost("UpdateAdditionalOfficialDocument")]
         public BaseResponse UpdateAdditionalOfficialDocument(UpdateAdditionalOfficialDocumentRequest input)
         {
-            byte[] fileContent = null;
-            string filepath = "D:\\CSULB\\Document\\test.pdf";
-            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
-            long byteLength = new System.IO.FileInfo(filepath).Length;
-            fileContent = binaryReader.ReadBytes((Int32)byteLength);
-            fs.Close();
-            fs.Dispose();
-            binaryReader.Close();
-            input.FileContent = fileContent;
-            
+            #region Get file content
+            //byte[] fileContent = null;
+            //string filepath = "D:\\CSULB\\Document\\test.pdf";
+            //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            //long byteLength = new System.IO.FileInfo(filepath).Length;
+            //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            //fs.Close();
+            //fs.Dispose();
+            //binaryReader.Close();
+            //input.FileContent = fileContent;
+            #endregion
+
             try
             {
                 BaseResponse response = _initialCredentialProgramService.UpdateAdditionalOfficialDocument(input);

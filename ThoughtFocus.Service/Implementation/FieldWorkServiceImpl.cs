@@ -593,7 +593,7 @@ namespace ThoughtFocus.Service.Implementation
         public FieldWorkActivityLogByIDResponse UpdateFieldWorkActivityLog(FieldWorkActivityLogRequest input)
         {
             DataTable standardsTable = ToDataTable(input.standards);
-            
+
             //BaseResponse obj = new BaseResponse();
 
             SqlParameter[] parameters =
@@ -604,6 +604,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@CommunityDistrictID", SqlDbType.BigInt) { Value = input.CommunityDistrictID },
                                           new SqlParameter("@CommunitySchoolID", SqlDbType.BigInt) { Value = input.CommunitySchoolID },
                                           new SqlParameter("@CommunitySiteUsersID", SqlDbType.BigInt) { Value = input.CommunitySiteUserID },
+                                          new SqlParameter("@CommunitySiteUserName", SqlDbType.NVarChar,200) { Value = input.CommunitySiteUserName },
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar,200) { Value = input.CommunitySiteUserEmail },
                                           new SqlParameter("@ActivityStartDate", SqlDbType.DateTime) { Value = input.ActivityStartDate },
                                           new SqlParameter("@ActivityEndDate", SqlDbType.DateTime) { Value = input.ActivityEndDate },
                                           new SqlParameter("@Hours", SqlDbType.Decimal) { Value = input.Hours },

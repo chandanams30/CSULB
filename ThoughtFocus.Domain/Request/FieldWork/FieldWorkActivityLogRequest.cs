@@ -14,6 +14,8 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public int CommunityDistrictID { get; set; }
         public int CommunitySchoolID { get; set; }
         public int CommunitySiteUserID { get; set; }
+        public string CommunitySiteUserName { get; set; }
+        public string CommunitySiteUserEmail { get; set; }
         public DateTime ActivityStartDate { get; set; }
         public DateTime ActivityEndDate { get; set; }
        
