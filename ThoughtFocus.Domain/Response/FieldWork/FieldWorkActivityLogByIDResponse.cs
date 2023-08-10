@@ -29,7 +29,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public int CommunitySchoolID { get; set; }
         public string CommunitySchoolName { get; set; }
         public int CommunitySiteUserID { get; set; }
-        public string CommunitySiteUserName { get; set; }       
+        public string CommunitySiteUserName { get; set; }
+        public string CommunitySiteUserEmail { get; set; }
         public DateTime ActivityStartDate { get; set; }
         public DateTime ActivityEndDate { get; set; }
         public decimal Hours { get; set; }
