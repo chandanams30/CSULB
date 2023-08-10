@@ -2182,9 +2182,15 @@ namespace ThoughtFocus.Service.Implementation
                     string rowValues = ConstructDataRows(label, val, comment);
                     sb.Append(rowValues);
                 }
-               
-
-                    var htmlBody = GetDocumentTemplate("DispositionUDCPTemplate.html");
+                var htmlBody = string.Empty;
+                if (programIdentifier.ToUpper() == "UDCP")
+                {
+                     htmlBody = GetDocumentTemplate("DispositionUDCPTemplate.html");
+                }
+                else 
+                {  
+                    htmlBody = GetDocumentTemplate("DispositionESCPTemplate.html"); 
+                }
 
                     htmlBody = htmlBody.Replace("[[UDCPData]]", sb.ToString());
                     StringReader sr = new StringReader(htmlBody.ToString());
@@ -2203,7 +2209,7 @@ namespace ThoughtFocus.Service.Implementation
                         memoryStream.Close();
                     }
 
-                    string html2PDFFilePath = Path.Combine(fileStoringPath, "Disposition_UDCP" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                    string html2PDFFilePath = Path.Combine(fileStoringPath, "Disposition" + "_" + programIdentifier.ToUpper() + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
                     File.WriteAllBytes(html2PDFFilePath, htmlContent);
                     iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(html2PDFFilePath);
                     //pdfReader.setUnethicalReading(true);

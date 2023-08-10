@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -1007,11 +1009,59 @@ namespace ThoughtFocus.Service.Implementation
                                           
                                         };
 
-            int identity = _helper.InsertTable("[Application].[UpdateFormSubSectionApproveral]", parameters);
+            DataTable applicantInfo = _helper.GetDataTable("[Application].[UpdateFormSubSectionApproveral]", parameters);
+            string applicantName = string.Empty;
+            string applicantEmail = string.Empty;
+            string Subject = string.Empty;
+            string body = string.Empty;
+            string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
+            string logoText = "cid:myImageID";
+            if (applicantInfo.Rows.Count>=0)
+            {
+                applicantName = applicantInfo.Rows[0]["ApplicantName"].ToString();
+                applicantEmail= applicantInfo.Rows[0]["ApplicantEmail"].ToString();
+            }
+            Dictionary<string, (string subject, string templateName)> subsectionMap = new Dictionary<string, (string, string)>
+            {
+                { "BSR", ("MyCED BSR Review", "BSRMailTemplate.html") },
+                { "SMC", ("MyCED SMC Review", "SMCMailTemplate.html") },
+                { "GPA", ("MyCED GPA Review", "GPAMailTemplate.html") },
+            };
+
+            if (subsectionMap.TryGetValue(input.SubSectionIdentifiers, out var value))
+            {
+                Subject = input.IsApproved ? $"{value.subject} Approved" : $"{value.subject} Rejected";
+                body = GetMailBodyTemplate(value.templateName);
+                body = body.Replace("[[logoPath]]", logoText)
+                           .Replace("[[applicantName]]", applicantName)
+                           .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
+                           .Replace("[[approveOrRejectStatus]]", input.IsApproved ? "approved" : "rejected");
+            
+            }
+            try
+            {
+                _sendMail.SendEmail(applicantEmail, "", "COMMON", Subject, body, "");
+            }
+            catch (Exception ee)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "BSR/SMC/GPA submit or not submitted status send mail failure.";
+            }
+
             obj.IsSuccess = true;
             obj.Message = "Subsection saved successfully";
 
             return obj;
+        }
+        private string GetMailBodyTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/EmailTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
         }
 
         public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers)
