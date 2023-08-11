@@ -22,6 +22,8 @@ using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Interfaces;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
+using ThoughtFocus.DataAccess.Models;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -228,7 +230,7 @@ namespace ThoughtFocus.Service.Implementation
 
 
                     obj.Semesters = dtSemesters.AsEnumerable().Select(row =>
-                                              new Semester
+                                              new Domain.Response.GraduateProgram.Semester
                                               {
                                                   TermCode = Convert.ToString(row["TermCode"]),
                                                   TermName = Convert.ToString(row["Name"])
@@ -1237,6 +1239,79 @@ namespace ThoughtFocus.Service.Implementation
             }
 
             return fileNames;
+        }
+        public Domain.Request.InitialCredentialProgram.FormAttachments GetAdditionalOfficialDocument(GetAdditionalOfficialDocumentRequest input)
+        {
+            //@UserID = 1,@FormID = 10253,@ProgramID = 1,@TermCode = 2234,@AdditionalOfficialDocumentID = 1
+            Domain.Request.InitialCredentialProgram.FormAttachments obj = new Domain.Request.InitialCredentialProgram.FormAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 20) { Value = input.TermCode },
+                                          new SqlParameter("@AdditionalOfficialDocumentID", SqlDbType.BigInt) { Value = input.AdditionalOfficialDocumentID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[Application].[GetAdditionalOfficialDocument]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new Domain.Request.InitialCredentialProgram.FormAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent1(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        private string GetAttachmentsFolderName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string userFolderName = folderSplit[0].ToString();
+            return userFolderName;
+        }
+        private string GetAttachmentsSavedFileName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string savedFileName = folderSplit[1].ToString();
+            return savedFileName;
+        }
+        public byte[] GetFileContent1(string userFolderPath, string fileName)
+        {
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            string filepath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, fileName));
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
+        }
+        public BaseResponse DeleteAdditionalOfficialDocument(DeleteAdditionalOfficialDocumentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FormAttachmentID ", SqlDbType.BigInt) { Value = input.AdditionalOfficialDocumentID },
+                                        };
+            DataTable dtDeleteAttachment = _helper.GetDataTable("[Application].[deleteAdditionalOfficialDocument]", parameters);
+            if (dtDeleteAttachment.Rows.Count > 0)
+            {
+                response.Message = "Attachment Deleted Successfully";
+                response.IsSuccess = true;
+            }
+            else
+            {
+                response.Message = "Failed To Delete Attachment";
+                response.IsSuccess = false;
+            }
+            return response;
         }
     }
 }

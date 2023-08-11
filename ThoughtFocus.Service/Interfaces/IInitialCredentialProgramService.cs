@@ -31,6 +31,8 @@ namespace ThoughtFocus.Service.Interfaces
         FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers);
         AdditionalOfficialDocumentsResponse GetAdditionalOfficialDocuments(int UserID, int FormID, int ProgramID, string TermCode);
         BaseResponse UpdateAdditionalOfficialDocument(UpdateAdditionalOfficialDocumentRequest input);
+        FormAttachments GetAdditionalOfficialDocument(GetAdditionalOfficialDocumentRequest input);
+        BaseResponse DeleteAdditionalOfficialDocument(DeleteAdditionalOfficialDocumentRequest input);
 
     }
 }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
@@ -488,6 +489,63 @@ namespace CSULB_COE.Controllers
             try
             {
                 BaseResponse response = _initialCredentialProgramService.UpdateAdditionalOfficialDocument(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetAdditionalOfficialDocument")]
+        public IActionResult GetAdditionalOfficialDocument(GetAdditionalOfficialDocumentRequest input)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+              
+                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.GetAdditionalOfficialDocument(input);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("DeleteAdditionalOfficialDocument")]
+        public BaseResponse DeleteAdditionalOfficialDocument(DeleteAdditionalOfficialDocumentRequest input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MYDOCS.png";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\pic2.jpg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                BaseResponse response = _initialCredentialProgramService.DeleteAdditionalOfficialDocument(input);
                 return response;
             }
             catch (Exception ex)
