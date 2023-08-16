@@ -1242,7 +1242,6 @@ namespace ThoughtFocus.Service.Implementation
         }
         public Domain.Request.InitialCredentialProgram.FormAttachments GetAdditionalOfficialDocument(GetAdditionalOfficialDocumentRequest input)
         {
-            //@UserID = 1,@FormID = 10253,@ProgramID = 1,@TermCode = 2234,@AdditionalOfficialDocumentID = 1
             Domain.Request.InitialCredentialProgram.FormAttachments obj = new Domain.Request.InitialCredentialProgram.FormAttachments();
             SqlParameter[] parameters =
                                      {
@@ -1258,7 +1257,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new Domain.Request.InitialCredentialProgram.FormAttachments
                                           {
                                               Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
-                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent1(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContentAdditionalDocument(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Form"), GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
                                           }).FirstOrDefault();
 
             return obj;
@@ -1275,7 +1274,7 @@ namespace ThoughtFocus.Service.Implementation
             string savedFileName = folderSplit[1].ToString();
             return savedFileName;
         }
-        public byte[] GetFileContent1(string userFolderPath, string fileName)
+        public byte[] GetFileContentAdditionalDocument(string userFolderPath, string fileName)
         {
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             string filepath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, fileName));
@@ -1298,19 +1297,11 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@FormAttachmentID ", SqlDbType.BigInt) { Value = input.AdditionalOfficialDocumentID },
+                                          new SqlParameter("@AdditionalOfficialDocumentID ", SqlDbType.BigInt) { Value = input.AdditionalOfficialDocumentID },
                                         };
-            DataTable dtDeleteAttachment = _helper.GetDataTable("[Application].[deleteAdditionalOfficialDocument]", parameters);
-            if (dtDeleteAttachment.Rows.Count > 0)
-            {
-                response.Message = "Attachment Deleted Successfully";
-                response.IsSuccess = true;
-            }
-            else
-            {
-                response.Message = "Failed To Delete Attachment";
-                response.IsSuccess = false;
-            }
+            int id = _helper.InsertTable("[Application].[deleteAdditionalOfficialDocument]", parameters);
+            response.Message = "Attachment Deleted Successfully";
+            response.IsSuccess = true;
             return response;
         }
     }
