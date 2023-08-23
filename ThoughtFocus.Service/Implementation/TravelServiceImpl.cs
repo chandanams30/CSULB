@@ -548,9 +548,9 @@ namespace ThoughtFocus.Service.Implementation
                 UserID = Convert.ToString(dtDirections.Rows[i]["UserID"]);
 
                 string strDirection=ConstructDirectionsTableData(directionsJSON,startingAddress,destinationAddress,directionsMapFileName);
-                sbReportData.Append("<tr><td style='text-align: center;'><img src='SupportFiles/Img/STARTING_ADDRESS.png' height='20px' width='20px' /></td><td> Starting Location : " + startingAddress + "</td></tr>");
+                sbReportData.Append("<tr><td style='text-align: center;'><img src='SupportFiles/Img/STARTING_ADDRESS.png' height='20px' width='20px' /></td><td style='font-size: 10px;'> Starting Location : " + startingAddress + "</td></tr>");
                 sbReportData.Append(strDirection);
-                sbReportData.Append("<tr><td align='center'><img src='SupportFiles/Img/DESTINATION_ADDRESS.png' height='20px' width='20px' /></td><td> Destination : " + destinationAddress + "</td></tr>");
+                sbReportData.Append("<tr><td align='center'><img src='SupportFiles/Img/DESTINATION_ADDRESS.png' height='20px' width='20px' /></td><td style='font-size: 10px;'> Destination : " + destinationAddress + "</td></tr>");
                 sbReportData.Append("<tr><td colspan='2'><img src='"+ GenerateImgURL(UserID,directionsMapFileName)+ "' /></td></tr>");
                 sbReportData.Append("<tr><td colspan='2'> &nbsp; </td > </tr>");
                 
@@ -589,7 +589,9 @@ namespace ThoughtFocus.Service.Implementation
             StringReader sr = new StringReader(htmlFormBody); // workable code uncomment after testing 
             //TextReader sr = new StringReader(htmlFormBody);
             //Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 0f);
-            Document pdfDoc = new Document(PageSize.A4, 16, 16, 25, 20);
+            //Document pdfDoc = new Document(PageSize.A4, 16, 16, 25, 20); //portrait mode
+            Document pdfDoc = new Document(PageSize.A4.Rotate(), 25, 25, 16, 16);//landscape mode
+
             HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
             using (MemoryStream memoryStream = new MemoryStream())
             {
@@ -638,13 +640,13 @@ namespace ThoughtFocus.Service.Implementation
         {
             StringBuilder sbRows=new StringBuilder();
             sbRows.Append("<tr>");
-            sbRows.Append("<td width='14%'>"+travelDateTime+"</td>");
-            sbRows.Append("<td width='22%'>" + startingAddress + "</td>");
-            sbRows.Append("<td width='22%'>" + destinationAddress + "</td>");
-            sbRows.Append("<td width='17%'>" + businessPurpose + "</td>");
-            sbRows.Append("<td>"+miles+"</td>");
-            sbRows.Append("<td>" + rate + "</td>");
-            sbRows.Append("<td width='10%'>" + amount + "</td>");
+            sbRows.Append("<td width='10%' style='font-size: 10px;'>" + travelDateTime+"</td>");
+            sbRows.Append("<td width='27%' style='font-size: 10px;'>" + startingAddress + "</td>");
+            sbRows.Append("<td width='27%' style='font-size: 10px;'>" + destinationAddress + "</td>");
+            sbRows.Append("<td width='8%'  style='font-size: 10px;'>" + businessPurpose + "</td>");
+            sbRows.Append("<td style='font-size: 10px;'>" + miles+"</td>");
+            sbRows.Append("<td style='font-size: 10px;'>" + rate + "</td>");
+            sbRows.Append("<td width='10%' style='font-size: 10px;'>" + amount + "</td>");
             sbRows.Append("</tr>");
             return sbRows.ToString();
         }
@@ -716,7 +718,7 @@ namespace ThoughtFocus.Service.Implementation
             StringBuilder strTableData = new StringBuilder();
             strTableData.Append("<tr>");
             strTableData.Append("<td width='10%' text-align='center'><img src=" + imagePath + " height='20px' width='20px'/></td>");
-            strTableData.Append("<td>" + narrative + "</td>");
+            strTableData.Append("<td style='font-size: 10px;'>" + narrative + "</td>");
             strTableData.Append("</tr>");
             return strTableData.ToString();
         }
