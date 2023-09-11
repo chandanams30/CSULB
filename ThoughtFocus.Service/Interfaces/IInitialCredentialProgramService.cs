@@ -33,6 +33,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateAdditionalOfficialDocument(UpdateAdditionalOfficialDocumentRequest input);
         FormAttachments GetAdditionalOfficialDocument(GetAdditionalOfficialDocumentRequest input);
         BaseResponse DeleteAdditionalOfficialDocument(DeleteAdditionalOfficialDocumentRequest input);
+        BaseResponse UpdateFormSubSectionSubmitForReview(UpdateFormSubSectionSubmitForReviewRequest input);
 
     }
 }

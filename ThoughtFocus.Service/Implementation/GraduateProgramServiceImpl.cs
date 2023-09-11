@@ -194,7 +194,12 @@ namespace ThoughtFocus.Service.Implementation
                                                   Semester = Convert.ToString(row["Semester"]),
                                                   TermCode = Convert.ToString(row["TermCode"]),
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
-                                                  ReviewersName = Convert.ToString(row["ReviewersName"])
+                                                  ReviewersName = Convert.ToString(row["ReviewersName"]),
+                                                  BSRStatus = Convert.ToString(row["BSR"]),
+                                                  CTCStatus = Convert.ToString(row["CTC Clearance"]),
+                                                  GPAStatus = Convert.ToString(row["GPA"]),
+                                                  SMCStatus = Convert.ToString(row["SMC"]),
+                                                  TBTestStatus = Convert.ToString(row["TB Test"]),
 
                                               }).ToList();
                     }

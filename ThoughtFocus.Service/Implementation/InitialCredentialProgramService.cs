@@ -1304,5 +1304,21 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
+
+        public BaseResponse UpdateFormSubSectionSubmitForReview(UpdateFormSubSectionSubmitForReviewRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@FormSubSectionID", SqlDbType.BigInt) { Value = input.FormSubSectionID },
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers },
+                                          new SqlParameter("@IsSubmitForReview ", SqlDbType.Bit) { Value = input.IsSubmitForReview },
+                                        };
+            int id = _helper.InsertTable("[Application].[UpdateFormSubSectionSubmitForReview]", parameters);
+            response.Message = "Form section submitted for Review";
+            response.IsSuccess = true;
+            return response;
+        }
     }
 }

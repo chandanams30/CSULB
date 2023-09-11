@@ -8,6 +8,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public List<AppliedFormsByPrograms> AppliedFormsByPrograms { get; set; }
         public HeaderDetails HeaderDetails { get; set; }
+
     }
     public class AppliedFormsByPrograms
     {
@@ -24,6 +25,11 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string TermCode { get; set; }
         public string CSULBID { get; set; }
         public string ReviewersName { get; set; }
+        public string BSRStatus { get; set; }
+        public string CTCStatus { get; set; }
+        public string GPAStatus { get; set; }
+        public string SMCStatus { get; set; }
+        public string TBTestStatus { get; set; }
     }
 
   
