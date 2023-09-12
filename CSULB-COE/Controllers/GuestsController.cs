@@ -1,12 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
+using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
@@ -23,14 +29,16 @@ namespace CSULB_COE.Controllers
         public IGraduateProgramService _graduateProgramService;
         private readonly IApplicationService _applicationService;
         private readonly IConfiguration _configuration;
+        private readonly ISqlDBUtility _helper;
         public GuestsController(IGraduateProgramService graduateProgramService ,
               ILogger<GraduateProgramController> logger, IApplicationService applicationService
-            , IConfiguration configuration)
+            , IConfiguration configuration, ISqlDBUtility helper)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
             _applicationService = applicationService;
             _configuration = configuration;
+            _helper = helper;
         }
         
 
@@ -227,6 +235,99 @@ namespace CSULB_COE.Controllers
 
                 _logger.LogError(ex, ex.Message);
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("ValidateForm")]
+        public GraduateProgramFormResponse ValidateForm(string part1, string part2, string part3)
+        {
+            try
+            {
+                var secretKey = _configuration["ApplicationKeys:SecretKey"];
+                byte[] Key = new byte[32];
+                Array.Copy(Encoding.UTF8.GetBytes(secretKey), Key, Math.Min(Key.Length, Encoding.UTF8.GetBytes(secretKey).Length));
+                string part3Decrypt = DecodeBase64AndDecrypt(part3, Key);
+                string part2Decrypt = string.Empty;
+                if (part3Decrypt == part1.ToString())
+                {
+                    part2Decrypt = DecodeBase64AndDecrypt(part2, Key);
+
+                    string[] keyValuePairs = part2Decrypt.Split('&');
+                    var keyValueDictionary = new System.Collections.Generic.Dictionary<string, string>();
+
+                    foreach (string keyValue in keyValuePairs)
+                    {
+                        // Split each key-value pair by '='
+                        string[] parts = keyValue.Split('=');
+
+                        if (parts.Length == 2)
+                        {
+                            string key = parts[0];
+                            string value = parts[1];
+                            keyValueDictionary[key] = value;
+                        }
+                    }
+                    int userID = Convert.ToInt32(keyValueDictionary["userID"]);
+                    int programID = Convert.ToInt32(keyValueDictionary["programID"]);
+                    string termCode = keyValueDictionary["termCode"];
+                    SqlParameter[] parameters =
+                                             {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.BigInt) { Value = termCode }
+                                        };
+                    DataTable dtAppliedForms = _helper.GetDataTable("[Application].[GetFormID]", parameters);
+                    int formID = 0;
+                    GraduateProgramFormResponse response = new GraduateProgramFormResponse();
+                    if (dtAppliedForms.Rows.Count > 0)
+                    {
+                        formID = Convert.ToInt32(dtAppliedForms.Rows[0]["FormID"]);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode);
+                    }
+                    return response;
+                }
+                else
+                {
+                    GraduateProgramFormResponse response = new GraduateProgramFormResponse();
+                    response.IsSuccess = false;
+                    response.Message = "Invalid link";
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                GraduateProgramFormResponse response = new GraduateProgramFormResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+
+        }
+        private string DecodeBase64AndDecrypt(string base64CipherText, byte[] Key)
+        {
+
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = Key;
+                aesAlg.Mode = CipherMode.ECB; // Use CFB mode for educational purposes (not recommended for security)
+                aesAlg.Padding = PaddingMode.PKCS7;
+
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor();
+
+                byte[] encryptedBytes = Convert.FromBase64String(base64CipherText);
+
+                using (MemoryStream msDecrypt = new MemoryStream(encryptedBytes))
+                {
+                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                        {
+                            return srDecrypt.ReadToEnd();
+                        }
+                    }
+                }
             }
         }
         private string GetFileType(string fileExt)
