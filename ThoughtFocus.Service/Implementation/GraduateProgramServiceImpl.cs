@@ -194,7 +194,13 @@ namespace ThoughtFocus.Service.Implementation
                                                   Semester = Convert.ToString(row["Semester"]),
                                                   TermCode = Convert.ToString(row["TermCode"]),
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
-                                                  ReviewersName = Convert.ToString(row["ReviewersName"])
+                                                  ReviewersName = Convert.ToString(row["ReviewersName"]),
+                                                  BSRStatus = Convert.ToString(row["BSR"]),
+                                                  CTCStatus = Convert.ToString(row["CTC Clearance"]),
+                                                  GPAStatus = Convert.ToString(row["GPA"]),
+                                                  SMCStatus = Convert.ToString(row["SMC"]),
+                                                  TBTestStatus = Convert.ToString(row["TB Test"]),
+                                                  CredentialPathway = Convert.ToString(row["Credential Pathway"])
 
                                               }).ToList();
                     }
@@ -2949,6 +2955,50 @@ namespace ThoughtFocus.Service.Implementation
                                                   ProgramID = Convert.ToInt32(row["ProgramID"]),
                                                   TermCode = Convert.ToString(row["TermCode"]),
                                                   StudentMessageBoard = Convert.ToString(row["StudentMessageBoard"])
+                                              }).FirstOrDefault();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public ProgramConfigurationHandlerResponse GetProgramConfigurationHandler(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            ProgramConfigurationHandlerResponse obj = new ProgramConfigurationHandlerResponse();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = TermCode }
+                                        };
+
+            DataTable dtProgramConfiguration = _helper.GetDataTable("[Application].[GetProgramConfigurationHandler]", parameters);
+            try
+            {
+                if (dtProgramConfiguration.Rows.Count > 0)
+                {
+
+
+                    obj = dtProgramConfiguration.AsEnumerable().Select(row =>
+                                              new ProgramConfigurationHandlerResponse
+                                              {
+                                                  StateHandler = Convert.ToString(row["StateHandler"])
+
                                               }).FirstOrDefault();
 
 

@@ -595,7 +595,7 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
                     subSectionNameSplit = fileNames.FileName.Split('_');
-                    subSectionName= subSectionNameSplit[0];
+                    subSectionName = subSectionNameSplit[0];
                     fileExtension = fileDetails.FileExtension;
                     if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
                     {
@@ -607,7 +607,7 @@ namespace ThoughtFocus.Service.Implementation
                         //input.FileContent = imageContent;
                         //fileExtension = "pdf";
                     }
-                 
+
 
                 }
                 SqlParameter[] parameters =
@@ -626,58 +626,90 @@ namespace ThoughtFocus.Service.Implementation
                     string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
                     userFolderName = folderSplit[0].ToString();
                     string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
-                    if (Directory.Exists(dirUserFolderPath))
+
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    string subSection = Path.Combine(dirForm, subSectionName);
+                    //if (Directory.Exists(dirUserFolderPath))
+                    //{
+                    if (!Directory.Exists(dirUserFolderPath))
                     {
-                        
-                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
-                        string subSection = Path.Combine(dirForm, subSectionName);
-                        if (Directory.Exists(dirForm))
-                        {
-                            subSection = Path.Combine(dirForm, subSectionName);
-                            // copy the file here 
-                            if (isNotPDFExtension)
-                            {
-                                //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
-                            }
-                            else
-                            {
-                                Directory.CreateDirectory(subSection);
-                                File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
-                            }
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(dirForm);
-                            if (isNotPDFExtension)
-                            {
-                                //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
-                            }
-                            else
-                            {
-                                Directory.CreateDirectory(subSection);
-                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
-                        string subSection= Path.Combine(dirForm, subSectionName);
                         DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
                         DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
                         DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
                         DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
                         dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
                         dirsubsectionFolder.SetAccessControl(dSecurity);
-                        if (isNotPDFExtension)
-                        {
-                            //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
-                        }
-                        else
-                        {
-                            File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
-                        }
                     }
+                    //string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    //string subSection = Path.Combine(dirForm, subSectionName);
+                    if (!Directory.Exists(dirForm))
+                    {
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
+                        DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirsubsectionFolder.SetAccessControl(dSecurity);
+
+                    }
+                    if (!Directory.Exists(subSection))
+                    {
+                        DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
+                        DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirsubsectionFolder.SetAccessControl(dSecurity);
+                    }
+                    File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //if (Directory.Exists(dirForm))
+                    //{
+                    //    subSection = Path.Combine(dirForm, subSectionName);
+                    //    // copy the file here 
+                    //    //if (isNotPDFExtension)
+                    //    //{
+                    //    //    //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                    //    //}
+                    //    if (Directory.Exists(subSection))
+                    //    {
+
+                    //    }
+                    //    else
+                    //    {
+                    //        Directory.CreateDirectory(subSection);
+                    //        File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    Directory.CreateDirectory(dirForm);
+                    //    if (isNotPDFExtension)
+                    //    {
+                    //        //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                    //    }
+                    //    else
+                    //    {
+                    //        Directory.CreateDirectory(subSection);
+                    //        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //    }
+                    //}
+                    //}
+                    //else
+                    //{
+                    //    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    //    string subSection= Path.Combine(dirForm, subSectionName);
+                    //    DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                    //    DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                    //    DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
+                    //    DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
+                    //    dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                    //    dirsubsectionFolder.SetAccessControl(dSecurity);
+                    //    if (isNotPDFExtension)
+                    //    {
+                    //        //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                    //    }
+                    //    else
+                    //    {
+                    //        File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //    }
+                    //}
                     // now delete the old file based on the file name return from DB call above 
                 }
 
@@ -1032,12 +1064,18 @@ namespace ThoughtFocus.Service.Implementation
 
             if (subsectionMap.TryGetValue(input.SubSectionIdentifiers, out var value))
             {
-                Subject = input.IsApproved ? $"{value.subject} Approved" : $"{value.subject} Rejected";
-                body = GetMailBodyTemplate(value.templateName);
-                body = body.Replace("[[logoPath]]", logoText)
-                           .Replace("[[applicantName]]", applicantName)
-                           .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
-                           .Replace("[[approveOrRejectStatus]]", input.IsApproved ? "approved" : "rejected");
+                if (input.SubSectionIdentifiers == "BSR")
+                {
+                    value.templateName = input.IsApproved ? "BSRMetMailTemplate.html" : "BSRNotMetMailTemplate.html";
+                }
+              
+                    Subject = input.IsApproved ? $"{value.subject} Met" : $"{value.subject} Not Met";
+                    body = GetMailBodyTemplate(value.templateName);
+                    body = body.Replace("[[logoPath]]", logoText)
+                               .Replace("[[applicantName]]", applicantName)
+                               .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
+                               .Replace("[[approveOrRejectStatus]]", input.IsApproved ? "approved" : "rejected");
+              
             
             }
             try
@@ -1301,6 +1339,22 @@ namespace ThoughtFocus.Service.Implementation
                                         };
             int id = _helper.InsertTable("[Application].[deleteAdditionalOfficialDocument]", parameters);
             response.Message = "Attachment Deleted Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public BaseResponse UpdateFormSubSectionSubmitForReview(UpdateFormSubSectionSubmitForReviewRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@FormSubSectionID", SqlDbType.BigInt) { Value = input.FormSubSectionID },
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers },
+                                          new SqlParameter("@IsSubmitForReview ", SqlDbType.Bit) { Value = input.IsSubmitForReview },
+                                        };
+            int id = _helper.InsertTable("[Application].[UpdateFormSubSectionSubmitForReview]", parameters);
+            response.Message = "Form section submitted for Review";
             response.IsSuccess = true;
             return response;
         }

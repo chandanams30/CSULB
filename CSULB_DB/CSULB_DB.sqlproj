@@ -952,8 +952,6 @@
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="Security\SPCSULB_Administrator.sql" />
-    <Build Include="Security\paul.sql" />
     <Build Include="Security\RoleMemberships.sql" />
     <Build Include="dbo\Functions\fnIsInterviewerAttachmentsPresent.sql">
       <AnsiNulls>On</AnsiNulls>

@@ -12,4 +12,9 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string TermCode { get; set; }
         public string StudentMessageBoard { get; set; }
     }
+
+    public class ProgramConfigurationHandlerResponse:BaseResponse
+    {
+        public string StateHandler { get; set; }
+    }
 }

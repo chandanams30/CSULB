@@ -676,6 +676,25 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetProgramConfigurationHandler")]
+        public ProgramConfigurationHandlerResponse GetProgramConfigurationHandler(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                ProgramConfigurationHandlerResponse response = new ProgramConfigurationHandlerResponse();
+                response = _graduateProgramService.GetProgramConfigurationHandler(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProgramConfigurationHandlerResponse response = new ProgramConfigurationHandlerResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         [HttpPost("UpdateFormStudentMessageBoard")]
         public BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input)
         {

@@ -13,4 +13,13 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public int AdditionalOfficialDocumentID { get; set; }
 
     }
+
+    public class UpdateFormSubSectionSubmitForReviewRequest
+    {
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public bool IsSubmitForReview { get; set; }
+
+    }
 }
