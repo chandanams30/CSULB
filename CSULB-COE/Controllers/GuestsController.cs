@@ -14,9 +14,12 @@ using System.Text;
 using System.Threading.Tasks;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.GraduateProgram;
+using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Domain.Response.InitialCredentialProgram;
+using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
@@ -27,20 +30,22 @@ namespace CSULB_COE.Controllers
     {
         public ILogger<GraduateProgramController> _logger;
         public IGraduateProgramService _graduateProgramService;
+        public IInitialCredentialProgramService _initialCredentialProgramService;
         private readonly IApplicationService _applicationService;
         private readonly IConfiguration _configuration;
         private readonly ISqlDBUtility _helper;
         public GuestsController(IGraduateProgramService graduateProgramService ,
               ILogger<GraduateProgramController> logger, IApplicationService applicationService
-            , IConfiguration configuration, ISqlDBUtility helper)
+            , IConfiguration configuration, ISqlDBUtility helper, IInitialCredentialProgramService initialCredentialProgramService)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
             _applicationService = applicationService;
             _configuration = configuration;
             _helper = helper;
+            _initialCredentialProgramService = initialCredentialProgramService;
         }
-        
+
 
         [HttpGet("GetAppliedFormsByPrograms")]
         public AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID,string termCode,int formStateID)
@@ -222,7 +227,7 @@ namespace CSULB_COE.Controllers
                 string fileType = string.Empty;
                 string fileName = string.Empty;
 
-                FormAttachments obj = _graduateProgramService.DownloadFormAttachments(userID, formattachmentID);
+                ThoughtFocus.Domain.Request.GraduateProgram.FormAttachments obj = _graduateProgramService.DownloadFormAttachments(userID, formattachmentID);
                 fileName = obj.Filename;
                 inputStream = obj.FileContent;
                 string[] fileSplit = obj.Filename.Split('.');
@@ -283,6 +288,11 @@ namespace CSULB_COE.Controllers
                         formID = Convert.ToInt32(dtAppliedForms.Rows[0]["FormID"]);
                         response = _graduateProgramService.GetForm(userID, formID, programID, termCode);
                     }
+                    else
+                    {
+                        formID = 0;
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode);
+                    }
                     return response;
                 }
                 else
@@ -330,6 +340,153 @@ namespace CSULB_COE.Controllers
                 }
             }
         }
+        [HttpPost("DeleteFormAttachment")]
+        public BaseResponse DeleteFormAttachment(DeleteFormAttachmentRequest input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MYDOCS.png";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\pic2.jpg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                BaseResponse response = _graduateProgramService.DeleteFormAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFormState")]
+        public BaseResponse UpdateFormState(FormStatusUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateFormState(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertFormEducationInformationAttachment")]
+        public UpsertFormEducationInformationAttachmentResponse UpsertFormEducationInformationAttachment(UpsertFormEducationInformationAttachmentRequest input)
+        {
+            try
+            {
+                UpsertFormEducationInformationAttachmentResponse response = new UpsertFormEducationInformationAttachmentResponse();
+
+                #region to get the file content from local
+                //byte[] fileContent = null;
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                #endregion
+
+                response = _initialCredentialProgramService.UpsertFormEducationInformationAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                UpsertFormEducationInformationAttachmentResponse response = new UpsertFormEducationInformationAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetFormEducationInformationAttachment")]
+        public IActionResult GetFormEducationInformationAttachment(int FormID, Guid UniqueID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                DownloadEducationalInformationalAttachment obj = _initialCredentialProgramService.GetFormEducationInformationAttachment(FormID, UniqueID);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetIntialCreditialOptionItemsList")]
+        public OptionItemListResponse GetIntialCreditialOptionItemsList(int programID)
+        {
+            try
+            {
+                OptionItemListResponse response = _initialCredentialProgramService.GetIntialCreditialOptionItemsList(programID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                OptionItemListResponse response = new OptionItemListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetProgramConfigurationHandler")]
+        public ProgramConfigurationHandlerResponse GetProgramConfigurationHandler(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                ProgramConfigurationHandlerResponse response = new ProgramConfigurationHandlerResponse();
+                response = _graduateProgramService.GetProgramConfigurationHandler(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProgramConfigurationHandlerResponse response = new ProgramConfigurationHandlerResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
         private string GetFileType(string fileExt)
         {
             string contentType = string.Empty;

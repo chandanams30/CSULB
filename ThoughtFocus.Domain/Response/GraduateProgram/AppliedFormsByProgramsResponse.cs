@@ -30,6 +30,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string GPAStatus { get; set; }
         public string SMCStatus { get; set; }
         public string TBTestStatus { get; set; }
+        public string CredentialPathway { get; set; }
     }
 
   

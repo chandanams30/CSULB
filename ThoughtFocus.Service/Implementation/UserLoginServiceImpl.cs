@@ -223,7 +223,7 @@ namespace ThoughtFocus.Service.Implementation
                     new Claim(ClaimTypes.Email,user.Email),
                     new Claim("UserID",user.Id.ToString())
               }),
-                Expires = DateTime.UtcNow.AddMinutes(20),
+                Expires = DateTime.UtcNow.AddMinutes(60),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var cToken = tokenHandler.CreateToken(tokenDescriptor);
