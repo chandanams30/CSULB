@@ -486,6 +486,155 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("GetFormSubSection")]
+        public FormSubSectionResponse GetFormSubSection(FormSubsectionRequest input)
+        {
+            try
+            {
+                FormSubSectionResponse response = _initialCredentialProgramService.GetFormSubSection(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormSubSectionResponse response = new FormSubSectionResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetFormSubSectionAttachmentList")]
+        public FormSectionAttachmentResponse GetFormSubSectionAttachmentList(FormSubsectionRequest input)
+        {
+            try
+            {
+                FormSectionAttachmentResponse response = _initialCredentialProgramService.GetFormSubSectionAttachmentList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormSectionAttachmentResponse response = new FormSectionAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFormSubSectionApproversDetails")]
+        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers)
+        {
+            try
+            {
+                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID, UserID, FormSubSectionID, SubSectionIdentifiers);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormSectionApprovalDetailsResponse response = new FormSectionApprovalDetailsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetAdditionalOfficialDocuments")]
+        public AdditionalOfficialDocumentsResponse GetAdditionalOfficialDocuments(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                AdditionalOfficialDocumentsResponse response = _initialCredentialProgramService.GetAdditionalOfficialDocuments(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdditionalOfficialDocumentsResponse response = new AdditionalOfficialDocumentsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetFormSubSectionAttachment")]
+        public IActionResult GetFormSubSectionAttachment(SubsectionAttachmentDownloadRequest input)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                FormSubsectionAttachmentDownloadResponse obj = _initialCredentialProgramService.GetFormSubSectionAttachment(input);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("SaveFormSubSectionAttachment")]
+        public BaseResponse SaveFormSubSectionAttachment(SaveFormSubSectionAttachmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                #region to get the file content from local
+                //byte[] fileContent = null;
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                #endregion
+
+                response = _initialCredentialProgramService.SaveFormSubSectionAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertFormSubSection")]
+        public BaseResponse UpsertFormSubSection(UpsertFormSubSectionRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _initialCredentialProgramService.UpsertFormSubSection(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         private string GetFileType(string fileExt)
         {

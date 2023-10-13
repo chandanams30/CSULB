@@ -838,6 +838,7 @@ namespace ThoughtFocus.Service.Implementation
                     objRec.TermCode = input.TermCode;
                     objRec.RecommenderName = recommender.RecommenderName;
                     objRec.RecommenderEmail = recommender.RecommenderEmail;
+                    objRec.RecommenderAffiliation = recommender.RecommenderAffiliation;
                     BaseResponse attachRes = AddRecommender(objRec);
                 }
             }
@@ -1194,12 +1195,15 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
                                           new SqlParameter("@RecommenderName", SqlDbType.NVarChar, 250) { Value = input.RecommenderName },
                                           new SqlParameter("@RecommenderEmail", SqlDbType.NVarChar, 250) { Value = input.RecommenderEmail },
+                                          new SqlParameter("@RecommenderAffiliation", SqlDbType.NVarChar, 200) { Value = input.RecommenderAffiliation },
 
                                           new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = DBNull.Value },
                                           new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier, 250) { Value = DBNull.Value },
                                           new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = DBNull.Value },
                                           new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = DBNull.Value },
                                           new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = DBNull.Value }
+                                          
+
                                         };
 
             // int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
