@@ -1274,7 +1274,7 @@ namespace ThoughtFocus.Service.Implementation
                               {
                                           new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = CSSDTID }
 
-                                     };
+                              };
 
             DataSet dtFieldWork = _helper.GetDataSet("[FieldWork].[PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail]", parameters);
             if (dtFieldWork.Tables.Count > 0)
@@ -1288,9 +1288,27 @@ namespace ThoughtFocus.Service.Implementation
                                               CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"])
                                               
                                           }).FirstOrDefault();
+
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully.";
-
+                try
+                {
+                    string toUser = "chandana.shankaregowda@thoughtfocus.com";
+                    string link = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
+                    string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
+                    string logoText = "cid:myImageID";
+                    body = body.Replace("[[logoPath]]", logoText)
+                               .Replace("[[PartnerUserName]]", obj.CommunitySiteUserName)
+                               .Replace("[[link]]", $"<a href='{link}' target='_blank'>Here</a>");
+                    string subject = "Partner User Link";
+                    _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
+                    obj.Message = "Partner User Approve/Reject status send mail successfully.";
+                }
+                catch (Exception ee)
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "Partner User Approve/Reject status send mail failure.";
+                }
             }
             else
             {
