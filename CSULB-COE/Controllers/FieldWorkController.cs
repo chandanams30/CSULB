@@ -17,7 +17,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class FieldWorkController : ControllerBase
     {
         public ILogger<FieldWorkController> _logger;
@@ -510,6 +510,45 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList")]
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList()
+        {
+            try
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse();
+                response = _fieldWorkService.PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail")]
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail(int CSSDTID)
+        {
+            try
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+                response = _fieldWorkService.PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail(CSSDTID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
         private string GetFolderName(int userId, int fieldWorkID)
         {
             string folderName = string.Empty;

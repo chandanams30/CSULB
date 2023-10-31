@@ -24,6 +24,7 @@ using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Interfaces;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Response.FieldWork;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1357,6 +1358,54 @@ namespace ThoughtFocus.Service.Implementation
             response.Message = "Form section submitted for Review";
             response.IsSuccess = true;
             return response;
+        }
+
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail)
+        {
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@CommunitySiteUserIdentifier", SqlDbType.Int, 50) { Value = CommunitySiteUserIdentifier },
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.Int, 50) { Value = CommunitySiteUserEmail }
+                                        };
+
+            DataTable dtAppliedForms = _helper.GetDataTable("[FieldWork].[PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher]", parameters);
+            try
+            {
+                if (dtAppliedForms.Rows.Count > 0)
+                {
+
+
+                    obj = dtAppliedForms.AsEnumerable().Select(row =>
+                                              new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail
+                                              {
+                                                  CSSDTID = Convert.ToInt32(row["CSSDTID"]),
+                                                  CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
+                                                  CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
+                                                  CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"])
+
+                                              }).FirstOrDefault();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail IInitialCredentialProgramService.PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail)
+        {
+            throw new NotImplementedException();
         }
     }
 }

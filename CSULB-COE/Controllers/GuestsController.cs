@@ -17,6 +17,7 @@ using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Implementation;
@@ -630,6 +631,24 @@ namespace CSULB_COE.Controllers
                 BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher")]
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail)
+        {
+            try
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = _initialCredentialProgramService.PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(CommunitySiteUserIdentifier,CommunitySiteUserEmail);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

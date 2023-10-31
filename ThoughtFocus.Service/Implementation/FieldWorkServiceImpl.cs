@@ -1086,6 +1086,41 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList()
+        {
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse();
+
+            SqlParameter[] parameters =
+                                {
+                                          };
+
+            DataTable dtUsersList = _helper.GetDataTable("[FieldWork].[PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList]", parameters);
+
+            if (dtUsersList.Rows.Count > 0)
+            {
+                obj.listPartnerUser = dtUsersList.AsEnumerable().Select(row =>
+                                          new PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList
+                                          {
+                                              CSSDTID = Convert.ToInt32(row["CSSDTID"]),
+                                              CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
+                                              CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
+                                              //EmailSentOn = Convert.ToDateTime(row["EmailSentOn"]),
+                                              EmailSentOn = Convert.ToDateTime(row["EmailSentOn"] == DBNull.Value ? null : row["EmailSentOn"])
+
+                                          }).ToList();
+                obj.IsSuccess = true;
+                obj.Message = "Data retrieved successfully";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data";
+            }
+
+            return obj;
+        }
+
         private bool AddPartnerUserCredentials(int userID,string userName,string password)
         {
             bool isAdded = false;
@@ -1228,6 +1263,42 @@ namespace ThoughtFocus.Service.Implementation
             int ID = _helper.InsertTable("[dbo].[UpdateFieldWorkActivityLogStatus]", parameters);
             obj.IsSuccess = true;
             obj.Message = "Activity Log Status Updated Successfully";
+            return obj;
+        }
+
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail(int CSSDTID)
+        {
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = CSSDTID }
+
+                                     };
+
+            DataSet dtFieldWork = _helper.GetDataSet("[FieldWork].[PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail]", parameters);
+            if (dtFieldWork.Tables.Count > 0)
+            {
+                obj = dtFieldWork.Tables[0].AsEnumerable().Select(row =>
+                                          new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail
+                                          {
+                                              CSSDTID = Convert.ToInt32(row["CSSDTID"]),
+                                              CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
+                                              CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
+                                              CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"])
+                                              
+                                          }).FirstOrDefault();
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully.";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data .";
+            }
+
+
             return obj;
         }
     }

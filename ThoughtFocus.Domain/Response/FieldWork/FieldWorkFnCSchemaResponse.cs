@@ -8,4 +8,25 @@ namespace ThoughtFocus.Domain.Response.FieldWork
     {
         public string schema { get; set; }
     }
+    public class PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse : BaseResponse
+    {
+       public List<PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList> listPartnerUser { get; set; }
+    }
+
+
+    public class PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList
+    {
+        public int CSSDTID { get; set; }
+        public string CommunitySiteUserName { get; set; }
+        public string CommunitySiteUserEmail { get; set; }
+        public DateTime? EmailSentOn { get; set; }
+    }
+
+    public class PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail : BaseResponse
+    {
+        public int CSSDTID { get; set; }
+        public string CommunitySiteUserName { get; set; }
+        public string CommunitySiteUserEmail { get; set; }
+        public string CommunitySiteUserIdentifier { get; set; }
+    }
 }

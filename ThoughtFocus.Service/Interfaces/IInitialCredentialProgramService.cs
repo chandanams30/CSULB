@@ -4,6 +4,7 @@ using System.Text;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 
@@ -34,6 +35,7 @@ namespace ThoughtFocus.Service.Interfaces
         FormAttachments GetAdditionalOfficialDocument(GetAdditionalOfficialDocumentRequest input);
         BaseResponse DeleteAdditionalOfficialDocument(DeleteAdditionalOfficialDocumentRequest input);
         BaseResponse UpdateFormSubSectionSubmitForReview(UpdateFormSubSectionSubmitForReviewRequest input);
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail);
 
     }
 }

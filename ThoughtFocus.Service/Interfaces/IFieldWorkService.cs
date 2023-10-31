@@ -30,5 +30,7 @@ namespace ThoughtFocus.Service.Interfaces
         FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaTypeId, int fieldWorkActivityLogID);
         BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input);
         BaseResponse UpdateFieldworkCommunityUsersforCreation();
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList();
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail(int CSSDTID);
     }
 }
