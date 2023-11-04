@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
@@ -32,12 +33,15 @@ namespace CSULB_COE.Controllers
         public ILogger<GraduateProgramController> _logger;
         public IGraduateProgramService _graduateProgramService;
         public IInitialCredentialProgramService _initialCredentialProgramService;
+        public IFieldWorkService _fieldWorkService;
         private readonly IApplicationService _applicationService;
         private readonly IConfiguration _configuration;
         private readonly ISqlDBUtility _helper;
         public GuestsController(IGraduateProgramService graduateProgramService ,
               ILogger<GraduateProgramController> logger, IApplicationService applicationService
-            , IConfiguration configuration, ISqlDBUtility helper, IInitialCredentialProgramService initialCredentialProgramService)
+            , IConfiguration configuration, ISqlDBUtility helper 
+            ,IInitialCredentialProgramService initialCredentialProgramService
+            ,IFieldWorkService fieldWorkService)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
@@ -45,6 +49,7 @@ namespace CSULB_COE.Controllers
             _configuration = configuration;
             _helper = helper;
             _initialCredentialProgramService = initialCredentialProgramService;
+            _fieldWorkService = fieldWorkService;
         }
 
 
@@ -641,7 +646,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = _initialCredentialProgramService.PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(CommunitySiteUserIdentifier,CommunitySiteUserEmail);
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = _fieldWorkService.PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(CommunitySiteUserIdentifier,CommunitySiteUserEmail);
                 return response;
             }
             catch (Exception ex)
@@ -654,6 +659,87 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
+        [HttpGet("GetFieldWorkData")]
+        public FieldWorkListResponse GetFieldWorkData(string CommunitySiteUserIdentifier)
+        {
+            try
+            {
+                FieldWorkListResponse response = _fieldWorkService.GetFieldWorkData(CommunitySiteUserIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkListResponse response = new FieldWorkListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+
+        [HttpGet("GetFieldWorkActivityLogList")]
+        public PUFieldWorkActivityLogListResponse GetFieldWorkActivityLogList(string CommunitySiteUserIdentifier,int fieldWorkId)
+        {
+            try
+            {
+                PUFieldWorkActivityLogListResponse response = _fieldWorkService.GetFieldWorkActivityLogList(CommunitySiteUserIdentifier, fieldWorkId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PUFieldWorkActivityLogListResponse response = new PUFieldWorkActivityLogListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+
+        [HttpGet("GetFieldWorkActivityLogByID")]
+        public FieldWorkActivityLogByIDResponse PUNS_GetFieldWorkActivityLogByID(string CommunitySiteUserIdentifier, int activityLogId)
+        {
+            try
+            {
+                FieldWorkActivityLogByIDResponse response = _fieldWorkService.PUNS_GetFieldWorkActivityLogByID(CommunitySiteUserIdentifier, activityLogId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+
+        [HttpPost("UpdateFieldWorkActivityLogStatus")]
+        public BaseResponse PUNS_UpdateFieldWorkActivityLogStatus(PUUpdateFieldWorkActivityLogStatusRequest input)
+        {
+            try
+            {
+                BaseResponse response = _fieldWorkService.PUNS_UpdateFieldWorkActivityLogStatus(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+
 
         private string GetFileType(string fileExt)
         {

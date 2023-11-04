@@ -1105,7 +1105,8 @@ namespace ThoughtFocus.Service.Implementation
                                               CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
                                               CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
                                               //EmailSentOn = Convert.ToDateTime(row["EmailSentOn"]),
-                                              EmailSentOn = Convert.ToDateTime(row["EmailSentOn"] == DBNull.Value ? null : row["EmailSentOn"])
+                                              // = Convert.ToDateTime(row["EmailSentOn"] == DBNull.Value ? DateTime.MinValue : row["EmailSentOn"]),
+                                              EmailSentOn = row["EmailSentOn"] == DBNull.Value ? "Not Sent" :Convert.ToDateTime(row["EmailSentOn"]).ToString("mm/dd/yyyy")
 
                                           }).ToList();
                 obj.IsSuccess = true;
@@ -1293,7 +1294,9 @@ namespace ThoughtFocus.Service.Implementation
                 obj.Message = "Data Retrieved Successfully.";
                 try
                 {
-                    string toUser = "chandana.shankaregowda@thoughtfocus.com";
+                    //please uncomment after testing
+                    //string toUser = "asif.khan@thoughtfocus.com";
+                    string toUser = obj.CommunitySiteUserEmail;
                     string link = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
                     string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
                     string logoText = "cid:myImageID";
@@ -1302,12 +1305,13 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[link]]", $"<a href='{link}' target='_blank'>Here</a>");
                     string subject = "Partner User Link";
                     _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
-                    obj.Message = "Partner User Approve/Reject status send mail successfully.";
+                    obj.IsSuccess = true;
+                    obj.Message = "Partner User Activation mail sent successfully.";
                 }
                 catch (Exception ee)
                 {
                     obj.IsSuccess = false;
-                    obj.Message = "Partner User Approve/Reject status send mail failure.";
+                    obj.Message = "Failure sending mail.";
                 }
             }
             else
@@ -1319,7 +1323,293 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
+
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail)
+        {
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@CommunitySiteUserIdentifier", SqlDbType.NVarChar) { Value = CommunitySiteUserIdentifier },
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar) { Value = Convert.ToString(CommunitySiteUserEmail) }
+
+                              };
+
+            DataSet dtFieldWork = _helper.GetDataSet("[FieldWork].[PUNS_AuthorizeCommunitySiteSupervisorDemonstrationTeacher]", parameters);
+            if (dtFieldWork.Tables.Count > 0 && dtFieldWork!=null)
+            {
+                obj = dtFieldWork.Tables[0].AsEnumerable().Select(row =>
+                                          new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail
+                                          {
+                                              CSSDTID = Convert.ToInt32(row["CSSDTID"]),
+                                              CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
+                                              CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
+                                              CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"])
+
+                                          }).FirstOrDefault();
+
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully.";
+         
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data .";
+            }
+
+
+            return obj;
+        }
+
+        public FieldWorkListResponse GetFieldWorkData(string CommunitySiteUserIdentifier)
+        {
+            FieldWorkListResponse objList = new FieldWorkListResponse();
+            List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@CommunitySiteUserIdentifier", SqlDbType.NVarChar) { Value = CommunitySiteUserIdentifier }
+
+                              };
+
+            DataTable dtFieldWork = _helper.GetDataTable("[FieldWork].[PUNS_AuthorizeCommunitySiteSupervisorDemonstrationTeacher]", parameters);
+            if (dtFieldWork.Rows.Count > 0 && dtFieldWork != null)
+            {
+                int cssdtid = Convert.ToInt32(dtFieldWork.Rows[0]["CSSDTID"]);
+                // pull fielldwork list 
+                SqlParameter[] parameters1 =
+                                            {
+                                          new SqlParameter("@CssdtID", SqlDbType.Int, 50) { Value = cssdtid }
+                                        };
+
+                DataTable dtFieldWorkList = _helper.GetDataTable("[FieldWork].[PUNS_GetFieldWorkData]", parameters1);
+                try
+                {
+                    if (dtFieldWorkList.Rows.Count > 0)
+                    {
+                        obj = dtFieldWorkList.AsEnumerable().Select(row =>
+                                                  new FieldWorkResponse
+                                                  {
+                                                      FieldWorkId = Convert.ToInt32(row["ID"]),
+                                                      StudentName = Convert.ToString(row["StudentName"]),
+                                                      FirstName = Convert.ToString(row["FirstName"]),
+                                                      LastName = Convert.ToString(row["LastName"]),
+                                                      CSULBID = Convert.ToString(row["CSULBID"]),
+                                                      CourseTitle = Convert.ToString(row["CourseTitle"]),
+                                                      CSULBCourseID = Convert.ToString(row["Course"]),
+                                                      College = Convert.ToString(row["College"]),
+                                                      Section = Convert.ToString(row["Section"]),
+                                                      Term = Convert.ToString(row["Term"]),
+                                                      FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
+
+                                                  }).ToList();
+
+                        objList.FieldWorkResponse = obj;
+                        objList.IsSuccess = true;
+                        objList.Message = "Data Retrieved Successfully";
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    objList.IsSuccess = false;
+                    objList.Message = "Data Retrievel Failed";
+                    objList.StackTrace = ex.Message;
+                }
+
+            }
+            else
+            {
+                objList.IsSuccess = false;
+                objList.Message = "Invalid Link.";
+            }
+
+
+            return objList;
+        }
+        public PUFieldWorkActivityLogListResponse GetFieldWorkActivityLogList(string CommunitySiteUserIdentifier,int fieldworkId)
+        {
+
+            PUFieldWorkActivityLogListResponse obj = new PUFieldWorkActivityLogListResponse();
+            List<FieldWorkActivityLogResponse> objList = new List<FieldWorkActivityLogResponse>();
+            SqlParameter[] parameters =
+                             {
+                                          new SqlParameter("@CommunitySiteUserIdentifier", SqlDbType.NVarChar) { Value = CommunitySiteUserIdentifier }
+
+                              };
+
+            DataTable dtFieldWork = _helper.GetDataTable("[FieldWork].[PUNS_AuthorizeCommunitySiteSupervisorDemonstrationTeacher]", parameters);
+            if (dtFieldWork.Rows.Count > 0 && dtFieldWork != null)
+            {
+                int cssdtid = Convert.ToInt32(dtFieldWork.Rows[0]["CSSDTID"]);
+
+                SqlParameter[] parameters1 =
+                                        {
+                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = cssdtid },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldworkId }
+                                     };
+                DataSet dtActivityLog = _helper.GetDataSet("[FieldWork].[PUNS_GetFieldWorkActivityLogList]", parameters1);
+                if (dtActivityLog.Tables.Count > 0)
+                {
+                    objList = dtActivityLog.Tables[0].AsEnumerable().Select(row =>
+                                                  new FieldWorkActivityLogResponse
+                                                  {
+                                                      ActivityLogID = Convert.ToInt32(row["ID"]),
+                                                      DisplayID = Convert.ToString(row["DisplayID"]),
+                                                      FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                                      CommunitySiteID = Convert.ToInt32(row["CommunitySiteID"]),
+                                                      SiteName = Convert.ToString(row["Site"]),
+                                                      ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
+                                                      ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
+                                                      Hours = Convert.ToDecimal(row["Hours"]),
+                                                      status = Convert.ToString(row["Status"]),
+                                                      ShowCheckbox = Convert.ToBoolean(row["ShowCheckbox"])
+                                                  }).ToList();
+
+                    obj.activityLogHandler = dtActivityLog.Tables[1].AsEnumerable().Select(row =>
+                                           new FieldWorkActivityLogHandler
+                                           {
+                                               ActivityLogHandler = Convert.ToString(row["AcitivityLogHandler"])
+                                           }).FirstOrDefault();
+
+                    obj.fieldWorkSummary = dtActivityLog.Tables[2].AsEnumerable().Select(row =>
+                                           new FieldWorkSummary
+                                           {
+                                               fieldWorkSummary = Convert.ToString(row["FieldWorkSummary"])
+                                           }).FirstOrDefault();
+
+                    obj.fieldWorkList = objList;
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data";
+                }
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Invalid Link";
+            }
+            return obj;
+        }
+
+        public FieldWorkActivityLogByIDResponse PUNS_GetFieldWorkActivityLogByID(string CommunitySiteUserIdentifier, int ActivityLogID)
+        {
+
+            FieldWorkActivityLogByIDResponse obj = new FieldWorkActivityLogByIDResponse();
+            SqlParameter[] parameters =
+                         {
+                                          new SqlParameter("@CommunitySiteUserIdentifier", SqlDbType.NVarChar) { Value = CommunitySiteUserIdentifier }
+
+                              };
+
+            DataTable dtFieldWork = _helper.GetDataTable("[FieldWork].[PUNS_AuthorizeCommunitySiteSupervisorDemonstrationTeacher]", parameters);
+            if (dtFieldWork.Rows.Count > 0 && dtFieldWork != null)
+            {
+                int cssdtid = Convert.ToInt32(dtFieldWork.Rows[0]["CSSDTID"]);
+                SqlParameter[] parameters1 =
+                              {
+                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = cssdtid },
+                                          new SqlParameter("@ActivityLogID", SqlDbType.BigInt) { Value = ActivityLogID }
+
+                                     };
+
+                DataSet dtActivityLogByID = _helper.GetDataSet("[FieldWork].[PUNS_GetFieldWorkActivityLogByID]", parameters1);
+                if (dtActivityLogByID.Tables.Count > 0)
+                {
+                    obj.DataByID = dtActivityLogByID.Tables[0].AsEnumerable().Select(row =>
+                                              new FieldWorkActivityLogByID
+                                              {
+                                                  ActivityLogID = Convert.ToInt32(row["ID"]),
+                                                  FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                                  CommunityDistrictID = Convert.ToInt32(row["CommunityDistrictID"]),
+                                                  CommunityDistrictName = Convert.ToString(row["CommunityDistrict"]),
+                                                  CommunitySchoolID = Convert.ToInt32(row["CommunitySchoolID"]),
+                                                  CommunitySchoolName = Convert.ToString(row["CommunitySchool"]),
+                                                  CommunitySiteUserID = Convert.ToInt32(row["CommunitySiteUsersID"]),
+                                                  CommunitySiteUserName = Convert.ToString(row["CommunitySiteUser"]),
+                                                  CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
+                                                  ActivityStartDate = Convert.ToDateTime(row["ActivityStartDate"]),
+                                                  ActivityEndDate = Convert.ToDateTime(row["ActivityEndDate"]),
+                                                  Hours = Convert.ToDecimal(row["Hours"]),
+                                                  Status = Convert.ToString(row["Status"]),
+                                                  ApprovedByUser = row["ApprovedByUser"] == DBNull.Value ? null : Convert.ToString(row["ApprovedByUser"]),
+                                                  ApprovedDateTime = row["ApprovedDateTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row["ApprovedDateTime"])
+                                              }).FirstOrDefault();
+
+                    obj.standardList = dtActivityLogByID.Tables[1].AsEnumerable().Select(row =>
+                                            new FieldWorkActivityLogStandardList
+                                            {
+                                                FieldWorkActivityLogID = Convert.ToInt32(row["FieldWorkActivityLogID"]),
+                                                FieldWorkCoursesCategoryStandardID = Convert.ToInt32(row["FieldWorkCoursesCategoryStandardID"]),
+                                                FieldWorkCoursesCategoryStandard = Convert.ToString(row["FieldWorkCoursesCategoryStandard"]),
+                                                FieldWorkCoursesCategorySchoolTypeID = Convert.ToInt32(row["FieldWorkCoursesCategorySchoolTypeID"]),
+                                                FieldWorkCoursesCategorySchoolType = Convert.ToString(row["FieldWorkCoursesCategorySchoolType"]),
+                                                Hours = Convert.ToDecimal(row["Hours"]),
+                                                Details = Convert.ToString(row["Details"])
+                                            }).ToList();
+
+                    obj.ActivityLogHandler = dtActivityLogByID.Tables[2].AsEnumerable().Select(row =>
+                                              new FieldWorkActivityLogHandler
+                                              {
+                                                  ActivityLogHandler = Convert.ToString(row["AcitivityLogHandler"])
+                                              }).FirstOrDefault();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully.";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data .";
+                }
+
+            }
+            else{
+                obj.IsSuccess = false;
+                obj.Message = "Invalid Link !!!";
+            }
+            return obj;
+        }
+
+        public BaseResponse PUNS_UpdateFieldWorkActivityLogStatus(PUUpdateFieldWorkActivityLogStatusRequest input)
+        {
+            BaseResponse obj = new BaseResponse();
+            SqlParameter[] parameters =
+                        {
+                                          new SqlParameter("@CommunitySiteUserIdentifier", SqlDbType.NVarChar) { Value = input.CommunitySiteUserIdentifier }
+
+                              };
+
+            DataTable dtFieldWork = _helper.GetDataTable("[FieldWork].[PUNS_AuthorizeCommunitySiteSupervisorDemonstrationTeacher]", parameters);
+            if (dtFieldWork.Rows.Count > 0 && dtFieldWork != null)
+            {
+                int cssdtid = Convert.ToInt32(dtFieldWork.Rows[0]["CSSDTID"]);
+                SqlParameter[] parameters1 =
+                                        {
+                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = cssdtid },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.fieldWorkID },
+                                          new SqlParameter("@FieldWorkActivityLogID", SqlDbType.BigInt) { Value = input.fieldWorkActivityLogID },
+                                          new SqlParameter("@Status", SqlDbType.VarChar) { Value = input.status }
+                                     };
+                int ID = _helper.InsertTable("[FieldWork].[PUNS_UpdateFieldWorkActivityLogStatus]", parameters1);
+                obj.IsSuccess = true;
+                obj.Message = "Activity Log Status Updated Successfully";
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Invalid Link !!!";
+            }
+            return obj; 
+       }
     }
+
+   
 
     public class EmailMessageModel
     {

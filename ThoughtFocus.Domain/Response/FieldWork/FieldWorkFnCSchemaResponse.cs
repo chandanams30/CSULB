@@ -19,7 +19,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public int CSSDTID { get; set; }
         public string CommunitySiteUserName { get; set; }
         public string CommunitySiteUserEmail { get; set; }
-        public DateTime? EmailSentOn { get; set; }
+        //public DateTime? EmailSentOn { get; set; }
+        public string EmailSentOn { get; set; }
     }
 
     public class PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail : BaseResponse

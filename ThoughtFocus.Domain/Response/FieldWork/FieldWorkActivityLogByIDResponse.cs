@@ -42,4 +42,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
     {
         public string ActivityLogHandler { get; set; }
     }
+    public class FieldWorkSummary
+    {
+        public string fieldWorkSummary { get; set; }
+    }
 }

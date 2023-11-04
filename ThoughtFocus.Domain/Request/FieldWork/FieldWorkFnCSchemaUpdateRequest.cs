@@ -12,4 +12,11 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string schema { get; set; }
         public int FieldWorkActivityLogID { get; set; }
     }
+    public class PUUpdateFieldWorkActivityLogStatusRequest
+    {
+        public string CommunitySiteUserIdentifier { get; set; }
+        public int fieldWorkID { get; set; }
+        public int fieldWorkActivityLogID { get; set; }
+        public string status { get; set; }
+    }
 }

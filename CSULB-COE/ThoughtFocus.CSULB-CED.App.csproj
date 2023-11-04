@@ -51,11 +51,5 @@
     <ProjectReference Include="..\ThoughtFocus.Service\ThoughtFocus.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="ThoughtFocus.Domain">
-      <HintPath>..\ThoughtFocus.Domain\bin\Debug\netcoreapp3.1\ThoughtFocus.Domain.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 
 </Project>
