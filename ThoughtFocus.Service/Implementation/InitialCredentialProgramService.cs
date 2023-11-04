@@ -1047,14 +1047,18 @@ namespace ThoughtFocus.Service.Implementation
             DataTable applicantInfo = _helper.GetDataTable("[Application].[UpdateFormSubSectionApproveral]", parameters);
             string applicantName = string.Empty;
             string applicantEmail = string.Empty;
+            string programName = string.Empty;
             string Subject = string.Empty;
             string body = string.Empty;
             string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
             string logoText = "cid:myImageID";
+            string signatureText = "cid:mySignatureImageID";
+            string date= DateTime.Now.ToString("MM-dd-yyyy");
             if (applicantInfo.Rows.Count>=0)
             {
                 applicantName = applicantInfo.Rows[0]["ApplicantName"].ToString();
                 applicantEmail= applicantInfo.Rows[0]["ApplicantEmail"].ToString();
+                programName = applicantInfo.Rows[0]["ProgramName"].ToString();
             }
             Dictionary<string, (string subject, string templateName)> subsectionMap = new Dictionary<string, (string, string)>
             {
@@ -1065,7 +1069,23 @@ namespace ThoughtFocus.Service.Implementation
 
             if (subsectionMap.TryGetValue(input.SubSectionIdentifiers, out var value))
             {
-                if (input.SubSectionIdentifiers == "BSR")
+                if ((programName == "Education Specialist Credential Program (ESCP)") && (input.SubSectionIdentifiers=="SMC"))
+                {
+                    value.templateName = input.IsApproved ? "SMC_Met_MailTemplate.html" : "SMC_NotMet_For_ESCP_MailTemplate.html";
+                }
+                else if ((programName == "Multiple Subject Credential Program (MSCP)") && (input.SubSectionIdentifiers == "SMC"))
+                {
+                    value.templateName = input.IsApproved ? "SMC_Met_MailTemplate.html" : "SMC_NotMet_For_MSCP_MailTemplate.html";
+                }
+                else if (((programName == "Single Subject Credential Program (SSCP)") ||(programName == "Urban Dual Credential Program (UDCP)")) && (input.SubSectionIdentifiers == "SMC"))
+                {
+                    value.templateName = input.IsApproved ? "SMC_Met_MailTemplate.html" : "SMC_NotMet_For_SSCP_UDCP_MailTemplate.html";
+                }
+                else if ((programName == "Single Subject Credential Program (SSCP)") && (input.SubSectionIdentifiers == "GPA"))
+                {
+                    value.templateName = input.IsApproved ? "GPAMailTemplate.html" : "GPA_Not_Met_For_SSCP_MailTemplate.html";
+                }
+                else if (input.SubSectionIdentifiers == "BSR")
                 {
                     value.templateName = input.IsApproved ? "BSRMetMailTemplate.html" : "BSRNotMetMailTemplate.html";
                 }
@@ -1075,6 +1095,9 @@ namespace ThoughtFocus.Service.Implementation
                     body = body.Replace("[[logoPath]]", logoText)
                                .Replace("[[applicantName]]", applicantName)
                                .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
+                               .Replace("[[programName]]", programName)
+                               .Replace("[[date]]",date)
+                               .Replace("[[Signature]]",signatureText)
                                .Replace("[[approveOrRejectStatus]]", input.IsApproved ? "approved" : "rejected");
               
             
