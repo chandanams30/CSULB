@@ -1106,11 +1106,11 @@ namespace ThoughtFocus.Service.Implementation
                                               CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
                                               //EmailSentOn = Convert.ToDateTime(row["EmailSentOn"]),
                                               // = Convert.ToDateTime(row["EmailSentOn"] == DBNull.Value ? DateTime.MinValue : row["EmailSentOn"]),
-                                              EmailSentOn = row["EmailSentOn"] == DBNull.Value ? "Not Sent" :Convert.ToDateTime(row["EmailSentOn"]).ToString("mm/dd/yyyy")
+                                              EmailSentOn = row["EmailSentOn"] == DBNull.Value ? "" :Convert.ToDateTime(row["EmailSentOn"]).ToString("MM/dd/yyyy hh:mm")
 
                                           }).ToList();
                 obj.IsSuccess = true;
-                obj.Message = "Data retrieved successfully";
+                obj.Message = "Data retrieved successfully"; 
 
             }
             else
