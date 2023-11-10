@@ -1301,8 +1301,7 @@ namespace ThoughtFocus.Service.Implementation
                     string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
                     string logoText = "cid:myImageID";
                     body = body.Replace("[[logoPath]]", logoText)
-                               .Replace("[[PartnerUserName]]", obj.CommunitySiteUserName)
-                               .Replace("[[link]]", $"<a href='{link}' target='_blank'>Here</a>");
+                              .Replace("[[link]]", link);
                     string subject = "Partner User Link";
                     _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
                     obj.IsSuccess = true;
