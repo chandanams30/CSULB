@@ -1302,7 +1302,7 @@ namespace ThoughtFocus.Service.Implementation
                     string logoText = "cid:myImageID";
                     body = body.Replace("[[logoPath]]", logoText)
                               .Replace("[[link]]", link);
-                    string subject = "Partner User Link";
+                    string subject = "Approve student hours for CSULB Clinical Practice";
                     _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
                     obj.IsSuccess = true;
                     obj.Message = "Partner User Activation mail sent successfully.";
