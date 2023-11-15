@@ -163,9 +163,10 @@ namespace ThoughtFocus.Service.Implementation
                                                   CourseTitle = Convert.ToString(row["CourseTitle"]),
                                                   CSULBCourseID = Convert.ToString(row["Course"]),
                                                   College = Convert.ToString(row["College"]),
-                                                  Section= Convert.ToString(row["Section"]),
+                                                  Section = Convert.ToString(row["Section"]),
                                                   Term = Convert.ToString(row["Term"]),
-                                                  FieldWorkPrerequisiteStatus=Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
+                                                  FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
+                                                  PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"])
 
                                               }).ToList();
 
