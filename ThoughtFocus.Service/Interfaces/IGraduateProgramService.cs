@@ -19,6 +19,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input);
         BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input);
         BaseResponse DeleteFormAttachment(DeleteFormAttachmentRequest input);
+        BaseResponse DeleteInsructorAttachment(DeleteInsructorAttachmentRequest input);
         BaseResponse SaveForm(FormSaveRequest input);
         BaseResponse UpdateFormState(FormStatusUpdateRequest input);
         FormAttachments DownloadFormAttachments(int userID, int formattachmentID);

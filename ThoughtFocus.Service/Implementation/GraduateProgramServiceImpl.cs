@@ -618,6 +618,30 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+
+        public BaseResponse DeleteInsructorAttachment(DeleteInsructorAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@InstructionID", SqlDbType.BigInt) { Value = input.InstructionID },
+                                          new SqlParameter("@InstructorUserID", SqlDbType.BigInt) { Value = input.InstructorUserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@InstructionAttachmentID ", SqlDbType.BigInt) { Value = input.InstructionAttachmentID },
+                                        };
+            DataTable dtDeleteAttachment = _helper.GetDataTable("[Application].[deleteInstructorAttachment]", parameters);
+            if (dtDeleteAttachment.Rows.Count > 0)
+            {
+                response.Message = "Attachment Deleted Successfully";
+                response.IsSuccess = true;
+            }
+            else
+            {
+                response.Message = "Failed To Delete Attachment";
+                response.IsSuccess = false;
+            }
+            return response;
+        }
         private bool SaveWordFileInTempFolder(byte[] fileContent,string fileName,string fileExtension,string workingFolderPath)
         {
             bool isFileSaved = false;
@@ -1038,9 +1062,13 @@ namespace ThoughtFocus.Service.Implementation
                         if (RecommenderMailTemplateAttachement)
                         {
                             userFolderPath = "SupportFiles/EmailAttachments";
-                            templateFileName = "Recommender_Template.pdf";
+                            templateFileName = "Recommender_Template_"+programID+".pdf";
                             byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                          
+                            if (fileContent == null || fileContent.Length <1)
+                            {
+                                templateFileName = "Recommender_Template.pdf";
+                                fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                            }
                             if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
                             {
                                 if (fileContent != null && fileContent.Length > 0)
@@ -1157,18 +1185,21 @@ namespace ThoughtFocus.Service.Implementation
             binaryReader.Close();
             return fileContent;
         }
-        
+
         public byte[] GetAttachmentContent(string userFolderPath, string fileName)
         {
             string filepath = Path.Combine(userFolderPath, fileName);
             byte[] fileContent = null;
+            if (File.Exists(Path.GetFullPath(filepath))) 
+            { 
             System.IO.FileStream fs = new System.IO.FileStream(Path.GetFullPath(filepath), System.IO.FileMode.Open, System.IO.FileAccess.Read);
             System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
             long byteLength = new System.IO.FileInfo(filepath).Length;
             fileContent = binaryReader.ReadBytes((Int32)byteLength);
             fs.Close();
             fs.Dispose();
-            binaryReader.Close();
+            binaryReader.Close(); 
+            }
             return fileContent;
         }
         private string GetAttachmentsFolderName(string combinedString)
