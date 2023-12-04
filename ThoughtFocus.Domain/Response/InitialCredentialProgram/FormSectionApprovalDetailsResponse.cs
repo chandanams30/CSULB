@@ -17,5 +17,7 @@ namespace ThoughtFocus.Domain.Response.InitialCredentialProgram
         public bool showSubSectionApproveral { get; set; }
         public bool canUpdateSubSectionApproveral { get; set; }
         public string ReviewedByText { get; set; }
+
+        public string Status { get; set; }
     }
 }

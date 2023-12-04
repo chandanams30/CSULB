@@ -1039,72 +1039,33 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers },
                                           new SqlParameter("@ApproverUserID", SqlDbType.BigInt) { Value = input.ApproverUserID },
                                           new SqlParameter("@ApproverComments", SqlDbType.NVarChar, -1) { Value = input.ApproverComments },
-                                          new SqlParameter("@IsApproved", SqlDbType.Bit) { Value = input.IsApproved }
-                                          
-                                          
+                                          new SqlParameter("@IsApproved", SqlDbType.Bit) { Value = input.IsApproved },
+                                          new SqlParameter("@Status", SqlDbType.VarChar, 20) { Value = input.Status}
+
                                         };
 
             DataTable applicantInfo = _helper.GetDataTable("[Application].[UpdateFormSubSectionApproveral]", parameters);
             string applicantName = string.Empty;
             string applicantEmail = string.Empty;
             string programName = string.Empty;
-            string Subject = string.Empty;
+            //string Subject = string.Empty;
             string body = string.Empty;
             string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
             string logoText = "cid:myImageID";
             string signatureText = "cid:mySignatureImageID";
             string date= DateTime.Now.ToString("MM-dd-yyyy");
+            string templateName = string.Empty;
             if (applicantInfo.Rows.Count>=0)
             {
                 applicantName = applicantInfo.Rows[0]["ApplicantName"].ToString();
-                applicantEmail= applicantInfo.Rows[0]["ApplicantEmail"].ToString();
+                applicantEmail = applicantInfo.Rows[0]["ApplicantEmail"].ToString();
+                //applicantEmail = "chandana.shankaregowda@thoughtfocus.com";
                 programName = applicantInfo.Rows[0]["ProgramName"].ToString();
             }
-            Dictionary<string, (string subject, string templateName)> subsectionMap = new Dictionary<string, (string, string)>
-            {
-                { "BSR", ("MyCED BSR Review", "BSRMailTemplate.html") },
-                { "SMC", ("MyCED SMC Review", "SMCMailTemplate.html") },
-                { "GPA", ("MyCED GPA Review", "GPAMailTemplate.html") },
-            };
-
-            if (subsectionMap.TryGetValue(input.SubSectionIdentifiers, out var value))
-            {
-                if ((programName == "Education Specialist Credential Program (ESCP)") && (input.SubSectionIdentifiers=="SMC"))
-                {
-                    value.templateName = input.IsApproved ? "SMC_Met_MailTemplate.html" : "SMC_NotMet_For_ESCP_MailTemplate.html";
-                }
-                else if ((programName == "Multiple Subject Credential Program (MSCP)") && (input.SubSectionIdentifiers == "SMC"))
-                {
-                    value.templateName = input.IsApproved ? "SMC_Met_MailTemplate.html" : "SMC_NotMet_For_MSCP_MailTemplate.html";
-                }
-                else if (((programName == "Single Subject Credential Program (SSCP)") ||(programName == "Urban Dual Credential Program (UDCP)")) && (input.SubSectionIdentifiers == "SMC"))
-                {
-                    value.templateName = input.IsApproved ? "SMC_Met_MailTemplate.html" : "SMC_NotMet_For_SSCP_UDCP_MailTemplate.html";
-                }
-                else if ((programName == "Single Subject Credential Program (SSCP)") && (input.SubSectionIdentifiers == "GPA"))
-                {
-                    value.templateName = input.IsApproved ? "GPAMailTemplate.html" : "GPA_Not_Met_For_SSCP_MailTemplate.html";
-                }
-                else if (input.SubSectionIdentifiers == "BSR")
-                {
-                    value.templateName = input.IsApproved ? "BSRMetMailTemplate.html" : "BSRNotMetMailTemplate.html";
-                }
-              
-                    Subject = input.IsApproved ? $"{value.subject} Met" : $"{value.subject} Not Met";
-                    body = GetMailBodyTemplate(value.templateName);
-                    body = body.Replace("[[logoPath]]", logoText)
-                               .Replace("[[applicantName]]", applicantName)
-                               .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
-                               .Replace("[[programName]]", programName)
-                               .Replace("[[date]]",date)
-                               .Replace("[[Signature]]",signatureText)
-                               .Replace("[[approveOrRejectStatus]]", input.IsApproved ? "approved" : "rejected");
-              
-            
-            }
+            EmailResult emailResult = GetMailTemplate(templateName,input,programName,logoText,applicantName,date,signatureText);
             try
             {
-                _sendMail.SendEmail(applicantEmail, "", "COMMON", Subject, body, "");
+                _sendMail.SendEmail(applicantEmail, "", "COMMON", emailResult.Subject, emailResult.Body, "");
             }
             catch (Exception ee)
             {
@@ -1116,6 +1077,80 @@ namespace ThoughtFocus.Service.Implementation
             obj.Message = "Subsection saved successfully";
 
             return obj;
+        }
+        private EmailResult GetMailTemplate(string templateName, UpdateFormSubSectionApproveralRequest input,string programName,string logoText,string applicantName,string date,string signatureText)
+        {
+            string Subject = string.Empty;
+            EmailResult obj=new EmailResult();
+            if (input.SubSectionIdentifiers == "BSR")
+            {
+                switch (input.Status)
+                {
+                    case "Met":
+                        templateName = "BSRMetMailTemplate.html";
+                        Subject = "MyCED BSR Review Met";
+                        break;
+                    case "Not Met":
+                        templateName = "BSRNotMetMailTemplate.html";
+                        Subject = "MyCED BSR Review Not Met";
+                        break;
+                }
+            }
+            else if (input.SubSectionIdentifiers == "SMC")
+            {
+                switch (input.Status)
+                {
+                    case "Met":
+                        templateName = "SMC_Met_MailTemplate.html";
+                        Subject = "MyCED SMC Review Met";
+                        break;
+                    case "Not Met":
+                        if (programName == "Education Specialist Credential Program (ESCP)")
+                            templateName = "SMC_NotMet_For_ESCP_MailTemplate.html";
+                        else if (programName == "Multiple Subject Credential Program (MSCP)")
+                            templateName = "SMC_NotMet_For_MSCP_MailTemplate.html";
+                        else if (programName == "Single Subject Credential Program (SSCP)" || programName == "Urban Dual Credential Program (UDCP)")
+                            templateName = "SMC_NotMet_For_SSCP_UDCP_MailTemplate.html";
+                        Subject = "MyCED SMC Review Not Met";
+                        break;
+                    case "Will Meet":
+                        templateName = "SMC_WillMeet_MailTemplate.html";
+                        Subject = "MyCED SMC Review Will Meet";
+                        break;
+                }
+            }
+            else if (input.SubSectionIdentifiers == "GPA")
+            {
+                switch (input.Status)
+                {
+                    case "Met":
+                        templateName = "GPA_Met_MailTemplate.html";
+                        Subject = "MyCED GPA Review Met";
+                        break;
+                    case "Not Met":
+                        if (programName == "Single Subject Credential Program (SSCP)")
+                            templateName = "GPA_Not_Met_For_SSCP_MailTemplate.html";
+                        else
+                            templateName = "GPA_NotMet_MailTemplate.html";
+                        Subject = "MyCED GPA Review Not Met";
+                        break;
+                }
+            }
+            obj.Subject = Subject;
+            obj.Body = GetMailBodyTemplate(templateName);
+            obj.Body = obj.Body.Replace("[[logoPath]]", logoText)
+                               .Replace("[[applicantName]]", applicantName)
+                               .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
+                               .Replace("[[programName]]", programName)
+                               .Replace("[[date]]", date)
+                               .Replace("[[Signature]]", signatureText);
+            return obj;
+
+        }
+        public class EmailResult
+        {
+            public string Body { get; set; }
+            public string Subject { get; set; }
         }
         private string GetMailBodyTemplate(string templateName)
         {
@@ -1155,7 +1190,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   ApprovedOn = Convert.ToDateTime(row["ApproveredOn"] == DBNull.Value ? null : row["ApproveredOn"]),
                                                   showSubSectionApproveral = Convert.ToBoolean(row["showSubSectionApproveral"] == DBNull.Value ? null : row["showSubSectionApproveral"]),
                                                   canUpdateSubSectionApproveral = Convert.ToBoolean(row["canUpdateSubSectionApproveral"] == DBNull.Value ? null : row["canUpdateSubSectionApproveral"]),
-                                                  ReviewedByText = Convert.ToString(row["ReviewedByText"])
+                                                  ReviewedByText = Convert.ToString(row["ReviewedByText"]),
+                                                  Status = Convert.ToString(row["Status"])
 
                                               }).FirstOrDefault();
                 obj.IsSuccess = true;
