@@ -1115,7 +1115,7 @@ namespace ThoughtFocus.Service.Implementation
                         break;
                     case "Will Meet":
                         templateName = "SMC_WillMeet_MailTemplate.html";
-                        Subject = "MyCED SMC Review Will Meet";
+                        Subject = "Subject Matter Competency - Will Meet";
                         break;
                 }
             }

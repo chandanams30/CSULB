@@ -374,5 +374,62 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
+        [HttpGet("FetchMilestoneUsersList")]
+        public GetMilestoneUsersListResponse GetMilestoneUsersList()
+        {
+            try
+            {
+                GetMilestoneUsersListResponse response = _milestonesService.GetMilestoneUsersList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneUsersListResponse response = new GetMilestoneUsersListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMilestoneFilledFormByUserList")]
+        public GetMilestoneFilledFormByUserListResponse GetMilestoneFilledFormByUserList(int UserID)
+        {
+            try
+            {
+                GetMilestoneFilledFormByUserListResponse response = _milestonesService.GetMilestoneFilledFormByUserList(UserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneFilledFormByUserListResponse response = new GetMilestoneFilledFormByUserListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetMilestoneFilledFormByPublishedFormList")]
+        public GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID)
+        {
+            try
+            {
+                GetMilestoneFilledFormByPublishedFormListResponse response = _milestonesService.GetMilestoneFilledFormByPublishedFormList(MilestonePublishedFormID,UserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneFilledFormByPublishedFormListResponse response = new GetMilestoneFilledFormByPublishedFormListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

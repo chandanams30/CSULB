@@ -200,7 +200,17 @@ namespace ThoughtFocus.Service.Implementation
                                                   GPAStatus = Convert.ToString(row["GPA"]),
                                                   SMCStatus = Convert.ToString(row["SMC"]),
                                                   TBTestStatus = Convert.ToString(row["TB Test"]),
-                                                  CredentialPathway = Convert.ToString(row["Credential Pathway"])
+                                                  CredentialPathway = Convert.ToString(row["Credential Pathway"]),
+                                                  RecommendationsSubmittedCount = Convert.ToString(row["RecommendationsSubmittedCount"]),
+                                                  IsInterviewRatingSheetSubmitted = Convert.ToString(row["IsInterviewRatingSheetSubmitted"]),
+                                                  LastUpdatedDate = Convert.ToDateTime(row["LastUpdatedDate"] == DBNull.Value ? null : row["LastUpdatedDate"]),
+                                                  SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"]),
+                                                  EDEL200380FinalFieldworkEvaluation_Status = Convert.ToString(row["EDEL200380FinalFieldworkEvaluation_Status"]),
+                                                  InstructorEvaluationForm_Status = Convert.ToString(row["InstructorEvaluationForm_Status"]),
+                                                  AdvisementConfirmationForm_Status = Convert.ToString(row["AdvisementConfirmationForm_Status"]),
+                                                  GridNotes = Convert.ToString(row["GridNotes"]),
+                                                  ReviewerRecommendation = Convert.ToString(row["ReviewerRecommendation"]),
+                                                  FinalDecision = Convert.ToString(row["FinalDecision"])
 
                                               }).ToList();
                     }
@@ -3070,6 +3080,24 @@ namespace ThoughtFocus.Service.Implementation
 
             int ID = _helper.InsertTable("[dbo].[updateFormStudentMessageBoard]", parameters);
             response.Message = "Message board updated Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@GridNotes", SqlDbType.NVarChar,-1) { Value = input.GridNotes }
+                                        };
+
+            int ID = _helper.InsertTable("[Application].[SaveFormGridNotes]", parameters);
+            response.Message = "Notes updated Successfully";
             response.IsSuccess = true;
             return response;
         }

@@ -214,7 +214,7 @@ namespace ThoughtFocus.Service.Implementation
                                               new MilestoneApplicationFormsList
                                               {
                                                   MilestoneFormsID = Convert.ToInt32(row["MilestoneFormsID"]),
-                                                  MilestoneID = Convert.ToInt32(row["MilestoneID"]),
+                                                  MilestonePublishedFormID = Convert.ToInt32(row["MilestonePublishedFormID"]),
                                                   FormID = Convert.ToInt32(row["FormID"]),
                                                   Status = Convert.ToBoolean(row["Status"]),
                                                   MilestoneName = Convert.ToString(row["MilestoneName"])
@@ -261,7 +261,7 @@ namespace ThoughtFocus.Service.Implementation
                                               new MilestoneApplicationForm
                                               {
                                                   MilestoneFormID = Convert.ToInt32(row["MilestoneFormID"]),
-                                                  MilestoneID = Convert.ToInt32(row["MilestoneID"]),
+                                                  MilestonePublishedFormID = Convert.ToInt32(row["MilestonePublishedFormID"]),
                                                   FormID = Convert.ToInt32(row["FormID"]),
                                                   MilestoneFilledForm = Convert.ToString(row["MilestoneFilledForm"]),
                                                   Status = Convert.ToBoolean(row["Status"]),
@@ -705,6 +705,105 @@ namespace ThoughtFocus.Service.Implementation
                 {
 
                     obj.MilestonePublishedFormsList = Convert.ToString(dtMilestoneTemplate.Rows[0]["MilestonePublishedFormsList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneUsersListResponse GetMilestoneUsersList()
+        {
+            GetMilestoneUsersListResponse obj = new GetMilestoneUsersListResponse();
+            SqlParameter[] parameters = {
+                                            
+                                        };
+
+            DataTable dtMilestoneUserList = _helper.GetDataTable("[Milestone].[GetMilestoneUsersList]", parameters);
+            try
+            {
+                if (dtMilestoneUserList.Rows.Count > 0)
+                {
+
+                    obj.MilestoneUsersList = Convert.ToString(dtMilestoneUserList.Rows[0]["GetMilestoneUsersList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneFilledFormByUserListResponse GetMilestoneFilledFormByUserList(int UserID)
+        {
+            GetMilestoneFilledFormByUserListResponse obj = new GetMilestoneFilledFormByUserListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+                                        };
+
+            DataTable dtMilestoneFilledForm = _helper.GetDataTable("[Milestone].[GetMilestoneFilledFormByUserList]", parameters);
+            try
+            {
+                if (dtMilestoneFilledForm.Rows.Count > 0)
+                {
+
+                    obj.MilestoneFilledFormByUserList = Convert.ToString(dtMilestoneFilledForm.Rows[0]["GetMilestoneFilledFormByUserList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+
+        }
+
+        public GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID)
+        {
+            GetMilestoneFilledFormByPublishedFormListResponse obj = new GetMilestoneFilledFormByPublishedFormListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@MilestonePublishedFormID", SqlDbType.BigInt) { Value = MilestonePublishedFormID },
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+                                        };
+
+            DataTable dtMilestonePublishedForm = _helper.GetDataTable("[Milestone].[GetMilestoneFilledFormByPublishedFormList]", parameters);
+            try
+            {
+                if (dtMilestonePublishedForm.Rows.Count > 0)
+                {
+
+                    obj.MilestonePublishedFormsList = Convert.ToString(dtMilestonePublishedForm.Rows[0]["MilestonePublishedFormsList"]);
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 

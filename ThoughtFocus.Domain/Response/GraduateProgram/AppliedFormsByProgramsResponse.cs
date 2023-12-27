@@ -31,7 +31,19 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string SMCStatus { get; set; }
         public string TBTestStatus { get; set; }
         public string CredentialPathway { get; set; }
+        public string IsInterviewRatingSheetSubmitted { get; set; }
+        public string RecommendationsSubmittedCount { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
+        public DateTime? SubmittedDate { get; set; }
+        public string EDEL200380FinalFieldworkEvaluation_Status { get; set; }
+        public string InstructorEvaluationForm_Status { get; set; }
+        public string AdvisementConfirmationForm_Status { get; set; }
+        public string GridNotes { get; set; }
+        public string ReviewerRecommendation { get; set; }
+        public string FinalDecision { get; set; }
+
+
     }
 
-  
+
 }

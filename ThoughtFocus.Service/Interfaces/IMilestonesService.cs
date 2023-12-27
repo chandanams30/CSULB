@@ -27,5 +27,8 @@ namespace ThoughtFocus.Service.Interfaces
         MilestoneUsersListResponse GetMilestoneUsersList(int RoleID, int ProgramID, string TermCode);
         MilestoneProgramTermListResponse GetMilestoneProgramTermList();
         MilestonePublishedFormsListResponse GetMilestonePublishedFormsList(int UserID);
+        GetMilestoneUsersListResponse GetMilestoneUsersList();
+        GetMilestoneFilledFormByUserListResponse GetMilestoneFilledFormByUserList(int UserID);
+        GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID);
     }
 }

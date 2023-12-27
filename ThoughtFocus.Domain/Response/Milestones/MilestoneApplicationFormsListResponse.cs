@@ -11,7 +11,7 @@ namespace ThoughtFocus.Domain.Response.Milestones
     public class MilestoneApplicationFormsList
     {
         public int MilestoneFormsID { get; set; }
-        public int MilestoneID { get; set; }
+        public int MilestonePublishedFormID { get; set; }
         public int FormID { get; set; }
         public bool Status { get; set; }
         public string MilestoneName { get; set; }       
@@ -26,7 +26,7 @@ namespace ThoughtFocus.Domain.Response.Milestones
     public class MilestoneApplicationForm
     {
         public int MilestoneFormID { get; set; }
-        public int MilestoneID { get; set; }
+        public int MilestonePublishedFormID { get; set; }
         public int FormID { get; set; }
         public string MilestoneFilledForm { get; set; }
         public bool Status { get; set; }

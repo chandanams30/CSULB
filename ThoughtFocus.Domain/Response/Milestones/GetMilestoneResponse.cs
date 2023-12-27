@@ -35,7 +35,21 @@ namespace ThoughtFocus.Domain.Response.Milestones
     }
     public class MilestoneApproverUserList
     {
-    public int ApproverUserID { get; set; }
-    public string ApproverUserName { get; set; }
-}
+        public int ApproverUserID { get; set; }
+        public string ApproverUserName { get; set; }
+    }
+
+    public class GetMilestoneUsersListResponse : BaseResponse
+    {
+        public string MilestoneUsersList { get; set; }
+    }
+    
+    public class GetMilestoneFilledFormByUserListResponse : BaseResponse
+    {
+        public string MilestoneFilledFormByUserList { get; set; }
+    }
+    public class GetMilestoneFilledFormByPublishedFormListResponse : BaseResponse
+    {
+        public string MilestonePublishedFormsList { get; set; }
+    }
 }
