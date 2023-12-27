@@ -151,6 +151,9 @@ namespace CSULB_COE
             // Travel
             services.AddScoped<ITravelService, TravelServiceImpl>();
 
+            //Student Profile
+            services.AddScoped<IStudentProfile, StudentProfileImpl>();
+
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {

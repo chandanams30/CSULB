@@ -1,0 +1,46 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using ThoughtFocus.Domain.Response.StudentProfile;
+using ThoughtFocus.Service.Interfaces;
+
+namespace CSULB_COE.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class StudentProfileController : ControllerBase
+    {
+        public ILogger<StudentProfileController> _logger;
+        public IStudentProfile _studentProfileService;
+        private readonly IConfiguration _configuration;
+        public StudentProfileController(IStudentProfile studentProfileService,
+              ILogger<StudentProfileController> logger
+            , IConfiguration configuration)
+        {
+            _logger = logger;
+            _studentProfileService = studentProfileService;
+            _configuration = configuration;
+        }
+        [HttpGet("GetStudentProfileData")]
+        public StudentProfileResponse GetStudentProfileData(string CsulbId)
+        {
+            try
+            {
+                StudentProfileResponse response = _studentProfileService.GetStudentProfileData(CsulbId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentProfileResponse response = new StudentProfileResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to fetch student profile data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+    }
+}
