@@ -431,5 +431,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
+        [HttpGet("GetMilestoneRequirementList")]
+        public GetMilestoneRequirementListResponse GetMilestoneRequirementList()
+        {
+            try
+            {
+                GetMilestoneRequirementListResponse response = _milestonesService.GetMilestoneRequirementList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneRequirementListResponse response = new GetMilestoneRequirementListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

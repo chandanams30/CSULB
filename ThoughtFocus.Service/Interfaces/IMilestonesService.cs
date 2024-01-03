@@ -30,5 +30,6 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneUsersListResponse GetMilestoneUsersList();
         GetMilestoneFilledFormByUserListResponse GetMilestoneFilledFormByUserList(int UserID);
         GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID);
+        GetMilestoneRequirementListResponse GetMilestoneRequirementList();
     }
 }

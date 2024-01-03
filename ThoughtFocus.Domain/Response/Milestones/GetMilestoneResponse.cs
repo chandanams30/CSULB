@@ -52,4 +52,8 @@ namespace ThoughtFocus.Domain.Response.Milestones
     {
         public string MilestonePublishedFormsList { get; set; }
     }
+    public class GetMilestoneRequirementListResponse : BaseResponse
+    {
+        public string MilestoneRequirementList { get; set; }
+    }
 }

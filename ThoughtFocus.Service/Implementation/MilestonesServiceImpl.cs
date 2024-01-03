@@ -614,7 +614,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@isMandatory", SqlDbType.Bit) { Value = input.isMandatory },
                                           new SqlParameter("@MilestonePublishedFormApprovers", SqlDbType.Structured) { Value = approvers },
                                           new SqlParameter("@MilestonePublishedFormUsers", SqlDbType.Structured) { Value = FormUsers },
-                                          new SqlParameter("@MilestoneTypeID", SqlDbType.BigInt) { Value = input.MilestoneTypeID }
+                                          new SqlParameter("@MilestoneTypeID", SqlDbType.BigInt) { Value = input.MilestoneTypeID },
+                                          new SqlParameter("@MilestoneRequirement", SqlDbType.NVarChar,500) { Value = input.MilestoneRequirement },
                                         };
 
             int ID = _helper.InsertTable("[Milestone].[PublishMilestoneForm]", parameters);
@@ -804,6 +805,36 @@ namespace ThoughtFocus.Service.Implementation
                 {
 
                     obj.MilestonePublishedFormsList = Convert.ToString(dtMilestonePublishedForm.Rows[0]["MilestonePublishedFormsList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneRequirementListResponse GetMilestoneRequirementList()
+        {
+            GetMilestoneRequirementListResponse obj = new GetMilestoneRequirementListResponse();
+            SqlParameter[] parameters = { };
+
+            DataTable dtMilestoneRequirementList = _helper.GetDataTable("[Milestone].[GetMilestoneRequirementList]", parameters);
+            try
+            {
+                if (dtMilestoneRequirementList.Rows.Count > 0)
+                {
+
+                    obj.MilestoneRequirementList = Convert.ToString(dtMilestoneRequirementList.Rows[0]["MilestonePublishedFormsList"]);
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
