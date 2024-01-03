@@ -42,5 +42,23 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetStudentProfileSearchData")]
+        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
+        {
+            try
+            {
+                StudentProfileSearchResponse response = _studentProfileService.GetStudentProfileSearchData(searchString);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentProfileSearchResponse response = new StudentProfileSearchResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to search profile data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

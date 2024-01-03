@@ -8,5 +8,6 @@ namespace ThoughtFocus.Service.Interfaces
     public interface IStudentProfile
     {
         StudentProfileResponse GetStudentProfileData(string CsuldId);
+        StudentProfileSearchResponse GetStudentProfileSearchData(string searchString);
     }
 }

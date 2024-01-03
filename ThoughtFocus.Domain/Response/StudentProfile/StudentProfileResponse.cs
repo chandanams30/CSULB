@@ -42,4 +42,16 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string CumulativeGpa { get; set; }
         public string MajorGpa { get; set; }
     }
+    public class StudentProfileSearchResponse : BaseResponse
+    {
+        public List<StudentProfileSearch> studentProfileSearch { get; set; }
+    }
+    public class StudentProfileSearch
+    {
+        public int ID { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string EMAIL { get; set; }
+        public string CSULBID { get; set; }
+    }
 }

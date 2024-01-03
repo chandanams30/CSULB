@@ -89,5 +89,38 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
+        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
+        {
+            StudentProfileSearchResponse obj = new StudentProfileSearchResponse();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@searchString", SqlDbType.NVarChar,100) { Value = searchString }
+                                     };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[SearchStudentProfile]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                obj.studentProfileSearch = dtResponse.AsEnumerable().Select(row =>
+                                              new StudentProfileSearch
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  FirstName = Convert.ToString(row["FirstName"]),
+                                                  LastName = Convert.ToString(row["LastName"]),
+                                                  EMAIL = Convert.ToString(row["CSULBEmail"]),
+                                                  CSULBID = Convert.ToString(row["CSULBID"]),
+
+                                              }).ToList();
+                obj.IsSuccess = true;
+                obj.Message = "Data retrieved succesfully ";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No data matching this search criteria";
+            }
+            return obj;
+
+        }
+
     }
 }
