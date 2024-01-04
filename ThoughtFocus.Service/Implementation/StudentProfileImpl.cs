@@ -74,6 +74,9 @@ namespace ThoughtFocus.Service.Implementation
                         AdmitTerm = Convert.ToString(row["AdmitTerm"]),
                         ActiveTerm = Convert.ToString(row["ActiveTerm"]),
                         GraduationFillingTerm = Convert.ToString(row["GraduationFillingTerm"]),
+                        EducationalLeaveTerm = Convert.ToString(row["EducationalLeaveTerm"]),
+                        Credential = Convert.ToString(row["Credential"]),
+                        Certificate = Convert.ToString(row["Certificate"]),
                     }).FirstOrDefault();
 
                     obj.IsSuccess = true;

@@ -41,6 +41,9 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string CurrentCsulbGpa { get; set; }
         public string CumulativeGpa { get; set; }
         public string MajorGpa { get; set; }
+        public string EducationalLeaveTerm { get; set; }
+        public string Credential { get; set; }
+        public string Certificate { get; set; }
     }
     public class StudentProfileSearchResponse : BaseResponse
     {
