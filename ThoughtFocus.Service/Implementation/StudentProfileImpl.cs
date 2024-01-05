@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Request.StudentProfile;
+using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.SearchApplication;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
@@ -124,6 +126,52 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
 
         }
+        public StudentProfileMessageBoardResponse GetStudentProfileMessageBoard(string CsulbId, string MessageBoardIdentifier)
+        {
+            StudentProfileMessageBoardResponse obj = new StudentProfileMessageBoardResponse();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar,25) { Value = CsulbId },
+                                          new SqlParameter("@MessageBoardIdentifier", SqlDbType.NVarChar,20) { Value = MessageBoardIdentifier}
+                                     };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[GetStudentProfileMessageBoard]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                obj.studentProfileMessageBoards = dtResponse.AsEnumerable().Select(row =>
+                                              new StudentProfileMessageBoard
+                                              {
+                                                  MessageBoard = Convert.ToString(row["MessageBoard"]),
+                                                  CSULBID = Convert.ToString(row["CSULBID"]),
 
+                                              }).ToList();
+                obj.IsSuccess = true;
+                obj.Message = "Data retrieved succesfully ";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No data matching this search criteria";
+            }
+            return obj;
+
+        }
+        public BaseResponse UpdateFormStudentMessageBoard(UpdateFormStudentMessageBoard input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@StudentMessageBoard", SqlDbType.VarChar,-1) { Value = input.StudentMessageBoard },
+                                        };
+
+            DataTable recomDetails = _helper.GetDataTable("[dbo].[updateFormStudentMessageBoard]", parameters);
+            response.Message = "Updated the message board successfully";
+            response.IsSuccess = true;
+            return response;
+        }
     }
 }

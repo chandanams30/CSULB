@@ -57,4 +57,13 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string EMAIL { get; set; }
         public string CSULBID { get; set; }
     }
+    public class StudentProfileMessageBoardResponse :BaseResponse
+    {
+        public List<StudentProfileMessageBoard> studentProfileMessageBoards { get; set; }
+    }
+    public class StudentProfileMessageBoard
+    {
+        public string CSULBID { get; set; }
+        public string MessageBoard { get; set; }
+    }
 }

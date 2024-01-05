@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using ThoughtFocus.Domain.Request.StudentProfile;
+using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.StudentProfile;
+using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
@@ -55,6 +58,44 @@ namespace CSULB_COE.Controllers
                 StudentProfileSearchResponse response = new StudentProfileSearchResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to search profile data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetStudentProfileMessageBoard")]
+        public StudentProfileMessageBoardResponse GetStudentProfileMessageBoard(string CsulbId,string MessageBoardIdentifier)
+        {
+            try
+            {
+                StudentProfileMessageBoardResponse response = _studentProfileService.GetStudentProfileMessageBoard(CsulbId, MessageBoardIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentProfileMessageBoardResponse response = new StudentProfileMessageBoardResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to fetch student profile message board data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFormStudentMessageBoard")]
+        public BaseResponse UpdateFormStudentMessageBoard(UpdateFormStudentMessageBoard input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentProfileService.UpdateFormStudentMessageBoard(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;
