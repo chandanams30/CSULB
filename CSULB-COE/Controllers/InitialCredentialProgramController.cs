@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
@@ -16,6 +17,7 @@ using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
+using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -564,5 +566,107 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetLetterOfRecommendationsByFormID")]
+        public LetterOfRecommendationsByFormIDResponse GetLetterOfRecommendationsByFormID(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                LetterOfRecommendationsByFormIDResponse response = _initialCredentialProgramService.GetLetterOfRecommendationsByFormID(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                LetterOfRecommendationsByFormIDResponse response = new LetterOfRecommendationsByFormIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertLetterOfRecommendations")]
+        public BaseResponse UpsertLetterOfRecommendations(UpdateFormStudentMessageBoardRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _initialCredentialProgramService.UpsertLetterOfRecommendations(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetLetterOfRecommendationsByRecommenderIdentifier")]
+        public LetterOfRecommendationsByRecommenderIdentifierResponse GetLetterOfRecommendationsByRecommenderIdentifier(string recommenderIdentifier)
+        {
+            try
+            {
+
+                LetterOfRecommendationsByRecommenderIdentifierResponse response = _initialCredentialProgramService.GetLetterOfRecommendationsByRecommenderIdentifier(recommenderIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                LetterOfRecommendationsByRecommenderIdentifierResponse response = new LetterOfRecommendationsByRecommenderIdentifierResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateLetterOfRecommendationsJSON")]
+        public BaseResponse UpdateLetterOfRecommendationsJSON(UpdateLetterOfRecommendationsJSONRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _initialCredentialProgramService.UpdateLetterOfRecommendationsJSON(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("DownloadAttachment")]
+        public IActionResult DownloadAttachment(string letterOfRecommendationJSON)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.DownloadAttachment(letterOfRecommendationJSON);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

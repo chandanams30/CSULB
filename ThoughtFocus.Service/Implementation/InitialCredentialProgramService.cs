@@ -25,6 +25,13 @@ using ThoughtFocus.Service.Interfaces;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Enumeration;
+using static ThoughtFocus.Service.Implementation.InitialCredentialProgramService;
+using FormAttachments = ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments;
+using Newtonsoft.Json.Linq;
+using iTextSharp.text.html.simpleparser;
+using iTextSharp.text.pdf;
+using iTextSharp.text;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1465,6 +1472,456 @@ namespace ThoughtFocus.Service.Implementation
         PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail IInitialCredentialProgramService.PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail)
         {
             throw new NotImplementedException();
+        }
+        public LetterOfRecommendationsByFormIDResponse GetLetterOfRecommendationsByFormID(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            LetterOfRecommendationsByFormIDResponse obj = new LetterOfRecommendationsByFormIDResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode }
+                                     };
+            DataTable letterOfRecommendationDetails = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByFormID]", parameters);
+            try
+            {
+                if (letterOfRecommendationDetails.Rows.Count > 0)
+                {
+
+
+                    obj.LetterOfRecommendationsByFormID = letterOfRecommendationDetails.AsEnumerable().Select(row =>
+                                              new LetterOfRecommendationsByFormID
+                                              {
+                                                  LetterOfRecommendationID = Convert.ToInt32(row["LetterOfRecommendationID"]),
+                                                  FormID = Convert.ToInt32(row["FormID"]),
+                                                  RecommenderName = Convert.ToString(row["RecommenderName"]),
+                                                  RecommenderEmail = Convert.ToString(row["RecommenderEmail"]),
+                                                  CreatedBy = Convert.ToInt16(row["CreatedBY"]),
+                                                  CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                                                  RecommenderURL = Convert.ToString(row["RecommenderURL"]),
+                                                  RecommenderURLValidTill = Convert.ToDateTime(row["RecommenderURLValidTill"] == DBNull.Value ? null : row["RecommenderURLValidTill"]),
+                                                  RecommenderIdentifier = Convert.ToString(row["RecommenderIdentifier"]),
+                                                  isMailSent = Convert.ToString(row["isMailSent"] == DBNull.Value ? null : row["isMailSent"]),
+                                                  LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"] == DBNull.Value ? null : row["LetterOfRecommendationJSON"]),
+                                                  CanView = Convert.ToString(row["CanView"]),
+                                                  FileLink = Convert.ToString(row["FileLink"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+
+        }
+        public LetterOfRecommendationsByRecommenderIdentifierResponse GetLetterOfRecommendationsByRecommenderIdentifier(string recommenderIdentifier)
+        {
+            LetterOfRecommendationsByRecommenderIdentifierResponse obj = new LetterOfRecommendationsByRecommenderIdentifierResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(recommenderIdentifier) }
+                                     };
+            DataTable letterOfRecommendationDetails = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByRecommenderIdentifier]", parameters);
+            try
+            {
+                if (letterOfRecommendationDetails.Rows.Count > 0)
+                {
+
+
+                    obj.LetterOfRecommendationsByRecommenderIdentifier= letterOfRecommendationDetails.AsEnumerable().Select(row =>
+                                              new LetterOfRecommendationsByRecommenderIdentifier
+                                              {
+                                                  LetterOfRecommendationID = Convert.ToInt32(row["LetterOfRecommendationID"]),
+                                                  FormID = Convert.ToInt32(row["FormID"]),
+                                                  RecommenderName = Convert.ToString(row["RecommenderName"]),
+                                                  LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"] == DBNull.Value ? null : row["LetterOfRecommendationJSON"]),
+                                                  StudentName = Convert.ToString(row["StudentName"]),
+                                                  StudentFirstName = Convert.ToString(row["StudentFirstName"]),
+                                                  StudentLastName = Convert.ToString(row["StudentLastName"]),
+                                                  CSULBID = Convert.ToString(row["CSULBID"]),
+                                                  StudentEmail = Convert.ToString(row["StudentEmail"]),
+                                                  ProgramName = Convert.ToString(row["ProgramName"]),
+                                                  TermName = Convert.ToString(row["TermName"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+
+        }
+        public BaseResponse UpsertLetterOfRecommendations(UpdateFormStudentMessageBoardRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@LetterOfRecommendationID", SqlDbType.BigInt) { Value = input.LetterOfRecommendationID },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@RecommenderName", SqlDbType.VarChar,200) { Value = input.RecommenderName },
+                                          new SqlParameter("@RecommenderEmail", SqlDbType.VarChar,200) { Value = input.RecommenderEmail }
+                                        };
+
+            DataTable recomDetails = _helper.GetDataTable("[Application].[UpsertLetterOfRecommendations]", parameters);
+            string logoText = "cid:myImageID";
+            string recommenderName = string.Empty;
+            string recommenderEmail = string.Empty;
+            string recommenderURL = string.Empty;
+            string recommenderIdentifier = string.Empty;
+            string applicantName = string.Empty;
+            string body = string.Empty;
+            string link = string.Empty;
+            bool isMailSent = false;
+            try
+            {
+                if (recomDetails.Rows.Count > 0)
+                {
+                    // send mail to the recommender with the URL link  
+                    recommenderName = Convert.ToString(recomDetails.Rows[0]["RecommenderName"]);
+                    recommenderEmail = Convert.ToString(recomDetails.Rows[0]["RecommenderEmail"]);
+                    recommenderURL = Convert.ToString(recomDetails.Rows[0]["RecommenderURL"]);
+                    recommenderIdentifier = Convert.ToString(recomDetails.Rows[0]["RecommenderIdentifier"]);
+                    applicantName = Convert.ToString(recomDetails.Rows[0]["StudentName"]);
+                    link = recommenderURL + recommenderIdentifier;
+                    body = GetMailBodyTemplate("SSCP_Clinical_Practice_Evaluation_Form.html");
+                    //link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+                    body = body.Replace("[[logoPath]]", logoText)
+                        .Replace("[[applicantname]]", applicantName)
+                        .Replace("[[link]]", link);
+
+                    string subject = "CSULB SSCP Clinical Practice Evaluation Form";
+                    _sendMail.SendEmail(recommenderEmail, "", "COMMON", subject, body, "");
+                    isMailSent = true;
+                }
+                UpdateLetterOfRecommendationsMailSent(input, isMailSent);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex.StackTrace);
+            }
+            response.Message = "Recommendation added and mail sent successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+        private void UpdateLetterOfRecommendationsMailSent(UpdateFormStudentMessageBoardRequest input,bool isMailSent)
+        {
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@LetterOfRecommendationID", SqlDbType.BigInt) { Value = input.LetterOfRecommendationID },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@IsMailSent", SqlDbType.Bit) { Value = isMailSent}
+                                        };
+
+            int ID = _helper.InsertTable("[Application].[UpdateLetterOfRecommendationsMailSent]", parameters);
+         
+        }
+        public BaseResponse UpdateLetterOfRecommendationsJSON(UpdateLetterOfRecommendationsJSONRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@LetterOfRecommendationID", SqlDbType.BigInt) { Value = input.LetterOfRecommendationID },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = input.LetterOfRecommendationJSON }
+                                        };
+
+            int ID = _helper.InsertTable("[Application].[UpdateLetterOfRecommendationsJSON]", parameters);
+            response.Message = "Data updated successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+        public FormAttachments DownloadAttachment(string letterOfRecommendationJSON)
+        {
+           FormAttachments obj = new FormAttachments();
+            byte[] fileContentJSONToPDF = GetPDFFromJSON(letterOfRecommendationJSON);
+            obj.Filename = "SSCP Evaluation Form.pdf";
+            obj.FileContent = fileContentJSONToPDF;
+            return obj;
+        }
+        private byte[] GetPDFFromJSON(string jsonString)
+        {
+                byte[] pdfFileContent = null;
+                string evaluationTemplateBody = string.Empty;
+                JObject schema = JObject.Parse(jsonString);
+
+                string candidateName = string.Empty;
+                string demonstrationTeacherName = string.Empty;
+                string candidateSpentHours = string.Empty;
+                string spokenEnglish = string.Empty;
+                string writtenEnglish = string.Empty;
+                string demonstratesConfidence = string.Empty;
+                string activeListeningSkills = string.Empty;
+                string professionalAppearance = string.Empty;
+                string relationshipsWithStaff = string.Empty;
+                string professionalEthicalBehavior = string.Empty;
+                string personalInteractionCourtesy = string.Empty;
+                string dependability = string.Empty;
+                string attendance = string.Empty;
+                string punctuality = string.Empty;
+                string sensitivityToDiversity = string.Empty;
+                string interestEnthusiasmTeaching = string.Empty;
+                string socialIntellectualMaturity = string.Empty;
+                string asksAppropriateQuestions = string.Empty;
+                string knowledgeOfSubjectMatter = string.Empty;
+                string knowledgeOfStateContentStandards = string.Empty;
+                string interestEnthusiasm = string.Empty;
+                string appropriateReflection = string.Empty;
+                string appropriateReflectionAnalysisOfObservedLessonDesign = string.Empty;
+                string recognitionOfHowInstructionAligned = string.Empty;
+                string recognitionOfHowInstructionDifferentiated = string.Empty;
+                string appropriateInteractionsWithStudents = string.Empty;
+                string attitudeOfClassTowardCandidate = string.Empty;
+                string realisticExpectationsForBehavior = string.Empty;
+                string supportsAndMotivatesStudents = string.Empty;
+                string predictStudentFutureTeacher = string.Empty;
+                string comment = string.Empty;
+
+
+                JObject personalInfo = (JObject)schema["personalinfo"];
+                JArray comunicationSkills = (JArray)personalInfo["comunicationSkills"];
+                JArray professionalAttitudeBehavior = (JArray)personalInfo["professionalAttitudeBehavior"];
+                JArray knowledgePedagogy = (JArray)personalInfo["knowledgePedagogy"];
+                JArray StudentInteraction = (JArray)personalInfo["StudentInteraction"];
+                JArray OverallAssessment = (JArray)personalInfo["OverallAssessment"];
+
+                candidateName = Convert.ToString(personalInfo.GetValue("candidateName"));
+                demonstrationTeacherName = Convert.ToString(personalInfo.GetValue("demonstrationTeacherName"));
+                candidateSpentHours = Convert.ToString(personalInfo.GetValue("candidateSpentHours"));
+                comment = Convert.ToString(schema.GetValue("comments"));
+                //Comunication Skills
+                foreach (JObject content in comunicationSkills.Children<JObject>())
+                {
+                    if (content["Category"].ToString() == "Spoken English")
+                    {
+                        spokenEnglish = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Written English (including emails)")
+                    {
+                        writtenEnglish = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Demonstrates confidence (e.g. body language, audible)")
+                    {
+                        demonstratesConfidence = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Active listening skills")
+                    {
+                        activeListeningSkills = Convert.ToString(content.GetValue("value"));
+                    }
+                }
+                //Professional Attitude Behavior
+                foreach (JObject content in professionalAttitudeBehavior.Children<JObject>())
+                {
+                    if (content["Category"].ToString() == "Professional appearance")
+                    {
+                        professionalAppearance = Convert.ToString(content.GetValue("value"));
+                    }
+                    if(content["Category"].ToString() == "Relationships with staff")
+                    {
+                        relationshipsWithStaff = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Professional/ethical behavior")
+                    {
+                        professionalEthicalBehavior = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Personal interaction and courtesy")
+                    {
+                        personalInteractionCourtesy = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Dependability *")
+                    {
+                        dependability = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Attendance *")
+                    {
+                        attendance = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Punctuality *")
+                    {
+                        punctuality = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Sensitivity to diversity (e.g. gender, multicultural, LGBTQ , special needs) *")
+                    {
+                        interestEnthusiasmTeaching= Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Interest & enthusiasm for teaching")
+                    {
+                        dependability = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Social and intellectual maturity")
+                    {
+                        socialIntellectualMaturity = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Asks appropriate questions about teaching practice and student learning")
+                    {
+                        asksAppropriateQuestions = Convert.ToString(content.GetValue("value"));
+                    }
+                }
+                //knowledgePedalogy
+                foreach (JObject content in knowledgePedagogy.Children<JObject>())
+                {
+                    if (content["Category"].ToString() == "Knowledge of subject matter")
+                    {
+                        knowledgeOfSubjectMatter = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Knowledge of state content standards & curriculum frameworks")
+                    {
+                        knowledgeOfStateContentStandards = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Interest & enthusiasm for subject matter")
+                    {
+                        interestEnthusiasm = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Appropriate reflection and analysis of observed strategies")
+                    {
+                        appropriateReflectionAnalysisOfObservedLessonDesign = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Appropriate reflection and analysis of observed lesson design")
+                    {
+                        appropriateReflectionAnalysisOfObservedLessonDesign = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Recognition of how instruction is aligned with content standards")
+                    {
+                        recognitionOfHowInstructionAligned = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Recognition of how instruction is differentiated to engage all learners")
+                    {
+                        recognitionOfHowInstructionDifferentiated = Convert.ToString(content.GetValue("value"));
+                    }
+                }
+                //Student Interaction
+                foreach (JObject content in StudentInteraction.Children<JObject>())
+                {
+                    if (content["Category"].ToString() == "Appropriate interactions with students")
+                    {
+                        appropriateInteractionsWithStudents = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Attitude of class toward candidate")
+                    {
+                        attitudeOfClassTowardCandidate = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Realistic expectations for behavior students")
+                    {
+                        realisticExpectationsForBehavior = Convert.ToString(content.GetValue("value"));
+                    }
+                    if (content["Category"].ToString() == "Supports and motivates")
+                    {
+                        supportsAndMotivatesStudents = Convert.ToString(content.GetValue("value"));
+                    }
+                }
+                //Overall Assessment
+                foreach (JObject content in OverallAssessment.Children<JObject>())
+                {
+                    if (content["Category"].ToString() == "What degree of success do you predict for this student as a future teacher:")
+                    {
+                        predictStudentFutureTeacher = Convert.ToString(content.GetValue("value"));
+                    }
+                }
+
+            evaluationTemplateBody = GetDocumentBodyTemplate("SSCPEvaluationFormTemplate.html");
+            // replace the values in the template 
+            evaluationTemplateBody = evaluationTemplateBody.Replace("[[CandidateName]]", candidateName)
+                                                                     .Replace("[[DemonstrationTeacherName]]", demonstrationTeacherName)
+                                                                     .Replace("[[CandidateSpentHours]]", candidateSpentHours)
+                                                                     .Replace("[[SpokenEnglish]]", spokenEnglish)
+                                                                     .Replace("[[WrittenEnglish]]", writtenEnglish)
+                                                                     .Replace("[[DemonstratesConfidence]]", demonstratesConfidence)
+                                                                     .Replace("[[ActiveListeningSkills]]", activeListeningSkills)
+                                                                     .Replace("[[ProfessionalAppearance]]", professionalAppearance)
+                                                                     .Replace("[[RelationshipsWithStaff]]", relationshipsWithStaff)
+                                                                     .Replace("[[Professional/ethicalBehavior]]", professionalEthicalBehavior)
+                                                                     .Replace("[[PersonalInteractionCourtesy]]", personalInteractionCourtesy)
+                                                                     .Replace("[[Dependability]]", dependability)
+                                                                     .Replace("[[Attendance]]", attendance)
+                                                                     .Replace("[[Punctuality]]", punctuality)
+                                                                     .Replace("[[SensitivityToDiversity]]", sensitivityToDiversity)
+                                                                     .Replace("[[InterestEnthusiasmTeaching]]", interestEnthusiasmTeaching)
+                                                                     .Replace("[[SocialIntellectualMaturity]]", socialIntellectualMaturity)
+                                                                     .Replace("[[AsksAppropriateQuestions]]", asksAppropriateQuestions)
+                                                                     .Replace("[[KnowledgeOfSubjectMatter]]", knowledgeOfSubjectMatter)
+                                                                     .Replace("[[KnowledgeOfStateContentStandards]]", knowledgeOfStateContentStandards)
+                                                                     .Replace("[[InterestEnthusiasm]]", interestEnthusiasm)
+                                                                     .Replace("[[AppropriateReflection]]", appropriateReflection)
+                                                                      .Replace("[[AppropriateReflectionAnalysisOfObservedLessonDesign]]", appropriateReflectionAnalysisOfObservedLessonDesign)
+                                                                     .Replace("[[RecognitionOfHowInstructionAligned]]", recognitionOfHowInstructionAligned)
+                                                                     .Replace("[[RecognitionOfHowInstructionDifferentiated]]", recognitionOfHowInstructionDifferentiated)
+                                                                     .Replace("[[AppropriateInteractionsWithStudents]]", appropriateInteractionsWithStudents)
+                                                                     .Replace("[[AttitudeOfClassTowardCandidate]]", attitudeOfClassTowardCandidate)
+                                                                     .Replace("[[RealisticExpectationsForBehavior]]", realisticExpectationsForBehavior)
+                                                                     .Replace("[[SupportsAndMotivatesStudents]]", supportsAndMotivatesStudents)
+                                                                     .Replace("[[PredictStudentFutureTeacher]]", predictStudentFutureTeacher)
+                                                                     .Replace("[[Comments]]", comment);
+                // get the filecontent
+                pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
+
+            return pdfFileContent;
+        }
+        private byte[] GetPDFFileContent(string htmlFormBody)
+        {
+            byte[] fileContent = null;
+            StringReader sr = new StringReader(htmlFormBody); // workable code uncomment after testing 
+            //TextReader sr = new StringReader(htmlFormBody);
+            //Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 0f);
+            iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 50, 50, 50, 50);
+            HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                PdfWriter writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                pdfDoc.Open();
+
+                htmlparser.Parse(sr);
+                pdfDoc.Close();
+
+                fileContent = memoryStream.ToArray();
+                memoryStream.Close();
+            }
+            return fileContent;
+        }
+        private string GetDocumentBodyTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/DocumentTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
         }
     }
 }
