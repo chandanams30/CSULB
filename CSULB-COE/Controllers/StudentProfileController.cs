@@ -81,14 +81,14 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("UpdateFormStudentMessageBoard")]
-        public BaseResponse UpdateFormStudentMessageBoard(UpdateFormStudentMessageBoard input)
+        [HttpPost("UpdateStudentProfileMessageBoard")]
+        public BaseResponse UpdateStudentProfileMessageBoard(UpdateStudentProfileMessageBoardRequest input)
         {
             try
             {
                 BaseResponse response = new BaseResponse();
 
-                response = _studentProfileService.UpdateFormStudentMessageBoard(input);
+                response = _studentProfileService.UpdateStudentProfileMessageBoard(input);
                 return response;
             }
             catch (Exception ex)

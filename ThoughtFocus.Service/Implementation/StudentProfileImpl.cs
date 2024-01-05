@@ -156,20 +156,18 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
 
         }
-        public BaseResponse UpdateFormStudentMessageBoard(UpdateFormStudentMessageBoard input)
+        public BaseResponse UpdateStudentProfileMessageBoard(UpdateStudentProfileMessageBoardRequest input)
         {
             BaseResponse response = new BaseResponse();
             SqlParameter[] parameters =
                                        {
-                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
-                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
-                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
-                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@StudentMessageBoard", SqlDbType.VarChar,-1) { Value = input.StudentMessageBoard },
+                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar,25) { Value = input.CSULBID },
+                                          new SqlParameter("@MessageBoardIdentifier", SqlDbType.NVarChar,20) { Value = input.MessageBoardIdentifier },
+                                          new SqlParameter("@MessageBoard", SqlDbType.VarChar,-1) { Value = input.MessageBoard }
                                         };
 
-            DataTable recomDetails = _helper.GetDataTable("[dbo].[updateFormStudentMessageBoard]", parameters);
-            response.Message = "Updated the message board successfully";
+            DataTable recomDetails = _helper.GetDataTable("[dbo].[UpdateStudentProfileMessageBoard]", parameters);
+            response.Message = "Updated the student profile message board successfully";
             response.IsSuccess = true;
             return response;
         }
