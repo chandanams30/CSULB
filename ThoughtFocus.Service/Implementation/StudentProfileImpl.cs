@@ -143,7 +143,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   MessageBoard = Convert.ToString(row["MessageBoard"]),
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
 
-                                              }).ToList();
+                                              }).FirstOrDefault();
                 obj.IsSuccess = true;
                 obj.Message = "Data retrieved succesfully ";
 

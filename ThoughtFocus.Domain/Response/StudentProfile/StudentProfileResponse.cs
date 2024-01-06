@@ -59,7 +59,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     }
     public class StudentProfileMessageBoardResponse :BaseResponse
     {
-        public List<StudentProfileMessageBoard> studentProfileMessageBoards { get; set; }
+        public StudentProfileMessageBoard studentProfileMessageBoards { get; set; }
     }
     public class StudentProfileMessageBoard
     {
