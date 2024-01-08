@@ -37,7 +37,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateFormSubSectionSubmitForReview(UpdateFormSubSectionSubmitForReviewRequest input);
         PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail);
         LetterOfRecommendationsByFormIDResponse GetLetterOfRecommendationsByFormID(int UserID, int FormID, int ProgramID, string TermCode);
-        BaseResponse UpsertLetterOfRecommendations(UpdateFormStudentMessageBoardRequest input);
+        BaseResponse UpsertLetterOfRecommendations(UpsertLetterOfRecommendationsRequest input);
         LetterOfRecommendationsByRecommenderIdentifierResponse GetLetterOfRecommendationsByRecommenderIdentifier(string identifier);
         BaseResponse UpdateLetterOfRecommendationsJSON(UpdateLetterOfRecommendationsJSONRequest input);
         FormAttachments DownloadAttachment(string LetterOfRecommendationJSON);

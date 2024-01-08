@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
 {
-    public class UpdateFormStudentMessageBoardRequest
+    public class UpsertLetterOfRecommendationsRequest
     {
         public int LetterOfRecommendationID { get; set; }
         public int UserID { get; set; }

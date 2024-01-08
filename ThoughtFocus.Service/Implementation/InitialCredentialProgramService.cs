@@ -1542,7 +1542,7 @@ namespace ThoughtFocus.Service.Implementation
                 {
 
 
-                    obj.LetterOfRecommendationsByRecommenderIdentifier= letterOfRecommendationDetails.AsEnumerable().Select(row =>
+                    obj.LetterOfRecommendationsByRecommenderIdentifier = letterOfRecommendationDetails.AsEnumerable().Select(row =>
                                               new LetterOfRecommendationsByRecommenderIdentifier
                                               {
                                                   LetterOfRecommendationID = Convert.ToInt32(row["LetterOfRecommendationID"]),
@@ -1556,7 +1556,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   StudentEmail = Convert.ToString(row["StudentEmail"]),
                                                   ProgramName = Convert.ToString(row["ProgramName"]),
                                                   TermName = Convert.ToString(row["TermName"])
-                                              }).ToList();
+                                              }).FirstOrDefault();
 
 
                     obj.IsSuccess = true;
@@ -1578,7 +1578,7 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
 
         }
-        public BaseResponse UpsertLetterOfRecommendations(UpdateFormStudentMessageBoardRequest input)
+        public BaseResponse UpsertLetterOfRecommendations(UpsertLetterOfRecommendationsRequest input)
         {
             BaseResponse response = new BaseResponse();
             SqlParameter[] parameters =
@@ -1634,7 +1634,7 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
-        private void UpdateLetterOfRecommendationsMailSent(UpdateFormStudentMessageBoardRequest input,bool isMailSent)
+        private void UpdateLetterOfRecommendationsMailSent(UpsertLetterOfRecommendationsRequest input,bool isMailSent)
         {
             SqlParameter[] parameters =
                                        {

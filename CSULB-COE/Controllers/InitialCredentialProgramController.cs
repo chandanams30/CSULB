@@ -585,7 +585,7 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("UpsertLetterOfRecommendations")]
-        public BaseResponse UpsertLetterOfRecommendations(UpdateFormStudentMessageBoardRequest input)
+        public BaseResponse UpsertLetterOfRecommendations(UpsertLetterOfRecommendationsRequest input)
         {
             try
             {

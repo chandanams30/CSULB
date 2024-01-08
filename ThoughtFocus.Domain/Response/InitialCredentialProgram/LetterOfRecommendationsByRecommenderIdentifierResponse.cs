@@ -8,7 +8,7 @@ namespace ThoughtFocus.Domain.Response.InitialCredentialProgram
 {
     public class LetterOfRecommendationsByRecommenderIdentifierResponse : BaseResponse
     {
-        public List<LetterOfRecommendationsByRecommenderIdentifier> LetterOfRecommendationsByRecommenderIdentifier { get; set; }
+        public LetterOfRecommendationsByRecommenderIdentifier LetterOfRecommendationsByRecommenderIdentifier { get; set; }
     }
     public class LetterOfRecommendationsByRecommenderIdentifier
     {
