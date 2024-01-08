@@ -604,6 +604,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [AllowAnonymous]
         [HttpGet("GetLetterOfRecommendationsByRecommenderIdentifier")]
         public LetterOfRecommendationsByRecommenderIdentifierResponse GetLetterOfRecommendationsByRecommenderIdentifier(string recommenderIdentifier)
         {
@@ -623,6 +624,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [AllowAnonymous]
         [HttpPost("UpdateLetterOfRecommendationsJSON")]
         public BaseResponse UpdateLetterOfRecommendationsJSON(UpdateLetterOfRecommendationsJSONRequest input)
         {

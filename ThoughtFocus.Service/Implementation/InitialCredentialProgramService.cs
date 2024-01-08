@@ -1714,7 +1714,7 @@ namespace ThoughtFocus.Service.Implementation
                 string comment = string.Empty;
 
 
-                JObject personalInfo = (JObject)schema["personalinfo"];
+                JObject personalInfo = (JObject)schema["personalInfo"];
                 JArray comunicationSkills = (JArray)personalInfo["comunicationSkills"];
                 JArray professionalAttitudeBehavior = (JArray)personalInfo["professionalAttitudeBehavior"];
                 JArray knowledgePedagogy = (JArray)personalInfo["knowledgePedagogy"];
