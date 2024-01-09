@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.StudentProfile;
@@ -60,7 +61,7 @@ namespace ThoughtFocus.Service.Implementation
                         MailingCity = Convert.ToString(row["MailingCity"]),
                         MailingState = Convert.ToString(row["MailingState"]),
                         MailingPostal = Convert.ToString(row["MailingPostal"]),
-                        Phone = Convert.ToString(row["Phone"]),
+                        Phone = Regex.Replace(Convert.ToString(row["Phone"]).Replace("/", "").Replace("-", ""), @"(\d{3})(\d{3})(\d{0,4})", "($1)-$2-$3"),
                         csulbemail = Convert.ToString(row["CSULBEmail"]),
                         AlternateEmail = Convert.ToString(row["AlternateEmail"]),
                         AcademicPlan = Convert.ToString(row["AcademicPlan"]),
