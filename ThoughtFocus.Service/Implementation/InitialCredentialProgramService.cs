@@ -1512,24 +1512,16 @@ namespace ThoughtFocus.Service.Implementation
                     {
                         List<LetterOfRecommendationsByFormID> lstRec = new List<LetterOfRecommendationsByFormID>();
                         LetterOfRecommendationsByFormID objRec=new LetterOfRecommendationsByFormID();
+                        objRec.LetterOfRecommendationID = 0;
                         objRec.FormID = FormID;
                         objRec.RecommenderName = String.Empty;
                         objRec.RecommenderEmail = String.Empty;
                         lstRec.Add(objRec);
                         obj.LetterOfRecommendationsByFormID = lstRec; 
                     }
-
-
-
-
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
-                }
-                else
-                {
-                    obj.IsSuccess = false;
-                    obj.Message = "No Data Present";
                 }
             }
             catch (Exception ex)
@@ -1692,6 +1684,7 @@ namespace ThoughtFocus.Service.Implementation
         {
                 byte[] pdfFileContent = null;
                 string evaluationTemplateBody = string.Empty;
+                string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
                 JObject schema = JObject.Parse(jsonString);
 
                 string candidateName = string.Empty;
@@ -1869,7 +1862,8 @@ namespace ThoughtFocus.Service.Implementation
 
             evaluationTemplateBody = GetDocumentBodyTemplate("SSCPEvaluationFormTemplate.html");
             // replace the values in the template 
-            evaluationTemplateBody = evaluationTemplateBody.Replace("[[CandidateName]]", candidateName)
+            evaluationTemplateBody = evaluationTemplateBody.Replace("[[logoPath]]",logoPath)
+                                                                     .Replace("[[CandidateName]]", candidateName)
                                                                      .Replace("[[DemonstrationTeacherName]]", demonstrationTeacherName)
                                                                      .Replace("[[CandidateSpentHours]]", candidateSpentHours)
                                                                      .Replace("[[SpokenEnglish]]", spokenEnglish)
