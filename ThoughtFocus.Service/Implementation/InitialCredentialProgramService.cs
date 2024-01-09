@@ -1486,27 +1486,40 @@ namespace ThoughtFocus.Service.Implementation
             DataTable letterOfRecommendationDetails = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByFormID]", parameters);
             try
             {
-                if (letterOfRecommendationDetails.Rows.Count > 0)
+                if (letterOfRecommendationDetails!=null)
                 {
+                    if (letterOfRecommendationDetails.Rows.Count > 0)
+                    {
+                        obj.LetterOfRecommendationsByFormID = letterOfRecommendationDetails.AsEnumerable().Select(row =>
+                                           new LetterOfRecommendationsByFormID
+                                           {
+                                               LetterOfRecommendationID = Convert.ToInt32(row["LetterOfRecommendationID"]),
+                                               FormID = Convert.ToInt32(row["FormID"]),
+                                               RecommenderName = Convert.ToString(row["RecommenderName"]),
+                                               RecommenderEmail = Convert.ToString(row["RecommenderEmail"]),
+                                               CreatedBy = Convert.ToInt16(row["CreatedBY"]),
+                                               CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                                               RecommenderURL = Convert.ToString(row["RecommenderURL"]),
+                                               RecommenderURLValidTill = Convert.ToDateTime(row["RecommenderURLValidTill"] == DBNull.Value ? null : row["RecommenderURLValidTill"]),
+                                               RecommenderIdentifier = Convert.ToString(row["RecommenderIdentifier"]),
+                                               isMailSent = Convert.ToBoolean(row["isMailSent"]),
+                                               LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"] == DBNull.Value ? null : row["LetterOfRecommendationJSON"]),
+                                               CanView = Convert.ToBoolean(row["CanView"]),
+                                               FileLink = Convert.ToString(row["FileLink"])
+                                           }).ToList();
+                    }
+                    else
+                    {
+                        List<LetterOfRecommendationsByFormID> lstRec = new List<LetterOfRecommendationsByFormID>();
+                        LetterOfRecommendationsByFormID objRec=new LetterOfRecommendationsByFormID();
+                        objRec.FormID = FormID;
+                        objRec.RecommenderName = String.Empty;
+                        objRec.RecommenderEmail = String.Empty;
+                        lstRec.Add(objRec);
+                        obj.LetterOfRecommendationsByFormID = lstRec; 
+                    }
 
 
-                    obj.LetterOfRecommendationsByFormID = letterOfRecommendationDetails.AsEnumerable().Select(row =>
-                                              new LetterOfRecommendationsByFormID
-                                              {
-                                                  LetterOfRecommendationID = Convert.ToInt32(row["LetterOfRecommendationID"]),
-                                                  FormID = Convert.ToInt32(row["FormID"]),
-                                                  RecommenderName = Convert.ToString(row["RecommenderName"]),
-                                                  RecommenderEmail = Convert.ToString(row["RecommenderEmail"]),
-                                                  CreatedBy = Convert.ToInt16(row["CreatedBY"]),
-                                                  CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                                                  RecommenderURL = Convert.ToString(row["RecommenderURL"]),
-                                                  RecommenderURLValidTill = Convert.ToDateTime(row["RecommenderURLValidTill"] == DBNull.Value ? null : row["RecommenderURLValidTill"]),
-                                                  RecommenderIdentifier = Convert.ToString(row["RecommenderIdentifier"]),
-                                                  isMailSent = Convert.ToString(row["isMailSent"] == DBNull.Value ? null : row["isMailSent"]),
-                                                  LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"] == DBNull.Value ? null : row["LetterOfRecommendationJSON"]),
-                                                  CanView = Convert.ToString(row["CanView"]),
-                                                  FileLink = Convert.ToString(row["FileLink"])
-                                              }).ToList();
 
 
                     obj.IsSuccess = true;
