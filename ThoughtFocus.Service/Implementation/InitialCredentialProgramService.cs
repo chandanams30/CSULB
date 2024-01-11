@@ -1669,7 +1669,7 @@ namespace ThoughtFocus.Service.Implementation
         {
            FormAttachments obj = new FormAttachments();
             byte[] fileContentJSONToPDF = GetPDFFromJSON(letterOfRecommendationJSON);
-            obj.Filename = "SSCP Evaluation Form.pdf";
+            obj.Filename = "SSCPEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             obj.FileContent = fileContentJSONToPDF;
             return obj;
         }
