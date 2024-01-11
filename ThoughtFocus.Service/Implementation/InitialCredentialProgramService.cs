@@ -1541,8 +1541,6 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(recommenderIdentifier) }
                                      };
             DataTable letterOfRecommendationDetails = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByRecommenderIdentifier]", parameters);
-            try
-            {
                 if (letterOfRecommendationDetails.Rows.Count > 0)
                 {
 
@@ -1571,16 +1569,9 @@ namespace ThoughtFocus.Service.Implementation
                 else
                 {
                     obj.IsSuccess = false;
-                    obj.Message = "No Data Present";
+                    obj.Message = "The page you are trying to reach has either expired or is not valid.";
                 }
-            }
-            catch (Exception ex)
-            {
-                obj.IsSuccess = false;
-                obj.Message = "Data Retrieval Failed , Please contact site admin ";
-                obj.StackTrace = ex.Message;
-            }
-            return obj;
+                return obj;
 
         }
         public BaseResponse UpsertLetterOfRecommendations(UpsertLetterOfRecommendationsRequest input)
@@ -1627,16 +1618,18 @@ namespace ThoughtFocus.Service.Implementation
                     string subject = "CSULB SSCP Clinical Practice Evaluation Form";
                     _sendMail.SendEmail(recommenderEmail, "", "COMMON", subject, body, "");
                     isMailSent = true;
+                    UpdateLetterOfRecommendationsMailSent(input, isMailSent);
                 }
-                UpdateLetterOfRecommendationsMailSent(input, isMailSent);
+                response.Message = "Recommendation added and mail sent successfully";
+                response.IsSuccess = true;
+
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex.StackTrace);
+                response.IsSuccess = false;
+                response.Message = "Recommendation mail send fail.";
             }
-            response.Message = "Recommendation added and mail sent successfully";
-            response.IsSuccess = true;
             return response;
         }
         private void UpdateLetterOfRecommendationsMailSent(UpsertLetterOfRecommendationsRequest input,bool isMailSent)
