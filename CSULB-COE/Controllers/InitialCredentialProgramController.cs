@@ -645,8 +645,8 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpGet("DownloadAttachment")]
-        public IActionResult DownloadAttachment(string letterOfRecommendationJSON)
+        [HttpPost("DownloadAttachment")]
+        public IActionResult DownloadAttachment(DownloadAttachmentRequest letterOfRecommendationJSON)
         {
             try
             {

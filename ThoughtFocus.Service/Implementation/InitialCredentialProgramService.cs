@@ -1665,10 +1665,10 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
-        public FormAttachments DownloadAttachment(string letterOfRecommendationJSON)
+        public FormAttachments DownloadAttachment(DownloadAttachmentRequest input)
         {
-           FormAttachments obj = new FormAttachments();
-            byte[] fileContentJSONToPDF = GetPDFFromJSON(letterOfRecommendationJSON);
+            FormAttachments obj = new FormAttachments();
+            byte[] fileContentJSONToPDF = GetPDFFromJSON(input.letterOfREcommendationjson);
             obj.Filename = "SSCPEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             obj.FileContent = fileContentJSONToPDF;
             return obj;
@@ -1678,6 +1678,7 @@ namespace ThoughtFocus.Service.Implementation
                 byte[] pdfFileContent = null;
                 string evaluationTemplateBody = string.Empty;
                 string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+                jsonString = jsonString.Replace("+", " ");
                 JObject schema = JObject.Parse(jsonString);
 
                 string candidateName = string.Empty;
@@ -1763,19 +1764,19 @@ namespace ThoughtFocus.Service.Implementation
                     {
                         personalInteractionCourtesy = Convert.ToString(content.GetValue("value"));
                     }
-                    if (content["Category"].ToString() == "Dependability *")
+                    if (content["Category"].ToString() == "Dependability")
                     {
                         dependability = Convert.ToString(content.GetValue("value"));
                     }
-                    if (content["Category"].ToString() == "Attendance *")
+                    if (content["Category"].ToString() == "Attendance")
                     {
                         attendance = Convert.ToString(content.GetValue("value"));
                     }
-                    if (content["Category"].ToString() == "Punctuality *")
+                    if (content["Category"].ToString() == "Punctuality")
                     {
                         punctuality = Convert.ToString(content.GetValue("value"));
                     }
-                    if (content["Category"].ToString() == "Sensitivity to diversity (e.g. gender, multicultural, LGBTQ , special needs) *")
+                    if (content["Category"].ToString() == "Sensitivity to diversity (e.g. gender, multicultural, LGBTQ , special needs)")
                     {
                         interestEnthusiasmTeaching= Convert.ToString(content.GetValue("value"));
                     }
