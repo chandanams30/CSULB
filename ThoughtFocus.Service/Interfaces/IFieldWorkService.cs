@@ -37,5 +37,10 @@ namespace ThoughtFocus.Service.Interfaces
         PUFieldWorkActivityLogListResponse GetFieldWorkActivityLogList(string CommunitySiteUserIdentifier,int fieldWorkId);
         FieldWorkActivityLogByIDResponse PUNS_GetFieldWorkActivityLogByID(string CommunitySiteUserIdentifier, int ActivityLogID);
         BaseResponse PUNS_UpdateFieldWorkActivityLogStatus(PUUpdateFieldWorkActivityLogStatusRequest input);
+        FieldWorkEvaluationByIDResponse GetEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode);
+        BaseResponse UpsertEvaluation(UpsertEvaluationRequest input);
+        EvaluationByEvaluationIdentifierResponse GetEvaluationByEvaluationIdentifier(string evaluationIdentifier);
+        BaseResponse UpdateEvaluationJSON(UpdateEvaluationJSONRequest input);
+        FieldWorkAttachmentsRequest  DownloadAttachment(DownloadAttachment input);
     }
 }
