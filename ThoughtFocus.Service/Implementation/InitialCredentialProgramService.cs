@@ -1598,6 +1598,7 @@ namespace ThoughtFocus.Service.Implementation
             string body = string.Empty;
             string link = string.Empty;
             bool isMailSent = false;
+            string subject = string.Empty;
             try
             {
                 if (recomDetails.Rows.Count > 0)
@@ -1609,13 +1610,15 @@ namespace ThoughtFocus.Service.Implementation
                     recommenderIdentifier = Convert.ToString(recomDetails.Rows[0]["RecommenderIdentifier"]);
                     applicantName = Convert.ToString(recomDetails.Rows[0]["StudentName"]);
                     link = recommenderURL + recommenderIdentifier;
-                    body = GetMailBodyTemplate("SSCP_Clinical_Practice_Evaluation_Form.html");
+                    body = GetMailBodyTemplateByProgramID(input.ProgramID);
                     //link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                     body = body.Replace("[[logoPath]]", logoText)
                         .Replace("[[applicantname]]", applicantName)
                         .Replace("[[link]]", link);
-
-                    string subject = "CSULB SSCP Clinical Practice Evaluation Form";
+                    if (input.ProgramID == 2)
+                        subject = "CSULB MSCP Clinical Practice Evaluation Form";
+                    if (input.ProgramID == 4)
+                        subject = "CSULB SSCP Clinical Practice Evaluation Form";
                     _sendMail.SendEmail(recommenderEmail, "", "COMMON", subject, body, "");
                     isMailSent = true;
                     UpdateLetterOfRecommendationsMailSent(input, isMailSent);
@@ -1668,12 +1671,21 @@ namespace ThoughtFocus.Service.Implementation
         public FormAttachments DownloadAttachment(DownloadAttachmentRequest input)
         {
             FormAttachments obj = new FormAttachments();
-            byte[] fileContentJSONToPDF = GetPDFFromJSON(input.letterOfREcommendationjson);
-            obj.Filename = "SSCPEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
+            byte[] fileContentJSONToPDF = new byte[0];
+            if (input.ProgramFormIdentifier == "SSCP")
+            {
+                fileContentJSONToPDF = GetPDFFromJSONForSSCP(input.LetterOfRecommendationJSON);
+                obj.Filename = "SSCPEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
+            }
+            else if (input.ProgramFormIdentifier == "MSCP")
+            {
+                fileContentJSONToPDF = GetPDFFromJSONForMSCP(input.LetterOfRecommendationJSON);
+                obj.Filename = "MSCPEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
+            }
             obj.FileContent = fileContentJSONToPDF;
             return obj;
         }
-        private byte[] GetPDFFromJSON(string jsonString)
+        private byte[] GetPDFFromJSONForSSCP(string jsonString)
         {
                 byte[] pdfFileContent = null;
                 string evaluationTemplateBody = string.Empty;
@@ -1892,6 +1904,125 @@ namespace ThoughtFocus.Service.Implementation
                 pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
 
             return pdfFileContent;
+        }
+        private byte[] GetPDFFromJSONForMSCP(string jsonString)
+        {
+            byte[] pdfFileContent = null;
+            string evaluationTemplateBody = string.Empty;
+            string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+            jsonString = jsonString.Replace("+", " ");
+            JObject schema = JObject.Parse(jsonString);
+
+            string date = string.Empty;
+            string gradeLevelTaught = string.Empty;
+            string schoolDistrict = string.Empty;
+            string schoolName = string.Empty;
+
+            string promptness = string.Empty;
+            string responsibility = string.Empty;
+            string honor = string.Empty;
+            string representUniversity = string.Empty;
+            string communicationSkills = string.Empty;
+            string diversePopulations = string.Empty;
+            string collaboration = string.Empty;
+            string knowledge = string.Empty;
+            string finalEvaluation = string.Empty;
+
+            string teacherSignature = string.Empty;
+            string teacherName = string.Empty;
+            string comment = string.Empty;
+
+
+            JObject personalInfo = (JObject)schema["personalInfo"];
+            JArray disposition = (JArray)personalInfo["disposition"];
+
+            date = Convert.ToString(personalInfo["date"]);
+            gradeLevelTaught = Convert.ToString(personalInfo.GetValue("gradeLevelTaught"));
+            schoolDistrict = Convert.ToString(personalInfo.GetValue("schoolDistrict"));
+            schoolName = Convert.ToString(personalInfo.GetValue("schoolName"));
+            teacherSignature = Convert.ToString(schema.GetValue("teacherSignature"));
+            teacherName = Convert.ToString(schema.GetValue("teacherName"));
+            comment = Convert.ToString(schema.GetValue("comments"));
+
+            //Disposition Criteria
+            foreach (JObject content in disposition.Children<JObject>())
+            {
+                if (content["Criteria"].ToString() == "Promptness: Timeliness in first contact; Punctuality in attendance")
+                {
+                    promptness = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "Responsibility: Consistency in schedule and work")
+                {
+                    responsibility = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "Honoring school setting: Compliance with school policies; Displays legal and ethical conduct; and, observing confidentiality at all times")
+                {
+                    honor = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "Representing the university: Respectful in professional language, behavior, and appearance. No use of social media in the schooling context at any time.")
+                {
+                    representUniversity = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "Communication Skills: University-level language in email, phone contact, and in person")
+                {
+                    communicationSkills = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "Working with Diverse Populations: Respect and demonstrates insightfulness for all students, various backgrounds, abilities, and orientations")
+                {
+                    diversePopulations = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "Collaboration: Willing contribution to classroom environment and learning opportunities")
+                {
+                    collaboration = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "Knowledge: Application of course content and best practices; reflection on learning")
+                {
+                    knowledge = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["Criteria"].ToString() == "OVERALL FINAL EVAULATION")
+                {
+                    finalEvaluation = Convert.ToString(content.GetValue("value"));
+                }
+            }
+
+            evaluationTemplateBody = GetDocumentBodyTemplate("MSCPEvaluationFormTemplate.html");
+            // replace the values in the template 
+            evaluationTemplateBody = evaluationTemplateBody.Replace("[[logoPath]]", logoPath)
+                                                                     .Replace("[[Date]]", date)
+                                                                     .Replace("[[GradeLevelTaught]]", gradeLevelTaught)
+                                                                     .Replace("[[SchoolDistrictName]]", schoolDistrict)
+                                                                     .Replace("[[SchoolName]]", schoolName)
+                                                                     .Replace("[[Promptness]]", promptness)
+                                                                     .Replace("[[Responsibility]]", responsibility)
+                                                                     .Replace("[[HonoringSchoolSetting]]", honor)
+                                                                     .Replace("[[RepresentingUniversity]]", representUniversity)
+                                                                     .Replace("[[CommunicationSkills]]", communicationSkills)
+                                                                     .Replace("[[WorkingDiversePopulations]]", diversePopulations)
+                                                                     .Replace("[[Collaboration]]", collaboration)
+                                                                     .Replace("[[Knowledge]]", knowledge)
+                                                                     .Replace("[[FinalEvaluation]]", finalEvaluation)
+                                                                     .Replace("[[AdditinalComments]]", comment)
+                                                                     .Replace("[[CooperatingTeacherSignature]]", teacherSignature)
+                                                                     .Replace("[[CooperatingTeacherName]]", teacherName);
+            // get the filecontent
+            pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
+
+            return pdfFileContent;
+        }
+        private string GetMailBodyTemplateByProgramID(int programID)
+        {
+            string body = string.Empty;
+            string templateName = string.Empty;
+            if (programID == 2)
+                templateName = "MSCP_Clinical_Practice_Evaluation_Form.html";
+            if (programID == 4)
+                templateName = "SSCP_Clinical_Practice_Evaluation_Form.html";
+            string filepath = Path.Combine("SupportFiles/EmailTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
         }
         private byte[] GetPDFFileContent(string htmlFormBody)
         {

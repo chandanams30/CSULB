@@ -646,7 +646,7 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("DownloadAttachment")]
-        public IActionResult DownloadAttachment(DownloadAttachmentRequest letterOfRecommendationJSON)
+        public IActionResult DownloadAttachment(DownloadAttachmentRequest input)
         {
             try
             {
@@ -654,7 +654,7 @@ namespace CSULB_COE.Controllers
                 string fileType = string.Empty;
                 string fileName = string.Empty;
 
-                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.DownloadAttachment(letterOfRecommendationJSON);
+                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.DownloadAttachment(input);
                 fileName = obj.Filename;
                 inputStream = obj.FileContent;
                 string[] fileSplit = obj.Filename.Split('.');

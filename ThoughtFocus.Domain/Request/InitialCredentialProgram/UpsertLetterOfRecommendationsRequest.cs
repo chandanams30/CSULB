@@ -25,6 +25,7 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
     }
     public class DownloadAttachmentRequest
     {
-        public string letterOfREcommendationjson { get; set; }
+        public string LetterOfRecommendationJSON { get; set; }
+        public string ProgramFormIdentifier { get;set; }
     }
 }
