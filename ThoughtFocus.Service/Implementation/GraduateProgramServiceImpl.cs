@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -32,15 +33,18 @@ namespace ThoughtFocus.Service.Implementation
         private readonly IConfiguration _configuration;
         private readonly ISendMail _sendMail;
         public ILogger<GraduateProgramServiceImpl> _logger;
+        public IInitialCredentialProgramService _initialCredentialProgramService;
         public GraduateProgramServiceImpl(ISqlDBUtility helper
                                          , IConfiguration configuration
                                          , ISendMail sendMail
-                                         , ILogger<GraduateProgramServiceImpl> logger)
+                                         , ILogger<GraduateProgramServiceImpl> logger
+                                         , IInitialCredentialProgramService initialCredentialProgramService)
         {
             _helper = helper;
             _configuration = configuration;
             _sendMail = sendMail;
             _logger = logger;
+            _initialCredentialProgramService = initialCredentialProgramService;
         }
         public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
         {
@@ -1988,11 +1992,11 @@ namespace ThoughtFocus.Service.Implementation
                 }
             }
 
-            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo,dtEducationInfo,dtDisposition);
+            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo,dtEducationInfo,dtDisposition,formID);
 
             return mergedFileStream;
         }
-        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo,DataTable dtEducationInfo,DataTable dtDisposition)
+        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo,DataTable dtEducationInfo,DataTable dtDisposition,int formID)
         {
             byte[] inputStream = null;
             var folderPath = _configuration["ApplicationKeys:FileRepository"];
@@ -2002,7 +2006,7 @@ namespace ThoughtFocus.Service.Implementation
             string dispositionsAssessmentForm = string.Empty;
             int formDispositionAssessmentID;
             string programIdentifier = string.Empty;
-            string OutFile = Path.Combine(MergedPDFFolderName, "Merged"+DateTime.Now.ToString("MMddyyyyHHmmss")+".pdf");
+            string OutFile = Path.Combine(MergedPDFFolderName, "Merged" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
             iTextSharp.text.Document document = new iTextSharp.text.Document();
             PdfCopy copyProvider;
 
@@ -2044,6 +2048,41 @@ namespace ThoughtFocus.Service.Implementation
                     programIdentifier= Convert.ToString(dtDisposition.Rows[0]["ProgramFormIdentifier"]);
                     // call the method to generate the dispositions document 
                     GenerateDispositionDocument(copyProvider,formDispositionAssessmentID,dispositionsAssessmentForm,programIdentifier, workingFolderName);
+                }
+            }
+            //Section to add evaluation form for SSCP and MSCP
+            if (programIdentifier == "SSCP" || programIdentifier == "MSCP")
+            {
+                SqlParameter[] parameters =
+                               {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = 0 },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = "" }
+                               };
+                DataTable dtRec = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByFormID]", parameters);
+                string json = string.Empty;
+                byte[] fileContentJSONToPDF = new byte[0];
+                if (dtRec != null && dtRec.Rows.Count > 0)
+                {
+                        json = Convert.ToString(dtRec.Rows[0]["LetterOfRecommendationJSON"]);
+                        if (json != null)
+                        {
+                            if (programIdentifier == "SSCP")
+                            {
+                               fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForSSCP(json);
+                            }
+                            else
+                            {
+                                fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForMSCP(json);
+                            }
+                            
+                        string PDFFilePath = Path.Combine(workingFolderName, "EvaluationForm" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                        File.WriteAllBytes(PDFFilePath, fileContentJSONToPDF);
+                        iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(PDFFilePath);
+                        copyProvider.AddDocument(pdfReader);
+                        pdfReader.Close();
+                    }
                 }
             }
             document.Close();

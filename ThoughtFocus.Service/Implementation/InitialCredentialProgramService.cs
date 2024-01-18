@@ -1675,17 +1675,17 @@ namespace ThoughtFocus.Service.Implementation
             if (input.ProgramFormIdentifier == "SSCP")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForSSCP(input.LetterOfRecommendationJSON);
-                obj.Filename = "SSCPEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
+                obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             }
             else if (input.ProgramFormIdentifier == "MSCP")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForMSCP(input.LetterOfRecommendationJSON);
-                obj.Filename = "MSCPEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
+                obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             }
             obj.FileContent = fileContentJSONToPDF;
             return obj;
         }
-        private byte[] GetPDFFromJSONForSSCP(string jsonString)
+        public byte[] GetPDFFromJSONForSSCP(string jsonString)
         {
                 byte[] pdfFileContent = null;
                 string evaluationTemplateBody = string.Empty;
@@ -1905,7 +1905,7 @@ namespace ThoughtFocus.Service.Implementation
 
             return pdfFileContent;
         }
-        private byte[] GetPDFFromJSONForMSCP(string jsonString)
+        public byte[] GetPDFFromJSONForMSCP(string jsonString)
         {
             byte[] pdfFileContent = null;
             string evaluationTemplateBody = string.Empty;
