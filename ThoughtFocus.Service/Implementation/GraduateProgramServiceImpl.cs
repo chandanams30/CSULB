@@ -2048,40 +2048,46 @@ namespace ThoughtFocus.Service.Implementation
                     programIdentifier= Convert.ToString(dtDisposition.Rows[0]["ProgramFormIdentifier"]);
                     // call the method to generate the dispositions document 
                     GenerateDispositionDocument(copyProvider,formDispositionAssessmentID,dispositionsAssessmentForm,programIdentifier, workingFolderName);
+                
                 }
             }
-            //Section to add evaluation form for SSCP and MSCP
-            if (programIdentifier == "SSCP" || programIdentifier == "MSCP")
+            if (dtDisposition!=null || dtDisposition.Rows.Count > 0)
             {
-                SqlParameter[] parameters =
-                               {
+                programIdentifier = Convert.ToString(dtDisposition.Rows[0]["ProgramFormIdentifier"]);
+
+                //Section to add evaluation form for SSCP and MSCP
+                if (programIdentifier == "SSCP" || programIdentifier == "MSCP")
+                {
+                    SqlParameter[] parameters =
+                                   {
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = 0 },
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = "" }
                                };
-                DataTable dtRec = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByFormID]", parameters);
-                string json = string.Empty;
-                byte[] fileContentJSONToPDF = new byte[0];
-                if (dtRec != null && dtRec.Rows.Count > 0)
-                {
+                    DataTable dtRec = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByFormID]", parameters);
+                    string json = string.Empty;
+                    byte[] fileContentJSONToPDF = new byte[0];
+                    if (dtRec != null && dtRec.Rows.Count > 0)
+                    {
                         json = Convert.ToString(dtRec.Rows[0]["LetterOfRecommendationJSON"]);
                         if (json != null)
                         {
                             if (programIdentifier == "SSCP")
                             {
-                               fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForSSCP(json);
+                                fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForSSCP(json);
                             }
                             else
                             {
                                 fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForMSCP(json);
                             }
-                            
-                        string PDFFilePath = Path.Combine(workingFolderName, "EvaluationForm" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
-                        File.WriteAllBytes(PDFFilePath, fileContentJSONToPDF);
-                        iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(PDFFilePath);
-                        copyProvider.AddDocument(pdfReader);
-                        pdfReader.Close();
+
+                            string PDFFilePath = Path.Combine(workingFolderName, "EvaluationForm" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                            File.WriteAllBytes(PDFFilePath, fileContentJSONToPDF);
+                            iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(PDFFilePath);
+                            copyProvider.AddDocument(pdfReader);
+                            pdfReader.Close();
+                        }
                     }
                 }
             }
