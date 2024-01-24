@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using PdfSharp.Pdf.Content.Objects;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -2071,7 +2072,7 @@ namespace ThoughtFocus.Service.Implementation
                     if (dtRec != null && dtRec.Rows.Count > 0)
                     {
                         json = Convert.ToString(dtRec.Rows[0]["LetterOfRecommendationJSON"]);
-                        if (json != null)
+                        if (!string.IsNullOrEmpty(json))
                         {
                             if (programIdentifier == "SSCP")
                             {
