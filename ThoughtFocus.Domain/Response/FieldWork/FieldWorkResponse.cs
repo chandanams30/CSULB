@@ -19,6 +19,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public int FieldWorkPrerequisiteStatus { get; set; }
         public string PrerequisiteStatus { get; set; }
         public string UIHandler { get; set; }
+        public string LoggedHours { get; set; }
+        public string ApprovedHours { get; set; }
     }
 
     public class FieldWorkListResponse:BaseResponse

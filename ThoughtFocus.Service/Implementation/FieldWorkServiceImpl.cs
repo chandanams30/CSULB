@@ -178,7 +178,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   Section = Convert.ToString(row["Section"]),
                                                   Term = Convert.ToString(row["Term"]),
                                                   FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
-                                                  PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"])
+                                                  PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"]),
+                                                  LoggedHours = Convert.ToString(row["LoggedHours"]),
+                                                  ApprovedHours = Convert.ToString(row["ApprovedHours"])
 
                                               }).ToList();
 
