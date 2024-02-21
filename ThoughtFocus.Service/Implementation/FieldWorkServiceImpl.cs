@@ -1926,6 +1926,63 @@ namespace ThoughtFocus.Service.Implementation
 
             return pdfFileContent;
         }
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail)
+        {
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
+
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@CommunitySiteUsersID", SqlDbType.BigInt) { Value = communitySiteUsersID },
+                                          new SqlParameter("@CommunitySiteUserName", SqlDbType.NVarChar,200) { Value = communitySiteUserName },
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar,200) { Value = communitySiteUserEmail }
+
+                              };
+
+            DataSet dtFieldWork = _helper.GetDataSet("[FieldWork].[PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents]", parameters);
+            if (dtFieldWork.Tables.Count > 0)
+            {
+                obj = dtFieldWork.Tables[0].AsEnumerable().Select(row =>
+                                          new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents
+                                          {
+                                              CSSDTID = Convert.ToInt32(row["CSSDTID"]),
+                                              CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
+                                              CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
+                                              CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"])
+
+                                          }).FirstOrDefault();
+
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully.";
+                try
+                {
+                    //please uncomment after testing
+                    //string toUser = "asif.khan@thoughtfocus.com";
+                    string toUser = obj.CommunitySiteUserEmail;
+                    string link = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
+                    string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
+                    string logoText = "cid:myImageID";
+                    body = body.Replace("[[logoPath]]", logoText)
+                              .Replace("[[link]]", link);
+                    string subject = "Approve student hours for CSULB Clinical Practice";
+                    _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
+                    obj.IsSuccess = true;
+                    obj.Message = "Partner User Activation mail sent successfully.";
+                }
+                catch (Exception ee)
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "Failure sending mail.";
+                }
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data .";
+            }
+
+
+            return obj;
+        }
         private byte[] GetPDFFileContent(string htmlFormBody)
         {
             byte[] fileContent = null;
