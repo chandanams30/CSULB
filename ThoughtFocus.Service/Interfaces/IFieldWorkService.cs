@@ -42,6 +42,6 @@ namespace ThoughtFocus.Service.Interfaces
         EvaluationByEvaluationIdentifierResponse GetEvaluationByEvaluationIdentifier(string evaluationIdentifier);
         BaseResponse UpdateEvaluationJSON(UpdateEvaluationJSONRequest input);
         FieldWorkAttachmentsRequest  DownloadAttachment(DownloadAttachment input);
-        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail);
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail,int activityLogID);
     }
 }

@@ -1926,7 +1926,7 @@ namespace ThoughtFocus.Service.Implementation
 
             return pdfFileContent;
         }
-        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail)
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail,int activityLogID)
         {
             PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
 
@@ -1934,7 +1934,8 @@ namespace ThoughtFocus.Service.Implementation
                               {
                                           new SqlParameter("@CommunitySiteUsersID", SqlDbType.BigInt) { Value = communitySiteUsersID },
                                           new SqlParameter("@CommunitySiteUserName", SqlDbType.NVarChar,200) { Value = communitySiteUserName },
-                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar,200) { Value = communitySiteUserEmail }
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar,200) { Value = communitySiteUserEmail },
+                                          new SqlParameter("@FieldWorkActivityLogId", SqlDbType.BigInt) { Value =  activityLogID }
 
                               };
 
