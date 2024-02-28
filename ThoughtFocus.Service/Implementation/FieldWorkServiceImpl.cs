@@ -18,6 +18,7 @@ using System.Security.Principal;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Enumeration;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
@@ -1983,6 +1984,94 @@ namespace ThoughtFocus.Service.Implementation
 
 
             return obj;
+        }
+        public FieldWorkAttachmentsRequest DownloadActivityLogs(GetReportDataRequest input)
+        {
+            FieldWorkAttachmentsRequest obj = new FieldWorkAttachmentsRequest();
+
+            string reportingDates = string.Empty;
+
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID }
+                                     };
+            DataSet dsFieldWorkData = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogList]", parameters);
+            DataTable dtFieldWorkDetails = dsFieldWorkData.Tables[0].Copy();
+            //DataTable dtfieldWorkHours = dsFieldWorkData.Tables[2].Copy();
+            obj.FileName = "ActivityLogs-Report-" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
+            obj.FileContent = DownloadActivityLogsContent(dtFieldWorkDetails);
+            return obj;
+        }
+        private byte[] DownloadActivityLogsContent(DataTable dtFieldWorkDetails)
+        {
+            byte[] inputStream = null;
+            StringBuilder sbReportData = new StringBuilder();
+            StringBuilder sbLogData = new StringBuilder();
+            string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+
+            // loop through all the mileage logs
+            double finalAmount = 0.00;
+            for (int y = 0; y < dtFieldWorkDetails.Rows.Count; y++)
+            {
+                string displayID = string.Empty;
+                string activityStartDate = string.Empty;
+                string activityEndDate = string.Empty;
+                string site = string.Empty;
+                string hours = string.Empty;
+                string status = string.Empty;
+
+                displayID = Convert.ToString(dtFieldWorkDetails.Rows[y]["DisplayID"]);
+                activityStartDate = Convert.ToDateTime(dtFieldWorkDetails.Rows[y]["ActivityStartDate"]).ToString("MMM-dd-yyyy");
+                activityEndDate = Convert.ToDateTime(dtFieldWorkDetails.Rows[y]["ActivityEndDate"]).ToString("MMM-dd-yyyy");
+                site = Convert.ToString(dtFieldWorkDetails.Rows[y]["Site"]);
+                hours = Convert.ToString(dtFieldWorkDetails.Rows[y]["Hours"]);
+                status = Convert.ToString(dtFieldWorkDetails.Rows[y]["Status"]);
+                string strLogs = ConstructMileageLogRows(displayID,activityStartDate,activityEndDate,site,hours,status);
+                sbLogData.Append(strLogs);
+            }
+            // push the data into template 
+            string template = GetDocumentBodyTemplate("FieldWorkReport.html");
+            template = template.Replace("[[dtFieldWorkDetails]]", sbLogData.ToString())
+                               .Replace("[[logoPath]]", logoPath);
+            inputStream = GetPDFFileContentAsLandscape(template);
+            return inputStream;
+        }
+        private string ConstructMileageLogRows(string displayID, string activityStartDate, string activityEndDate,string site, string hours, string status)
+        {
+            StringBuilder sbRows = new StringBuilder();
+            sbRows.Append("<tr>");
+            sbRows.Append("<td width='15%' style='font-size: 10px;'>" + displayID + "</td>");
+            sbRows.Append("<td width='20%' style='font-size: 10px;'>" + activityStartDate + "</td>");
+            sbRows.Append("<td width='20%' style='font-size: 10px;'>" + activityEndDate + "</td>");
+            sbRows.Append("<td width='10%'  style='font-size: 10px;'>" + site + "</td>");
+            sbRows.Append("<td style='font-size: 10px;'>" + hours + "</td>");
+            sbRows.Append("<td style='font-size: 10px;'>" + status + "</td>");
+            sbRows.Append("</tr>");
+            return sbRows.ToString();
+        }
+        private byte[] GetPDFFileContentAsLandscape(string htmlFormBody)
+        {
+            byte[] fileContent = null;
+            StringReader sr = new StringReader(htmlFormBody); // workable code uncomment after testing 
+            //TextReader sr = new StringReader(htmlFormBody);
+            //Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 0f);
+            //Document pdfDoc = new Document(PageSize.A4, 16, 16, 25, 20); //portrait mode
+            iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4.Rotate(), 25, 25, 16, 16);//landscape mode
+
+            HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                iTextSharp.text.pdf.PdfWriter writer = PdfWriter.GetInstance(pdfDoc, memoryStream);
+                pdfDoc.Open();
+
+                htmlparser.Parse(sr);
+                pdfDoc.Close();
+
+                fileContent = memoryStream.ToArray();
+                memoryStream.Close();
+            }
+            return fileContent;
         }
         private byte[] GetPDFFileContent(string htmlFormBody)
         {
