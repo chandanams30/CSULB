@@ -31,5 +31,7 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneFilledFormByUserListResponse GetMilestoneFilledFormByUserList(int UserID);
         GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID);
         GetMilestoneRequirementListResponse GetMilestoneRequirementList();
+        GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID);
+        GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID);
     }
 }

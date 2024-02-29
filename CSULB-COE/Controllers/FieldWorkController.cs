@@ -674,13 +674,13 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("DownloadActivityLogs")]
-        public IActionResult DownloadActivityLogs(GetReportDataRequest input)
+        public IActionResult DownloadActivityLogs(FieldWorkActivityLogsAttachmentRequest input)
         {
             byte[] inputStream = null;
             string fileType = string.Empty;
             string fileName = string.Empty;
 
-            FieldWorkAttachmentsRequest obj = _fieldWorkService.DownloadActivityLogs(input);
+            FieldWorkActivityLogsAttachmentResponse obj = _fieldWorkService.DownloadActivityLogs(input);
             fileName = obj.FileName;
             inputStream = obj.FileContent;
             string[] fileSplit = obj.FileName.Split('.');

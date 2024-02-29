@@ -450,5 +450,41 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetMilestoneSubmittedFormsList")]
+        public GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID)
+        {
+            try
+            {
+                GetMilestoneSubmittedFormsListResponse response = _milestonesService.GetMilestoneSubmittedFormsList(RoleID,ApproverUserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneSubmittedFormsListResponse response = new GetMilestoneSubmittedFormsListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetMilestoneWorkflowProcessTransitionHistory")]
+        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID)
+        {
+            try
+            {
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = _milestonesService.GetMilestoneWorkflowProcessTransitionHistory(MilestoneFormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = new GetMilestoneWorkflowProcessTransitionHistoryResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

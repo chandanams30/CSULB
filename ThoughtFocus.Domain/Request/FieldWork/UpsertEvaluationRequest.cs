@@ -27,7 +27,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
     {
         public string evaluationjson { get; set; }
     }
-    public class GetReportDataRequest
+    public class FieldWorkActivityLogsAttachmentRequest
     {
         public int UserID { get; set; }
         public int FieldWorkID { get; set; }

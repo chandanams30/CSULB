@@ -1985,11 +1985,9 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-        public FieldWorkAttachmentsRequest DownloadActivityLogs(GetReportDataRequest input)
+        public FieldWorkActivityLogsAttachmentResponse DownloadActivityLogs(FieldWorkActivityLogsAttachmentRequest input)
         {
-            FieldWorkAttachmentsRequest obj = new FieldWorkAttachmentsRequest();
-
-            string reportingDates = string.Empty;
+            FieldWorkActivityLogsAttachmentResponse obj = new FieldWorkActivityLogsAttachmentResponse();
 
             SqlParameter[] parameters =
                                      {
@@ -1997,8 +1995,6 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID }
                                      };
             DataSet dsFieldWorkData = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogDataForDownload]", parameters);
-           // DataTable dtFieldWorkDetails = dsFieldWorkData.Tables[0].Copy();
-            //DataTable dtfieldWorkHours = dsFieldWorkData.Tables[2].Copy();
             obj.FileName = "ActivityLogs-Report-" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             obj.FileContent = DownloadActivityLogsContent(dsFieldWorkData);
             return obj;
@@ -2006,47 +2002,84 @@ namespace ThoughtFocus.Service.Implementation
         private byte[] DownloadActivityLogsContent(DataSet dsFieldWorkData)
         {
             byte[] inputStream = null;
-            StringBuilder sbReportData = new StringBuilder();
             StringBuilder sbLogData = new StringBuilder();
             string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+            string studentName = string.Empty;
+            string courseTitle = string.Empty;
+            string course = string.Empty;
+            string section = string.Empty;
+            string term = string.Empty;
+            decimal excpectedHours = 0;
+            decimal loggedHours = 0;
+            decimal sentForApproval = 0;
+            decimal approvedHours = 0;
+            decimal approve = 0;
 
-            // loop through all the mileage logs
-            double finalAmount = 0.00;
+            //student details
+            if (dsFieldWorkData.Tables[2].Rows.Count > 0)
+            {
+                studentName = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["StudentName"]);
+                courseTitle = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["CourseTitle"]);
+                course = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Course"]);
+                section = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Section"]);
+                term = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Term"]);
+            }
+            //summary data
+            if (dsFieldWorkData.Tables[1].Rows.Count > 0)
+            {
+                excpectedHours = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["ExpectedHours"]);
+                loggedHours = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["LoggedHours"]);
+                sentForApproval = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["SentforApproval"]);
+                approvedHours = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["ApprovedHours"]);
+                approve = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["Approved"]);
+            }
+
+            // loop through activity logs
             for (int y = 0; y < dsFieldWorkData.Tables[0].Rows.Count; y++)
             {
                 string displayID = string.Empty;
                 string activityStartDate = string.Empty;
                 string activityEndDate = string.Empty;
                 string site = string.Empty;
-                string hours = string.Empty;
+                decimal hours = 0;
                 string status = string.Empty;
 
                 displayID = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["DisplayID"]);
                 activityStartDate = Convert.ToDateTime(dsFieldWorkData.Tables[0].Rows[y]["ActivityStartDate"]).ToString("MMM-dd-yyyy");
                 activityEndDate = Convert.ToDateTime(dsFieldWorkData.Tables[0].Rows[y]["ActivityEndDate"]).ToString("MMM-dd-yyyy");
                 site = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Site"]);
-                hours = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Hours"]);
+                hours = Convert.ToDecimal(dsFieldWorkData.Tables[0].Rows[y]["Hours"]);
                 status = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Status"]);
-                string strLogs = ConstructMileageLogRows(displayID,activityStartDate,activityEndDate,site,hours,status);
+                string strLogs = ConstructActivityLogRows(displayID,activityStartDate,activityEndDate,site,hours.ToString(),status);
                 sbLogData.Append(strLogs);
             }
             // push the data into template 
             string template = GetDocumentBodyTemplate("FieldWorkReport.html");
             template = template.Replace("[[dtFieldWorkDetails]]", sbLogData.ToString())
-                               .Replace("[[logoPath]]", logoPath);
+                               .Replace("[[logoPath]]", logoPath)
+                               .Replace("[[studentName]]", studentName)
+                               .Replace("[[courseTitle]]", courseTitle)
+                               .Replace("[[course]]", course)
+                               .Replace("[[section]]", section)
+                               .Replace("[[term]]",term)
+                               .Replace("[[excpectedHours]]", excpectedHours.ToString())
+                               .Replace("[[loggedHours]]", loggedHours.ToString())
+                               .Replace("[[sentForApproval]]", sentForApproval.ToString())
+                               .Replace("[[approvedHours]]", approvedHours.ToString())
+                               .Replace("[[approve]]", approve.ToString());
             inputStream = GetPDFFileContentAsLandscape(template);
             return inputStream;
         }
-        private string ConstructMileageLogRows(string displayID, string activityStartDate, string activityEndDate,string site, string hours, string status)
+        private string ConstructActivityLogRows(string displayID, string activityStartDate, string activityEndDate,string site, string hours, string status)
         {
             StringBuilder sbRows = new StringBuilder();
             sbRows.Append("<tr>");
-            sbRows.Append("<td width='15%' style='font-size: 10px;'>" + displayID + "</td>");
-            sbRows.Append("<td width='20%' style='font-size: 10px;'>" + activityStartDate + "</td>");
-            sbRows.Append("<td width='20%' style='font-size: 10px;'>" + activityEndDate + "</td>");
-            sbRows.Append("<td width='10%'  style='font-size: 10px;'>" + site + "</td>");
-            sbRows.Append("<td style='font-size: 10px;'>" + hours + "</td>");
-            sbRows.Append("<td style='font-size: 10px;'>" + status + "</td>");
+            sbRows.Append("<td width='12%' style='font-size: 10px; text-align:center;'>" + displayID + "</td>");
+            sbRows.Append("<td width='12%' style='font-size: 10px; text-align:center;'>" + activityStartDate + "</td>");
+            sbRows.Append("<td width='12%' style='font-size: 10px; text-align:center;'>" + activityEndDate + "</td>");
+            sbRows.Append("<td width='40%' style='font-size: 10px; text-align:center;'>" + site + "</td>");
+            sbRows.Append("<td width='10%' style='font-size: 10px; text-align:center;'>" + hours + "</td>");
+            sbRows.Append("<td width='8%' style='font-size: 10px; text-align:center;'>" + status + "</td>");
             sbRows.Append("</tr>");
             return sbRows.ToString();
         }
@@ -2054,9 +2087,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             byte[] fileContent = null;
             StringReader sr = new StringReader(htmlFormBody); // workable code uncomment after testing 
-            //TextReader sr = new StringReader(htmlFormBody);
-            //Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 0f);
-            //Document pdfDoc = new Document(PageSize.A4, 16, 16, 25, 20); //portrait mode
+            //iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 50, 50, 50, 50); //portrait mode
             iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4.Rotate(), 25, 25, 16, 16);//landscape mode
 
             HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
