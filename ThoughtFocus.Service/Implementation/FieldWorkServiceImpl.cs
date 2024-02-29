@@ -1996,14 +1996,14 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID }
                                      };
-            DataSet dsFieldWorkData = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogList]", parameters);
-            DataTable dtFieldWorkDetails = dsFieldWorkData.Tables[0].Copy();
+            DataSet dsFieldWorkData = _helper.GetDataSet("[dbo].[GetFieldWorkActivityLogDataForDownload]", parameters);
+           // DataTable dtFieldWorkDetails = dsFieldWorkData.Tables[0].Copy();
             //DataTable dtfieldWorkHours = dsFieldWorkData.Tables[2].Copy();
             obj.FileName = "ActivityLogs-Report-" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
-            obj.FileContent = DownloadActivityLogsContent(dtFieldWorkDetails);
+            obj.FileContent = DownloadActivityLogsContent(dsFieldWorkData);
             return obj;
         }
-        private byte[] DownloadActivityLogsContent(DataTable dtFieldWorkDetails)
+        private byte[] DownloadActivityLogsContent(DataSet dsFieldWorkData)
         {
             byte[] inputStream = null;
             StringBuilder sbReportData = new StringBuilder();
@@ -2012,7 +2012,7 @@ namespace ThoughtFocus.Service.Implementation
 
             // loop through all the mileage logs
             double finalAmount = 0.00;
-            for (int y = 0; y < dtFieldWorkDetails.Rows.Count; y++)
+            for (int y = 0; y < dsFieldWorkData.Tables[0].Rows.Count; y++)
             {
                 string displayID = string.Empty;
                 string activityStartDate = string.Empty;
@@ -2021,12 +2021,12 @@ namespace ThoughtFocus.Service.Implementation
                 string hours = string.Empty;
                 string status = string.Empty;
 
-                displayID = Convert.ToString(dtFieldWorkDetails.Rows[y]["DisplayID"]);
-                activityStartDate = Convert.ToDateTime(dtFieldWorkDetails.Rows[y]["ActivityStartDate"]).ToString("MMM-dd-yyyy");
-                activityEndDate = Convert.ToDateTime(dtFieldWorkDetails.Rows[y]["ActivityEndDate"]).ToString("MMM-dd-yyyy");
-                site = Convert.ToString(dtFieldWorkDetails.Rows[y]["Site"]);
-                hours = Convert.ToString(dtFieldWorkDetails.Rows[y]["Hours"]);
-                status = Convert.ToString(dtFieldWorkDetails.Rows[y]["Status"]);
+                displayID = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["DisplayID"]);
+                activityStartDate = Convert.ToDateTime(dsFieldWorkData.Tables[0].Rows[y]["ActivityStartDate"]).ToString("MMM-dd-yyyy");
+                activityEndDate = Convert.ToDateTime(dsFieldWorkData.Tables[0].Rows[y]["ActivityEndDate"]).ToString("MMM-dd-yyyy");
+                site = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Site"]);
+                hours = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Hours"]);
+                status = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Status"]);
                 string strLogs = ConstructMileageLogRows(displayID,activityStartDate,activityEndDate,site,hours,status);
                 sbLogData.Append(strLogs);
             }

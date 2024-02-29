@@ -231,13 +231,13 @@ namespace CSULB_COE
 
             // Anti click-jacking headers X-Frame-Headers vulnerability 
             // ------------------uncomment after testing --------------
-            app.Use(async (context, next) =>
-            {
-                context.Response.Headers.Add("Content-Security-Policy", "default-src 'self';"); // provide "default-src 'self' cdn.jsdelivr.net;" if you want to load the resources from the CDN 
-                context.Response.Headers.Add("X-Frame-Options", "DENY"); // if framed then "SAMEORIGIN" if not framed then "DENY"
-                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-                await next();
-            });
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self';"); // provide "default-src 'self' cdn.jsdelivr.net;" if you want to load the resources from the CDN 
+            //    context.Response.Headers.Add("X-Frame-Options", "DENY"); // if framed then "SAMEORIGIN" if not framed then "DENY"
+            //    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+            //    await next();
+            //});
 
             app.UseAuthentication();
             app.UseAuthorization();
