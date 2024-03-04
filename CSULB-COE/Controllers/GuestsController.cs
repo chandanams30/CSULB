@@ -739,6 +739,30 @@ namespace CSULB_COE.Controllers
             }
 
         }
+        [HttpPost("UpdateFieldWorkActivityLogStatusList")]
+        public BaseResponse PUNS_UpdateFieldWorkActivityLogStatusList(PUUpdateFieldWorkActivityLogStatusListRequest inputs)
+        {
+            try
+            {
+                foreach (PUUpdateFieldWorkActivityLogStatusRequest input in inputs.logStatusList)
+                {
+                    _fieldWorkService.PUNS_UpdateFieldWorkActivityLogStatus(input);
+                }
+                BaseResponse obj = new BaseResponse();
+                obj.IsSuccess = true;
+                obj.Message = "Activity Log Status Updated Successfully";
+                return obj;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Update Activity Log Status, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
 
         private string GetFileType(string fileExt)
