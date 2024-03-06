@@ -763,6 +763,63 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetFnCSchema")]
+        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaType, int fieldWorkActivityLogID)
+        {
+            try
+            {
+                FieldWorkFnCSchemaResponse response = new FieldWorkFnCSchemaResponse();
+                response = _fieldWorkService.GetFnCSchema(userID, fieldWorkID, schemaType, fieldWorkActivityLogID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkFnCSchemaResponse response = new FieldWorkFnCSchemaResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFnCSchema")]
+        public BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpdateFnCSchema(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save the schema , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("SendReminderToRecommender")]
+        public BaseResponse SendReminderToRecommender(int recommendationID)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.SendReminderToRecommender(recommendationID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
 
         private string GetFileType(string fileExt)

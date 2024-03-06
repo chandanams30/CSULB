@@ -2007,8 +2007,9 @@ namespace ThoughtFocus.Service.Implementation
             string studentName = string.Empty;
             string courseTitle = string.Empty;
             string course = string.Empty;
-            string section = string.Empty;
+            string instructor = string.Empty;
             string term = string.Empty;
+            string studentID = string.Empty;
             decimal excpectedHours = 0;
             decimal loggedHours = 0;
             decimal sentForApproval = 0;
@@ -2021,8 +2022,9 @@ namespace ThoughtFocus.Service.Implementation
                 studentName = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["StudentName"]);
                 courseTitle = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["CourseTitle"]);
                 course = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Course"]);
-                section = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Section"]);
+                instructor = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["SupervisorName"]);
                 term = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Term"]);
+                studentID = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["StudentID"]);
             }
             //summary data
             if (dsFieldWorkData.Tables[1].Rows.Count > 0)
@@ -2031,26 +2033,33 @@ namespace ThoughtFocus.Service.Implementation
                 loggedHours = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["LoggedHours"]);
                 sentForApproval = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["SentforApproval"]);
                 approvedHours = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["ApprovedHours"]);
-                approve = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["Approved"]);
+                approve = Math.Round(Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["Approved"]),2);
             }
 
             // loop through activity logs
             for (int y = 0; y < dsFieldWorkData.Tables[0].Rows.Count; y++)
             {
-                string displayID = string.Empty;
                 string activityStartDate = string.Empty;
                 string activityEndDate = string.Empty;
                 string site = string.Empty;
                 decimal hours = 0;
-                string status = string.Empty;
+                string schoolDistrict = string.Empty;
+                string supervisorName = string.Empty;
+                string dropdown1 = string.Empty;
+                string dropdown2 = string.Empty;
+                string description = string.Empty;
 
-                displayID = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["DisplayID"]);
+
                 activityStartDate = Convert.ToDateTime(dsFieldWorkData.Tables[0].Rows[y]["ActivityStartDate"]).ToString("MMM-dd-yyyy");
                 activityEndDate = Convert.ToDateTime(dsFieldWorkData.Tables[0].Rows[y]["ActivityEndDate"]).ToString("MMM-dd-yyyy");
                 site = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Site"]);
                 hours = Convert.ToDecimal(dsFieldWorkData.Tables[0].Rows[y]["Hours"]);
-                status = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Status"]);
-                string strLogs = ConstructActivityLogRows(displayID,activityStartDate,activityEndDate,site,hours.ToString(),status);
+                schoolDistrict = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["District"]);
+                supervisorName = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["ParnetUserName"]);
+                dropdown1 = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["CategoryStandard"]);
+                dropdown2 = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["SchoolType"]);
+                description = Convert.ToString(dsFieldWorkData.Tables[0].Rows[y]["Details"]);
+                string strLogs = ConstructActivityLogRows(activityStartDate,activityEndDate,site,hours.ToString(),schoolDistrict,supervisorName,dropdown1,dropdown2,description);
                 sbLogData.Append(strLogs);
             }
             // push the data into template 
@@ -2060,8 +2069,9 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[studentName]]", studentName)
                                .Replace("[[courseTitle]]", courseTitle)
                                .Replace("[[course]]", course)
-                               .Replace("[[section]]", section)
+                               .Replace("[[instructor]]", instructor)
                                .Replace("[[term]]",term)
+                               .Replace("[[studentID]]",studentID)
                                .Replace("[[excpectedHours]]", excpectedHours.ToString())
                                .Replace("[[loggedHours]]", loggedHours.ToString())
                                .Replace("[[sentForApproval]]", sentForApproval.ToString())
@@ -2070,16 +2080,19 @@ namespace ThoughtFocus.Service.Implementation
             inputStream = GetPDFFileContentAsLandscape(template);
             return inputStream;
         }
-        private string ConstructActivityLogRows(string displayID, string activityStartDate, string activityEndDate,string site, string hours, string status)
+        private string ConstructActivityLogRows(string activityStartDate, string activityEndDate,string site, string hours,string schoolDistrict,string supervisorName,string dropdown1,string dropdown2,string description)
         {
             StringBuilder sbRows = new StringBuilder();
             sbRows.Append("<tr>");
-            sbRows.Append("<td width='12%' style='font-size: 10px; text-align:center;'>" + displayID + "</td>");
             sbRows.Append("<td width='12%' style='font-size: 10px; text-align:center;'>" + activityStartDate + "</td>");
             sbRows.Append("<td width='12%' style='font-size: 10px; text-align:center;'>" + activityEndDate + "</td>");
-            sbRows.Append("<td width='40%' style='font-size: 10px; text-align:center;'>" + site + "</td>");
-            sbRows.Append("<td width='10%' style='font-size: 10px; text-align:center;'>" + hours + "</td>");
-            sbRows.Append("<td width='8%' style='font-size: 10px; text-align:center;'>" + status + "</td>");
+            sbRows.Append("<td width='20%' style='font-size: 10px; text-align:center;'>" + schoolDistrict + "</td>");
+            sbRows.Append("<td width='25%' style='font-size: 10px; text-align:center;'>" + site + "</td>");
+            sbRows.Append("<td width='15%' style='font-size: 10px; text-align:center;'>" + supervisorName + "</td>");
+            sbRows.Append("<td width='15%' style='font-size: 10px; text-align:center;'>" + dropdown1 + "</td>");
+            sbRows.Append("<td width='15%' style='font-size: 10px; text-align:center;'>" + dropdown2 + "</td>");
+            sbRows.Append("<td width='30%' style='font-size: 10px; text-align:center;'>" + description + "</td>");
+            sbRows.Append("<td width='8%' style='font-size: 10px; text-align:center;'>" + hours + "</td>");
             sbRows.Append("</tr>");
             return sbRows.ToString();
         }
