@@ -1728,11 +1728,19 @@ namespace ThoughtFocus.Service.Implementation
                     string subject = "CSULB MSCP Clinical Practice Evaluation Form";
                     _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
                     isMailSent = true;
-                    UpdateEvaluationMailSent(input, isMailSent);
-                }
+                    SqlParameter[] parameters1 =
+                                         {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode }
+                                     };
+                    DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByFieldWorkID]", parameters1);
+                    string id = evalDetails.Rows[0]["EvaluationID"].ToString();
+                    UpdateEvaluationMailSent(input, isMailSent, id);
+                 }
                 response.Message = "Evaluation added and mail sent successfully";
                 response.IsSuccess = true;
-
             }
             catch (Exception ex)
             {
@@ -1741,11 +1749,11 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
-        private void UpdateEvaluationMailSent(UpsertEvaluationRequest input, bool isMailSent)
+        private void UpdateEvaluationMailSent(UpsertEvaluationRequest input, bool isMailSent,string id)
         {
             SqlParameter[] parameters =
                                        {
-                                          new SqlParameter("@EvaluationID", SqlDbType.BigInt) { Value = input.EvaluationID },
+                                          new SqlParameter("@EvaluationID", SqlDbType.BigInt) { Value = id},
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
@@ -1846,7 +1854,7 @@ namespace ThoughtFocus.Service.Implementation
             string knowledge = string.Empty;
             string finalEvaluation = string.Empty;
 
-            string teacherSignature = string.Empty;
+            //string teacherSignature = string.Empty;
             string teacherName = string.Empty;
             string comment = string.Empty;
 
@@ -1858,7 +1866,7 @@ namespace ThoughtFocus.Service.Implementation
             gradeLevelTaught = Convert.ToString(personalInfo.GetValue("gradeLevelTaught"));
             schoolDistrict = Convert.ToString(personalInfo.GetValue("schoolDistrict"));
             schoolName = Convert.ToString(personalInfo.GetValue("schoolName"));
-            teacherSignature = Convert.ToString(schema.GetValue("teacherSignature"));
+            //teacherSignature = Convert.ToString(schema.GetValue("teacherSignature"));
             teacherName = Convert.ToString(schema.GetValue("teacherName"));
             comment = Convert.ToString(schema.GetValue("comments"));
 
@@ -1920,7 +1928,7 @@ namespace ThoughtFocus.Service.Implementation
                                                                      .Replace("[[Knowledge]]", knowledge)
                                                                      .Replace("[[FinalEvaluation]]", finalEvaluation)
                                                                      .Replace("[[AdditinalComments]]", comment)
-                                                                     .Replace("[[CooperatingTeacherSignature]]", teacherSignature)
+                                                                     //.Replace("[[CooperatingTeacherSignature]]", teacherSignature)
                                                                      .Replace("[[CooperatingTeacherName]]", teacherName);
             // get the filecontent
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
