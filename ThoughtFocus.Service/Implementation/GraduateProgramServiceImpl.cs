@@ -2071,23 +2071,26 @@ namespace ThoughtFocus.Service.Implementation
                     byte[] fileContentJSONToPDF = new byte[0];
                     if (dtRec != null && dtRec.Rows.Count > 0)
                     {
-                        json = Convert.ToString(dtRec.Rows[0]["LetterOfRecommendationJSON"]);
-                        if (!string.IsNullOrEmpty(json))
+                        foreach (DataRow row in dtRec.Rows)
                         {
-                            if (programIdentifier == "SSCP")
+                            json = Convert.ToString(row["LetterOfRecommendationJSON"]);
+                            if (!string.IsNullOrEmpty(json))
                             {
-                                fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForSSCP(json);
-                            }
-                            else
-                            {
-                                fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForMSCP(json);
-                            }
+                                if (programIdentifier == "SSCP")
+                                {
+                                    fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForSSCP(json);
+                                }
+                                else
+                                {
+                                    fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForMSCP(json);
+                                }
 
-                            string PDFFilePath = Path.Combine(workingFolderName, "EvaluationForm" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
-                            File.WriteAllBytes(PDFFilePath, fileContentJSONToPDF);
-                            iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(PDFFilePath);
-                            copyProvider.AddDocument(pdfReader);
-                            pdfReader.Close();
+                                string PDFFilePath = Path.Combine(workingFolderName, "EvaluationForm" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                                File.WriteAllBytes(PDFFilePath, fileContentJSONToPDF);
+                                iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(PDFFilePath);
+                                copyProvider.AddDocument(pdfReader);
+                                pdfReader.Close();
+                            }
                         }
                     }
                 }
