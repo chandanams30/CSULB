@@ -688,6 +688,24 @@ namespace CSULB_COE.Controllers
             fileType = GetFileType(fileextension);
             return File(inputStream, fileType, fileName);
         }
+        [HttpPost("DeleteActivityLog")]
+        public BaseResponse DeleteFieldWorkActivityLog(DeleteActivityLogRequest input)
+        {
+            try
+            {
+                BaseResponse response = _fieldWorkService.DeleteFieldWorkActivityLog(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete activity log , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         private string GetFolderName(int userId, int fieldWorkID)
         {

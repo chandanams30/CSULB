@@ -2007,6 +2007,20 @@ namespace ThoughtFocus.Service.Implementation
             obj.FileContent = DownloadActivityLogsContent(dsFieldWorkData);
             return obj;
         }
+        public BaseResponse DeleteFieldWorkActivityLog(DeleteActivityLogRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@ActiviyLogId", SqlDbType.BigInt) { Value = input.ActivityLogID },
+                                          new SqlParameter("@FieldWorkId", SqlDbType.BigInt) { Value = input.FieldWorkID },
+                                          new SqlParameter("@UserId", SqlDbType.BigInt) { Value = input.UserID }
+                                    };
+            int id = _helper.InsertTable("[FieldWork].[DeleteFieldWorkActivityLog]", parameters);
+            response.Message = "Activity Log Deleted Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
         private byte[] DownloadActivityLogsContent(DataSet dsFieldWorkData)
         {
             byte[] inputStream = null;

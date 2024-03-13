@@ -44,5 +44,6 @@ namespace ThoughtFocus.Service.Interfaces
         FieldWorkAttachmentsRequest  DownloadAttachment(DownloadAttachment input);
         PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail,int activityLogID);
         FieldWorkActivityLogsAttachmentResponse DownloadActivityLogs(FieldWorkActivityLogsAttachmentRequest input);
+        BaseResponse DeleteFieldWorkActivityLog(DeleteActivityLogRequest input);
     }
 }
