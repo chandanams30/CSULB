@@ -1728,14 +1728,11 @@ namespace ThoughtFocus.Service.Implementation
                     string subject = "CSULB MSCP Clinical Practice Evaluation Form";
                     _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
                     isMailSent = true;
-                    SqlParameter[] parameters1 =
-                                         {
-                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
-                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
-                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
-                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode }
-                                     };
-                    DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByFieldWorkID]", parameters1);
+                    SqlParameter[] parmeter1 =
+                    {
+                        new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
+                    };
+                    DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
                     string id = evalDetails.Rows[0]["EvaluationID"].ToString();
                     UpdateEvaluationMailSent(input, isMailSent, id);
                  }
