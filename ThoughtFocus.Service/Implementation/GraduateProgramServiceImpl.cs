@@ -79,7 +79,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   AcceptedCount = Convert.ToInt32(row["AcceptedCount"]),
                                                   showApply = Convert.ToBoolean(row["showApply"]),
                                                   showView = Convert.ToBoolean(row["showView"]),
-                                                  ProgramSetting = Convert.ToString(row["ProgramSetting"])
+                                                  ProgramSetting = Convert.ToString(row["ProgramSetting"]),
+                                                  SubmittedCount = Convert.ToInt32(row["SubmittedCount"])
                                               }).ToList();
 
                     obj.HeaderDetails= dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>

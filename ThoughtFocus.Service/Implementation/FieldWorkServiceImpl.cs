@@ -2029,6 +2029,7 @@ namespace ThoughtFocus.Service.Implementation
             string instructor = string.Empty;
             string term = string.Empty;
             string studentID = string.Empty;
+            string section = string.Empty;
             decimal excpectedHours = 0;
             decimal loggedHours = 0;
             decimal sentForApproval = 0;
@@ -2044,6 +2045,7 @@ namespace ThoughtFocus.Service.Implementation
                 instructor = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["SupervisorName"]);
                 term = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Term"]);
                 studentID = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["StudentID"]);
+                section = Convert.ToString(dsFieldWorkData.Tables[2].Rows[0]["Section"]);
             }
             //summary data
             if (dsFieldWorkData.Tables[1].Rows.Count > 0)
@@ -2090,6 +2092,7 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[course]]", course)
                                .Replace("[[instructor]]", instructor)
                                .Replace("[[term]]",term)
+                               .Replace("[[section]]",section)
                                .Replace("[[studentID]]",studentID)
                                .Replace("[[excpectedHours]]", excpectedHours.ToString())
                                .Replace("[[loggedHours]]", loggedHours.ToString())

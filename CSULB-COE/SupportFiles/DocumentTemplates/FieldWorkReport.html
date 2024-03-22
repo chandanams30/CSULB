@@ -1,66 +1,69 @@
 <html>
-	<head>    
-	<meta charset='utf-8'>
-	</head>
-	<body>
-		<table border="1" style="margin-bottom: 20px">
-			<tr>
-				<td><img alt="logo" src=[[logoPath]] /></td>
-				<td><h4 align="center"><b>FIELD WORK ACTIVITY LOG DETAILS</b></h4></td>
-			</tr>
-		</table>
-		<br />
-		<div>
-			<p><strong>Student Name: </strong> [[studentName]]</p>
-			<p><strong>Student ID: </strong> [[studentID]]</p>
-			<p><strong>Course Name: </strong> [[courseTitle]]</p>
-			<p><strong>Course Number: </strong> [[course]]</p>
-			<p><strong>Semester: </strong> [[term]]</p>
-			<p><strong>Instructor: </strong> [[instructor]]</p>
-		</div>
-			<br />
-			<table border="1" style="margin-bottom: 20px">
-				<tr bgcolor='#D3D3D3'>
-					<td colspan=5>
-						<b>SUMMARY</b>
-					</td>
-				</tr>
-				<tr>
-					<td width='38%' align="center" style="font-size: 12px;">Expected Hours</td>
-					<td width='38%' align="center" style="font-size: 12px;">Logged Hours</td>
-					<td width='38%' align="center" style="font-size: 12px;">Sent for Approval</td>
-					<td width='38%' align="center" style="font-size: 12px;">Approved Hours</td>
-					<td width='38%' align="center" style="font-size: 12px;">Approved</td>
-				</tr>
-				<tr>
-					<td align="center" style="font-size: 10px;">[[excpectedHours]]</td>
-					<td align="center" style="font-size: 10px;">[[loggedHours]]</td>
-					<td align="center" style="font-size: 10px;">[[sentForApproval]]</td>
-					<td align="center" style="font-size: 10px;">[[approvedHours]]</td>
-					<td align="center" style="font-size: 10px;">[[approve]]</td>
-				</tr>
-			</table>
-			<br />
-			<table border="1" style="margin-bottom: 20px">
-				<tr bgcolor='#D3D3D3'>
-					<td colspan=9>
-						<b>ACTIVITY LOG</b>
-					</td>
-				</tr>
-				<tr>
-					<th align="center" style="font-size: 12px">Start Date</th>
-					<th align="center" style="font-size: 12px">End Date</th>
-					<th align="center" style="font-size: 12px">School District</th>
-					<th align="center" style="font-size: 12px">Site/Location</th>
-					<th align="center" style="font-size: 12px">Supervisor</th>
-					<th align="center" style="font-size: 12px">Domain</th>
-					<th align="center" style="font-size: 12px">Domain</th>
-					<th align="center" style="font-size: 12px">Description of Activities/Reflection</th>
-					<th align="center" style="font-size: 12px">Hours</th>
-				</tr>
-				[[dtFieldWorkDetails]]
+<head>
+	
+</head>
+<body>
+	<table border="0" style="margin-bottom: 20px">
+		<tr>
+			<td style="vertical-align:top"><img alt="logo" src="[[logoPath]]" width="200" height="61" /></td>
+			<td style="vertical-align:top">
+				<span><strong>Student Name: </strong> [[studentName]]</span><br />
+				<span><strong>Course Name: </strong> [[courseTitle]]</span><br />
+				<span><strong>Section: </strong> [[section]]</span><br/>
+				<span><strong>Instructor: </strong> [[instructor]]</span>
+			</td>
+			<td style="vertical-align:top" valign="top">
+				<span><strong>Student ID: </strong> [[studentID]]</span><br />
+				<span><strong>Course Number: </strong> [[course]]</span><br />
+				<span><strong>Semester: </strong> [[term]]</span>
+			</td>
+		</tr>
+	</table>
+	<br />
+	<h4 align="center"><b>FIELD WORK ACTIVITY LOG DETAILS</b></h4>
+	<br />
+	<table border="1" style="margin-bottom: 20px">
+		<tr bgcolor='#D3D3D3'>
+			<td colspan=5>
+				<b>SUMMARY</b>
+			</td>
+		</tr>
+		<tr>
+			<td width='38%' align="center" style="font-size: 12px;">Expected Hours</td>
+			<td width='38%' align="center" style="font-size: 12px;">Logged Hours</td>
+			<td width='38%' align="center" style="font-size: 12px;">Sent for Approval</td>
+			<td width='38%' align="center" style="font-size: 12px;">Approved Hours</td>
+			<td width='38%' align="center" style="font-size: 12px;">Approved</td>
+		</tr>
+		<tr>
+			<td align="center" style="font-size: 10px;">[[excpectedHours]]</td>
+			<td align="center" style="font-size: 10px;">[[loggedHours]]</td>
+			<td align="center" style="font-size: 10px;">[[sentForApproval]]</td>
+			<td align="center" style="font-size: 10px;">[[approvedHours]]</td>
+			<td align="center" style="font-size: 10px;">[[approve]]</td>
+		</tr>
+	</table>
+	<br />
+	<table border="1" style="margin-bottom: 20px">
+		<tr bgcolor='#D3D3D3'>
+			<td colspan=9>
+				<b>ACTIVITY LOG</b>
+			</td>
+		</tr>
+		<tr>
+			<th align="center" style="font-size: 12px">Start Date</th>
+			<th align="center" style="font-size: 12px">End Date</th>
+			<th align="center" style="font-size: 12px">School District</th>
+			<th align="center" style="font-size: 12px">Site/Location</th>
+			<th align="center" style="font-size: 12px">Supervisor</th>
+			<th align="center" style="font-size: 12px">Domain</th>
+			<th align="center" style="font-size: 12px">Domain</th>
+			<th align="center" style="font-size: 12px">Description of Activities/Reflection</th>
+			<th align="center" style="font-size: 12px">Hours</th>
+		</tr>
+		[[dtFieldWorkDetails]]
 
-			</table>
-	</body>
+	</table>
+</body>
 </html>
 

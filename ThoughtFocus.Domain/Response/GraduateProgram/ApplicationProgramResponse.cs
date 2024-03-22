@@ -23,6 +23,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public bool showApply { get; set; }
         public bool showView { get; set; }
         public string ProgramSetting { get; set; }
+        public int SubmittedCount { get; set; }
     }
 
     public class HeaderDetails
