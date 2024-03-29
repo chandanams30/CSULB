@@ -101,5 +101,26 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("SaveStudentProfileData")]
+        public BaseResponse SaveStudentProfileData(SaveStudentProfileDataRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentProfileService.SaveStudentProfileData(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        
     }
 }

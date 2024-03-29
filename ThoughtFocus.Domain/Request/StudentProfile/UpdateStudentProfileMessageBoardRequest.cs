@@ -11,5 +11,14 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public string MessageBoard { get; set; }
 
     }
+    public class SaveStudentProfileDataRequest
+    {
+        public string CSULBID { get; set; }
+        public DateTime ? DateOfBirth { get; set; }
+        public string SSNNumber { get; set; }
+        public string AcademicIntegrityStatement { get; set; }
+        public DateTime ? SubmittedDate { get; set; }
+
+    }
 
 }

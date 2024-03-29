@@ -44,6 +44,10 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string EducationalLeaveTerm { get; set; }
         public string Credential { get; set; }
         public string Certificate { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string SSNNumber { get; set; }
+        public string AcademicIntegrityStatement { get; set; }
+        public DateTime SubmittedDate { get; set; }
     }
     public class StudentProfileSearchResponse : BaseResponse
     {

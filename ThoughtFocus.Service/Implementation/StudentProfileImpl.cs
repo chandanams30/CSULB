@@ -1,10 +1,14 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Tls.Crypto.Impl.BC;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
@@ -80,8 +84,16 @@ namespace ThoughtFocus.Service.Implementation
                         EducationalLeaveTerm = Convert.ToString(row["EducationalLeaveTerm"]),
                         Credential = Convert.ToString(row["Credential"]),
                         Certificate = Convert.ToString(row["Certificate"]),
+                        DateOfBirth = Convert.ToDateTime(row["DateOfBirth"] == DBNull.Value ? null : row["DateOfBirth"]),
+                        SSNNumber = Convert.ToString(row["SSNNumber"] == DBNull.Value ? null : row["SSNNumber"]),
+                        AcademicIntegrityStatement = Convert.ToString(row["AcademicIntegrityStatement"] == DBNull.Value ? null : row["AcademicIntegrityStatement"]),
+                        SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"])
                     }).FirstOrDefault();
-
+                    if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
+                    {
+                        //IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
+                        obj.studentProfile.SSNNumber = DecryptSSNNumber(obj.studentProfile.SSNNumber);
+                    }
                     obj.IsSuccess = true;
                     obj.Message = "Data retrieved succesfully ";
                 }
@@ -171,6 +183,72 @@ namespace ThoughtFocus.Service.Implementation
             response.Message = "Updated the student profile message board successfully";
             response.IsSuccess = true;
             return response;
+        }
+        public BaseResponse SaveStudentProfileData(SaveStudentProfileDataRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            if (!string.IsNullOrEmpty(input.SSNNumber) && input.SSNNumber != null)
+            {
+                input.SSNNumber = EncryptSSNNumber(input.SSNNumber);
+            }
+
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar,25) { Value = input.CSULBID  },
+                                          new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = input.DateOfBirth  },
+                                          new SqlParameter("@SSNNumber", SqlDbType.VarChar,-1) { Value = input.SSNNumber },
+                                          new SqlParameter("@AcademicIntegrityStatement", SqlDbType.VarChar,-1) { Value = input.AcademicIntegrityStatement },
+                                          new SqlParameter("@SubmittedDate", SqlDbType.DateTime) { Value = input.SubmittedDate }
+                                        };
+
+            int id = _helper.InsertTable("[dbo].[SaveStudentProfile]", parameters);
+            response.Message = "Student profile data saved successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+        private string EncryptSSNNumber(string clearText)
+        {
+            string encryptionKey = _configuration["ApplicationKeys:EncryptionKey"];
+            byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);
+            using (Aes encryptor = Aes.Create())
+            {
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(clearBytes, 0, clearBytes.Length);
+                        cs.Close();
+                    }
+                    clearText = Convert.ToBase64String(ms.ToArray());
+                }
+            }
+
+            return clearText;
+        }
+        private string DecryptSSNNumber(string cipherText)
+        {
+            string encryptionKey = _configuration["ApplicationKeys:EncryptionKey"];
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+            using (Aes encryptor = Aes.Create())
+            {
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(cipherBytes, 0, cipherBytes.Length);
+                        cs.Close();
+                    }
+                    cipherText = Encoding.Unicode.GetString(ms.ToArray());
+                }
+            }
+
+            return cipherText;
         }
     }
 }
