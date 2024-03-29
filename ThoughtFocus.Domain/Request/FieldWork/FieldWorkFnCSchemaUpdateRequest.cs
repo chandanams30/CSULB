@@ -19,4 +19,9 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public int fieldWorkActivityLogID { get; set; }
         public string status { get; set; }
     }
+    public class PUUpdateFieldWorkActivityLogStatusListRequest
+    {
+        public List<PUUpdateFieldWorkActivityLogStatusRequest> logStatusList { get; set; }
+    }
+
 }

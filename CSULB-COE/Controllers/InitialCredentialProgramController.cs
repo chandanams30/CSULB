@@ -25,7 +25,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class InitialCredentialProgramController : ControllerBase
     {
         public ILogger<InitialCredentialProgramController> _logger;
@@ -645,8 +645,8 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpGet("DownloadAttachment")]
-        public IActionResult DownloadAttachment(string letterOfRecommendationJSON)
+        [HttpPost("DownloadAttachment")]
+        public IActionResult DownloadAttachment(DownloadAttachmentRequest input)
         {
             try
             {
@@ -654,7 +654,7 @@ namespace CSULB_COE.Controllers
                 string fileType = string.Empty;
                 string fileName = string.Empty;
 
-                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.DownloadAttachment(letterOfRecommendationJSON);
+                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.DownloadAttachment(input);
                 fileName = obj.Filename;
                 inputStream = obj.FileContent;
                 string[] fileSplit = obj.Filename.Split('.');

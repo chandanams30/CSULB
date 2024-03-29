@@ -9,15 +9,18 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.FieldWork;
+using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.InitialCredentialProgram;
+using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class FieldWorkController : ControllerBase
     {
         public ILogger<FieldWorkController> _logger;
@@ -548,7 +551,161 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-     
+        [HttpGet("GetEvaluationByFieldWorkID")]
+        public FieldWorkEvaluationByIDResponse GetEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                FieldWorkEvaluationByIDResponse response = _fieldWorkService.GetEvaluationByFieldWorkID(UserID, FieldWorkID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkEvaluationByIDResponse response = new FieldWorkEvaluationByIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertEvaluation")]
+        public BaseResponse UpsertEvaluation(UpsertEvaluationRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _fieldWorkService.UpsertEvaluation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [AllowAnonymous]
+        [HttpGet("GetEvaluationByEvaluationIdentifier")]
+        public EvaluationByEvaluationIdentifierResponse GetEvaluationByEvaluationIdentifier(string evaluationIdentifier)
+        {
+            try
+            {
+
+                EvaluationByEvaluationIdentifierResponse response = _fieldWorkService.GetEvaluationByEvaluationIdentifier(evaluationIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                EvaluationByEvaluationIdentifierResponse response = new EvaluationByEvaluationIdentifierResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [AllowAnonymous]
+        [HttpPost("UpdateEvaluationJSON")]
+        public BaseResponse UpdateEvaluationJSON(UpdateEvaluationJSONRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _fieldWorkService.UpdateEvaluationJSON(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("DownloadAttachment")]
+        public IActionResult DownloadAttachment(DownloadAttachment input)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                FieldWorkAttachmentsRequest obj = _fieldWorkService.DownloadAttachment(input);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.FileName.Split('.');
+                string fileextension = obj.FileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents")]
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string? communitySiteUserName, string? communitySiteUserEmail,int activityLogID)
+        {
+            try
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
+                response = _fieldWorkService.PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(communitySiteUsersID,communitySiteUserName,communitySiteUserEmail,activityLogID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("DownloadActivityLogs")]
+        public IActionResult DownloadActivityLogs(FieldWorkActivityLogsAttachmentRequest input)
+        {
+            byte[] inputStream = null;
+            string fileType = string.Empty;
+            string fileName = string.Empty;
+
+            FieldWorkActivityLogsAttachmentResponse obj = _fieldWorkService.DownloadActivityLogs(input);
+            fileName = obj.FileName;
+            inputStream = obj.FileContent;
+            string[] fileSplit = obj.FileName.Split('.');
+            string fileextension = obj.FileName.Split('.').Last();
+            fileType = GetFileType(fileextension);
+            return File(inputStream, fileType, fileName);
+        }
+        [HttpPost("DeleteActivityLog")]
+        public BaseResponse DeleteFieldWorkActivityLog(DeleteActivityLogRequest input)
+        {
+            try
+            {
+                BaseResponse response = _fieldWorkService.DeleteFieldWorkActivityLog(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete activity log , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         private string GetFolderName(int userId, int fieldWorkID)
         {

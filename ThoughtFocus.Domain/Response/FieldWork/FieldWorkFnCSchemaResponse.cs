@@ -30,4 +30,11 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string CommunitySiteUserEmail { get; set; }
         public string CommunitySiteUserIdentifier { get; set; }
     }
+    public class PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents : BaseResponse
+    {
+        public int CSSDTID { get; set; }
+        public string CommunitySiteUserName { get; set; }
+        public string CommunitySiteUserEmail { get; set; }
+        public string CommunitySiteUserIdentifier { get; set; }
+    }
 }

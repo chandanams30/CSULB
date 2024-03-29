@@ -48,5 +48,21 @@ namespace CSULB_COE.Controllers
             }
             
         }
+
+        [HttpGet("GetStudentNotification")]
+        public IActionResult GetStudentNotification(string CSULBID)
+        {
+            try
+            {
+                StudentNotificationResponse response = _applicationService.GetStudentNotification(CSULBID);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest();
+            }
+
+        }
     }
 }

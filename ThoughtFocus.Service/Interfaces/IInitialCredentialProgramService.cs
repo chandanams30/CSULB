@@ -40,7 +40,9 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpsertLetterOfRecommendations(UpsertLetterOfRecommendationsRequest input);
         LetterOfRecommendationsByRecommenderIdentifierResponse GetLetterOfRecommendationsByRecommenderIdentifier(string identifier);
         BaseResponse UpdateLetterOfRecommendationsJSON(UpdateLetterOfRecommendationsJSONRequest input);
-        FormAttachments DownloadAttachment(string LetterOfRecommendationJSON);
+        FormAttachments DownloadAttachment(DownloadAttachmentRequest input);
+        public byte[] GetPDFFromJSONForSSCP(string jsonString);
+        public byte[] GetPDFFromJSONForMSCP(string jsonString);
 
     }
 }

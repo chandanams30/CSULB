@@ -56,4 +56,23 @@ namespace ThoughtFocus.Domain.Response.Milestones
     {
         public string MilestoneRequirementList { get; set; }
     }
+    public class GetMilestoneSubmittedFormsListResponse : BaseResponse
+    {
+        public List<GetMilestoneSubmittedFormsResponse> milestoneSubmittedFormsList { get; set; }
+    }
+    public class GetMilestoneSubmittedFormsResponse
+    {
+        public int MilestoneFormID { get; set; }
+        public string ApproverName { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public string State { get; set; }
+        public string CSULBID { get; set; }
+        public string StudentName { get; set; }
+        public string Name { get; set; }
+        public string MilestoneName { get; set; }
+    }
+    public class GetMilestoneWorkflowProcessTransitionHistoryResponse : BaseResponse
+    {
+        public string WorkflowTransitionHistory { get; set; }
+    }
 }
