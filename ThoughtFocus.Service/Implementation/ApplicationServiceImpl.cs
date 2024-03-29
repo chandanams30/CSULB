@@ -60,5 +60,28 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
+
+        public StudentNotificationResponse GetStudentNotification(string CSULBID)
+        {
+            StudentNotificationResponse obj = new StudentNotificationResponse();
+
+            SqlParameter[] parameters =
+                                  {
+                                    new SqlParameter("@csulbid", SqlDbType.NVarChar, 255) { Value = CSULBID}
+                                  };
+
+            DataTable dtNotification = _helper.GetDataTable("[User].[GetStudentNotification]", parameters);
+            if (dtNotification.Rows.Count > 0)
+            {
+                obj = dtNotification.AsEnumerable().Select(row =>
+                                         new StudentNotificationResponse
+                                         {
+                                             ShowNotification = Convert.ToBoolean(row["ShowNotification"]),
+                                             Message = Convert.ToString(row["Message"])
+                                         }).FirstOrDefault();
+            }
+
+            return obj;
+        }
     }
 }
