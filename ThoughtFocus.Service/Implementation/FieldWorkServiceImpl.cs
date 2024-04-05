@@ -2034,7 +2034,7 @@ namespace ThoughtFocus.Service.Implementation
             decimal loggedHours = 0;
             decimal sentForApproval = 0;
             decimal approvedHours = 0;
-            decimal approve = 0;
+            //decimal approve = 0;
 
             //student details
             if (dsFieldWorkData.Tables[2].Rows.Count > 0)
@@ -2054,7 +2054,7 @@ namespace ThoughtFocus.Service.Implementation
                 loggedHours = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["LoggedHours"]);
                 sentForApproval = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["SentforApproval"]);
                 approvedHours = Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["ApprovedHours"]);
-                approve = Math.Round(Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["Approved"]),2);
+                //approve = Math.Round(Convert.ToDecimal(dsFieldWorkData.Tables[1].Rows[0]["Approved"]),2);
             }
 
             // loop through activity logs
@@ -2098,8 +2098,7 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[excpectedHours]]", excpectedHours.ToString())
                                .Replace("[[loggedHours]]", loggedHours.ToString())
                                .Replace("[[sentForApproval]]", sentForApproval.ToString())
-                               .Replace("[[approvedHours]]", approvedHours.ToString())
-                               .Replace("[[approve]]", approve.ToString());
+                               .Replace("[[approvedHours]]", approvedHours.ToString());
             inputStream = GetPDFFileContentAsLandscape(template);
             return inputStream;
         }
