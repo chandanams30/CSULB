@@ -97,7 +97,7 @@ namespace CSULB_COE.Controllers
             #region testing with manual file , actual file will come as byte array 
             //-------------just for testing - comment it after testing
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
-            //string filepath = "D:\\CSULB\\GitHub\\Documents\\test500kb.pdf";
+            //string filepath = "D:\\CSULB\\Document\\TBCTC_Approval.pdf";
             //byte[] fileContent = null;
             //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
             //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
