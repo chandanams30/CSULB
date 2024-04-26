@@ -15,6 +15,7 @@ namespace ThoughtFocus.Domain.Request.Milestones
         public List<MilestonePublishedFormApprovers> MilestonePublishedFormApprovers { get; set; }
         public List<MilestonePublishedFormUsers> MilestonePublishedFormUsers { get; set; }
         public int MilestoneTypeID { get; set; }
+        public string MilestoneRequirement { get; set; }
     }
 
     public class MilestonePublishedFormApprovers

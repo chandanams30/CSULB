@@ -8,5 +8,6 @@ namespace ThoughtFocus.Service.Interfaces
     public interface IApplicationService
     {
         List<ApplicationListResponse> GetApplications(int userId);
+        StudentNotificationResponse GetStudentNotification(string CSULBID);
     }
 }

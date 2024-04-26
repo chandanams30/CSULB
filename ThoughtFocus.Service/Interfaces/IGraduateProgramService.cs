@@ -19,6 +19,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input);
         BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input);
         BaseResponse DeleteFormAttachment(DeleteFormAttachmentRequest input);
+        BaseResponse DeleteInsructorAttachment(DeleteInsructorAttachmentRequest input);
         BaseResponse SaveForm(FormSaveRequest input);
         BaseResponse UpdateFormState(FormStatusUpdateRequest input);
         FormAttachments DownloadFormAttachments(int userID, int formattachmentID);
@@ -45,5 +46,6 @@ namespace ThoughtFocus.Service.Interfaces
         StudentMessageBoardResponse GetFormStudentMessageBoard(int UserID, int FormID, int ProgramID, string TermCode);
         BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input);
         ProgramConfigurationHandlerResponse GetProgramConfigurationHandler(int UserID, int FormID, int ProgramID, string TermCode);
+        BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input);
     }
 }

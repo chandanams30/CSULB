@@ -74,5 +74,6 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public int ApproverUserID { get; set; }
         public string ApproverComments { get; set; }
         public bool IsApproved { get; set; }
+        public string Status { get; set; }
     }
 }

@@ -38,8 +38,15 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public int FieldWorkActivityLogID { get; set; }
         public string Status { get; set; }
     }
+  
     public class UpdateFieldWorkActivityLogStatusListRequest
     {
         public List<UpdateFieldWorkActivityLogStatusRequest> logStatusList { get; set; }
+    }
+    public class DeleteActivityLogRequest
+    {
+        public int ActivityLogID { get; set; }
+        public int FieldWorkID { get; set; }
+        public int UserID { get; set;}
     }
 }

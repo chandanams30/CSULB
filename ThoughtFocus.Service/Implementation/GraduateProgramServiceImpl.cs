@@ -5,11 +5,13 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using PdfSharp.Pdf.Content.Objects;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -32,15 +34,18 @@ namespace ThoughtFocus.Service.Implementation
         private readonly IConfiguration _configuration;
         private readonly ISendMail _sendMail;
         public ILogger<GraduateProgramServiceImpl> _logger;
+        public IInitialCredentialProgramService _initialCredentialProgramService;
         public GraduateProgramServiceImpl(ISqlDBUtility helper
                                          , IConfiguration configuration
                                          , ISendMail sendMail
-                                         , ILogger<GraduateProgramServiceImpl> logger)
+                                         , ILogger<GraduateProgramServiceImpl> logger
+                                         , IInitialCredentialProgramService initialCredentialProgramService)
         {
             _helper = helper;
             _configuration = configuration;
             _sendMail = sendMail;
             _logger = logger;
+            _initialCredentialProgramService = initialCredentialProgramService;
         }
         public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
         {
@@ -75,6 +80,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   showApply = Convert.ToBoolean(row["showApply"]),
                                                   showView = Convert.ToBoolean(row["showView"]),
                                                   ProgramSetting = Convert.ToString(row["ProgramSetting"])
+                                                  //SubmittedCount = Convert.ToInt32(row["SubmittedCount"])
                                               }).ToList();
 
                     obj.HeaderDetails= dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
@@ -200,7 +206,17 @@ namespace ThoughtFocus.Service.Implementation
                                                   GPAStatus = Convert.ToString(row["GPA"]),
                                                   SMCStatus = Convert.ToString(row["SMC"]),
                                                   TBTestStatus = Convert.ToString(row["TB Test"]),
-                                                  CredentialPathway = Convert.ToString(row["Credential Pathway"])
+                                                  CredentialPathway = Convert.ToString(row["Credential Pathway"]),
+                                                  RecommendationsSubmittedCount = Convert.ToString(row["RecommendationsSubmittedCount"]),
+                                                  IsInterviewRatingSheetSubmitted = Convert.ToString(row["IsInterviewRatingSheetSubmitted"]),
+                                                  LastUpdatedDate = Convert.ToDateTime(row["LastUpdatedDate"] == DBNull.Value ? null : row["LastUpdatedDate"]),
+                                                  SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"]),
+                                                  EDEL200380FinalFieldworkEvaluation_Status = Convert.ToString(row["EDEL200380FinalFieldworkEvaluation_Status"]),
+                                                  InstructorEvaluationForm_Status = Convert.ToString(row["InstructorEvaluationForm_Status"]),
+                                                  AdvisementConfirmationForm_Status = Convert.ToString(row["AdvisementConfirmationForm_Status"]),
+                                                  GridNotes = Convert.ToString(row["GridNotes"]),
+                                                  ReviewerRecommendation = Convert.ToString(row["ReviewerRecommendation"]),
+                                                  FinalDecision = Convert.ToString(row["FinalDecision"])
 
                                               }).ToList();
                     }
@@ -618,6 +634,30 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+
+        public BaseResponse DeleteInsructorAttachment(DeleteInsructorAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@InstructionID", SqlDbType.BigInt) { Value = input.InstructionID },
+                                          new SqlParameter("@InstructorUserID", SqlDbType.BigInt) { Value = input.InstructorUserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@InstructionAttachmentID ", SqlDbType.BigInt) { Value = input.InstructionAttachmentID },
+                                        };
+            DataTable dtDeleteAttachment = _helper.GetDataTable("[Application].[deleteInstructorAttachment]", parameters);
+            if (dtDeleteAttachment.Rows.Count > 0)
+            {
+                response.Message = "Attachment Deleted Successfully";
+                response.IsSuccess = true;
+            }
+            else
+            {
+                response.Message = "Failed To Delete Attachment";
+                response.IsSuccess = false;
+            }
+            return response;
+        }
         private bool SaveWordFileInTempFolder(byte[] fileContent,string fileName,string fileExtension,string workingFolderPath)
         {
             bool isFileSaved = false;
@@ -838,6 +878,7 @@ namespace ThoughtFocus.Service.Implementation
                     objRec.TermCode = input.TermCode;
                     objRec.RecommenderName = recommender.RecommenderName;
                     objRec.RecommenderEmail = recommender.RecommenderEmail;
+                    objRec.RecommenderAffiliation = recommender.RecommenderAffiliation;
                     BaseResponse attachRes = AddRecommender(objRec);
                 }
             }
@@ -1037,9 +1078,13 @@ namespace ThoughtFocus.Service.Implementation
                         if (RecommenderMailTemplateAttachement)
                         {
                             userFolderPath = "SupportFiles/EmailAttachments";
-                            templateFileName = "Recommender_Template.pdf";
+                            templateFileName = "Recommender_Template_"+programID+".pdf";
                             byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                          
+                            if (fileContent == null || fileContent.Length <1)
+                            {
+                                templateFileName = "Recommender_Template.pdf";
+                                fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                            }
                             if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
                             {
                                 if (fileContent != null && fileContent.Length > 0)
@@ -1156,18 +1201,21 @@ namespace ThoughtFocus.Service.Implementation
             binaryReader.Close();
             return fileContent;
         }
-        
+
         public byte[] GetAttachmentContent(string userFolderPath, string fileName)
         {
             string filepath = Path.Combine(userFolderPath, fileName);
             byte[] fileContent = null;
+            if (File.Exists(Path.GetFullPath(filepath))) 
+            { 
             System.IO.FileStream fs = new System.IO.FileStream(Path.GetFullPath(filepath), System.IO.FileMode.Open, System.IO.FileAccess.Read);
             System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
             long byteLength = new System.IO.FileInfo(filepath).Length;
             fileContent = binaryReader.ReadBytes((Int32)byteLength);
             fs.Close();
             fs.Dispose();
-            binaryReader.Close();
+            binaryReader.Close(); 
+            }
             return fileContent;
         }
         private string GetAttachmentsFolderName(string combinedString)
@@ -1194,12 +1242,15 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
                                           new SqlParameter("@RecommenderName", SqlDbType.NVarChar, 250) { Value = input.RecommenderName },
                                           new SqlParameter("@RecommenderEmail", SqlDbType.NVarChar, 250) { Value = input.RecommenderEmail },
+                                          new SqlParameter("@RecommenderAffiliation", SqlDbType.NVarChar, 200) { Value = input.RecommenderAffiliation },
 
                                           new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = DBNull.Value },
                                           new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier, 250) { Value = DBNull.Value },
                                           new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = DBNull.Value },
                                           new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = DBNull.Value },
                                           new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = DBNull.Value }
+                                          
+
                                         };
 
             // int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
@@ -1943,11 +1994,11 @@ namespace ThoughtFocus.Service.Implementation
                 }
             }
 
-            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo,dtEducationInfo,dtDisposition);
+            mergedFileStream = Merge(UserFolderName, objList, dtPersonalInfo,dtEducationInfo,dtDisposition,formID);
 
             return mergedFileStream;
         }
-        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo,DataTable dtEducationInfo,DataTable dtDisposition)
+        private byte[] Merge(string UserFolderName, List<FormAttachmentEntity> lstAttachments,DataTable dtPersonalInfo,DataTable dtEducationInfo,DataTable dtDisposition,int formID)
         {
             byte[] inputStream = null;
             var folderPath = _configuration["ApplicationKeys:FileRepository"];
@@ -1957,7 +2008,7 @@ namespace ThoughtFocus.Service.Implementation
             string dispositionsAssessmentForm = string.Empty;
             int formDispositionAssessmentID;
             string programIdentifier = string.Empty;
-            string OutFile = Path.Combine(MergedPDFFolderName, "Merged"+DateTime.Now.ToString("MMddyyyyHHmmss")+".pdf");
+            string OutFile = Path.Combine(MergedPDFFolderName, "Merged" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
             iTextSharp.text.Document document = new iTextSharp.text.Document();
             PdfCopy copyProvider;
 
@@ -1999,6 +2050,50 @@ namespace ThoughtFocus.Service.Implementation
                     programIdentifier= Convert.ToString(dtDisposition.Rows[0]["ProgramFormIdentifier"]);
                     // call the method to generate the dispositions document 
                     GenerateDispositionDocument(copyProvider,formDispositionAssessmentID,dispositionsAssessmentForm,programIdentifier, workingFolderName);
+                
+                }
+            }
+            if (dtDisposition!=null || dtDisposition.Rows.Count > 0)
+            {
+                programIdentifier = Convert.ToString(dtDisposition.Rows[0]["ProgramFormIdentifier"]);
+
+                //Section to add evaluation form for SSCP and MSCP
+                if (programIdentifier == "SSCP" || programIdentifier == "MSCP")
+                {
+                    SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = 0 },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = "" }
+                               };
+                    DataTable dtRec = _helper.GetDataTable("[Application].[GetLetterOfRecommendationsByFormID]", parameters);
+                    string json = string.Empty;
+                    byte[] fileContentJSONToPDF = new byte[0];
+                    if (dtRec != null && dtRec.Rows.Count > 0)
+                    {
+                        foreach (DataRow row in dtRec.Rows)
+                        {
+                            json = Convert.ToString(row["LetterOfRecommendationJSON"]);
+                            if (!string.IsNullOrEmpty(json))
+                            {
+                                if (programIdentifier == "SSCP")
+                                {
+                                    fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForSSCP(json);
+                                }
+                                else
+                                {
+                                    fileContentJSONToPDF = _initialCredentialProgramService.GetPDFFromJSONForMSCP(json);
+                                }
+
+                                string PDFFilePath = Path.Combine(workingFolderName, "EvaluationForm" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf");
+                                File.WriteAllBytes(PDFFilePath, fileContentJSONToPDF);
+                                iTextSharp.text.pdf.PdfReader pdfReader = new iTextSharp.text.pdf.PdfReader(PDFFilePath);
+                                copyProvider.AddDocument(pdfReader);
+                                pdfReader.Close();
+                            }
+                        }
+                    }
                 }
             }
             document.Close();
@@ -3035,6 +3130,24 @@ namespace ThoughtFocus.Service.Implementation
 
             int ID = _helper.InsertTable("[dbo].[updateFormStudentMessageBoard]", parameters);
             response.Message = "Message board updated Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@GridNotes", SqlDbType.NVarChar,-1) { Value = input.GridNotes }
+                                        };
+
+            int ID = _helper.InsertTable("[Application].[SaveFormGridNotes]", parameters);
+            response.Message = "Notes updated Successfully";
             response.IsSuccess = true;
             return response;
         }

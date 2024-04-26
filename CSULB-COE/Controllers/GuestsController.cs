@@ -13,10 +13,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Implementation;
@@ -31,12 +33,15 @@ namespace CSULB_COE.Controllers
         public ILogger<GraduateProgramController> _logger;
         public IGraduateProgramService _graduateProgramService;
         public IInitialCredentialProgramService _initialCredentialProgramService;
+        public IFieldWorkService _fieldWorkService;
         private readonly IApplicationService _applicationService;
         private readonly IConfiguration _configuration;
         private readonly ISqlDBUtility _helper;
         public GuestsController(IGraduateProgramService graduateProgramService ,
               ILogger<GraduateProgramController> logger, IApplicationService applicationService
-            , IConfiguration configuration, ISqlDBUtility helper, IInitialCredentialProgramService initialCredentialProgramService)
+            , IConfiguration configuration, ISqlDBUtility helper 
+            ,IInitialCredentialProgramService initialCredentialProgramService
+            ,IFieldWorkService fieldWorkService)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
@@ -44,6 +49,7 @@ namespace CSULB_COE.Controllers
             _configuration = configuration;
             _helper = helper;
             _initialCredentialProgramService = initialCredentialProgramService;
+            _fieldWorkService = fieldWorkService;
         }
 
 
@@ -486,6 +492,335 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("GetFormSubSection")]
+        public FormSubSectionResponse GetFormSubSection(FormSubsectionRequest input)
+        {
+            try
+            {
+                FormSubSectionResponse response = _initialCredentialProgramService.GetFormSubSection(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormSubSectionResponse response = new FormSubSectionResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetFormSubSectionAttachmentList")]
+        public FormSectionAttachmentResponse GetFormSubSectionAttachmentList(FormSubsectionRequest input)
+        {
+            try
+            {
+                FormSectionAttachmentResponse response = _initialCredentialProgramService.GetFormSubSectionAttachmentList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormSectionAttachmentResponse response = new FormSectionAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFormSubSectionApproversDetails")]
+        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers)
+        {
+            try
+            {
+                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID, UserID, FormSubSectionID, SubSectionIdentifiers);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormSectionApprovalDetailsResponse response = new FormSectionApprovalDetailsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetAdditionalOfficialDocuments")]
+        public AdditionalOfficialDocumentsResponse GetAdditionalOfficialDocuments(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                AdditionalOfficialDocumentsResponse response = _initialCredentialProgramService.GetAdditionalOfficialDocuments(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdditionalOfficialDocumentsResponse response = new AdditionalOfficialDocumentsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetFormSubSectionAttachment")]
+        public IActionResult GetFormSubSectionAttachment(SubsectionAttachmentDownloadRequest input)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                FormSubsectionAttachmentDownloadResponse obj = _initialCredentialProgramService.GetFormSubSectionAttachment(input);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("SaveFormSubSectionAttachment")]
+        public BaseResponse SaveFormSubSectionAttachment(SaveFormSubSectionAttachmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                #region to get the file content from local
+                //byte[] fileContent = null;
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                #endregion
+
+                response = _initialCredentialProgramService.SaveFormSubSectionAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertFormSubSection")]
+        public BaseResponse UpsertFormSubSection(UpsertFormSubSectionRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _initialCredentialProgramService.UpsertFormSubSection(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher")]
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail)
+        {
+            try
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = _fieldWorkService.PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(CommunitySiteUserIdentifier,CommunitySiteUserEmail);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetFieldWorkData")]
+        public FieldWorkListResponse GetFieldWorkData(string CommunitySiteUserIdentifier)
+        {
+            try
+            {
+                FieldWorkListResponse response = _fieldWorkService.GetFieldWorkData(CommunitySiteUserIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkListResponse response = new FieldWorkListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+
+        [HttpGet("GetFieldWorkActivityLogList")]
+        public PUFieldWorkActivityLogListResponse GetFieldWorkActivityLogList(string CommunitySiteUserIdentifier,int fieldWorkId)
+        {
+            try
+            {
+                PUFieldWorkActivityLogListResponse response = _fieldWorkService.GetFieldWorkActivityLogList(CommunitySiteUserIdentifier, fieldWorkId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PUFieldWorkActivityLogListResponse response = new PUFieldWorkActivityLogListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+
+        [HttpGet("GetFieldWorkActivityLogByID")]
+        public FieldWorkActivityLogByIDResponse PUNS_GetFieldWorkActivityLogByID(string CommunitySiteUserIdentifier, int activityLogId)
+        {
+            try
+            {
+                FieldWorkActivityLogByIDResponse response = _fieldWorkService.PUNS_GetFieldWorkActivityLogByID(CommunitySiteUserIdentifier, activityLogId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkActivityLogByIDResponse response = new FieldWorkActivityLogByIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+
+        [HttpPost("UpdateFieldWorkActivityLogStatus")]
+        public BaseResponse PUNS_UpdateFieldWorkActivityLogStatus(PUUpdateFieldWorkActivityLogStatusRequest input)
+        {
+            try
+            {
+                BaseResponse response = _fieldWorkService.PUNS_UpdateFieldWorkActivityLogStatus(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+
+        }
+        [HttpPost("UpdateFieldWorkActivityLogStatusList")]
+        public BaseResponse PUNS_UpdateFieldWorkActivityLogStatusList(PUUpdateFieldWorkActivityLogStatusListRequest inputs)
+        {
+            try
+            {
+                foreach (PUUpdateFieldWorkActivityLogStatusRequest input in inputs.logStatusList)
+                {
+                    _fieldWorkService.PUNS_UpdateFieldWorkActivityLogStatus(input);
+                }
+                BaseResponse obj = new BaseResponse();
+                obj.IsSuccess = true;
+                obj.Message = "Activity Log Status Updated Successfully";
+                return obj;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Update Activity Log Status, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFnCSchema")]
+        public FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaType, int fieldWorkActivityLogID)
+        {
+            try
+            {
+                FieldWorkFnCSchemaResponse response = new FieldWorkFnCSchemaResponse();
+                response = _fieldWorkService.GetFnCSchema(userID, fieldWorkID, schemaType, fieldWorkActivityLogID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkFnCSchemaResponse response = new FieldWorkFnCSchemaResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFnCSchema")]
+        public BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpdateFnCSchema(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save the schema , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("SendReminderToRecommender")]
+        public BaseResponse SendReminderToRecommender(int recommendationID)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.SendReminderToRecommender(recommendationID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
 
         private string GetFileType(string fileExt)
         {
