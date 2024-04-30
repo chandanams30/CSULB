@@ -635,6 +635,15 @@ namespace ThoughtFocus.Service.Implementation
             FieldWorkActivityLogByIDResponse obj = new FieldWorkActivityLogByIDResponse();
 
             obj = GetFielWorkActivityLogByID(input.UserID, activityLogID);
+            if (dtActivityLog.Rows.Count > 0)
+            {
+                obj.ValidateCommunitySiteSupervisor = dtActivityLog.AsEnumerable().Select(row =>
+                                                  new ValidateCommunitySiteSupervisorFieldWork
+                                                  {
+                                                      Status = Convert.ToInt32(row["Status"]),
+                                                      Message = Convert.ToString(row["Message"])
+                                                  }).FirstOrDefault();
+            }
 
 
             //int ID = _helper.InsertTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
