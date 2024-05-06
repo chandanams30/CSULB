@@ -947,9 +947,9 @@ namespace ThoughtFocus.Service.Implementation
             {
                 sendFormSubmitted(input.UserID,input.FormID,input.ProgramID,input.TermCode);
             }
-            else if ((input.FormStateID == 10) && (input.ProgramID == 1 || input.ProgramID == 2 || input.ProgramID == 4 || input.ProgramID == 6))
+            else if (input.FormStateID == 10 || input.FormStateID == 11 )
             {
-                sendFormOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode);
+                sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode,input.FormStateID);
             }
             response.IsSuccess = true;
             response.Message = "Data updated successfully";
@@ -1050,7 +1050,7 @@ namespace ThoughtFocus.Service.Implementation
             }
         }
 
-        private void sendFormOffered(int userID, int formID, int programID, string termCode)
+        private void sendFormOfferedNotOffered(int userID, int formID, int programID, string termCode, int formStateID)
         {
             // call SP getFormDetailsByFormID
             BaseResponse response = new BaseResponse();
@@ -1082,8 +1082,19 @@ namespace ThoughtFocus.Service.Implementation
                     ccMail = Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
                     programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                     finalDecision = Convert.ToString(dsRec.Tables[0].Rows[0]["FinalDecision"]);
-                    subject = "Application Offered";
-                    body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
+                    if (formStateID == 10)
+                    {
+                        subject = "Application Offered";
+                        if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
+                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
+                        else
+                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
+                    }
+                    else
+                    {
+                        subject = "Application Not Offered";
+                        body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                    }
                     body = body.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", applicantsName)
                                .Replace("[[programName]]", programName)
