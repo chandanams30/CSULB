@@ -834,7 +834,43 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-
+        [HttpGet("GetLatestWaitlistNumber")]
+        public LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID,int FormID)
+        {
+            try
+            {
+                LatestWaitlistNumberResponse response = new LatestWaitlistNumberResponse();
+                response = _graduateProgramService.GetLatestWaitlistNumber(TermCode,ProgramID, FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                LatestWaitlistNumberResponse response = new LatestWaitlistNumberResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("BulkOfferNotOfferUpdateFormState")]
+        public BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.BulkOfferNotOfferUpdateFormState(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
 
         private string GetFileType(string fileExt)
