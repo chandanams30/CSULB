@@ -41,8 +41,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string GridNotes { get; set; }
         public string ReviewerRecommendation { get; set; }
         public string FinalDecision { get; set; }
-
-
+        public int WaitlistNumber { get; set; }
+        public bool ShowBulkCheckBox { get; set; }
     }
 
 

@@ -79,8 +79,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   AcceptedCount = Convert.ToInt32(row["AcceptedCount"]),
                                                   showApply = Convert.ToBoolean(row["showApply"]),
                                                   showView = Convert.ToBoolean(row["showView"]),
-                                                  ProgramSetting = Convert.ToString(row["ProgramSetting"])
-                                                  //SubmittedCount = Convert.ToInt32(row["SubmittedCount"])
+                                                  ProgramSetting = Convert.ToString(row["ProgramSetting"]),
+                                                  SubmittedCount = Convert.ToInt32(row["SubmittedCount"])
                                               }).ToList();
 
                     obj.HeaderDetails= dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
@@ -216,8 +216,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   AdvisementConfirmationForm_Status = Convert.ToString(row["AdvisementConfirmationForm_Status"]),
                                                   GridNotes = Convert.ToString(row["GridNotes"]),
                                                   ReviewerRecommendation = Convert.ToString(row["ReviewerRecommendation"]),
-                                                  FinalDecision = Convert.ToString(row["FinalDecision"])
-
+                                                  FinalDecision = Convert.ToString(row["FinalDecision"]),
+                                                  WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"]),
+                                                  ShowBulkCheckBox = Convert.ToBoolean(row["ShowBulkCheckBox"])
                                               }).ToList();
                     }
                     if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
@@ -229,7 +230,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   TermCode = Convert.ToString(row["TermCode"]),
                                                   programName = Convert.ToString(row["ProgramName"]),
                                                   programID = Convert.ToInt32(row["ProgramID"]),
-                                                  showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"])
+                                                  showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"]),
+                                                  showBulkDeny = Convert.ToBoolean(row["showBulkDeny"]),
+                                                  showBulkOffer = Convert.ToBoolean(row["showBulkOffer"]),
 
                                               }).FirstOrDefault();
                     }
@@ -374,7 +377,10 @@ namespace ThoughtFocus.Service.Implementation
                                                    ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
                                                    ProgramFormIdentifier = Convert.ToString(row["ProgramFormIdentifier"]),
                                                    CreatedDateTime = Convert.ToDateTime(row["CreatedDateTime"]),
-                                                   SubmittedDateTime = Convert.ToDateTime(row["SubmittedDateTime"] == DBNull.Value ? null : row["SubmittedDateTime"])
+                                                   SubmittedDateTime = Convert.ToDateTime(row["SubmittedDateTime"] == DBNull.Value ? null : row["SubmittedDateTime"]),
+                                                   WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"] == DBNull.Value ? null : row["WaitlistNumber"]),
+                                                   WaitlistComments = Convert.ToString(row["WaitlistComments"] == DBNull.Value ? null : row["WaitlistComments"]),
+                                                   FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ?null : row["FinalDecision"])
 
                                                }).FirstOrDefault();
 
@@ -434,6 +440,19 @@ namespace ThoughtFocus.Service.Implementation
                                 Interviewer = Convert.ToString(row["Interviewer"])
 
                             }).FirstOrDefault();
+
+                    obj.ProgramCoordinator = dtFormData.Tables[8].AsEnumerable().Select(row =>
+                        row["ProgramsforCoordinator"] != DBNull.Value ? new ProgramCoordinator
+                        {
+                            ProgramControll = Convert.ToString(row["ProgramsforCoordinator"])
+                        }: null
+                        ).FirstOrDefault();
+
+                    obj.FinalDecision = dtFormData.Tables[9].AsEnumerable().Select(row =>
+                        new FinalDecisionJSON
+                        {
+                            FinalDecision = Convert.ToString(row["FinalDecision"])
+                        }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -916,7 +935,10 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@FormStateID", SqlDbType.Int) { Value = input.FormStateID }
+                                          new SqlParameter("@FormStateID", SqlDbType.Int) { Value = input.FormStateID },
+                                          new SqlParameter("@WaitlistNumber", SqlDbType.BigInt) { Value = input.WaitlistNumber},
+                                          new SqlParameter("@WaitlistComments", SqlDbType.NVarChar,500) { Value = input.WaitlistComments },
+                                          new SqlParameter("@FinalDecision", SqlDbType.BigInt) { Value = input.FinalDecision }
                                         };
             int id = _helper.InsertTable("[dbo].[UpdateFormState]", parameters);
             // check if the form state ID is submit then Send mails to Recommenders and applicant .
@@ -924,6 +946,10 @@ namespace ThoughtFocus.Service.Implementation
             if (input.FormStateID == 3)
             {
                 sendFormSubmitted(input.UserID,input.FormID,input.ProgramID,input.TermCode);
+            }
+            else if ((input.FormStateID == 10) && (input.ProgramID == 1 || input.ProgramID == 2 || input.ProgramID == 4 || input.ProgramID == 6))
+            {
+                sendFormOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode);
             }
             response.IsSuccess = true;
             response.Message = "Data updated successfully";
@@ -1017,6 +1043,54 @@ namespace ThoughtFocus.Service.Implementation
                 //}
 
                 //}
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void sendFormOffered(int userID, int formID, int programID, string termCode)
+        {
+            // call SP getFormDetailsByFormID
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value =userID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+            };
+
+            DataSet dsRec = _helper.GetDataSet("[dbo].[getFormDetailsByFormID]", parameters);
+            try
+            {
+                if (dsRec.Tables[0].Rows.Count > 0)
+                {
+                    // applicant mail
+                    string logoText = "cid:myImageID";
+                    string applicantsName = string.Empty;
+                    string toMail = string.Empty;
+                    string ccMail = string.Empty;
+                    string subject = string.Empty;
+                    string body = string.Empty;
+                    string programName = string.Empty;
+                    string finalDecision = string.Empty;
+
+                    applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
+                    toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
+                    ccMail = Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
+                    programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
+                    finalDecision = Convert.ToString(dsRec.Tables[0].Rows[0]["FinalDecision"]);
+                    subject = "Application Offered";
+                    body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
+                    body = body.Replace("[[logoPath]]", logoText)
+                               .Replace("[[ApplicantName]]", applicantsName)
+                               .Replace("[[programName]]", programName)
+                               .Replace("[[finalDecision]]", finalDecision);
+                    byte[] inputStr = null;
+                    _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
+                }
             }
             catch (Exception ex)
             {
@@ -3149,6 +3223,107 @@ namespace ThoughtFocus.Service.Implementation
             int ID = _helper.InsertTable("[Application].[SaveFormGridNotes]", parameters);
             response.Message = "Notes updated Successfully";
             response.IsSuccess = true;
+            return response;
+        }
+        public LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID, int FormID)
+        {
+            LatestWaitlistNumberResponse obj = new LatestWaitlistNumberResponse();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = TermCode },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID}
+                                        };
+
+            DataTable dtWaitlistNumber = _helper.GetDataTable("[dbo].[GetLatestWaitlistNumber]", parameters);
+            try
+            {
+                if (dtWaitlistNumber.Rows.Count > 0)
+                {
+                    obj = dtWaitlistNumber.AsEnumerable().Select(row =>
+                                              new LatestWaitlistNumberResponse
+                                              {
+                                                  WaitlistNumber = Convert.ToInt16(row["WaitlistNumber"])
+
+                                              }).FirstOrDefault();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            string strFormID = string.Join(",", input.FormID);
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.VarChar , 500) { Value = strFormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FormStateID", SqlDbType.Int) { Value = input.FormStateID }
+                                        };
+            int id = _helper.InsertTable("[dbo].[UpdateBulkDeny]", parameters);
+            foreach (int formID in input.FormID)
+            {
+                SqlParameter[] parameters1 =
+                {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value =input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode }
+                };
+
+                DataSet dsRec = _helper.GetDataSet("[dbo].[getFormDetailsByFormID]", parameters1);
+                
+                    if (dsRec.Tables[0].Rows.Count > 0)
+                    {
+                        // applicant mail
+                        string logoText = "cid:myImageID";
+                        string applicantsName = string.Empty;
+                        string toMail = string.Empty;
+                        string ccMail = string.Empty;
+                        string subject = string.Empty;
+                        string body = string.Empty;
+                        string programName = string.Empty;
+
+                        applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
+                        toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
+                        ccMail = Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
+                        programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
+                        if (input.FormStateID == 10)
+                        {
+                            subject = "Application Offered";
+                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
+                        }
+                        else
+                        {
+                            subject = "Application Not Offered";
+                            body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                        }
+                        body = body.Replace("[[logoPath]]", logoText)
+                                   .Replace("[[ApplicantName]]", applicantsName)
+                                   .Replace("[[programName]]", programName);
+                        byte[] inputStr = null;
+                        _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
+                    }
+                }
+            response.IsSuccess = true;
+            response.Message = "Data updated successfully";
             return response;
         }
     }

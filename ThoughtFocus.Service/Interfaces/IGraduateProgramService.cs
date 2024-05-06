@@ -47,5 +47,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input);
         ProgramConfigurationHandlerResponse GetProgramConfigurationHandler(int UserID, int FormID, int ProgramID, string TermCode);
         BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input);
+        LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID, int FormID);
+        BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input);
     }
 }
