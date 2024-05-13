@@ -2028,6 +2028,30 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
+        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(int cssdtID, string communitySiteUserEmail)
+        {
+            UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse obj = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = cssdtID},
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NChar, 200) { Value = communitySiteUserEmail }
+                                     };
+            DataTable dtCommunityData = _helper.GetDataTable("[FieldWork].[PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList]", parameters);
+            if (dtCommunityData.Rows.Count > 0)
+            {
+                obj = dtCommunityData.AsEnumerable().Select(row =>
+                                                  new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse
+                                                  {
+                                                      CssdtID = Convert.ToInt32(row["CssdtID"]),
+                                                      status = Convert.ToBoolean(row["Status"]),
+                                                      message = Convert.ToString(row["Message"]).Replace("  ", "").Trim()
+                                                  }).FirstOrDefault();
+            }
+            obj.IsSuccess = true;
+            //obj.Message = "Community User Data Updated Successfully";
+            return obj;
+        }
         private byte[] DownloadActivityLogsContent(DataSet dsFieldWorkData)
         {
             byte[] inputStream = null;

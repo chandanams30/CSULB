@@ -706,6 +706,25 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("UpdateCommunitySiteSupervisorDemonstrationTeacherList")]
+        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(int cssdtID,string communitySiteUserEmail)
+        {
+            try
+            {
+                UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+                response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(cssdtID,communitySiteUserEmail);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Update Community User List, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         private string GetFolderName(int userId, int fieldWorkID)
         {

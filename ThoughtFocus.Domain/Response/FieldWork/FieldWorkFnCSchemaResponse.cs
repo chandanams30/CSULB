@@ -37,4 +37,11 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string CommunitySiteUserEmail { get; set; }
         public string CommunitySiteUserIdentifier { get; set; }
     }
+    public class UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse : BaseResponse
+    {
+        public int CssdtID { get; set; }
+        public bool status { get; set; }
+        public string message { get; set; }
+    }
+
 }
