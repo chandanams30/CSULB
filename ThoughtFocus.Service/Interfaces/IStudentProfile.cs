@@ -14,5 +14,8 @@ namespace ThoughtFocus.Service.Interfaces
         StudentProfileMessageBoardResponse GetStudentProfileMessageBoard(string CsulbId, string MessageBoardIdentifier);
         BaseResponse UpdateStudentProfileMessageBoard(UpdateStudentProfileMessageBoardRequest input);
         BaseResponse SaveStudentProfileData(SaveStudentProfileDataRequest input);
+        List<ApplicationList> GetApplications(int userId);
+        SemesterTermListResponse GetSemesterList(int applicationId);
+        ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode);
     }
 }

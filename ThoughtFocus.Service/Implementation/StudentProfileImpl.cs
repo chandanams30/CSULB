@@ -206,6 +206,112 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
+        public List<ApplicationList> GetApplications(int userId)
+        {
+            // gets the list of applications
+            List<ApplicationList> obj = new List<ApplicationList>();
+
+            SqlParameter[] parameters =
+                                  {
+                                    new SqlParameter("@UserID", SqlDbType.NVarChar, 255) { Value = userId}
+                                  };
+
+            DataTable dtApplications = _helper.GetDataTable("[dbo].[GetApplications]", parameters);
+            if (dtApplications.Rows.Count > 0)
+            {
+               //get only ICP/GPA/Doctoral applications
+                obj = dtApplications.AsEnumerable().Where(row => row.Field<long>("ID") == 1 || row.Field<long>("ID") == 2 || row.Field<long>("ID") == 3)
+                                                   .Select(row =>
+                                                         new ApplicationList
+                                                         {
+                                                             ApplicationId = Convert.ToInt32(row["ID"]),
+                                                             ApplicationName = Convert.ToString(row["Name"])
+                                                         }).ToList();
+            }
+
+            return obj;
+        }
+        public SemesterTermListResponse GetSemesterList(int applicationId)
+        {
+            SemesterTermListResponse obj = new SemesterTermListResponse();
+
+
+            SqlParameter[] parameters = { };
+
+            DataTable dtSemesters = _helper.GetDataTable("[dbo].[GetSemesterList]", parameters);
+            try
+            {
+                if (dtSemesters.Rows.Count > 0)
+                {
+
+
+                    obj.SemesterTerms = dtSemesters.AsEnumerable().Where(row => row.Field<long>("ApplicationTypeID") == applicationId)
+                                                                  .Select(row =>
+                                                                              new SemesterTerm
+                                                                              {
+                                                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                                                  TermName = Convert.ToString(row["Name"])
+                                                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode)
+        {
+            ApplicationProgramListResponse obj = new ApplicationProgramListResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
+                                          new SqlParameter("@ApplicationTypeID", SqlDbType.Int, 50) { Value = applicationTypeID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                        };
+
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationPrograms]", parameters);
+            try
+            {
+                if (dtApplicationPrograms.Tables.Count > 0)
+                {
+
+
+                    obj.ApplicationProgramList = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                              new ApplicationProgramList
+                                              {
+                                                  programID = Convert.ToInt32(row["ID"]),
+                                                  programName = Convert.ToString(row["Name"]),
+                                                  semester = Convert.ToString(row["Semester"]),
+                                                  TermCode = Convert.ToString(row["TermCode"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
         private string EncryptSSNNumber(string clearText)
         {
             string encryptionKey = _configuration["ApplicationKeys:EncryptionKey"];

@@ -65,9 +65,36 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     {
         public StudentProfileMessageBoard studentProfileMessageBoards { get; set; }
     }
+    public class SemesterTermListResponse : BaseResponse
+    {
+        public List<SemesterTerm> SemesterTerms { get; set; }
+    }
+    public class ApplicationProgramListResponse: BaseResponse
+    {
+        public List<ApplicationProgramList> ApplicationProgramList { get; set; }
+    }
     public class StudentProfileMessageBoard
     {
         public string CSULBID { get; set; }
         public string MessageBoard { get; set; }
     }
+    public class ApplicationList
+    {
+        public int ApplicationId { get; set; }
+        public string ApplicationName { get; set; }
+    }
+    public class SemesterTerm
+    {
+        public string TermCode { get; set; }
+        public string TermName { get; set; }
+        //public int ApplicationId { get; set; }
+    }
+    public class ApplicationProgramList
+    {
+        public int programID { get; set; }
+        public string programName { get; set; }
+        public string semester { get; set; }
+        public string TermCode { get; set; }
+    }
+
 }
