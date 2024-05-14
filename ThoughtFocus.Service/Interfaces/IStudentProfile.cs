@@ -17,5 +17,6 @@ namespace ThoughtFocus.Service.Interfaces
         List<ApplicationList> GetApplications(int userId);
         SemesterTermListResponse GetSemesterList(int applicationId);
         ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode);
+        StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode);
     }
 }

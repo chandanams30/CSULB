@@ -173,7 +173,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-
+        [HttpGet("GetStudentAppliedFormsByPrograms")]
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms( int programID, string termCode)
+        {
+            try
+            {
+                StudentAppliedFormsByProgramsResponse response = _studentProfileService.GetStudentAppliedFormsByPrograms( programID, termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentAppliedFormsByProgramsResponse response = new StudentAppliedFormsByProgramsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
     }
 }

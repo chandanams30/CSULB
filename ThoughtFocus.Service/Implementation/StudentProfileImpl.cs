@@ -312,6 +312,65 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode)
+        {
+            StudentAppliedFormsByProgramsResponse obj = new StudentAppliedFormsByProgramsResponse();
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = termCode }
+                                        };
+
+            DataTable dsStudentAppliedFormsByProgram = _helper.GetDataTable("StudentProfileSearch", parameters);
+            try
+            { 
+
+                    if (dsStudentAppliedFormsByProgram.Rows.Count > 0)
+                    {
+                        obj.StudentAppliedFormsByPrograms = dsStudentAppliedFormsByProgram.AsEnumerable().Select(row =>
+                                              new StudentAppliedFormsByPrograms
+                                              {
+                                                  FormID = Convert.ToInt32(row["ID"]),
+                                                  StudentFirstName = Convert.ToString(row["FirstName"]),
+                                                  StudentLastName = Convert.ToString(row["LastName"]),
+                                                  Email = Convert.ToString(row["EMAIL"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  ProgramName = Convert.ToString(row["ProgramName"]),
+                                                  Semester = Convert.ToString(row["Term"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  CSULBID = Convert.ToString(row["CSULBID"]),
+                                                  ApplicationTypeName = Convert.ToString(row["Type"]),
+                                                  ApplicantTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
+                                                  Status = Convert.ToString(row["Status"]),
+                                                  DOB = Convert.ToDateTime(row["DOB"] == DBNull.Value ? null : row["DOB"]),
+                                                  SSN = Convert.ToString(row["SSN"] == DBNull.Value ? null : row["SSN"])
+                                              }).ToList();
+                    foreach (var studentForm in obj.StudentAppliedFormsByPrograms)
+                    {
+                        if (!string.IsNullOrEmpty(studentForm.SSN) && studentForm.SSN != null)
+                        {
+                            studentForm.SSN = DecryptSSNNumber(studentForm.SSN);
+                        }
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                    }
+                    else
+                    {
+                        obj.IsSuccess = false;
+                        obj.Message = "No Data Present";
+                    }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
         private string EncryptSSNNumber(string clearText)
         {
             string encryptionKey = _configuration["ApplicationKeys:EncryptionKey"];
