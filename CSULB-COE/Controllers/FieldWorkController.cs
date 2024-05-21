@@ -707,12 +707,12 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("UpdateCommunitySiteSupervisorDemonstrationTeacherList")]
-        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(int cssdtID,string communitySiteUserEmail)
+        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
         {
             try
             {
                 UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
-                response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(cssdtID,communitySiteUserEmail);
+                response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(input);
                 return response;
             }
             catch (Exception ex)

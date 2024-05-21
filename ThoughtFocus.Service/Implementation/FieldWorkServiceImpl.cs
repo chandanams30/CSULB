@@ -2028,14 +2028,14 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
-        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(int cssdtID, string communitySiteUserEmail)
+        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
         {
             UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse obj = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
 
             SqlParameter[] parameters =
                                     {
-                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = cssdtID},
-                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NChar, 200) { Value = communitySiteUserEmail }
+                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = input.cssdtID},
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar, 200) { Value = input.communitySiteUserEmail }
                                      };
             DataTable dtCommunityData = _helper.GetDataTable("[FieldWork].[PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList]", parameters);
             if (dtCommunityData.Rows.Count > 0)
