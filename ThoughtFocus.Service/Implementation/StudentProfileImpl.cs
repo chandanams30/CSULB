@@ -315,6 +315,7 @@ namespace ThoughtFocus.Service.Implementation
         public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode)
         {
             StudentAppliedFormsByProgramsResponse obj = new StudentAppliedFormsByProgramsResponse();
+            
 
             SqlParameter[] parameters =
                                         {
@@ -322,7 +323,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = termCode }
                                         };
 
-            DataTable dsStudentAppliedFormsByProgram = _helper.GetDataTable("StudentProfileSearch", parameters);
+            DataTable dsStudentAppliedFormsByProgram = _helper.GetDataTable("[dbo].[StudentProfileSearch]", parameters);
             try
             { 
 
@@ -347,15 +348,18 @@ namespace ThoughtFocus.Service.Implementation
                                                   DOB = Convert.ToDateTime(row["DOB"] == DBNull.Value ? null : row["DOB"]),
                                                   SSN = Convert.ToString(row["SSN"] == DBNull.Value ? null : row["SSN"])
                                               }).ToList();
-                    foreach (var studentForm in obj.StudentAppliedFormsByPrograms)
-                    {
-                        if (!string.IsNullOrEmpty(studentForm.SSN) && studentForm.SSN != null)
+                        foreach (var studentForm in obj.StudentAppliedFormsByPrograms)
                         {
-                            studentForm.SSN = DecryptSSNNumber(studentForm.SSN);
+                            if (!string.IsNullOrEmpty(studentForm.SSN) && studentForm.SSN != null)
+                            {
+                                studentForm.SSN = DecryptSSNNumber(studentForm.SSN);
+                            }
                         }
-                    }
-                    obj.IsSuccess = true;
-                    obj.Message = "Data Retrieved Successfully";
+                        int SSNtimeoutInSeconds = Convert.ToInt32(_configuration["ApplicationKeys:SSNTimeout"]);
+                        int SSNtimeoutInMilliseconds = SSNtimeoutInSeconds * 1000;
+                        obj.SSNSessionTimeOut = SSNtimeoutInMilliseconds;
+                        obj.IsSuccess = true;
+                        obj.Message = "Data Retrieved Successfully";
                     }
                     else
                     {

@@ -76,8 +76,9 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     public class StudentAppliedFormsByProgramsResponse : BaseResponse
     {
         public List<StudentAppliedFormsByPrograms> StudentAppliedFormsByPrograms { get; set; }
-
+        public int SSNSessionTimeOut {  get; set; }
     }
+
     public class StudentAppliedFormsByPrograms
     {
         public int FormID { get; set; }
