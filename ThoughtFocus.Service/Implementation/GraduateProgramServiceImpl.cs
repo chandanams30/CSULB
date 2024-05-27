@@ -3337,6 +3337,36 @@ namespace ThoughtFocus.Service.Implementation
             response.Message = "Data updated successfully";
             return response;
         }
+        public BaseResponse UpdateRecommendation(UpdateRecommendation input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@RecommendationID", SqlDbType.BigInt) { Value = input.RecommendationID },
+                                          new SqlParameter("@RecommenderEmail", SqlDbType.NVarChar,200) {Value = input.RecommenderEmail},
+                                          new SqlParameter("@RecommenderName", SqlDbType.NVarChar,200) {Value = input.RecommenderName}
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[UpdateRecommendation]", parameters);
+            response.Message = "Recommendation Updated Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+        public BaseResponse DeleteRecommendation(DeleteRecommendations input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@RecommendationID", SqlDbType.BigInt) { Value = input.RecommendationID }
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[DeleteRecommendations]", parameters);
+            response.Message = "Recommendation Deleted Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
     }
 
 

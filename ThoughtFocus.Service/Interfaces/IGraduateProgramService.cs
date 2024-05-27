@@ -49,5 +49,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input);
         LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID, int FormID);
         BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input);
+        BaseResponse UpdateRecommendation(UpdateRecommendation input);
+        public BaseResponse DeleteRecommendation(DeleteRecommendations input);
     }
 }
