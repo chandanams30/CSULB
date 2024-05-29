@@ -312,7 +312,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode)
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID)
         {
             StudentAppliedFormsByProgramsResponse obj = new StudentAppliedFormsByProgramsResponse();
             
@@ -320,7 +320,8 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
-                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = termCode }
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = termCode },
+                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar, 25) { Value = CSULBID }
                                         };
 
             DataTable dsStudentAppliedFormsByProgram = _helper.GetDataTable("[dbo].[StudentProfileSearch]", parameters);

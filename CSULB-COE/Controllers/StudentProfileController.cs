@@ -174,11 +174,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetStudentAppliedFormsByPrograms")]
-        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms( int programID, string termCode)
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms( int programID, string termCode,string CSULBID )
         {
             try
             {
-                StudentAppliedFormsByProgramsResponse response = _studentProfileService.GetStudentAppliedFormsByPrograms( programID, termCode);
+                StudentAppliedFormsByProgramsResponse response = _studentProfileService.GetStudentAppliedFormsByPrograms( programID, termCode,CSULBID);
                 return response;
             }
             catch (Exception ex)
