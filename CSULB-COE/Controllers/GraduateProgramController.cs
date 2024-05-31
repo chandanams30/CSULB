@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.GraduateProgram;
@@ -904,5 +905,25 @@ namespace CSULB_COE.Controllers
             return contentType;
         }
 
+
+        [HttpPost("SendMailtoPendingRecommendations")]
+        public BaseResponse SendMailtoPendingRecommendations(int ProgramID, int TermCode)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.SendNotificationforPendingRecommendations(ProgramID, TermCode);
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "There is an error while sending the notifications, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

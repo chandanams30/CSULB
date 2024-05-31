@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
@@ -49,5 +50,6 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input);
         LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID, int FormID);
         BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input);
+        BaseResponse SendNotificationforPendingRecommendations(int ProgramID, int TermCode);
     }
 }

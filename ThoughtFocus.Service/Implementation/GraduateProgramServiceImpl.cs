@@ -3337,6 +3337,26 @@ namespace ThoughtFocus.Service.Implementation
             response.Message = "Data updated successfully";
             return response;
         }
+
+        public BaseResponse SendNotificationforPendingRecommendations(int ProgramID, int TermCode)
+        {
+            BaseResponse baseResponse = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@TermCode", SqlDbType.BigInt) { Value = TermCode },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID }
+
+                                        };
+
+            DataTable dtRecommendationDetails = _helper.GetDataTable("[dbo].[GetListOfPendingRecommendation]", parameters);
+
+            for(int i=0;i< dtRecommendationDetails.Rows.Count;i++)
+            {
+                baseResponse = SendReminderToRecommender(Convert.ToInt32(dtRecommendationDetails.Rows[i]["RecommendationID"]));
+            }
+            return baseResponse;
+
+        }
     }
 
 
