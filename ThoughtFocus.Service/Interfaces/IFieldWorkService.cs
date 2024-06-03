@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Text;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
+using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
 
 namespace ThoughtFocus.Service.Interfaces
 {
@@ -46,6 +48,8 @@ namespace ThoughtFocus.Service.Interfaces
         FieldWorkActivityLogsAttachmentResponse DownloadActivityLogs(FieldWorkActivityLogsAttachmentRequest input);
         BaseResponse DeleteFieldWorkActivityLog(DeleteActivityLogRequest input);
         UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input);
-        PrerequisiteExiredResponse PrerequisiteExired_Sendmail_To_Students(string type, string identifier, int userID);
+        AdhocMailLogResponse PrerequisiteExired_Sendmail_To_Students(PrerequisiteExiredRequest input);
+        AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input);
+        AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID);
     }
 }

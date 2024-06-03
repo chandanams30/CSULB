@@ -5,12 +5,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
+using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
 
 namespace CSULB_COE.Controllers
 {
@@ -942,5 +945,25 @@ namespace CSULB_COE.Controllers
             return contentType;
         }
 
+
+        [HttpPost("SendMailtoPendingRecommendations")]
+        public AdhocMailLogResponse SendMailtoPendingRecommendations(PendingRecommendationsRequest input)
+        {
+            try
+            {
+                AdhocMailLogResponse response = _graduateProgramService.SendNotificationforPendingRecommendations(input);
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdhocMailLogResponse response = new AdhocMailLogResponse();
+                response.IsSuccess = false;
+                response.Message = "There is an error while sending the notifications, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

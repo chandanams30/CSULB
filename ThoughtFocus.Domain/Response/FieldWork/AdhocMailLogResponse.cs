@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ThoughtFocus.Domain.Response.FieldWork
 {
-    public class PrerequisiteExiredResponse : BaseResponse
+    public class AdhocMailLogResponse : BaseResponse
     {
         public int ID { get; set; }
         public string Type { get; set; }

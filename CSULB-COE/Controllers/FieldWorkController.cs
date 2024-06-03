@@ -15,6 +15,7 @@ using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
+using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
 
 namespace CSULB_COE.Controllers
 {
@@ -725,20 +726,38 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpGet("PrerequisiteExiredMail")]
-        public PrerequisiteExiredResponse PrerequisiteExired_Sendmail_To_Students(string type, string identifier, int userID)
+        [HttpPost("PrerequisiteExiredMail")]
+        public AdhocMailLogResponse PrerequisiteExired_Sendmail_To_Students(PrerequisiteExiredRequest input)
         {
             try
             {
-                PrerequisiteExiredResponse response = new PrerequisiteExiredResponse();
-                response = _fieldWorkService.PrerequisiteExired_Sendmail_To_Students(type,identifier,userID);
+                AdhocMailLogResponse response = new AdhocMailLogResponse();
+                response = _fieldWorkService.PrerequisiteExired_Sendmail_To_Students(input);
                 return response;
             }
             catch (Exception ex)
             {
-                PrerequisiteExiredResponse response = new PrerequisiteExiredResponse();
+                AdhocMailLogResponse response = new AdhocMailLogResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to Send mail , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("PrerequisiteApprovedMail")]
+        public AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input)
+        {
+            try
+            {
+                AdhocMailLogResponse response = _fieldWorkService.StudentsEnrolled_ApprovedDocuments_BulkEmail(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdhocMailLogResponse response = new AdhocMailLogResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

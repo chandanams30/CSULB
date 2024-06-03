@@ -21,9 +21,11 @@ using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.FormModels;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.TemplateModels;
 using ThoughtFocus.Service.Interfaces;
+using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
 
 
 namespace ThoughtFocus.Service.Implementation
@@ -35,17 +37,20 @@ namespace ThoughtFocus.Service.Implementation
         private readonly ISendMail _sendMail;
         public ILogger<GraduateProgramServiceImpl> _logger;
         public IInitialCredentialProgramService _initialCredentialProgramService;
+        public IFieldWorkService _fieldWorkService;
         public GraduateProgramServiceImpl(ISqlDBUtility helper
                                          , IConfiguration configuration
                                          , ISendMail sendMail
                                          , ILogger<GraduateProgramServiceImpl> logger
-                                         , IInitialCredentialProgramService initialCredentialProgramService)
+                                         , IInitialCredentialProgramService initialCredentialProgramService
+                                         ,IFieldWorkService fieldWorkService)
         {
             _helper = helper;
             _configuration = configuration;
             _sendMail = sendMail;
             _logger = logger;
             _initialCredentialProgramService = initialCredentialProgramService;
+            _fieldWorkService = fieldWorkService;
         }
         public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
         {
@@ -3366,6 +3371,47 @@ namespace ThoughtFocus.Service.Implementation
             response.Message = "Recommendation Deleted Successfully";
             response.IsSuccess = true;
             return response;
+        }
+
+        public AdhocMailLogResponse SendNotificationforPendingRecommendations(PendingRecommendationsRequest input)
+        {
+            AdhocMailLogResponse obj = new AdhocMailLogResponse();
+            BaseResponse baseResponse = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@TermCode", SqlDbType.BigInt) { Value = input.TermCode},
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID}
+
+                                        };
+
+            DataTable dtRecommendationDetails = _helper.GetDataTable("[dbo].[GetListOfPendingRecommendation]", parameters);
+            StringBuilder sbLogData = new StringBuilder();
+            int totalFailure = 0;
+            int count = 0;
+            for (int i=0;i< dtRecommendationDetails.Rows.Count;i++)
+            { 
+                
+                try
+                {
+                    string recommenderName = Convert.ToString(dtRecommendationDetails.Rows[i]["RecommenderName"]);
+                    string recommenderEmail = Convert.ToString(dtRecommendationDetails.Rows[i]["RecommenderEmail"]);
+                    baseResponse = SendReminderToRecommender(Convert.ToInt32(dtRecommendationDetails.Rows[i]["RecommendationID"]));
+                    count++;
+                    string logSummary = $"{count}. {recommenderName}  mail sent to {recommenderEmail} successfully.";
+                    sbLogData.AppendLine(logSummary);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, input.Type + " "+ input.Identifier +": " + ex.Message);
+                    continue;
+                }
+            }
+            //initiate logging
+            totalFailure = dtRecommendationDetails.Rows.Count - count;
+            obj = _fieldWorkService.GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
+            obj.IsSuccess = true;
+            return obj;
+
         }
     }
 

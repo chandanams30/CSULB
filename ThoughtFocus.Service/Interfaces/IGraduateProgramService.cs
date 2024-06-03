@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
 
 namespace ThoughtFocus.Service.Interfaces
 {
@@ -51,5 +54,6 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input);
         BaseResponse UpdateRecommendation(UpdateRecommendation input);
         public BaseResponse DeleteRecommendation(DeleteRecommendations input);
+        AdhocMailLogResponse SendNotificationforPendingRecommendations(PendingRecommendationsRequest input);
     }
 }
