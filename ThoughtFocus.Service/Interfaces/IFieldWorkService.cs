@@ -46,5 +46,6 @@ namespace ThoughtFocus.Service.Interfaces
         FieldWorkActivityLogsAttachmentResponse DownloadActivityLogs(FieldWorkActivityLogsAttachmentRequest input);
         BaseResponse DeleteFieldWorkActivityLog(DeleteActivityLogRequest input);
         UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input);
+        PrerequisiteExiredResponse PrerequisiteExired_Sendmail_To_Students(string type, string identifier, int userID);
     }
 }

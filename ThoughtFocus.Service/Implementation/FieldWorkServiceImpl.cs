@@ -2136,6 +2136,91 @@ namespace ThoughtFocus.Service.Implementation
             inputStream = GetPDFFileContentAsLandscape(template);
             return inputStream;
         }
+        public PrerequisiteExiredResponse PrerequisiteExired_Sendmail_To_Students(string type,string identifier,int userID)
+        {
+            PrerequisiteExiredResponse obj = new PrerequisiteExiredResponse();
+            DataTable dtPreqList = _helper.GetDataTable("[FieldWork].[GetExiredPrerequisiteStudentList]", null);
+            StringBuilder sbLogData = new StringBuilder();
+            int totalFailure = 0;
+            if (dtPreqList.Rows.Count > 0)
+            {
+                string subject = "MyCED prerequisites expired";
+                string logoText = "cid:myImageID";
+                string body = GetMailBodyTemplate("Prerequisite_Expired_Mail.html");
+                int count = 0;
+                for (int i = 0; i < dtPreqList.Rows.Count; i++)
+                {
+                    DataRow row = dtPreqList.Rows[i];
+                    string applicantName = Convert.ToString(row["ApplicantName"]);
+                    string applicantEmail = Convert.ToString(row["Email"]);
+                    string CSULBID = Convert.ToString(row["CSULBID"]);
+                    try
+                    {
+                        body = body.Replace("[[logoPath]]", logoText)
+                                  .Replace("[[ApplicantName]]", applicantName);
+                        _sendMail.SendEmail(applicantEmail, "", "COMMON", subject, body, "");
+                        count++;
+                        string logSummary = $"{count}. {applicantName} {CSULBID} mail sent to {applicantEmail} successfully.";
+                        sbLogData.Append(logSummary);
+                        sbLogData.Append(Environment.NewLine); // Adding a new line
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Pre-requisite Approved Mails: " + ex.Message);
+                        continue;
+                    }
+                }
+                //initiate logging
+                //totalFailure =  dtPreqList.Rows.Count - count;
+                string logData = sbLogData.ToString();
+                obj=GetAdocMailLogDetails(type, identifier, sbLogData.ToString(), count, totalFailure, userID);
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data Present.";
+            }
+
+
+            return obj;
+        }
+        public PrerequisiteExiredResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
+        {
+            PrerequisiteExiredResponse obj = new PrerequisiteExiredResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@Type", SqlDbType.NVarChar,100) { Value = type},
+                                          new SqlParameter("@Identifier", SqlDbType.NVarChar, 50) { Value = identifier },
+                                          new SqlParameter("@LogSummary", SqlDbType.NVarChar, -1) { Value = sbLogData.ToString() },
+                                          new SqlParameter("@TotalSent", SqlDbType.BigInt) { Value = count },
+                                          new SqlParameter("@TotalFailure", SqlDbType.BigInt) { Value = totalFailure },
+                                          new SqlParameter("@TriggeredBy", SqlDbType.BigInt) { Value = userID }
+                                     };
+            DataTable dtMailDetails = _helper.GetDataTable("[dbo].[Upsert_Adhoc_Mail_Notification_Log]", parameters);
+            if (dtMailDetails.Rows.Count > 0)
+            {
+                obj = dtMailDetails.AsEnumerable().Select(row =>
+                                                  new PrerequisiteExiredResponse
+                                                  {
+                                                      ID = Convert.ToInt32(row["ID"]),
+                                                      Type = Convert.ToString(row["Type"]),
+                                                      Identifier = Convert.ToString(row["Identifier"]),
+                                                      LogSummary = Convert.ToString(row["LogSummary"]),
+                                                      TotalSent = Convert.ToInt32(row["TotalSent"]),
+                                                      TotalFailure = Convert.ToInt32(row["TotalFailure"]),
+                                                      TriggeredBy = Convert.ToInt32(row["TriggeredBy"]),
+                                                      TriggeredDate = Convert.ToDateTime(row["TriggeredDate"])
+                                                  }).FirstOrDefault();
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data Present in Adhoc_Mail_Notification_Log table .";
+            }
+            return obj;
+        }
         private string ConstructActivityLogRows(string activityStartDate, string activityEndDate,string site, string hours,string schoolDistrict,string supervisorName,string dropdown1,string dropdown2,string description,string status)
         {
             StringBuilder sbRows = new StringBuilder();

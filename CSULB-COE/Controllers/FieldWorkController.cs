@@ -725,6 +725,25 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("PrerequisiteExiredMail")]
+        public PrerequisiteExiredResponse PrerequisiteExired_Sendmail_To_Students(string type, string identifier, int userID)
+        {
+            try
+            {
+                PrerequisiteExiredResponse response = new PrerequisiteExiredResponse();
+                response = _fieldWorkService.PrerequisiteExired_Sendmail_To_Students(type,identifier,userID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PrerequisiteExiredResponse response = new PrerequisiteExiredResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Send mail , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         private string GetFolderName(int userId, int fieldWorkID)
         {
