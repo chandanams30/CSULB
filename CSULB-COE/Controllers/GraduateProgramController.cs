@@ -13,7 +13,7 @@ using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
-using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
+using ThoughtFocus.Domain.Request.FieldWork;
 
 namespace CSULB_COE.Controllers
 {

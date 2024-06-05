@@ -25,7 +25,7 @@ using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.TemplateModels;
 using ThoughtFocus.Service.Interfaces;
-using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
+using ThoughtFocus.Domain.Request.FieldWork;
 
 
 namespace ThoughtFocus.Service.Implementation
@@ -3388,8 +3388,9 @@ namespace ThoughtFocus.Service.Implementation
             StringBuilder sbLogData = new StringBuilder();
             int totalFailure = 0;
             int count = 0;
+            sbLogData.Append("<ol>");
             for (int i=0;i< dtRecommendationDetails.Rows.Count;i++)
-            { 
+            {
                 
                 try
                 {
@@ -3397,15 +3398,16 @@ namespace ThoughtFocus.Service.Implementation
                     string recommenderEmail = Convert.ToString(dtRecommendationDetails.Rows[i]["RecommenderEmail"]);
                     baseResponse = SendReminderToRecommender(Convert.ToInt32(dtRecommendationDetails.Rows[i]["RecommendationID"]));
                     count++;
-                    string logSummary = $"{count}. {recommenderName}  mail sent to {recommenderEmail} successfully.";
-                    sbLogData.AppendLine(logSummary);
+                    string logSummary = $"{recommenderName} mail sent to {recommenderEmail} successfully.";
+                    sbLogData.Append($"<li>{logSummary}</li>");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, input.Type + " "+ input.Identifier +": " + ex.Message);
+                    _logger.LogError(ex, $"{input.Type} {input.Identifier} : {ex.Message}.");
                     continue;
                 }
             }
+            sbLogData.Append("</ol>");
             //initiate logging
             totalFailure = dtRecommendationDetails.Rows.Count - count;
             obj = _fieldWorkService.GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);

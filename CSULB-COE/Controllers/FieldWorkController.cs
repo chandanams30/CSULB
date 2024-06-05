@@ -15,7 +15,6 @@ using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
-using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
 
 namespace CSULB_COE.Controllers
 {
@@ -726,13 +725,13 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("PrerequisiteExiredMail")]
-        public AdhocMailLogResponse PrerequisiteExired_Sendmail_To_Students(PrerequisiteExiredRequest input)
+        [HttpPost("PrerequisiteExpiredMail")]
+        public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
         {
             try
             {
                 AdhocMailLogResponse response = new AdhocMailLogResponse();
-                response = _fieldWorkService.PrerequisiteExired_Sendmail_To_Students(input);
+                response = _fieldWorkService.PrerequisiteExpired_Sendmail_To_Students(input);
                 return response;
             }
             catch (Exception ex)

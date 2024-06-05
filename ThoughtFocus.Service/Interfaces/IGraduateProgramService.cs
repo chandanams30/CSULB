@@ -6,7 +6,7 @@ using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
-using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
+using ThoughtFocus.Domain.Request.FieldWork;
 
 namespace ThoughtFocus.Service.Interfaces
 {

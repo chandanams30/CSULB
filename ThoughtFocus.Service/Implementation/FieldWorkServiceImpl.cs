@@ -27,7 +27,6 @@ using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Interfaces;
-using static ThoughtFocus.Domain.Request.FieldWork.AdhocMailLogRequest;
 using static ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata;
 
 namespace ThoughtFocus.Service.Implementation
@@ -2138,11 +2137,12 @@ namespace ThoughtFocus.Service.Implementation
             inputStream = GetPDFFileContentAsLandscape(template);
             return inputStream;
         }
-        public AdhocMailLogResponse PrerequisiteExired_Sendmail_To_Students(PrerequisiteExiredRequest input)
+        public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
         {
             AdhocMailLogResponse obj = new AdhocMailLogResponse();
-            DataTable dtPreqList = _helper.GetDataTable("[FieldWork].[GetExiredPrerequisiteStudentList]", null);
+            DataTable dtPreqList = _helper.GetDataTable("[FieldWork].[GetExpiredPrerequisiteStudentList]", null);
             StringBuilder sbLogData = new StringBuilder();
+            sbLogData.Append("<ol>"); 
             int totalFailure = 0;
             if (dtPreqList.Rows.Count > 0)
             {
@@ -2162,20 +2162,19 @@ namespace ThoughtFocus.Service.Implementation
                                   .Replace("[[ApplicantName]]", applicantName);
                         _sendMail.SendEmail(applicantEmail, "", "COMMON", subject, body, "");
                         count++;
-                        string logSummary = $"{count}. {applicantName} {CSULBID} mail sent to {applicantEmail} successfully.";
-                        sbLogData.AppendLine(logSummary);
-                        //sbLogData.Append(Environment.NewLine); // Adding a new line
+                        string logSummary = $"{applicantName} {CSULBID} mail sent to {applicantEmail} successfully.";
+                        sbLogData.Append($"<li>{logSummary}</li>");
 
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Expired Pre-requisite Mails: " + ex.Message);
+                        _logger.LogError(ex, $"{input.Type} {input.Identifier} : {ex.Message}.");
                         continue;
                     }
                 }
+                sbLogData.Append("</ol>");
                 //initiate logging
                 totalFailure = dtPreqList.Rows.Count - count;
-                string logData = sbLogData.ToString();
                 obj=GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
                 obj.IsSuccess = true;
                 //obj.Message = "Prerequisites Expired mail sent successfully";
@@ -2192,72 +2191,56 @@ namespace ThoughtFocus.Service.Implementation
         }
         public AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input)
         {
-            AdhocMailLogResponse obj = new AdhocMailLogResponse();
-            try
-            { 
-                string responseString = string.Empty;
-
-                SqlParameter[] parameters =
-                                            {
-                                            new SqlParameter("@TermCode", SqlDbType.NVarChar, 255) { Value = (object)input.TermCode ?? DBNull.Value },
+                AdhocMailLogResponse obj = new AdhocMailLogResponse(); 
+                SqlParameter[] parameters = {
+                                                new SqlParameter("@TermCode", SqlDbType.NVarChar, 255) { Value = (object)input.TermCode ?? DBNull.Value },
                                             };
 
                 DataTable dtStudentsInfo = _helper.GetDataTable("[FieldWork].[GetStudentsEnrolled_ApprovedDocuments_BulkEmail]", parameters);
                 StringBuilder sbLogData = new StringBuilder();
+                sbLogData.Append("<ol>");
+                int count = 0;
+                int totalFailure = 0;
                 if (dtStudentsInfo.Rows.Count > 0 && dtStudentsInfo != null)
                 {
-                    int count = 0;
-                    int totalFailure = 0;
-
                     for (int i = 0; i < dtStudentsInfo.Rows.Count; i++)
                     {
                         try
                         {
                             int FieldWorkID = Convert.ToInt32(dtStudentsInfo.Rows[i]["FieldWorkID"]);
-
                             EmailMessageModel emailModel = GetMessageBody(FieldWorkID);
-
                             // check the prerequisite status and send mail to student 
                             if (!String.IsNullOrEmpty(emailModel.Body))
                             {
-                                // fire the mail 
-                                string toUser = emailModel.toEmail; // pull  this from SP 
-                                                                    // get the below body section from HTML
-                                                                    // string body = "This is the body section needs to be re-visited.";
+                                string toUser = emailModel.toEmail;
                                 string body = GetMailBodyTemplate("FinalApprovedTemplate.html");
                                 string logoText = "cid:myImageID";
                                 body = body.Replace("[[logoPath]]", logoText).Replace("[[ApplicantName]]", emailModel.ApplicantName);
                                 string subject = "MyCED prerequisites review completed";
                                 _sendMail.SendEmail(toUser, "", "COMMON", subject, body, emailModel.Body);
                                 count++;
-                                string logSummary = $"{count}. {emailModel.ApplicantName} {emailModel.CSULBID} mail sent to {toUser} successfully.";
-                                sbLogData.AppendLine(logSummary);
-                               
+                                string logSummary = $"{emailModel.ApplicantName} {emailModel.CSULBID} mail sent to {toUser} successfully.";
+                                sbLogData.Append($"<li>{logSummary}</li>");
                             }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, input.Type + " " + input.Identifier + ": " + ex.Message);
+                            _logger.LogError(ex, $"{input.Type} {input.Identifier} : {ex.Message}.");
                             continue;
                         }
                     }
+                    sbLogData.Append("</ol>");
                     //initiate logging
                     totalFailure = dtStudentsInfo.Rows.Count - count;
                     obj = GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
                     obj.IsSuccess = true;
-                    //obj.Message = "Prerequisites Approved mail sent successfully";
-
                 }
-
-            }
-            catch (Exception ex)
-            {
-                
+                else
+                {
                     obj.IsSuccess = false;
-                    obj.Message = "StudentsEnrolled_ApprovedDocuments_BulkEmail failed";
-            }
-
-             return obj;
+                    obj.Message = "No Data Present.";
+                }
+            return obj;
         }
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
         {
@@ -2286,6 +2269,8 @@ namespace ThoughtFocus.Service.Implementation
                                                       TriggeredBy = Convert.ToInt32(row["TriggeredBy"]),
                                                       TriggeredDate = Convert.ToDateTime(row["TriggeredDate"])
                                                   }).FirstOrDefault();
+
+
             }
             else
             {
