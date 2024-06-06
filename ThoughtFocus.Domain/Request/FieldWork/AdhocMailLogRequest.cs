@@ -26,4 +26,11 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string TermCode { get; set; }
         public int ProgramID { get; set; }
     }
+    public class UnapprovedPartnerUserMailRequest
+    {
+        public int UserID { get; set; }
+        public string Type { get; set; }
+        public string Identifier { get; set; }
+        public string TermCode { get; set; }
+    }
 }

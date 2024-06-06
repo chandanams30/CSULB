@@ -2148,7 +2148,6 @@ namespace ThoughtFocus.Service.Implementation
             {
                 string subject = "MyCED prerequisites expired";
                 string logoText = "cid:myImageID";
-                string body = GetMailBodyTemplate("Prerequisite_Expired_Mail.html");
                 int count = 0;
                 for (int i = 0; i < dtPreqList.Rows.Count; i++)
                 {
@@ -2158,6 +2157,7 @@ namespace ThoughtFocus.Service.Implementation
                     string CSULBID = Convert.ToString(row["CSULBID"]);
                     try
                     {
+                        string body = GetMailBodyTemplate("Prerequisite_Expired_Mail.html");
                         body = body.Replace("[[logoPath]]", logoText)
                                   .Replace("[[ApplicantName]]", applicantName);
                         _sendMail.SendEmail(applicantEmail, "", "COMMON", subject, body, "");
@@ -2193,7 +2193,7 @@ namespace ThoughtFocus.Service.Implementation
         {
                 AdhocMailLogResponse obj = new AdhocMailLogResponse(); 
                 SqlParameter[] parameters = {
-                                                new SqlParameter("@TermCode", SqlDbType.NVarChar, 255) { Value = (object)input.TermCode ?? DBNull.Value },
+                                                new SqlParameter("@TermCode", SqlDbType.NVarChar, 255) { Value = (object)input.TermCode ?? DBNull.Value }
                                             };
 
                 DataTable dtStudentsInfo = _helper.GetDataTable("[FieldWork].[GetStudentsEnrolled_ApprovedDocuments_BulkEmail]", parameters);
@@ -2240,6 +2240,42 @@ namespace ThoughtFocus.Service.Implementation
                     obj.IsSuccess = false;
                     obj.Message = "No Data Present.";
                 }
+            return obj;
+        }
+        public AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input)
+        {
+            AdhocMailLogResponse obj = new AdhocMailLogResponse();
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+            SqlParameter[] parameters =
+                                       {
+                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 50) { Value = (object)input.TermCode ?? DBNull.Value }
+                                       };
+
+            DataTable dtPartnerUserDetails = _helper.GetDataTable("[FieldWork].[GetPartnerUsers_UnApprovedFieldWorkHours_BulkEmail]", parameters);
+            StringBuilder sbLogData = new StringBuilder();
+            int totalFailure = 0;
+            int count = 0;
+            sbLogData.Append("<ol>");
+            for (int i = 0; i < dtPartnerUserDetails.Rows.Count; i++)
+            {
+                try
+                { 
+                    response = PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail(Convert.ToInt32(dtPartnerUserDetails.Rows[i]["CSSDTID"]));
+                    count++;
+                    string logSummary = $"{response.CommunitySiteUserName} mail sent to {response.CommunitySiteUserEmail} successfully.";
+                    sbLogData.Append($"<li>{logSummary}</li>");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"{input.Type} {input.Identifier} : {ex.Message}.");
+                    continue;
+                }
+            }
+            sbLogData.Append("</ol>");
+            //initiate logging
+            totalFailure = dtPartnerUserDetails.Rows.Count - count;
+            obj = GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
+            obj.IsSuccess = true;
             return obj;
         }
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)

@@ -762,6 +762,25 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("UnapprovedHoursByPartnerUser")]
+        public AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input)
+        {
+            try
+            {
+                AdhocMailLogResponse response = new AdhocMailLogResponse();
+                response = _fieldWorkService.SendNotificationforUnapprovedPartnerUser(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdhocMailLogResponse response = new AdhocMailLogResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Send mail , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         private string GetFolderName(int userId, int fieldWorkID)
         {
