@@ -706,81 +706,81 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("UpdateCommunitySiteSupervisorDemonstrationTeacherList")]
-        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
-        {
-            try
-            {
-                UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
-                response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(input);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
-                response.IsSuccess = false;
-                response.Message = "Failed to Update Community User List, please try after sometime";
-                response.StackTrace = ex.Message;
-                _logger.LogError(ex, ex.Message);
-                return response;
-            }
-        }
-        [HttpPost("PrerequisiteExpiredMail")]
-        public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
-        {
-            try
-            {
-                AdhocMailLogResponse response = new AdhocMailLogResponse();
-                response = _fieldWorkService.PrerequisiteExpired_Sendmail_To_Students(input);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                AdhocMailLogResponse response = new AdhocMailLogResponse();
-                response.IsSuccess = false;
-                response.Message = "Failed to Send mail , please try after sometime";
-                response.StackTrace = ex.Message;
-                _logger.LogError(ex, ex.Message);
-                return response;
-            }
-        }
-        [HttpPost("PrerequisiteApprovedMail")]
-        public AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input)
-        {
-            try
-            {
-                AdhocMailLogResponse response = _fieldWorkService.StudentsEnrolled_ApprovedDocuments_BulkEmail(input);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                AdhocMailLogResponse response = new AdhocMailLogResponse();
-                response.IsSuccess = false;
-                response.Message = "Failed to retrieve data , please try after sometime";
-                response.StackTrace = ex.Message;
-                _logger.LogError(ex, ex.Message);
-                return response;
-            }
-        }
-        [HttpPost("UnapprovedHoursByPartnerUser")]
-        public AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input)
-        {
-            try
-            {
-                AdhocMailLogResponse response = new AdhocMailLogResponse();
-                response = _fieldWorkService.SendNotificationforUnapprovedPartnerUser(input);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                AdhocMailLogResponse response = new AdhocMailLogResponse();
-                response.IsSuccess = false;
-                response.Message = "Failed to Send mail , please try after sometime";
-                response.StackTrace = ex.Message;
-                _logger.LogError(ex, ex.Message);
-                return response;
-            }
-        }
+        //[HttpPost("UpdateCommunitySiteSupervisorDemonstrationTeacherList")]
+        //public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
+        //{
+        //    try
+        //    {
+        //        UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+        //        response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to Update Community User List, please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("PrerequisiteExpiredMail")]
+        //public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
+        //{
+        //    try
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response = _fieldWorkService.PrerequisiteExpired_Sendmail_To_Students(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to Send mail , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("PrerequisiteApprovedMail")]
+        //public AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input)
+        //{
+        //    try
+        //    {
+        //        AdhocMailLogResponse response = _fieldWorkService.StudentsEnrolled_ApprovedDocuments_BulkEmail(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to retrieve data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("UnapprovedHoursByPartnerUser")]
+        //public AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input)
+        //{
+        //    try
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response = _fieldWorkService.SendNotificationforUnapprovedPartnerUser(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to Send mail , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
 
         private string GetFolderName(int userId, int fieldWorkID)
         {
