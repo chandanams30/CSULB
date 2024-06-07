@@ -1470,6 +1470,7 @@ namespace ThoughtFocus.Service.Implementation
                         string body = string.Empty;
                         string link = string.Empty;
                         bool RecommenderMailTemplateAttachement = false;
+                        int programID = 0;
 
                         recommenderURL = Convert.ToString(dsRec.Tables[0].Rows[0]["RecommenderURL"]);
                         body = Convert.ToString(dsRec.Tables[0].Rows[0]["MailBody"]);
@@ -1478,6 +1479,7 @@ namespace ThoughtFocus.Service.Implementation
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                         applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[0]["ApplicationDeadline"]);
                         RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
+                        programID = Convert.ToInt32(dsRec.Tables[0].Rows[0]["ProgramID"]); 
                         link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                         body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[RecommenderName]]", recommenderName)
@@ -1489,10 +1491,14 @@ namespace ThoughtFocus.Service.Implementation
                     if (RecommenderMailTemplateAttachement)
                     {
                         userFolderPath = "SupportFiles/EmailAttachments";
-                        templateFileName = "Recommender_Template.pdf";
+                        templateFileName = "Recommender_Template_" + programID + ".pdf";
                         byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
                         //_logger.LogInformation(fileContent.Length.ToString());
-                        
+                        if (fileContent == null || fileContent.Length < 1)
+                        {
+                            templateFileName = "Recommender_Template.pdf";
+                            fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                        }
                         if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
                         {
                             if (fileContent != null && fileContent.Length > 0)
