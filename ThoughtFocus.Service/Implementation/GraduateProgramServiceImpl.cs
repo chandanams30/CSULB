@@ -3415,6 +3415,141 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
 
         }
+        public BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
+                                          new SqlParameter("@ApplicationOpens", SqlDbType.DateTime) {Value = input.ApplicationOpens},
+                                          new SqlParameter("@ApplicationDeadline", SqlDbType.DateTime) {Value = input.ApplicationDeadline},
+                                          new SqlParameter("@ApplicationCloseDate", SqlDbType.DateTime) {Value = input.ApplicationCloseDate},
+                                          new SqlParameter("@Status", SqlDbType.Bit) {Value = input.Status}
+                                        };
+            try
+            {
+                int ID = _helper.InsertTable("[dbo].[UpdateProgramApplicationDates]", parameters);
+                response.Message = "Program application dates updated successfully";
+                response.IsSuccess = true;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                response.Message = ex.Message;
+                response.IsSuccess= false;
+            }
+            return response;
+        }
+        public ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode)
+        {
+            ProgramApplicationDates obj = new ProgramApplicationDates();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                        };
+
+            DataTable dtApplicationDates = _helper.GetDataTable("[dbo].[GetProgramApplicationDates]", parameters);
+            try
+            {
+                if (dtApplicationDates.Rows.Count > 0)
+                {
+                    obj = dtApplicationDates.AsEnumerable().Select(row =>
+                                              new ProgramApplicationDates
+                                              {
+                                                  ApplicationOpens = Convert.ToDateTime(row["ApplicationOpens"]),
+                                                  ApplicationDeadline = Convert.ToDateTime(row["ApplicationDeadline"]),
+                                                  ApplicationCloseDate = Convert.ToDateTime(row["ApplicationCloseDate"]),
+                                                  Status = Convert.ToBoolean(row["Status"])
+
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode)
+        {
+            ApplicationProgramResponse obj = new ApplicationProgramResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
+                                          new SqlParameter("@ApplicationTypeID", SqlDbType.Int, 50) { Value = applicationTypeID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                        };
+
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationProgramsforDates]", parameters);
+            try
+            {
+                if (dtApplicationPrograms.Tables.Count > 0)
+                {
+
+
+                    obj.ApplicationPrograms = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                              new ApplicationPrograms
+                                              {
+                                                  programID = Convert.ToInt32(row["ID"]),
+                                                  programName = Convert.ToString(row["Name"]),
+                                                  semester = Convert.ToString(row["Semester"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  applicationOpens = Convert.ToDateTime(row["ApplicationOpens"]),
+                                                  applicationCloseDate = Convert.ToDateTime(row["ApplicationCloseDate"]),
+                                                  TotalCount = Convert.ToInt32(row["TotalCount"]),
+                                                  AcceptedCount = Convert.ToInt32(row["AcceptedCount"]),
+                                                  showApply = Convert.ToBoolean(row["showApply"]),
+                                                  showView = Convert.ToBoolean(row["showView"]),
+                                                  ProgramSetting = Convert.ToString(row["ProgramSetting"]),
+                                                  SubmittedCount = Convert.ToInt32(row["SubmittedCount"])
+                                              }).ToList();
+
+                    obj.HeaderDetails = dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
+                                               new HeaderDetails
+                                               {
+                                                   semester = Convert.ToString(row["Semester"]),
+                                                   TermCode = Convert.ToString(row["TermCode"]),
+                                                   showApply = Convert.ToBoolean(row["showApply"]),
+                                                   showView = Convert.ToBoolean(row["showView"]),
+                                                   showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"]),
+                                                   showSettings = Convert.ToBoolean(row["showSettings"])
+                                               }).FirstOrDefault();
+
+                    obj.Semesters = dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
+                                             new Semester
+                                             {
+                                                 TermCode = Convert.ToString(row["TermCode"]),
+                                                 TermName = Convert.ToString(row["Semester"])
+                                             }).ToList();
+
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
     }
 
 

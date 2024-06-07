@@ -55,5 +55,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateRecommendation(UpdateRecommendation input);
         public BaseResponse DeleteRecommendation(DeleteRecommendations input);
         AdhocMailLogResponse SendNotificationforPendingRecommendations(PendingRecommendationsRequest input);
+        BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input);
+        ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode);
+        ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode);
     }
 }

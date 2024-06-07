@@ -965,5 +965,60 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("UpdateProgramApplicationDates")]
+        public BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateProgramApplicationDates(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update program application dates , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetProgramApplicationDates")]
+        public ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode)
+        {
+            try
+            {
+                ProgramApplicationDates response = new ProgramApplicationDates();
+                response = _graduateProgramService.GetProgramApplicationDates(programID,termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProgramApplicationDates response = new ProgramApplicationDates();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetApplicationProgramsforDates")]
+        public ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode)
+        {
+            try
+            {
+                ApplicationProgramResponse response = _graduateProgramService.GetApplicationProgramsforDates(userID, applicationTypeID, termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramResponse response = new ApplicationProgramResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
