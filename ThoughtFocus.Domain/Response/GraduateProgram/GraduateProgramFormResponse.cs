@@ -14,7 +14,10 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public FormControlHandler FormControlHandler { get; set; }
         public InstructorInformation Instructor { get; set; }
         public InterviwerInformation Interviewer { get; set; }
+        public ProgramCoordinator ProgramCoordinator { get; set; }
+        //public FinalDecisionJSON FinalDecision { get; set; }
     }
+
     public class FormBasicInformation
     {
         public int FormID { get; set; }
@@ -35,6 +38,9 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string ProgramFormIdentifier { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public DateTime? SubmittedDateTime { get; set; }
+        public int WaitlistNumber { get; set; }
+        public string WaitlistComments {  get; set; }
+        //public string FinalDecision { get; set; }
     }
     public class FormStateHandler
     {
@@ -89,4 +95,16 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public string Interviewer { get; set; }
     }
+    public class LatestWaitlistNumberResponse : BaseResponse
+    {
+        public int WaitlistNumber {  get; set; }
+    }
+    public class ProgramCoordinator
+    {
+        public string ProgramControll { get; set; }
+    }
+    //public class FinalDecisionJSON
+    //{
+    //    public string FinalDecision { get; set; }
+    //}
 }

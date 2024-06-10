@@ -29,4 +29,16 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public string ProgramFormIdentifier { get; set; }
         public List<FormAddRecommendationRequestAttachment> FormAddRecommendationRequestAttachment { get; set; }
     }
+    public class DeleteRecommendations
+    {
+        public int FormID { get; set; }
+        public int RecommendationID { get; set; }
+    }
+    public class UpdateRecommendation
+    {
+        public int FormID { get; set; }
+        public int RecommendationID { get; set; }
+        public string RecommenderEmail { get; set; }
+        public string RecommenderName { get; set; }
+    }
 }

@@ -9,6 +9,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public FieldWorkActivityLogByID DataByID { get; set; }
         public List<FieldWorkActivityLogStandardList> standardList { get; set; }
         public FieldWorkActivityLogHandler   ActivityLogHandler { get; set; }
+        public ValidateCommunitySiteSupervisorFieldWork ValidateCommunitySiteSupervisor { get; set; }
     }
     public class FieldWorkActivityLogStandardList
     {
@@ -45,5 +46,10 @@ namespace ThoughtFocus.Domain.Response.FieldWork
     public class FieldWorkSummary
     {
         public string fieldWorkSummary { get; set; }
+    }
+    public class ValidateCommunitySiteSupervisorFieldWork
+    {
+        public int Status {  get; set; }
+        public string Message {  get; set; }
     }
 }

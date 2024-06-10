@@ -44,6 +44,10 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string EducationalLeaveTerm { get; set; }
         public string Credential { get; set; }
         public string Certificate { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string SSNNumber { get; set; }
+        public string AcademicIntegrityStatement { get; set; }
+        public DateTime SubmittedDate { get; set; }
     }
     public class StudentProfileSearchResponse : BaseResponse
     {
@@ -61,9 +65,60 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     {
         public StudentProfileMessageBoard studentProfileMessageBoards { get; set; }
     }
+    public class SemesterTermListResponse : BaseResponse
+    {
+        public List<SemesterTerm> SemesterTerms { get; set; }
+    }
+    public class ApplicationProgramListResponse: BaseResponse
+    {
+        public List<ApplicationProgramList> ApplicationProgramList { get; set; }
+    }
+    public class StudentAppliedFormsByProgramsResponse : BaseResponse
+    {
+        public List<StudentAppliedFormsByPrograms> StudentAppliedFormsByPrograms { get; set; }
+        public int SSNSessionTimeOut {  get; set; }
+    }
+
+    public class StudentAppliedFormsByPrograms
+    {
+        public int FormID { get; set; }
+        public string StudentFirstName { get; set; }
+        public string StudentLastName { get; set; }
+        public string Email { get; set; }
+        public string CSULBID { get; set; }
+        public string ApplicationTypeName { get; set; }
+        public int UserID { get; set; }
+        public string TermCode { get; set; }
+        public int ProgramID { get; set; }
+        public string ProgramName { get; set; }
+        public int ApplicantTypeID { get; set; }
+        public string Semester { get; set; }
+        public string Status { get; set; }
+        public DateTime DOB { get; set; }
+        public string SSN { get; set; }
+    }
     public class StudentProfileMessageBoard
     {
         public string CSULBID { get; set; }
         public string MessageBoard { get; set; }
     }
+    public class ApplicationList
+    {
+        public int ApplicationId { get; set; }
+        public string ApplicationName { get; set; }
+    }
+    public class SemesterTerm
+    {
+        public string TermCode { get; set; }
+        public string TermName { get; set; }
+        //public int ApplicationId { get; set; }
+    }
+    public class ApplicationProgramList
+    {
+        public int programID { get; set; }
+        public string programName { get; set; }
+        public string semester { get; set; }
+        public string TermCode { get; set; }
+    }
+
 }

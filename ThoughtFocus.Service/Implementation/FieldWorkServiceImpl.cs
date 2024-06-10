@@ -13,6 +13,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -447,7 +448,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FileExtn", SqlDbType.VarChar, 20) { Value = fileExtension },
                                           new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
                                           new SqlParameter("@ValidTill", SqlDbType.DateTime) { Value = input.ValidTill },
-                                          new SqlParameter("@Comments", SqlDbType.VarChar, -1) { Value = input.Comments }
+                                          new SqlParameter("@Comments", SqlDbType.VarChar, -1) { Value = input.Comments },
+                                          new SqlParameter("@UploadedDate", SqlDbType.DateTime) { Value = input.UploadedDate}
                                         };
             DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UpdateFieldWorkRequiredDocuments]", parameters);
             if (dtFWDoc.Rows.Count > 0 && input.FileName != string.Empty)
@@ -635,6 +637,15 @@ namespace ThoughtFocus.Service.Implementation
             FieldWorkActivityLogByIDResponse obj = new FieldWorkActivityLogByIDResponse();
 
             obj = GetFielWorkActivityLogByID(input.UserID, activityLogID);
+            if (dtActivityLog.Rows.Count > 0)
+            {
+                obj.ValidateCommunitySiteSupervisor = dtActivityLog.AsEnumerable().Select(row =>
+                                                  new ValidateCommunitySiteSupervisorFieldWork
+                                                  {
+                                                      Status = Convert.ToInt32(row["Status"]),
+                                                      Message = Convert.ToString(row["Message"])
+                                                  }).FirstOrDefault();
+            }
 
 
             //int ID = _helper.InsertTable("[dbo].[SaveFieldWorkActivityLog]", parameters);
@@ -2018,6 +2029,30 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
+        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
+        {
+            UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse obj = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@CssdtID", SqlDbType.BigInt) { Value = input.cssdtID},
+                                          new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar, 200) { Value = input.communitySiteUserEmail }
+                                     };
+            DataTable dtCommunityData = _helper.GetDataTable("[FieldWork].[PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList]", parameters);
+            if (dtCommunityData.Rows.Count > 0)
+            {
+                obj = dtCommunityData.AsEnumerable().Select(row =>
+                                                  new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse
+                                                  {
+                                                      CssdtID = Convert.ToInt32(row["CssdtID"]),
+                                                      status = Convert.ToBoolean(row["Status"]),
+                                                      message = Convert.ToString(row["Message"]).Replace("  ", "").Trim()
+                                                  }).FirstOrDefault();
+            }
+            obj.IsSuccess = true;
+            //obj.Message = "Community User Data Updated Successfully";
+            return obj;
+        }
         private byte[] DownloadActivityLogsContent(DataSet dsFieldWorkData)
         {
             byte[] inputStream = null;
@@ -2101,6 +2136,184 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[approvedHours]]", approvedHours.ToString());
             inputStream = GetPDFFileContentAsLandscape(template);
             return inputStream;
+        }
+        public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
+        {
+            AdhocMailLogResponse obj = new AdhocMailLogResponse();
+            DataTable dtPreqList = _helper.GetDataTable("[FieldWork].[GetExpiredPrerequisiteStudentList]", null);
+            StringBuilder sbLogData = new StringBuilder();
+            sbLogData.Append("<ol>"); 
+            int totalFailure = 0;
+            if (dtPreqList.Rows.Count > 0)
+            {
+                string subject = "MyCED prerequisites expired";
+                string logoText = "cid:myImageID";
+                int count = 0;
+                for (int i = 0; i < dtPreqList.Rows.Count; i++)
+                {
+                    DataRow row = dtPreqList.Rows[i];
+                    string applicantName = Convert.ToString(row["ApplicantName"]);
+                    string applicantEmail = Convert.ToString(row["Email"]);
+                    string CSULBID = Convert.ToString(row["CSULBID"]);
+                    try
+                    {
+                        string body = GetMailBodyTemplate("Prerequisite_Expired_Mail.html");
+                        body = body.Replace("[[logoPath]]", logoText)
+                                  .Replace("[[ApplicantName]]", applicantName);
+                        _sendMail.SendEmail(applicantEmail, "", "COMMON", subject, body, "");
+                        count++;
+                        string logSummary = $"{applicantName} {CSULBID} mail sent to {applicantEmail} successfully.";
+                        sbLogData.Append($"<li>{logSummary}</li>");
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"{input.Type} {input.Identifier} : {ex.Message}.");
+                        continue;
+                    }
+                }
+                sbLogData.Append("</ol>");
+                //initiate logging
+                totalFailure = dtPreqList.Rows.Count - count;
+                obj=GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
+                obj.IsSuccess = true;
+                //obj.Message = "Prerequisites Expired mail sent successfully";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data Present.";
+            }
+
+
+            return obj;
+        }
+        public AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input)
+        {
+                AdhocMailLogResponse obj = new AdhocMailLogResponse(); 
+                SqlParameter[] parameters = {
+                                                new SqlParameter("@TermCode", SqlDbType.NVarChar, 255) { Value = (object)input.TermCode ?? DBNull.Value }
+                                            };
+
+                DataTable dtStudentsInfo = _helper.GetDataTable("[FieldWork].[GetStudentsEnrolled_ApprovedDocuments_BulkEmail]", parameters);
+                StringBuilder sbLogData = new StringBuilder();
+                sbLogData.Append("<ol>");
+                int count = 0;
+                int totalFailure = 0;
+                if (dtStudentsInfo.Rows.Count > 0 && dtStudentsInfo != null)
+                {
+                    for (int i = 0; i < dtStudentsInfo.Rows.Count; i++)
+                    {
+                        try
+                        {
+                            int FieldWorkID = Convert.ToInt32(dtStudentsInfo.Rows[i]["FieldWorkID"]);
+                            EmailMessageModel emailModel = GetMessageBody(FieldWorkID);
+                            // check the prerequisite status and send mail to student 
+                            if (!String.IsNullOrEmpty(emailModel.Body))
+                            {
+                                string toUser = emailModel.toEmail;
+                                string body = GetMailBodyTemplate("FinalApprovedTemplate.html");
+                                string logoText = "cid:myImageID";
+                                body = body.Replace("[[logoPath]]", logoText).Replace("[[ApplicantName]]", emailModel.ApplicantName);
+                                string subject = "MyCED prerequisites review completed";
+                                _sendMail.SendEmail(toUser, "", "COMMON", subject, body, emailModel.Body);
+                                count++;
+                                string logSummary = $"{emailModel.ApplicantName} {emailModel.CSULBID} mail sent to {toUser} successfully.";
+                                sbLogData.Append($"<li>{logSummary}</li>");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"{input.Type} {input.Identifier} : {ex.Message}.");
+                            continue;
+                        }
+                    }
+                    sbLogData.Append("</ol>");
+                    //initiate logging
+                    totalFailure = dtStudentsInfo.Rows.Count - count;
+                    obj = GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
+                    obj.IsSuccess = true;
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present.";
+                }
+            return obj;
+        }
+        public AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input)
+        {
+            AdhocMailLogResponse obj = new AdhocMailLogResponse();
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail();
+            SqlParameter[] parameters =
+                                       {
+                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 50) { Value = (object)input.TermCode ?? DBNull.Value }
+                                       };
+
+            DataTable dtPartnerUserDetails = _helper.GetDataTable("[FieldWork].[GetPartnerUsers_UnApprovedFieldWorkHours_BulkEmail]", parameters);
+            StringBuilder sbLogData = new StringBuilder();
+            int totalFailure = 0;
+            int count = 0;
+            sbLogData.Append("<ol>");
+            for (int i = 0; i < dtPartnerUserDetails.Rows.Count; i++)
+            {
+                try
+                { 
+                    response = PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail(Convert.ToInt32(dtPartnerUserDetails.Rows[i]["CSSDTID"]));
+                    count++;
+                    string logSummary = $"{response.CommunitySiteUserName} mail sent to {response.CommunitySiteUserEmail} successfully.";
+                    sbLogData.Append($"<li>{logSummary}</li>");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"{input.Type} {input.Identifier} : {ex.Message}.");
+                    continue;
+                }
+            }
+            sbLogData.Append("</ol>");
+            //initiate logging
+            totalFailure = dtPartnerUserDetails.Rows.Count - count;
+            obj = GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
+            obj.IsSuccess = true;
+            return obj;
+        }
+        public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
+        {
+            AdhocMailLogResponse obj = new AdhocMailLogResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@Type", SqlDbType.NVarChar,100) { Value = type},
+                                          new SqlParameter("@Identifier", SqlDbType.NVarChar, 50) { Value = identifier },
+                                          new SqlParameter("@LogSummary", SqlDbType.NVarChar, -1) { Value = sbLogData.ToString() },
+                                          new SqlParameter("@TotalSent", SqlDbType.BigInt) { Value = count },
+                                          new SqlParameter("@TotalFailure", SqlDbType.BigInt) { Value = totalFailure },
+                                          new SqlParameter("@TriggeredBy", SqlDbType.BigInt) { Value = userID }
+                                     };
+            DataTable dtMailDetails = _helper.GetDataTable("[dbo].[Upsert_Adhoc_Mail_Notification_Log]", parameters);
+            if (dtMailDetails.Rows.Count > 0)
+            {
+                obj = dtMailDetails.AsEnumerable().Select(row =>
+                                                  new AdhocMailLogResponse
+                                                  {
+                                                      ID = Convert.ToInt32(row["ID"]),
+                                                      Type = Convert.ToString(row["Type"]),
+                                                      Identifier = Convert.ToString(row["Identifier"]),
+                                                      LogSummary = Convert.ToString(row["LogSummary"]),
+                                                      TotalSent = Convert.ToInt32(row["TotalSent"]),
+                                                      TotalFailure = Convert.ToInt32(row["TotalFailure"]),
+                                                      TriggeredBy = Convert.ToInt32(row["TriggeredBy"]),
+                                                      TriggeredDate = Convert.ToDateTime(row["TriggeredDate"])
+                                                  }).FirstOrDefault();
+
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data Present in Adhoc_Mail_Notification_Log table .";
+            }
+            return obj;
         }
         private string ConstructActivityLogRows(string activityStartDate, string activityEndDate,string site, string hours,string schoolDistrict,string supervisorName,string dropdown1,string dropdown2,string description,string status)
         {

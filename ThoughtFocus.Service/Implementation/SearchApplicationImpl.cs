@@ -52,6 +52,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   TermCode = row["TermCode"]==DBNull.Value?"": Convert.ToString(row["TermCode"]),
                                                   ProgramID = row["ProgramID"]==DBNull.Value?(int?)null: Convert.ToInt32(row["ProgramID"]),
                                                   ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"])
+                                                  //ProgramName = Convert.ToString(row["ProgramName"]),
+                                                  //Term = Convert.ToString(row["Term"]),
+                                                  //Status = Convert.ToString(row["Status"])
 
                                               }).ToList();
                 obj.IsSuccess = true;

@@ -5,12 +5,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
+using ThoughtFocus.Domain.Request.FieldWork;
 
 namespace CSULB_COE.Controllers
 {
@@ -834,7 +837,81 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetLatestWaitlistNumber")]
+        public LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID,int FormID)
+        {
+            try
+            {
+                LatestWaitlistNumberResponse response = new LatestWaitlistNumberResponse();
+                response = _graduateProgramService.GetLatestWaitlistNumber(TermCode,ProgramID, FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                LatestWaitlistNumberResponse response = new LatestWaitlistNumberResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        //[HttpPost("BulkOfferNotOfferUpdateFormState")]
+        //public BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input)
+        //{
+        //    try
+        //    {
+        //        BaseResponse response = _graduateProgramService.BulkOfferNotOfferUpdateFormState(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        BaseResponse response = new BaseResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to save data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("UpdateRecommendation")]
+        //public BaseResponse UpdateRecommendation(UpdateRecommendation input)
+        //{
+        //    try
+        //    {
 
+        //        BaseResponse response = _graduateProgramService.UpdateRecommendation(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        BaseResponse response = new BaseResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to update recommendation data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("DeleteRecommendation")]
+        //public BaseResponse DeleteRecommendation(DeleteRecommendations input)
+        //{
+        //    try
+        //    {
+
+        //        BaseResponse response = _graduateProgramService.DeleteRecommendation(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        BaseResponse response = new BaseResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to delete recommendation data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
 
 
         private string GetFileType(string fileExt)
@@ -868,5 +945,80 @@ namespace CSULB_COE.Controllers
             return contentType;
         }
 
+
+        //[HttpPost("SendMailtoPendingRecommendations")]
+        //public AdhocMailLogResponse SendMailtoPendingRecommendations(PendingRecommendationsRequest input)
+        //{
+        //    try
+        //    {
+        //        AdhocMailLogResponse response = _graduateProgramService.SendNotificationforPendingRecommendations(input);
+
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "There is an error while sending the notifications, please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("UpdateProgramApplicationDates")]
+        //public BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input)
+        //{
+        //    try
+        //    {
+        //        BaseResponse response = _graduateProgramService.UpdateProgramApplicationDates(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        BaseResponse response = new BaseResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to update program application dates , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpGet("GetProgramApplicationDates")]
+        //public ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode)
+        //{
+        //    try
+        //    {
+        //        ProgramApplicationDates response = new ProgramApplicationDates();
+        //        response = _graduateProgramService.GetProgramApplicationDates(programID,termCode);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ProgramApplicationDates response = new ProgramApplicationDates();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to retrieve data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpGet("GetApplicationProgramsforDates")]
+        //public ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode)
+        //{
+        //    try
+        //    {
+        //        ApplicationProgramResponse response = _graduateProgramService.GetApplicationProgramsforDates(userID, applicationTypeID, termCode);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ApplicationProgramResponse response = new ApplicationProgramResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to retrieve data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
     }
 }

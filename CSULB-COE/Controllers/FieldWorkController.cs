@@ -97,7 +97,7 @@ namespace CSULB_COE.Controllers
             #region testing with manual file , actual file will come as byte array 
             //-------------just for testing - comment it after testing
             //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
-            //string filepath = "D:\\CSULB\\GitHub\\Documents\\test500kb.pdf";
+            //string filepath = "D:\\CSULB\\Document\\TBCTC_Approval.pdf";
             //byte[] fileContent = null;
             //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
             //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
@@ -706,6 +706,81 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        //[HttpPost("UpdateCommunitySiteSupervisorDemonstrationTeacherList")]
+        //public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
+        //{
+        //    try
+        //    {
+        //        UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+        //        response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to Update Community User List, please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("PrerequisiteExpiredMail")]
+        //public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
+        //{
+        //    try
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response = _fieldWorkService.PrerequisiteExpired_Sendmail_To_Students(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to Send mail , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("PrerequisiteApprovedMail")]
+        //public AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input)
+        //{
+        //    try
+        //    {
+        //        AdhocMailLogResponse response = _fieldWorkService.StudentsEnrolled_ApprovedDocuments_BulkEmail(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to retrieve data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        //[HttpPost("UnapprovedHoursByPartnerUser")]
+        //public AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input)
+        //{
+        //    try
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response = _fieldWorkService.SendNotificationforUnapprovedPartnerUser(input);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AdhocMailLogResponse response = new AdhocMailLogResponse();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to Send mail , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
 
         private string GetFolderName(int userId, int fieldWorkID)
         {

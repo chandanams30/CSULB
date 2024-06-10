@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.StudentProfile;
@@ -27,6 +28,7 @@ namespace CSULB_COE.Controllers
             _studentProfileService = studentProfileService;
             _configuration = configuration;
         }
+        //feches student profile data
         [HttpGet("GetStudentProfileData")]
         public StudentProfileResponse GetStudentProfileData(string CsulbId)
         {
@@ -45,6 +47,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        //Student profile search
         [HttpGet("GetStudentProfileSearchData")]
         public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
         {
@@ -101,5 +104,95 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("SaveStudentProfileData")]
+        public BaseResponse SaveStudentProfileData(SaveStudentProfileDataRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentProfileService.SaveStudentProfileData(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetApplicationList")]
+        public IActionResult GetApplicationList(int userId)
+        {
+            try
+            {
+                List<ApplicationList> response = _studentProfileService.GetApplications(userId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest();
+            }
+
+        }
+        [HttpGet("GetSemesterTermList")]
+        public SemesterTermListResponse GetSemesterTermList(int applicationId)
+        {
+            try
+            {
+                SemesterTermListResponse response = _studentProfileService.GetSemesterList(applicationId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                SemesterTermListResponse response = new SemesterTermListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetApplicationProgramList")]
+        public ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode)
+        {
+            try
+            {
+                ApplicationProgramListResponse response = _studentProfileService.GetApplicationProgramList(userID, applicationTypeID, termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramListResponse response = new ApplicationProgramListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetStudentAppliedFormsByPrograms")]
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms( int programID, string termCode,string CSULBID )
+        {
+            try
+            {
+                StudentAppliedFormsByProgramsResponse response = _studentProfileService.GetStudentAppliedFormsByPrograms( programID, termCode,CSULBID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentAppliedFormsByProgramsResponse response = new StudentAppliedFormsByProgramsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
     }
 }
