@@ -856,62 +856,62 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        //[HttpPost("BulkOfferNotOfferUpdateFormState")]
-        //public BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input)
-        //{
-        //    try
-        //    {
-        //        BaseResponse response = _graduateProgramService.BulkOfferNotOfferUpdateFormState(input);
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        BaseResponse response = new BaseResponse();
-        //        response.IsSuccess = false;
-        //        response.Message = "Failed to save data , please try after sometime";
-        //        response.StackTrace = ex.Message;
-        //        _logger.LogError(ex, ex.Message);
-        //        return response;
-        //    }
-        //}
-        //[HttpPost("UpdateRecommendation")]
-        //public BaseResponse UpdateRecommendation(UpdateRecommendation input)
-        //{
-        //    try
-        //    {
+        [HttpPost("BulkOfferNotOfferUpdateFormState")]
+        public BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.BulkOfferNotOfferUpdateFormState(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateRecommendation")]
+        public BaseResponse UpdateRecommendation(UpdateRecommendation input)
+        {
+            try
+            {
 
-        //        BaseResponse response = _graduateProgramService.UpdateRecommendation(input);
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        BaseResponse response = new BaseResponse();
-        //        response.IsSuccess = false;
-        //        response.Message = "Failed to update recommendation data , please try after sometime";
-        //        response.StackTrace = ex.Message;
-        //        _logger.LogError(ex, ex.Message);
-        //        return response;
-        //    }
-        //}
-        //[HttpPost("DeleteRecommendation")]
-        //public BaseResponse DeleteRecommendation(DeleteRecommendations input)
-        //{
-        //    try
-        //    {
+                BaseResponse response = _graduateProgramService.UpdateRecommendation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update recommendation data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("DeleteRecommendation")]
+        public BaseResponse DeleteRecommendation(DeleteRecommendations input)
+        {
+            try
+            {
 
-        //        BaseResponse response = _graduateProgramService.DeleteRecommendation(input);
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        BaseResponse response = new BaseResponse();
-        //        response.IsSuccess = false;
-        //        response.Message = "Failed to delete recommendation data , please try after sometime";
-        //        response.StackTrace = ex.Message;
-        //        _logger.LogError(ex, ex.Message);
-        //        return response;
-        //    }
-        //}
+                BaseResponse response = _graduateProgramService.DeleteRecommendation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete recommendation data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
 
         private string GetFileType(string fileExt)

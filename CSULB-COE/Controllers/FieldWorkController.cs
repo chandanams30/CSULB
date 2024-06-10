@@ -706,25 +706,25 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        //[HttpPost("UpdateCommunitySiteSupervisorDemonstrationTeacherList")]
-        //public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
-        //{
-        //    try
-        //    {
-        //        UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
-        //        response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(input);
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
-        //        response.IsSuccess = false;
-        //        response.Message = "Failed to Update Community User List, please try after sometime";
-        //        response.StackTrace = ex.Message;
-        //        _logger.LogError(ex, ex.Message);
-        //        return response;
-        //    }
-        //}
+        [HttpPost("UpdateCommunitySiteSupervisorDemonstrationTeacherList")]
+        public UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input)
+        {
+            try
+            {
+                UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+                response = _fieldWorkService.PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse response = new UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Update Community User List, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         //[HttpPost("PrerequisiteExpiredMail")]
         //public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
         //{
