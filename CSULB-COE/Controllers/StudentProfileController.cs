@@ -28,6 +28,7 @@ namespace CSULB_COE.Controllers
             _studentProfileService = studentProfileService;
             _configuration = configuration;
         }
+        //feches student profile data
         [HttpGet("GetStudentProfileData")]
         public StudentProfileResponse GetStudentProfileData(string CsulbId)
         {
