@@ -222,8 +222,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   GridNotes = Convert.ToString(row["GridNotes"]),
                                                   ReviewerRecommendation = Convert.ToString(row["ReviewerRecommendation"]),
                                                   FinalDecision = Convert.ToString(row["FinalDecision"]),
-                                                  WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"])
-                                                  //ShowBulkCheckBox = Convert.ToBoolean(row["ShowBulkCheckBox"])
+                                                  WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"]),
+                                                  ShowBulkCheckBox = Convert.ToBoolean(row["ShowBulkCheckBox"])
                                               }).ToList();
                     }
                     if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
@@ -235,9 +235,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   TermCode = Convert.ToString(row["TermCode"]),
                                                   programName = Convert.ToString(row["ProgramName"]),
                                                   programID = Convert.ToInt32(row["ProgramID"]),
-                                                  showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"])
-                                                  //showBulkDeny = Convert.ToBoolean(row["showBulkDeny"]),
-                                                  //showBulkOffer = Convert.ToBoolean(row["showBulkOffer"]),
+                                                  showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"]),
+                                                  showBulkDeny = Convert.ToBoolean(row["showBulkDeny"]),
+                                                  showBulkOffer = Convert.ToBoolean(row["showBulkOffer"]),
 
                                               }).FirstOrDefault();
                     }
@@ -384,8 +384,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    CreatedDateTime = Convert.ToDateTime(row["CreatedDateTime"]),
                                                    SubmittedDateTime = Convert.ToDateTime(row["SubmittedDateTime"] == DBNull.Value ? null : row["SubmittedDateTime"]),
                                                    WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"] == DBNull.Value ? null : row["WaitlistNumber"]),
-                                                   WaitlistComments = Convert.ToString(row["WaitlistComments"] == DBNull.Value ? null : row["WaitlistComments"])
-                                                   //FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ?null : row["FinalDecision"])
+                                                   WaitlistComments = Convert.ToString(row["WaitlistComments"] == DBNull.Value ? null : row["WaitlistComments"]),
+                                                   FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecision"])
 
                                                }).FirstOrDefault();
 
@@ -453,11 +453,11 @@ namespace ThoughtFocus.Service.Implementation
                         }: null
                         ).FirstOrDefault();
 
-                    //obj.FinalDecision = dtFormData.Tables[9].AsEnumerable().Select(row =>
-                    //    new FinalDecisionJSON
-                    //    {
-                    //        FinalDecision = Convert.ToString(row["FinalDecision"])
-                    //    }).FirstOrDefault();
+                    obj.FinalDecision = dtFormData.Tables[9].AsEnumerable().Select(row =>
+                        new FinalDecisionJSON
+                        {
+                            FinalDecision = Convert.ToString(row["FinalDecision"])
+                        }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -942,8 +942,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
                                           new SqlParameter("@FormStateID", SqlDbType.Int) { Value = input.FormStateID },
                                           new SqlParameter("@WaitlistNumber", SqlDbType.BigInt) { Value = input.WaitlistNumber},
-                                          new SqlParameter("@WaitlistComments", SqlDbType.NVarChar,500) { Value = input.WaitlistComments }
-                                          //new SqlParameter("@FinalDecision", SqlDbType.BigInt) { Value = input.FinalDecision }
+                                          new SqlParameter("@WaitlistComments", SqlDbType.NVarChar,500) { Value = input.WaitlistComments },
+                                          new SqlParameter("@FinalDecision", SqlDbType.BigInt) { Value = input.FinalDecision }
                                         };
             int id = _helper.InsertTable("[dbo].[UpdateFormState]", parameters);
             // check if the form state ID is submit then Send mails to Recommenders and applicant .
@@ -952,10 +952,10 @@ namespace ThoughtFocus.Service.Implementation
             {
                 sendFormSubmitted(input.UserID,input.FormID,input.ProgramID,input.TermCode);
             }
-            //else if (input.FormStateID == 10 || input.FormStateID == 11 )
-            //{
-            //    sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode,input.FormStateID);
-            //}
+            else if (input.FormStateID == 10 || input.FormStateID == 11)
+            {
+                sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode, input.FormStateID);
+            }
             response.IsSuccess = true;
             response.Message = "Data updated successfully";
             return response;

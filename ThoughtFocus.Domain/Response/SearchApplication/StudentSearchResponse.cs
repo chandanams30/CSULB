@@ -20,9 +20,9 @@ namespace ThoughtFocus.Domain.Response.SearchApplication
         public string TermCode { get; set; }
         public int? ProgramID { get; set; }
         public int ApplicationTypeID { get; set; }
-        //public string ProgramName { get; set; }
-        //public string Term { get; set; }
-        //public string Status {  get; set; }
+        public string ProgramName { get; set; }
+        public string Term { get; set; }
+        public string Status { get; set; }
 
     }
 }
