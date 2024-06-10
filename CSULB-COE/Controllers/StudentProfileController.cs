@@ -47,6 +47,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        //Student profile search
         [HttpGet("GetStudentProfileSearchData")]
         public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
         {
