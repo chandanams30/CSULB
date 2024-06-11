@@ -1069,15 +1069,18 @@ namespace ThoughtFocus.Service.Implementation
                 //applicantEmail = "chandana.shankaregowda@thoughtfocus.com";
                 programName = applicantInfo.Rows[0]["ProgramName"].ToString();
             }
-            EmailResult emailResult = GetMailTemplate(templateName,input,programName,logoText,applicantName,date,signatureText);
-            try
+            if (input.Status != string.Empty)
             {
-                _sendMail.SendEmail(applicantEmail, "", "COMMON", emailResult.Subject, emailResult.Body, "");
-            }
-            catch (Exception ee)
-            {
-                obj.IsSuccess = false;
-                obj.Message = "BSR/SMC/GPA submit or not submitted status send mail failure.";
+                EmailResult emailResult = GetMailTemplate(templateName, input, programName, logoText, applicantName, date, signatureText);
+                try
+                {
+                    _sendMail.SendEmail(applicantEmail, "", "COMMON", emailResult.Subject, emailResult.Body, "");
+                }
+                catch (Exception ee)
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "BSR/SMC/GPA submit or not submitted status send mail failure.";
+                }
             }
 
             obj.IsSuccess = true;
