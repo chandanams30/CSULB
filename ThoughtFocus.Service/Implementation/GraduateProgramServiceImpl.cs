@@ -223,7 +223,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   ReviewerRecommendation = Convert.ToString(row["ReviewerRecommendation"]),
                                                   FinalDecision = Convert.ToString(row["FinalDecision"]),
                                                   WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"]),
-                                                  ShowBulkCheckBox = Convert.ToBoolean(row["ShowBulkCheckBox"])
+                                                  ShowBulkCheckBox = Convert.ToBoolean(row["ShowBulkCheckBox"]),
+                                                  Email = Convert.ToString(row["Email"]),
+                                                  AlternateEmail = Convert.ToString(row["AlternateEmail"])
                                               }).ToList();
                     }
                     if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
