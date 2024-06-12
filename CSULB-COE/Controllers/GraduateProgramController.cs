@@ -1020,5 +1020,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("RevertBackToPreviousState")]
+        public BaseResponse RevertBacktoPreviousState(int formID)
+        {
+            try
+            {
+
+                BaseResponse response = _graduateProgramService.RevertBacktoPreviousState(formID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Revert Back to Previous State , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
