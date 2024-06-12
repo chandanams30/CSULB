@@ -283,7 +283,12 @@ namespace ThoughtFocus.Service.Implementation
                                                   StateID = Convert.ToInt32(row["StateID"]),
                                                   StateName = Convert.ToString(row["StateName"])
                                               }).ToList();
-
+                    var deletedState = obj.FormStates.FirstOrDefault(state => state.StateID == -1 && state.StateName == "Deleted");
+                    if (deletedState != null)
+                    {
+                        obj.FormStates.Remove(deletedState);
+                        obj.FormStates.Add(deletedState);
+                    }
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -3564,6 +3569,19 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        public BaseResponse RevertBacktoPreviousState(int formID)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID }
+                                        };
+
+            int ID = _helper.InsertTable("[dbo].[RevertBacktoPreviousState]", parameters);
+            response.Message = "Reverted Back to Previous State Successfully";
+            response.IsSuccess = true;
+            return response;
         }
     }
 
