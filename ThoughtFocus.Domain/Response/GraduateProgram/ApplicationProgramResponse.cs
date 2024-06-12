@@ -38,5 +38,6 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public int programID { get; set; }
         public bool showBulkDeny { get; set; }
         public bool showBulkOffer { get; set; }
+        public bool showRevertBack { get; set; }
     }
 }
