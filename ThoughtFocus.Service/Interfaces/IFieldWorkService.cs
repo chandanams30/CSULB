@@ -5,6 +5,8 @@ using System.Text;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.GraduateProgram;
+
 namespace ThoughtFocus.Service.Interfaces
 {
     public interface IFieldWorkService
@@ -50,5 +52,6 @@ namespace ThoughtFocus.Service.Interfaces
         AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input);
         AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID);
         AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input);
+        SemesterListResponse GetFieldWorkTerms();
     }
 }

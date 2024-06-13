@@ -25,6 +25,7 @@ using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Interfaces;
 using static ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata;
@@ -2276,6 +2277,39 @@ namespace ThoughtFocus.Service.Implementation
             totalFailure = dtPartnerUserDetails.Rows.Count - count;
             obj = GetAdocMailLogDetails(input.Type, input.Identifier, sbLogData.ToString(), count, totalFailure, input.UserID);
             obj.IsSuccess = true;
+            return obj;
+        }
+        public SemesterListResponse GetFieldWorkTerms()
+        {
+            SemesterListResponse obj = new SemesterListResponse();
+            SqlParameter[] parameters = { };
+            DataTable dtSemesters = _helper.GetDataTable("[FieldWork].[GetFieldWorkTerms]", parameters);
+            try
+            {
+                if (dtSemesters.Rows.Count > 0)
+                {
+                    obj.Semesters = dtSemesters.AsEnumerable().Select(row =>
+                                              new Domain.Response.GraduateProgram.Semester
+                                              {
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  TermName = Convert.ToString(row["Description"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
             return obj;
         }
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
