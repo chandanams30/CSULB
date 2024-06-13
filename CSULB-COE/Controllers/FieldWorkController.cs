@@ -12,6 +12,7 @@ using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
@@ -776,6 +777,24 @@ namespace CSULB_COE.Controllers
                 AdhocMailLogResponse response = new AdhocMailLogResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to Send mail , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFieldWorkTerms")]
+        public SemesterListResponse GetFieldWorkTerms()
+        {
+            try
+            {
+                SemesterListResponse response = _fieldWorkService.GetFieldWorkTerms();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                SemesterListResponse response = new SemesterListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;
