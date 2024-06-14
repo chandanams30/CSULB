@@ -957,7 +957,20 @@ namespace ThoughtFocus.Service.Implementation
             // getFormDetailsByFormID
             if (input.FormStateID == 3)
             {
-                sendFormSubmitted(input.UserID,input.FormID,input.ProgramID,input.TermCode);
+                SqlParameter[] parameter =
+                                  {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID }
+                                  };
+                DataTable dt = _helper.GetDataTable("[dbo].[SendSubmittedMailNotifications]", parameter);
+                bool sendSubmittedMail=false;
+                if (dt.Rows.Count > 0)
+                {
+                    sendSubmittedMail = Convert.ToBoolean(dt.Rows[0]["SendSubmittedMail"]);
+                    if (sendSubmittedMail == true)
+                    {
+                        sendFormSubmitted(input.UserID, input.FormID, input.ProgramID, input.TermCode);
+                    }
+                }
             }
             //else if (input.FormStateID == 10 || input.FormStateID == 11 )
             //{
