@@ -52,6 +52,6 @@ namespace ThoughtFocus.Service.Interfaces
         AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input);
         AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID);
         AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input);
-        SemesterListResponse GetFieldWorkTerms();
+        FieldWorkSemesterList GetFieldWorkTerms();
     }
 }

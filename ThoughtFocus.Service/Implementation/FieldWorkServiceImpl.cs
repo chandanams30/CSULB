@@ -2279,9 +2279,9 @@ namespace ThoughtFocus.Service.Implementation
             obj.IsSuccess = true;
             return obj;
         }
-        public SemesterListResponse GetFieldWorkTerms()
+        public FieldWorkSemesterList GetFieldWorkTerms()
         {
-            SemesterListResponse obj = new SemesterListResponse();
+            FieldWorkSemesterList obj = new FieldWorkSemesterList();
             SqlParameter[] parameters = { };
             DataTable dtSemesters = _helper.GetDataTable("[FieldWork].[GetFieldWorkTerms]", parameters);
             try
@@ -2289,10 +2289,10 @@ namespace ThoughtFocus.Service.Implementation
                 if (dtSemesters.Rows.Count > 0)
                 {
                     obj.Semesters = dtSemesters.AsEnumerable().Select(row =>
-                                              new Domain.Response.GraduateProgram.Semester
+                                              new FieldWorkSemester
                                               {
-                                                  TermCode = Convert.ToString(row["TermCode"]),
-                                                  TermName = Convert.ToString(row["Description"])
+                                                  Value = Convert.ToString(row["TermCode"]),
+                                                  Label = Convert.ToString(row["Description"])
                                               }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
