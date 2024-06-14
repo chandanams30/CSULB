@@ -783,16 +783,16 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetFieldWorkTerms")]
-        public SemesterListResponse GetFieldWorkTerms()
+        public FieldWorkSemesterList GetFieldWorkTerms()
         {
             try
             {
-                SemesterListResponse response = _fieldWorkService.GetFieldWorkTerms();
+                FieldWorkSemesterList response = _fieldWorkService.GetFieldWorkTerms();
                 return response;
             }
             catch (Exception ex)
             {
-                SemesterListResponse response = new SemesterListResponse();
+                FieldWorkSemesterList response = new FieldWorkSemesterList();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
