@@ -1011,8 +1011,8 @@ namespace ThoughtFocus.Service.Implementation
                     ccMail= Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
                     programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                     subject = "Application Submitted";
-                    if(programID==6)
-                        body = GetMailBodyTemplate("Student_FormSubmit_Confirmation_UDCP.html");
+                    if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
+                        body = GetMailBodyTemplate("Student_FormSubmit_Confirmation_ICP.html");
                     else
                         body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
                     body = body.Replace("[[logoPath]]", logoText) 
