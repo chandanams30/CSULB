@@ -820,6 +820,116 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("GetFormDispositionsAssessment")]
+        public FormDispositionsAssessmentResponse GetFormDispositionsAssessment(FormDispositionsAssessmentRequest input)
+        {
+            try
+            {
+                FormDispositionsAssessmentResponse response = _initialCredentialProgramService.GetFormDispositionsAssessment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormDispositionsAssessmentResponse response = new FormDispositionsAssessmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFormPrerequisites")]
+        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID)
+        {
+            try
+            {
+                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId, FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormPrerequisitesResponse response = new FormPrerequisitesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertFormDispositionsAssessment")]
+        public BaseResponse UpsertFormDispositionsAssessment(UpsertFormDispositionsAssessmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _initialCredentialProgramService.UpsertFormDispositionsAssessment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFormSubSectionSubmitForReview")]
+        public BaseResponse UpdateFormSubSectionSubmitForReview(UpdateFormSubSectionSubmitForReviewRequest input)
+        {
+            try
+            {
+
+                BaseResponse response = _initialCredentialProgramService.UpdateFormSubSectionSubmitForReview(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UploadFieldWorkRequiredDocuments")]
+        public BaseResponse UploadFieldWorkRequiredDocuments(FieldWorkUploadDocumentsRequest input)
+        {
+            #region testing with manual file , actual file will come as byte array 
+            //-------------just for testing - comment it after testing
+            //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
+            //string filepath = "D:\\CSULB\\Document\\TBCTC_Approval.pdf";
+            //byte[] fileContent = null;
+            //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            //long byteLength = new System.IO.FileInfo(filepath).Length;
+            //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            //input.FileContent = fileContent;
+            //fs.Close();
+            //fs.Dispose();
+            //binaryReader.Close();
+            //string fc = fileContent.ToString();
+            //----end comment----------------------------------------
+            #endregion
+
+            try
+            {
+                BaseResponse response = _fieldWorkService.UpdateFieldWorkDocumentValidation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         //[HttpPost("UpdateRecommendation")]
         //public BaseResponse UpdateRecommendation(UpdateRecommendation input)
         //{
