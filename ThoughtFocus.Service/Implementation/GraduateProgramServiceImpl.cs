@@ -26,7 +26,7 @@ using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.TemplateModels;
 using ThoughtFocus.Service.Interfaces;
 using ThoughtFocus.Domain.Request.FieldWork;
-
+using iTextSharp.text.pdf.codec.wmf;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1456,6 +1456,10 @@ namespace ThoughtFocus.Service.Implementation
                 templateName = "UDCPRecommendationFormTemplate.htm";
             if (programIdentifier.ToUpper() == "ESCP")
                 templateName = "ESCPRecommendationFormTemplate.htm";
+            if (programIdentifier == "MS Special Education (SPED)")
+                templateName = "MSSPEDRecommendationFormTemplate.html";
+            else
+                templateName = "GraduateRecommendationFormTemplate.htm";
 
             string filepath = Path.Combine("SupportFiles/DocumentTemplates", templateName);
             using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
@@ -1573,7 +1577,23 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response= new BaseResponse(); 
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            
+            byte[] fileContentJSONToPDF = null;
+            //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    job_title: \"xxx\",\r\n    recommenderName: \"chandana\",\r\n    studentName: \"xello\",\r\n    occupation: \"ggg\",\r\n    organization: \"ttt\",\r\n    email: \"ttt@gmail.com\",\r\n    phone: \"34456456546\",\r\n  },\r\n  relationship: {\r\n    howLongApplicantKnown: \"1-2 Years\",\r\n    inWhatCapacityApplicantKnown: \"1-2 Years\",\r\n  },\r\n  referrenceRatings: [\r\n    {\r\n      quality: \"Communication Skills, Oral:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Communication Skills, Written:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Technology Skills:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Initiative:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Maturity:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Motivation for this program of study:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Creativity:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Ability to work with others:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Intellectual potential:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Present academic performance:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Potential for graduate work:\",\r\n      scale: \"1\",\r\n    },\r\n  ],\r\n  overAllRecommendationAdmission: \"Highest\",\r\n}";
+            //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    job_title: \"xxx\",\r\n    recommenderName: \"chandana\",\r\n    studentName: \"xello\",\r\n    occupation: \"ggg\",\r\n    organization: \"ttt\",\r\n    email: \"ttt@gmail.com\",\r\n    phone: \"34456456546\",\r\n  },\r\n  relationship: {\r\n    howLongApplicantKnown: \"1-2 Years\",\r\n    inWhatCapacityApplicantKnown: \"1-2 Years\",\r\n  },\r\n  referrenceRatings: [\r\n    {\r\n      quality: \"Communication Skills, Oral:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Communication Skills, Written:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Technology Skills:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Initiative:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Maturity:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Motivation for this program of study:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Creativity:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Ability to work with others:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Intellectual potential:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Present academic performance:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Potential for graduate work:\",\r\n      scale: \"1\",\r\n    },\r\n  ],\r\n  overAllRecommendationAdmission: \"Highest\",\r\nquestion1:\"hello\",\r\nquestion2:\"world\",\r\n}";
+            if ((input.LetterOfRecommendationJSON != string.Empty) && (input.LetterOfRecommendationJSON != null))
+            {
+                fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON, input.ProgramName);
+            }
+            if((input.FormAddRecommendationRequestAttachment.Count < 2) && (input.LetterOfRecommendationJSON != string.Empty) && (input.LetterOfRecommendationJSON != null))
+            {
+                var attachment = new FormAddRecommendationRequestAttachment
+                {
+                    DocumentID = 3,
+                    FileName = "",
+                    FileContent = null
+                };
+                input.FormAddRecommendationRequestAttachment.Add(attachment);
+            }
             foreach (var attachment in input.FormAddRecommendationRequestAttachment)
             {
                 //response = new BaseResponse();
@@ -1581,9 +1601,19 @@ namespace ThoughtFocus.Service.Implementation
                 string fileExtension = string.Empty;
                 string userFolderName = string.Empty;
                 string savedFileName = string.Empty;
+                string letterOfRecommendationJSON = string.Empty;
 
                 // pull the saved file name format SP Below
                 FormAttachmentFileNames fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                if ((input.ProgramFormIdentifier == "GACP") && (input.LetterOfRecommendationJSON != string.Empty) && (input.LetterOfRecommendationJSON != null))
+                {
+                    if (attachment.DocumentID == 3)
+                    {
+                        letterOfRecommendationJSON = input.LetterOfRecommendationJSON;
+                        attachment.FileContent = fileContentJSONToPDF;
+                        attachment.FileName = fileNames.FileName + ".pdf";
+                    }
+                }
                 if (!string.IsNullOrEmpty(fileNames.FileName) && attachment.FileContent != null && !string.IsNullOrEmpty(attachment.FileName))
                 {
                     if (!sendMail) { sendMail = true; }
@@ -1608,7 +1638,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RecommenderIdentifier", SqlDbType.UniqueIdentifier, 250) { Value = new Guid(input.RecommenderIdentifier) },
                                           new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
                                           new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
-                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName }
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
+                                          new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = letterOfRecommendationJSON }
                                         };
 
                     //int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
@@ -1903,6 +1934,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             else if (programIdentifier.ToUpper() == "ESCP")
             {
+
                 //fields for report generation 
                 string recommenderName = string.Empty;
                 string applicantName = string.Empty;
@@ -1973,6 +2005,140 @@ namespace ThoughtFocus.Service.Implementation
 
                 // get the filecontent
                 pdfFileContent = GetPDFFileContent(recommendationTemplateBody);
+            }
+            else
+            {
+                string studentName = string.Empty;
+                string recommenderName = string.Empty;
+                string job_title = string.Empty;
+                string occupation = string.Empty;
+                string organization = string.Empty;
+                string email = string.Empty;
+                string phone = string.Empty;
+                string howLongApplicantKnown = string.Empty;
+                string inWhatCapacityApplicantKnown = string.Empty;
+
+                string communicationSkillsOral = string.Empty;
+                string communicationSkillsWritten = string.Empty;
+                string technologySkills = string.Empty;
+                string initiative = string.Empty;
+                string maturity = string.Empty;
+                string motivation = string.Empty;
+                string creativity = string.Empty;
+                string abilityToWork = string.Empty;
+                string intellectualPotential = string.Empty;
+                string academicPerformance = string.Empty;
+                string graduateWork = string.Empty;
+                string overAllRecommendationAdmission = string.Empty;
+                string comment = string.Empty;
+                string question1 = string.Empty;
+                string question2 = string.Empty;
+
+                JObject personalInfo = (JObject)schema["personalInfo"];
+                JObject relationship = (JObject)schema["relationship"];
+                JArray referrenceRatings = (JArray)schema["referrenceRatings"];
+
+                // section for personal info 
+                studentName = Convert.ToString(personalInfo.GetValue("studentName"));
+                recommenderName = Convert.ToString(personalInfo.GetValue("recommenderName"));
+                job_title = Convert.ToString(personalInfo.GetValue("job_title"));
+                occupation = Convert.ToString(personalInfo.GetValue("occupation"));
+                organization = Convert.ToString(personalInfo.GetValue("organization"));
+                email = Convert.ToString(personalInfo.GetValue("email"));
+                phone = Convert.ToString(personalInfo.GetValue("phone"));
+                //relationship to applicant
+                howLongApplicantKnown= Convert.ToString(relationship.GetValue("howLongApplicantKnown"));
+                inWhatCapacityApplicantKnown = Convert.ToString(relationship.GetValue("inWhatCapacityApplicantKnown"));
+                overAllRecommendationAdmission = Convert.ToString(schema.GetValue("overAllRecommendationAdmission"));
+                if(programIdentifier == "MS Special Education (SPED)")
+                {
+                    if (schema.ContainsKey("question1"))
+                    {
+                        question1 = Convert.ToString(schema.GetValue("question1"));
+                    }
+                    if (schema.ContainsKey("question2"))
+                    {
+                        question2 = Convert.ToString(schema.GetValue("question2"));
+                    }
+                }
+
+                // referrence ratings
+                foreach (JObject content in referrenceRatings.Children<JObject>())
+                {
+                    if (content["quality"].ToString() == "Communication Skills, Oral:")
+                    {
+                        communicationSkillsOral = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Communication Skills, Written:")
+                    {
+                        communicationSkillsWritten = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Technology Skills:")
+                    {
+                        technologySkills = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Initiative:")
+                    {
+                        initiative = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Maturity:")
+                    {
+                        maturity = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Motivation for this program of study:")
+                    {
+                        motivation = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Creativity:")
+                    {
+                        creativity = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Ability to work with others:")
+                    {
+                        abilityToWork = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Intellectual potential:")
+                    {
+                        intellectualPotential = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Present academic performance:")
+                    {
+                        academicPerformance = Convert.ToString(content.GetValue("scale"));
+                    }
+                    if (content["quality"].ToString() == "Potential for graduate work:")
+                    {
+                        graduateWork = Convert.ToString(content.GetValue("scale"));
+                    }
+                }
+
+                recommendationTemplateBody = GetDocumentBodyTemplate(programIdentifier);
+                // replace the values in the template 
+                recommendationTemplateBody = recommendationTemplateBody.Replace("[[studentName]]", studentName)
+                                                                     .Replace("[[recommenderName]]", recommenderName)
+                                                                     .Replace("[[job_title]]", job_title)
+                                                                     .Replace("[[email]]", email)
+                                                                     .Replace("[[occupation]]", occupation)
+                                                                     .Replace("[[organization]]", organization)
+                                                                     .Replace("[[phone]]", phone)
+                                                                     .Replace("[[howLongApplicantKnown]]", howLongApplicantKnown)
+                                                                     .Replace("[[inWhatCapacityApplicantKnown]]", inWhatCapacityApplicantKnown)
+                                                                     .Replace("[[communicationSkillsOral]]", communicationSkillsOral)
+                                                                     .Replace("[[communicationSkillsWritten]]", communicationSkillsWritten)
+                                                                     .Replace("[[technologySkills]]", technologySkills)
+                                                                     .Replace("[[initiative]]", initiative)
+                                                                     .Replace("[[maturity]]", maturity)
+                                                                     .Replace("[[motivation]]", motivation)
+                                                                     .Replace("[[creativity]]", creativity)
+                                                                     .Replace("[[academicPerformance]]", academicPerformance)
+                                                                     .Replace("[[abilityToWork]]", abilityToWork)
+                                                                     .Replace("[[intellectualPotential]]", intellectualPotential)
+                                                                     .Replace("[[graduateWork]]", graduateWork)
+                                                                     .Replace("[[overAllRecommendationAdmission]]", overAllRecommendationAdmission)
+                                                                     .Replace("[[question1]]", question1)
+                                                                     .Replace("[[question2]]", question2);
+                // get the filecontent
+                pdfFileContent = GetPDFFileContent(recommendationTemplateBody);
+
             }
             return pdfFileContent;
         }
