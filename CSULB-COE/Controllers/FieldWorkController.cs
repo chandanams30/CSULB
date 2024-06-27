@@ -801,6 +801,81 @@ namespace CSULB_COE.Controllers
             }
         }
 
+        [HttpGet("GetFieldWorkCourses")]
+        public FieldWorkCourseList GetFieldWorkCourses(string termCode)
+        {
+            try
+            {
+                FieldWorkCourseList response = _fieldWorkService.GetFieldWorkCourses(termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkCourseList response = new FieldWorkCourseList();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetFieldWorkCourseConfiguration")]
+        public FieldWorkCourseConfiguration GetFieldWorkCourseConfiguration(int courseId)
+        {
+            try
+            {
+                FieldWorkCourseConfiguration response = _fieldWorkService.GetFieldWorkCourseConfiguration(courseId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkCourseConfiguration response = new FieldWorkCourseConfiguration();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFieldWorkCoursesCategory")]
+        public FieldWorkCoursesCategoryList GetFieldWorkCoursesCategory()
+        {
+            try
+            {
+                FieldWorkCoursesCategoryList response = _fieldWorkService.GetFieldWorkCoursesCategories();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkCoursesCategoryList response = new FieldWorkCoursesCategoryList();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFieldWorkCourseConfiguration")]
+        public BaseResponse UpdateFieldWorkCourseConfiguration(FieldWorkCourseConfigurationRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpdateFieldWorkCourseConfiguration(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save Activity Log, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
         private string GetFolderName(int userId, int fieldWorkID)
         {
             string folderName = string.Empty;
