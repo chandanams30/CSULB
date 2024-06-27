@@ -53,5 +53,9 @@ namespace ThoughtFocus.Service.Interfaces
         AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID);
         AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input);
         FieldWorkSemesterList GetFieldWorkTerms();
+        FieldWorkCourseList GetFieldWorkCourses(string termCode);
+        FieldWorkCourseConfiguration GetFieldWorkCourseConfiguration(int courseId);
+        FieldWorkCoursesCategoryList GetFieldWorkCoursesCategories();
+        BaseResponse UpdateFieldWorkCourseConfiguration(FieldWorkCourseConfigurationRequest input);
     }
 }

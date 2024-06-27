@@ -2312,6 +2312,186 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+
+        public FieldWorkCourseList GetFieldWorkCourses(string termCode)
+        {
+            FieldWorkCourseList obj = new FieldWorkCourseList();
+           // SqlParameter[] parameters = { };
+            SqlParameter[] parameters =
+                                     {
+                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 50) { Value = (object)termCode ?? DBNull.Value }
+                                       };
+
+            DataTable dtCourses = _helper.GetDataTable("[FieldWork].[GetFieldWorkCourses]", parameters);
+            try
+            {
+                if (dtCourses.Rows.Count > 0)
+                {
+                    obj.Courses = dtCourses.AsEnumerable().Select(row =>
+                                              new FieldWorkCourse
+                                              {
+                                                  Value = Convert.ToString(row["Id"]),
+                                                  Label = Convert.ToString(row["Name"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public FieldWorkCourseConfiguration GetFieldWorkCourseConfiguration(int courseId)
+        {
+            FieldWorkCourseConfiguration obj = new FieldWorkCourseConfiguration();
+            // SqlParameter[] parameters = { };
+            SqlParameter[] parameters =
+                                       {
+                                           new SqlParameter("@CourseId", SqlDbType.Int) { Value = (object)courseId ?? DBNull.Value }
+                                       };
+
+            DataSet dtCourseConfiguration = _helper.GetDataSet("[FieldWork].[GetFieldWorkCourseConfiguration]", parameters);
+            try
+            {
+                if (dtCourseConfiguration.Tables.Count > 0)
+                {
+                    DataTable dtCourseConfig = dtCourseConfiguration.Tables[0];
+
+                    obj.Name = Convert.ToString(dtCourseConfig.Rows[0]["Name"]);
+                    obj.Subject = Convert.ToString(dtCourseConfig.Rows[0]["Subject"]);
+                    obj.CourseNumber = Convert.ToString(dtCourseConfig.Rows[0]["CourseNumber"]);
+                    obj.ClassSection = Convert.ToString(dtCourseConfig.Rows[0]["ClassSection"]);
+                    obj.EnableActivityLog = Convert.ToBoolean(dtCourseConfig.Rows[0]["EnableActivityLog"]);
+                    obj.AutoCompute = Convert.ToBoolean(dtCourseConfig.Rows[0]["AutoCompute"]);
+                    obj.FieldWorkHours = Convert.ToBoolean(dtCourseConfig.Rows[0]["FieldWorkHours"]);
+                    obj.CategoryID = Convert.ToInt32(dtCourseConfig.Rows[0]["CategoryID"]);
+                    obj.RecordByDate = Convert.ToBoolean(dtCourseConfig.Rows[0]["RecordByDate"]);
+
+                    obj.DocumentsConfig = dtCourseConfiguration.Tables[1].AsEnumerable().Select(row =>
+                                              new FieldWorkDocuments
+                                              {
+                                                  DocumentName = Convert.ToString(row["DocumentName"]),
+                                                  DocumentId= Convert.ToInt32(row["DocumentID"]),
+                                                  IsRestricted = Convert.ToBoolean(row["IsRestricted"]),
+                                                  isRequiredPrerequisite = Convert.ToBoolean(row["isRequiredPrerequisite"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public FieldWorkCoursesCategoryList GetFieldWorkCoursesCategories()
+        {
+            FieldWorkCoursesCategoryList obj = new FieldWorkCoursesCategoryList();
+            SqlParameter[] parameters = { };
+            DataTable dtCategories = _helper.GetDataTable("[FieldWork].[GetFieldWorkCoursesCategory]", parameters);
+            try
+            {
+                if (dtCategories.Rows.Count > 0)
+                {
+                    obj.Categories = dtCategories.AsEnumerable().Select(row =>
+                                              new FieldWorkCoursesCategory
+                                              {
+                                                  Value = Convert.ToString(row["ID"]),
+                                                  Label = Convert.ToString(row["Category"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse UpdateFieldWorkCourseConfiguration(FieldWorkCourseConfigurationRequest input)
+        {
+            BaseResponse obj = new BaseResponse();
+            try
+            {
+
+                DataTable documentConfigTable = ToDataTable(input.DocumentConfig);
+
+                SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@CourseId", SqlDbType.Int) { Value = input.CourseId },
+                                          new SqlParameter("@EnableActivityLog", SqlDbType.Bit) { Value = input.EnableActivityLog },
+                                          new SqlParameter("@AutoCompute", SqlDbType.Bit) { Value = input.AutoCompute },
+                                          new SqlParameter("@CategoryID", SqlDbType.Int) { Value = input.CategoryID },
+                                          new SqlParameter("@RecordByDate", SqlDbType.Bit) { Value = input.RecordByDate },
+                                          new SqlParameter("@FieldWorkHours", SqlDbType.Int) { Value = input.FieldWorkHours },
+                                          new SqlParameter("@DocumentConfig", SqlDbType.Structured) { Value = documentConfigTable }
+                                     };
+
+                DataTable dtResult = _helper.GetDataTable("[FieldWork].[UpSertFieldWorkCourseConfiguration]", parameters);
+
+                if (dtResult != null && dtResult.Rows.Count > 0)
+                {
+
+                    obj = dtResult.AsEnumerable().Select(row =>
+                                                     new BaseResponse
+                                                     {
+                                                         IsSuccess = Convert.ToBoolean(row["IsSuccess"]),
+                                                         Message = Convert.ToString(row["Message"]),
+
+                                                     }).FirstOrDefault();
+
+                }
+                else
+                {
+
+                    obj.IsSuccess = false;
+                    obj.Message = "Course Configuratoin Update Error";
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                obj.IsSuccess = false;
+                obj.Message = "Data Updated Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+
+            return obj;
+        }
+
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
         {
             AdhocMailLogResponse obj = new AdhocMailLogResponse();
