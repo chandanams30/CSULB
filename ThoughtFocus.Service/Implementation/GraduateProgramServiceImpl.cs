@@ -1451,13 +1451,13 @@ namespace ThoughtFocus.Service.Implementation
             string templateName = string.Empty;
             if (programIdentifier.ToUpper() == "SSCP")
                 templateName = "SSCPRecommendationFormTemplate.htm";
-            if (programIdentifier.ToUpper() == "MSCP")
+            else if (programIdentifier.ToUpper() == "MSCP")
                 templateName = "MSCPRecommendationFormTemplate.htm";
-            if (programIdentifier.ToUpper() == "UDCP")
+            else if (programIdentifier.ToUpper() == "UDCP")
                 templateName = "UDCPRecommendationFormTemplate.htm";
-            if (programIdentifier.ToUpper() == "ESCP")
+            else if (programIdentifier.ToUpper() == "ESCP")
                 templateName = "ESCPRecommendationFormTemplate.htm";
-            if (programIdentifier == "MS Special Education (SPED)")
+            else if (programIdentifier == "MS Special Education (SPED)")
                 templateName = "MSSPEDRecommendationFormTemplate.html";
             else
                 templateName = "GraduateRecommendationFormTemplate.htm";
@@ -1705,6 +1705,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
+            //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    position_title: \"tt1\",\r\n    recommenderFirstName: \"chandana\",\r\n    recommenderLastName: \"\",\r\n    studentName: \"Neil Mccaffery\",\r\n    campusID: \"010459603\",\r\n    email: \"Neil.Mccaffery01@student.csulb.edu\"\r\n  },\r\n  signatureOfRecommender: {\r\n    name: \"chandana\",\r\n    date: \"06/18/2024\"\r\n  },\r\n  academicCompetency: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  professionalism: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  dispositionsPersonalityCharacter: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  specialEducation: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  studentOverAllRank: 5\r\n}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
