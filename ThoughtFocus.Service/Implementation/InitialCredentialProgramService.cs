@@ -1688,6 +1688,28 @@ namespace ThoughtFocus.Service.Implementation
             obj.FileContent = fileContentJSONToPDF;
             return obj;
         }
+        public BaseResponse DeleteSubSectionAttachments(DeleteSubSectionAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@FileName", SqlDbType.VarChar, 100) { Value = input.FileName }
+                                     };
+            try
+            {
+                int id = _helper.InsertTable("[Application].[DeleteSubSectionAttachments]", parameters);
+                response.Message = "Attachment Deleted Successfully";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Data Retrieval Failed , Please contact site admin ";
+                response.StackTrace = ex.Message;
+            }
+            return response;
+        }
         public byte[] GetPDFFromJSONForSSCP(string jsonString)
         {
                 byte[] pdfFileContent = null;
