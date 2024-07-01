@@ -930,6 +930,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("DownloadRequiredDocuments")]
+        public IActionResult DownloadRequiredDocuments(int userId, int fieldworkAttachmentId)
+        {
+            byte[] inputStream = null;
+            string fileType = string.Empty;
+            string fileName = string.Empty;
+
+            FieldWorkProfileAttachments obj = _fieldWorkService.DownloadRequiredDocuments(userId, fieldworkAttachmentId);
+            fileName = obj.FileName;
+            inputStream = obj.FileContent;
+            string[] fileSplit = obj.FileName.Split('.');
+            string fileextension = obj.FileName.Split('.').Last();
+            fileType = GetFileType(fileextension);
+            //fileType = GetFileType(fileSplit[1]);
+            //Response.Headers.Add("Content-Disposition", "inline");
+            //return File(inputStream, fileType);
+            return File(inputStream, fileType, fileName);
+        }
         //[HttpPost("UpdateRecommendation")]
         //public BaseResponse UpdateRecommendation(UpdateRecommendation input)
         //{
