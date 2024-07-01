@@ -1692,7 +1692,8 @@ namespace ThoughtFocus.Service.Implementation
             if (sendMail)
             {
                 // send mail to the applicant 
-                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier);
+                string programIdentifier = "";
+                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier,programIdentifier );
             }
 
 
@@ -1703,7 +1704,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    position_title: \"tt1\",\r\n    recommenderFirstName: \"chandana\",\r\n    recommenderLastName: \"\",\r\n    studentName: \"Neil Mccaffery\",\r\n    campusID: \"010459603\",\r\n    email: \"Neil.Mccaffery01@student.csulb.edu\"\r\n  },\r\n  signatureOfRecommender: {\r\n    name: \"chandana\",\r\n    date: \"06/18/2024\"\r\n  },\r\n  academicCompetency: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  professionalism: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  dispositionsPersonalityCharacter: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  specialEducation: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  studentOverAllRank: 5\r\n}";
+            //input.LetterOfRecommendationJSON = "{\r\n\t\"personalInfo\": {\r\n\t\t\"position_title\": \"sdf\",\r\n\t\t\"recommenderFirstName\": \"awge\",\r\n\t\t\"recommenderLastName\": \"\",\r\n\t\t\"studentName\": \"Ailym Arciga\",\r\n\t\t\"campusID\": \"014169166\",\r\n\t\t\"email\": \"Ailym.Arciga@student.csulb.edu\"\r\n\t},\r\n\t\"signatureOfRecommender\": {\r\n\t\t\"name\": \"chandana\",\r\n\t\t\"date\": \"07/30/2024\"\r\n\t},\r\n\t\"academicCompetency\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"professionalism\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"dispositionsPersonalityCharacter\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Area Needs Improvement\"\r\n\t},\r\n\t\"specialEducation\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"studentOverAllRank\": \"Top 5% One of the best\"\r\n}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
@@ -1804,7 +1805,7 @@ namespace ThoughtFocus.Service.Implementation
             if (sendMail)
             {
                 // send mail to the applicant 
-                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier);
+                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier,input.ProgramFormIdentifier);
             }
 
 
@@ -2179,7 +2180,7 @@ namespace ThoughtFocus.Service.Implementation
             return fileContent;
         }
 
-        private void SendRecommendedConfirmMailToApplicant(string recommenderIdentifier)
+        private void SendRecommendedConfirmMailToApplicant(string recommenderIdentifier, string programIdentifier)
         {
             SqlParameter[] parameters =
                                      {
@@ -2198,7 +2199,15 @@ namespace ThoughtFocus.Service.Implementation
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
                 ccMail= Convert.ToString(dtResponse.Rows[0]["altEmail"]);
                 subject = "Recommendation Submitted";
-                body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
+                if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP")
+                {
+                    body = GetMailBodyTemplate("Student_Recommendation_Confirmation_ICP.html");
+                }
+                else
+                //else if(programIdentifier.ToUpper() == "GACP" || programIdentifier.ToUpper() == "DOCT")
+                {
+                    body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
+                }
                 body = body.Replace("[[logoPath]]", logoText)
                            .Replace("[[ApplicantName]]", applicantsName);
                 _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, "");
