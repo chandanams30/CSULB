@@ -1642,7 +1642,8 @@ namespace ThoughtFocus.Service.Implementation
             if (sendMail)
             {
                 // send mail to the applicant 
-                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier);
+                string programIdentifier = "";
+                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier,programIdentifier );
             }
 
 
@@ -1753,7 +1754,7 @@ namespace ThoughtFocus.Service.Implementation
             if (sendMail)
             {
                 // send mail to the applicant 
-                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier);
+                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier,input.ProgramFormIdentifier);
             }
 
 
@@ -1764,7 +1765,7 @@ namespace ThoughtFocus.Service.Implementation
             byte[] pdfFileContent = null;
             string recommendationTemplateBody = string.Empty;
             JObject schema = JObject.Parse(jsonString);
-            if (programIdentifier.ToUpper()=="MSCP"|| programIdentifier.ToUpper() == "SSCP"| programIdentifier.ToUpper() == "UDCP")
+            if (programIdentifier.ToUpper()=="MSCP"|| programIdentifier.ToUpper() == "SSCP"|| programIdentifier.ToUpper() == "UDCP")
             {
                 //TemplateStore<SSCP_MSCP_UDCP_Model> store = new TemplateStore<SSCP_MSCP_UDCP_Model>();
                 //SSCP_MSCP_UDCP_Model obj = new SSCP_MSCP_UDCP_Model();
@@ -1993,7 +1994,7 @@ namespace ThoughtFocus.Service.Implementation
             return fileContent;
         }
 
-        private void SendRecommendedConfirmMailToApplicant(string recommenderIdentifier)
+        private void SendRecommendedConfirmMailToApplicant(string recommenderIdentifier, string programIdentifier)
         {
             SqlParameter[] parameters =
                                      {
@@ -2012,7 +2013,15 @@ namespace ThoughtFocus.Service.Implementation
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
                 ccMail= Convert.ToString(dtResponse.Rows[0]["altEmail"]);
                 subject = "Recommendation Submitted";
-                body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
+                if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP")
+                {
+                    body = GetMailBodyTemplate("Student_Recommendation_Confirmation_ICP.html");
+                }
+                else
+                //else if(programIdentifier.ToUpper() == "GACP" || programIdentifier.ToUpper() == "DOCT")
+                {
+                    body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
+                }
                 body = body.Replace("[[logoPath]]", logoText)
                            .Replace("[[ApplicantName]]", applicantsName);
                 _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, "");
