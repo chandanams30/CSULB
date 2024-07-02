@@ -1,7 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System;
 using System.Collections.Generic;
 using System.Text;
-
+ 
 namespace ThoughtFocus.Domain.Response.FieldWork
 {
     public class FieldWorkCourseConfiguration : BaseResponse
@@ -10,12 +11,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string Subject { get; set; }
         public string CourseNumber { get; set; }
         public string ClassSection { get; set; }
-        public bool EnableActivityLog { get; set; }
-        public bool AutoCompute { get; set; }
-        public bool FieldWorkHours { get; set; }
-        public int CategoryID { get; set; }
-        public bool RecordByDate { get; set; }
-        public List<FieldWorkDocuments> DocumentsConfig { get; set; }
+        public FieldWorkActivityConfig Configs { get; set; }
     }
     public class FieldWorkDocuments
     {
@@ -24,4 +20,15 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public bool IsRestricted { get; set; }
         public bool isRequiredPrerequisite { get; set; }
     }
+    public class FieldWorkActivityConfig
+    {
+        public bool EnableActivityLog { get; set; }
+        public bool AutoCompute { get; set; }
+        public string FieldWorkHours { get; set; }
+        public int CategoryID { get; set; }
+        public bool RecordByDate { get; set; }
+        public List<FieldWorkDocuments> DocumentsConfig { get; set; }
+
+    }
+
 }
