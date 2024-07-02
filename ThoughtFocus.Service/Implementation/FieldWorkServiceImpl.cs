@@ -2372,20 +2372,27 @@ namespace ThoughtFocus.Service.Implementation
                     obj.Subject = Convert.ToString(dtCourseConfig.Rows[0]["Subject"]);
                     obj.CourseNumber = Convert.ToString(dtCourseConfig.Rows[0]["CourseNumber"]);
                     obj.ClassSection = Convert.ToString(dtCourseConfig.Rows[0]["ClassSection"]);
-                    obj.EnableActivityLog = Convert.ToBoolean(dtCourseConfig.Rows[0]["EnableActivityLog"]);
-                    obj.AutoCompute = Convert.ToBoolean(dtCourseConfig.Rows[0]["AutoCompute"]);
-                    obj.FieldWorkHours = Convert.ToBoolean(dtCourseConfig.Rows[0]["FieldWorkHours"]);
-                    obj.CategoryID = Convert.ToInt32(dtCourseConfig.Rows[0]["CategoryID"]);
-                    obj.RecordByDate = Convert.ToBoolean(dtCourseConfig.Rows[0]["RecordByDate"]);
+                    var activityLogConfig = new FieldWorkActivityConfig();
 
-                    obj.DocumentsConfig = dtCourseConfiguration.Tables[1].AsEnumerable().Select(row =>
+                    activityLogConfig.EnableActivityLog = Convert.ToBoolean(dtCourseConfig.Rows[0]["EnableActivityLog"]);
+                    activityLogConfig.AutoCompute = Convert.ToBoolean(dtCourseConfig.Rows[0]["AutoCompute"]);
+                    activityLogConfig.FieldWorkHours = Convert.ToString(dtCourseConfig.Rows[0]["FieldWorkHours"]);
+                    activityLogConfig.CategoryID = Convert.ToInt32(dtCourseConfig.Rows[0]["CategoryID"]);
+                    activityLogConfig.RecordByDate = Convert.ToBoolean(dtCourseConfig.Rows[0]["RecordByDate"]);
+
+
+                    var documentsConfig = dtCourseConfiguration.Tables[1].AsEnumerable().Select(row =>
                                               new FieldWorkDocuments
                                               {
                                                   DocumentName = Convert.ToString(row["DocumentName"]),
-                                                  DocumentId= Convert.ToInt32(row["DocumentID"]),
+                                                  DocumentId = Convert.ToInt32(row["DocumentID"]),
                                                   IsRestricted = Convert.ToBoolean(row["IsRestricted"]),
                                                   isRequiredPrerequisite = Convert.ToBoolean(row["isRequiredPrerequisite"])
                                               }).ToList();
+
+                    activityLogConfig.DocumentsConfig = documentsConfig;
+
+                    obj.Configs = activityLogConfig;
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
