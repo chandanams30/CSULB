@@ -15,7 +15,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public int CategoryID { get; set; }
         public int FieldWorkHours { get; set; }
 
-        public List<FieldWorkDocumentConfig> DocumentConfig { get; set; }
+        public List<FieldWorkDocumentConfig> DocumentsConfig { get; set; }
     }
     public class FieldWorkDocumentConfig
     {
