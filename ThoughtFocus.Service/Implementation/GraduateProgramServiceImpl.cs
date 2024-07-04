@@ -1693,8 +1693,8 @@ namespace ThoughtFocus.Service.Implementation
             if (sendMail)
             {
                 // send mail to the applicant 
-                string programIdentifier = "";
-                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier,programIdentifier );
+                //string programIdentifier = "";
+                SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier,input.ProgramFormIdentifier);
             }
 
 
@@ -2204,8 +2204,8 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     body = GetMailBodyTemplate("Student_Recommendation_Confirmation_ICP.html");
                 }
-                else
-                //else if(programIdentifier.ToUpper() == "GACP" || programIdentifier.ToUpper() == "DOCT")
+                //else
+                else if (programIdentifier.ToUpper() == "GACP" || programIdentifier.ToUpper() == "DOCT")
                 {
                     body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
                 }
