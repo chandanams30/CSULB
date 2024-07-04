@@ -146,10 +146,13 @@ namespace CSULB_COE
             services.AddScoped<IAdminService, AdminServiceImpl>();
 
             // Milestones
-            //services.AddScoped<IMilestonesService, MilestonesServiceImpl>();
+            services.AddScoped<IMilestonesService, MilestonesServiceImpl>();
 
             // Travel
             services.AddScoped<ITravelService, TravelServiceImpl>();
+
+            //Student Profile
+            services.AddScoped<IStudentProfile, StudentProfileImpl>();
 
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo

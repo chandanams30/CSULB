@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Text;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 
 namespace ThoughtFocus.Service.Interfaces
 {
@@ -30,5 +32,30 @@ namespace ThoughtFocus.Service.Interfaces
         FieldWorkFnCSchemaResponse GetFnCSchema(int userID, int fieldWorkID, int schemaTypeId, int fieldWorkActivityLogID);
         BaseResponse UpdateFnCSchema(FieldWorkFnCSchemaUpdateRequest input);
         BaseResponse UpdateFieldworkCommunityUsersforCreation();
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_GetCommunitySiteSupervisorDemonstrationTeacherList();
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail(int CSSDTID);
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail PUNS_AutharizeCommunitySiteSupervisorDemonstrationTeacher(string CommunitySiteUserIdentifier, string CommunitySiteUserEmail);
+        FieldWorkListResponse GetFieldWorkData(string CommunitySiteUserIdentifier);
+        PUFieldWorkActivityLogListResponse GetFieldWorkActivityLogList(string CommunitySiteUserIdentifier,int fieldWorkId);
+        FieldWorkActivityLogByIDResponse PUNS_GetFieldWorkActivityLogByID(string CommunitySiteUserIdentifier, int ActivityLogID);
+        BaseResponse PUNS_UpdateFieldWorkActivityLogStatus(PUUpdateFieldWorkActivityLogStatusRequest input);
+        FieldWorkEvaluationByIDResponse GetEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode);
+        BaseResponse UpsertEvaluation(UpsertEvaluationRequest input);
+        EvaluationByEvaluationIdentifierResponse GetEvaluationByEvaluationIdentifier(string evaluationIdentifier);
+        BaseResponse UpdateEvaluationJSON(UpdateEvaluationJSONRequest input);
+        FieldWorkAttachmentsRequest  DownloadAttachment(DownloadAttachment input);
+        PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail,int activityLogID);
+        FieldWorkActivityLogsAttachmentResponse DownloadActivityLogs(FieldWorkActivityLogsAttachmentRequest input);
+        BaseResponse DeleteFieldWorkActivityLog(DeleteActivityLogRequest input);
+        UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse PUNS_UpdateCommunitySiteSupervisorDemonstrationTeacherList(UpdateCommunitySiteSupervisorDemonstrationTeacherListRequest input);
+        AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input);
+        AdhocMailLogResponse StudentsEnrolled_ApprovedDocuments_BulkEmail(PrerequisiteApprovedRequest input);
+        AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID);
+        AdhocMailLogResponse SendNotificationforUnapprovedPartnerUser(UnapprovedPartnerUserMailRequest input);
+        FieldWorkSemesterList GetFieldWorkTerms();
+        FieldWorkCourseList GetFieldWorkCourses(string termCode);
+        FieldWorkCourseConfiguration GetFieldWorkCourseConfiguration(int courseId);
+        FieldWorkCoursesCategoryList GetFieldWorkCoursesCategories();
+        BaseResponse UpdateFieldWorkCourseConfiguration(FieldWorkCourseConfigurationRequest input);
     }
 }

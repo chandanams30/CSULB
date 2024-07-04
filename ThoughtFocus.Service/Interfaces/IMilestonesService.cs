@@ -18,5 +18,20 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID);
         GetMilestoneResponse GetMilestone(int MilestoneID);
         MilestoneApproverUserListResponse GetMilestoneApproverUserList();
+        MilestoneTypesResponse GetMilestoneTypes();
+        BaseResponse UpsertMilestoneTemplate(UpsertMilestoneTemplateRequest input);
+        MilestoneTemplateListResponse GetMilestoneTemplateList(bool isReadyToPublish);
+        MilestoneTemplateByIDResponse GetMilestoneTemplateByID(int MilestoneTemplateID);
+        MilestonesApproverTypesResponse GetMilestoneApproverTypes();
+        BaseResponse PublishMilestoneForm(PublishMilestoneFormRequest input);
+        MilestoneUsersListResponse GetMilestoneUsersList(int RoleID, int ProgramID, string TermCode);
+        MilestoneProgramTermListResponse GetMilestoneProgramTermList();
+        MilestonePublishedFormsListResponse GetMilestonePublishedFormsList(int UserID);
+        GetMilestoneUsersListResponse GetMilestoneUsersList();
+        GetMilestoneFilledFormByUserListResponse GetMilestoneFilledFormByUserList(int UserID);
+        GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID);
+        GetMilestoneRequirementListResponse GetMilestoneRequirementList();
+        GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID);
+        GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID);
     }
 }

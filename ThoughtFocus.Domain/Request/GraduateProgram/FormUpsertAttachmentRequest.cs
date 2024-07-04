@@ -25,4 +25,12 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int FormAttachmentID { get; set; }
     }
 
+    public class DeleteInsructorAttachmentRequest
+    {
+        public int InstructionID { get; set; }
+        public int InstructorUserID { get; set; }
+        public int FormID { get; set; }
+        public int InstructionAttachmentID { get; set; }
+    }
+
 }

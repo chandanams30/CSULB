@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Domain.Request.FieldWork;
 
 namespace ThoughtFocus.Service.Interfaces
 {
@@ -19,6 +22,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input);
         BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input);
         BaseResponse DeleteFormAttachment(DeleteFormAttachmentRequest input);
+        BaseResponse DeleteInsructorAttachment(DeleteInsructorAttachmentRequest input);
         BaseResponse SaveForm(FormSaveRequest input);
         BaseResponse UpdateFormState(FormStatusUpdateRequest input);
         FormAttachments DownloadFormAttachments(int userID, int formattachmentID);
@@ -44,5 +48,16 @@ namespace ThoughtFocus.Service.Interfaces
         ReviewerListResponse GetReviewerList(GetReviewerListRequest input);
         StudentMessageBoardResponse GetFormStudentMessageBoard(int UserID, int FormID, int ProgramID, string TermCode);
         BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input);
+        ProgramConfigurationHandlerResponse GetProgramConfigurationHandler(int UserID, int FormID, int ProgramID, string TermCode);
+        BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input);
+        LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID, int FormID);
+        BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input);
+        BaseResponse UpdateRecommendation(UpdateRecommendation input);
+        public BaseResponse DeleteRecommendation(DeleteRecommendations input);
+        AdhocMailLogResponse SendNotificationforPendingRecommendations(PendingRecommendationsRequest input);
+        BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input);
+        ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode);
+        ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode);
+        BaseResponse RevertBacktoPreviousState(int formID);
     }
 }

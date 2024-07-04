@@ -3,11 +3,8 @@
 -- Create date: <Create Date,,>
 -- Description:	Returns attachments by sorting for merge
 -- =============================================
-
---EXEC [dbo].[GetFormAttachmentsForMerge] 2
 CREATE PROCEDURE [dbo].[GetFormAttachmentsForMerge]
 @FormID BIGINT
-
 AS
 BEGIN
 
@@ -17,22 +14,23 @@ SELECT @JSON=[form] FROM [Application].[Forms] where [ID]=@FormID
 SELECT *
 FROM OPENJSON(@json)
   WITH (
-    firstName nvarchar(500)
-  ,lastName nvarchar(500)
-  ,preferredName nvarchar(500)
-  ,otherName nvarchar(500)
-  ,cusulbEmail nvarchar(500)
-  ,altEmail nvarchar(500)
-  ,phoneNumber nvarchar(500)
-  ,csulbCampusId nvarchar(500)
-  --,casId nvarchar(500)
-   ,Semester nvarchar(500)
-   ,Program nvarchar(500)
+		firstName nvarchar(200)
+		,lastName nvarchar(200)
+		,preferredName nvarchar(200)
+		,otherName nvarchar(200)
+		,cusulbEmail nvarchar(200)
+		,altEmail nvarchar(200)
+		,phoneNumber nvarchar(200)
+		,csulbCampusId nvarchar(200)
+		--,casId nvarchar(500)
+		,Semester nvarchar(200)
+		,Program nvarchar(200)
+		,bachelorDegreeMajor nvarchar(200)
+		,institution nvarchar(200)
+		,highestDegreeEarned nvarchar(200)
   )T CROSS JOIN   (SELECT STRING_AGG([value], ',') as languages
       FROM OPENJSON(@json, '$.languages') where [value] <> '') T2;
-
 ----------------------------------------------
-
 --SELECT T.[FormID], T.[FileName], T.[FileExtn], T.[FolderName] from (
 --SELECT FA.[FormID], FA.[FileName], FA.[FileExtn], FA.[FolderName], PD.[DocumentID] FROM [Application].[FormAttachments] FA 
 --JOIN [Master].[ProgramDocuments] PD ON PD.[ID] = FA.[ProgramDocumentID]
@@ -61,9 +59,32 @@ JOIN [Master].[ProgramDocuments] PD ON PD.[ProgramID] = F.[ProgramID] AND PD.[Do
 WHERE PD.[isRequiredForMerge]=1 AND T.[FileName] IS NOT NULL
 ORDER BY PD.[SortingOrder],T.RecomendationID,t.[DocumentID]
 ----------------------------------------------
-
-----------------------------------------------
 SELECT [UserID] as UserFolder FROM [Application].[Forms] where [ID]=@FormID
 ----------------------------------------------
+SELECT *  FROM OPENJSON(@json, '$.degrees') WITH (
+[college] nvarchar(200) '$.college'
+,[degree] nvarchar(200) '$.degree'
+,[state] nvarchar(200) '$.state'
+,[dateFrom] varchar(200) '$.date.from' 
+,[dateTo] varchar(200) '$.date.to'  
+);
 
+--SELECT 
+--[college]
+--,[degree]
+--,[state]
+--,ISNULL([dateFrom],'-') AS [dateFrom]
+--,ISNULL([dateTo],'-') AS [dateTo]
+--FROM OPENJSON(@json, '$.degrees') WITH (
+--[college] nvarchar(200) '$.college'
+--,[degree] nvarchar(200) '$.degree'
+--,[state] nvarchar(200) '$.state'
+--,[dateFrom] varchar(200) '$.date.from' 
+--,[dateTo] varchar(200) '$.date.to'  
+--);
+----------------------------------------------
+--execute [dbo].[GetFormAttachmentsForMerge] @FormID = 10319
+--execute [dbo].[GetFormAttachmentsForMerge] @FormID = 10307
+--execute [dbo].[GetFormAttachmentsForMerge] @FormID = 86
+--execute [dbo].[GetFormAttachmentsForMerge] @FormID = 2
 END

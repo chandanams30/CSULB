@@ -59,7 +59,7 @@ BEGIN
 
 DECLARE @RoleIDs varchar(50)
 SELECT @RoleIDs = STRING_AGG(
-	CASE WHEN [RoleID] = 1 THEN '1,2,4,5' --Administrator 
+	CASE WHEN [RoleID] = 1 THEN '1,2,4,5,6' --Administrator 
 		WHEN [RoleID] = 3 THEN '1,2,4' --Student
 		WHEN [RoleID] = 4 THEN '1,2,4,5' --ProgramAdmin
 		WHEN [RoleID] = 5 THEN '1,4' --Faculty/Supervisor

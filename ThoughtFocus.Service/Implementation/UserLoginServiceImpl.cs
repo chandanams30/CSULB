@@ -34,6 +34,7 @@ namespace ThoughtFocus.Service.Implementation
         private readonly ISqlDBUtility _helper;
         private readonly ISendMail _sendMail;
         public ILogger<UserLoginServiceImpl> _logger;
+        private readonly IConfiguration _configuration;
         public UserLoginServiceImpl(IUserRepository userRepository,
                                     IUserDetailsRepository userDetailsRepository, 
                                     IUserActivityRepository userActivityRepository,
@@ -41,7 +42,8 @@ namespace ThoughtFocus.Service.Implementation
                                     IConfiguration config,
                                     ISqlDBUtility helper,
                                     ISendMail sendMail,
-                                    ILogger<UserLoginServiceImpl> logger
+                                    ILogger<UserLoginServiceImpl> logger,
+                                    IConfiguration configuration
                                     )
         {
             _userRepository = userRepository;
@@ -52,6 +54,7 @@ namespace ThoughtFocus.Service.Implementation
             _helper = helper;
             _sendMail = sendMail;
             _logger = logger;
+            _configuration = configuration;
         }
         public AuthenticateResponse Authenticate(AuthenticateRequest model)
         {
@@ -223,7 +226,7 @@ namespace ThoughtFocus.Service.Implementation
                     new Claim(ClaimTypes.Email,user.Email),
                     new Claim("UserID",user.Id.ToString())
               }),
-                Expires = DateTime.UtcNow.AddMinutes(20),
+                Expires = DateTime.UtcNow.AddMinutes(60),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var cToken = tokenHandler.CreateToken(tokenDescriptor);
@@ -281,14 +284,18 @@ namespace ThoughtFocus.Service.Implementation
                     bodyUsername = bodyUsername.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", request.FirstName + " " + request.LastName)
                                .Replace("[[UserName]]", request.CSULBID);
-                    _sendMail.SendEmail(request.Email, "", "COMMON", subjectUserName, bodyUsername, "");
+                    // mail send to student email
+                    //_sendMail.SendEmail(request.Email, "", "COMMON", subjectUserName, bodyUsername, "");
+                    var BCCCommonMails = _configuration["EmailNotifications:BCCCommon"];
+                    _sendMail.SendEmail(BCCCommonMails, "", "COMMON", subjectUserName, bodyUsername, "");// mail to BCCCommon email
                     // trigger email with the password 
                     string bodyPassword = GetMailBodyTemplate("Student_Password.html");
                     string subjectPassword = "Password for MyCED Application";
                     bodyPassword = bodyPassword.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", request.FirstName + " " + request.LastName)
                                .Replace("[[Password]]", userPassword);
-                    _sendMail.SendEmail(request.Email, "","COMMON", subjectPassword, bodyPassword, "");
+                    //_sendMail.SendEmail(request.Email, "","COMMON", subjectPassword, bodyPassword, "");
+                    _sendMail.SendEmail(BCCCommonMails, "", "COMMON", subjectPassword, bodyPassword, "");// mail to BCCCommon email
                     obj.IsSuccess = true;
                     obj.Message = message;
                 }

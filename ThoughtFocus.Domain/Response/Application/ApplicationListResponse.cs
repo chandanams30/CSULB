@@ -10,4 +10,10 @@ namespace ThoughtFocus.Domain.Response.Application
         public string ApplicationName { get; set; }
         public int Count { get; set; }
     }
+
+    public class StudentNotificationResponse
+    {
+        public bool ShowNotification { get; set; }
+        public string Message { get; set; }
+    }
 }

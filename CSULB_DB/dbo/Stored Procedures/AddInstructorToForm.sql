@@ -9,18 +9,20 @@ CREATE PROCEDURE [dbo].[AddInstructorToForm]
 ,@ProgramID BIGINT
 ,@TermCode varchar(10)
 ,@InstructorUserID bigint
+,@isAssigned bit = 1
 
 AS
 BEGIN
 	--SELECT * FROM [Application].[Instructor]
 	--SELECT * FROM [Application].[InstructorAttachments]
-
-	INSERT INTO [Application].[Instructor]
-           ([FormID]
-           ,[InstructorUserID])
-     VALUES
-           (@FormID
-           ,@InstructorUserID)
+IF NOT EXISTS (SELECT * FROM [Application].[Instructor] WHERE [FormID]=@FormID AND [InstructorUserID]=@InstructorUserID)
+	BEGIN
+		INSERT INTO [Application].[Instructor]
+			   ([FormID]
+			   ,[InstructorUserID])
+		 VALUES
+			   (@FormID
+			   ,@InstructorUserID)
 
 	 DECLARE @InstructionID AS BIGINT
 		IF (@@ERROR = 0)
@@ -33,6 +35,10 @@ BEGIN
 				VALUES
 				(@InstructionID,26) --26	EDSS 300 Instructor Assessment
 		END
-
+	END
+ELSE 
+	BEGIN
+		UPDATE [Application].[Instructor] SET [isAssigned]=@isAssigned WHERE [FormID] = @FormID AND [InstructorUserID]=@InstructorUserID
+	END
 
 END

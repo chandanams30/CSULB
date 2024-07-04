@@ -16,6 +16,7 @@ SELECT P.[ID]
 		,PAD.[ApplicationDeadline] AS [ApplicationDeadline]
 		,ISNULL(TC.[TotalCount],0) AS [TotalCount]
 		,ISNULL(TC.[AcceptedCount], 0) AS [AcceptedCount]
+		,P.[AcademicPlanCode]
 		into #tempApplicationPrograms
 FROM [Master].[ProgramApplicationDates] PAD 
 JOIN [Master].[Term] T ON T.[TermCode] = PAD.[TermCode] 
@@ -27,6 +28,12 @@ AND PAD.[TermCode] = isnull(@TermCode, PAD.[TermCode])
 ORDER BY T.[TermCode], P.[ID];
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
+DECLARE @isMyCEDApplicantStudents as int
+
+SELECT @isMyCEDApplicantStudents = COUNT(*) FROM [CSULB_Student_DB].[dbo].[MyCED_Applicant_Students] MCAS join [CSULB_DB].[User].[Users] U ON MCAS.[Campus_ID] = U.[CSULBID] WHERE U.[ID] = @UserID;
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+
 --1 Administrator
 SELECT T.[ID] AS [ProgramID],T.[TermCode]
 INTO #tempProgramID
@@ -35,12 +42,24 @@ WHERE [dbo].[fnIsRoleValid](@Userid, '1') = 1 --1	Administrator
 
 UNION
 
---3	Student FOR 1 Initial Teacher Credential Programs
-SELECT T.[ID] AS [ProgramID],T.[TermCode]
-FROM #tempApplicationPrograms T
-LEFT JOIN [Application].[Forms] F ON F.ProgramID = T.[ID] AND F.TermCode = T.TermCode AND F.[UserID] = @Userid
-WHERE [dbo].[fnIsRoleValid](@Userid, '3') = 1 --3	Student
-	AND f.[ID] IS NULL
+--3	Student Graduate / Advanced Credential Programs
+SELECT P.[ID] AS [ProgramID], P.[TermCode] AS [TermCode]
+FROM 
+[CSULB_DB].[User].[Users] U 
+CROSS JOIN #tempApplicationPrograms P
+LEFT JOIN [CSULB_Student_DB].[dbo].[MyCED_Applicant_Students] MCAS ON MCAS.[Campus_ID] = U.[CSULBID] AND  MCAS.[Academic_Plan] = P.[AcademicPlanCode] AND MCAS.[Term] = P.[TermCode]
+LEFT JOIN [Application].[Forms] F ON F.ProgramID =P.[ID] AND F.TermCode = P.[TermCode] AND F.[UserID] = @Userid
+WHERE U.[ID] = @UserID
+AND ISNULL(MCAS.[Academic_Plan], '0') = CASE WHEN @isMyCEDApplicantStudents > 0 THEN MCAS.[Academic_Plan] ELSE '0'  END
+AND [dbo].[fnIsRoleValid](@Userid, '3') = 1
+AND F.[ID] IS NULL
+
+----3	Student 
+--SELECT T.[ID] AS [ProgramID],T.[TermCode]
+--FROM #tempApplicationPrograms T
+--LEFT JOIN [Application].[Forms] F ON F.ProgramID = T.[ID] AND F.TermCode = T.TermCode AND F.[UserID] = @Userid
+--WHERE [dbo].[fnIsRoleValid](@Userid, '3') = 1 --3	Student
+--	AND f.[ID] IS NULL
 
 UNION
 
@@ -59,6 +78,7 @@ FROM #tempApplicationPrograms T
 JOIN [Application].[Forms] F ON F.[ProgramID] = T.[ID]
 	AND F.[TermCode] = T.[TermCode]
 JOIN [Application].[Reviewer] R ON R.[FormID] = F.[ID]
+JOIN [Master].[ProgramUsers] PU ON PU.[ProgramID] = T.[ID] AND PU.[UserID] =@userid AND PU.[RoleID]=6
 WHERE [dbo].[fnIsRoleValid](@Userid, '6') = 1 --6	Reviewer
 	AND R.[ReviewerID] = @Userid
 
@@ -70,6 +90,7 @@ FROM #tempApplicationPrograms T
 JOIN [Application].[Forms] F ON F.[ProgramID] = T.[ID]
 	AND F.[TermCode] = T.[TermCode]
 JOIN [Application].[Instructor] INS ON INS.[FormID] = F.[ID]
+JOIN [Master].[ProgramUsers] PU ON PU.[ProgramID] = T.[ID] AND PU.[UserID] =@userid AND PU.[RoleID]=7
 WHERE [dbo].[fnIsRoleValid](@Userid, '7') = 1 --7	Instructor
 	AND INS.[InstructorUserID] = @Userid
 
@@ -81,6 +102,7 @@ FROM #tempApplicationPrograms T
 JOIN [Application].[Forms] F ON F.[ProgramID] = T.[ID]
 	AND F.[TermCode] = T.[TermCode]
 JOIN [Application].[Interviewer] INVR ON INVR.[FormID] = F.[ID]
+JOIN [Master].[ProgramUsers] PU ON PU.[ProgramID] = T.[ID] AND PU.[UserID] =@userid AND PU.[RoleID]=8
 WHERE [dbo].[fnIsRoleValid](@Userid, '8') = 1 --8	Interviewer
 	AND INVR.[InterviewerUserID] = @Userid
 
@@ -106,6 +128,7 @@ SELECT DISTINCT
 			--,T.[showView]
 			, CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'3') =1 THEN 1 ELSE 0 END AS [showApply]
 			, CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'3') = 1 THEN 0 ELSE 1 END AS [showView] 
+			,CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'1,4') = 1 THEN (SELECT [Key],[Value], [RoleID] FROM [Master].[ProgramSettingsItem] WHERE [ProgramID]=P.[ProgramID] FOR JSON PATH) ELSE '' END AS [ProgramSetting]
 		FROM #tempApplicationPrograms T 
 		JOIN #tempProgramID P ON P.[ProgramID] = T.[ID] AND T.[TermCode]=P.[TermCode]
 		WHERE 
@@ -117,6 +140,7 @@ SELECT
 	, CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'3') =1 THEN 1 ELSE 0 END AS [showApply]
 		, CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'3') = 1 THEN 0 ELSE 1 END AS [showView]
 		, CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'1,4') = 1 THEN 1 ELSE 0 END AS [showAssignApplicationToReviewers]
+		, CASE WHEN [dbo].[fnIsRoleValid] (@Userid,'1,4') = 1 THEN 1 ELSE 0 END AS [showSettings]
 FROM #tempApplicationPrograms T
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------

@@ -15,6 +15,7 @@ namespace ThoughtFocus.Domain.Request.Milestones
         public bool isMandatory { get; set; }
         public int createdByUserID { get; set; }
         public List<MileStoneApprovers> MileStoneApprovers { get; set; }
+        public int MilestoneTypeID { get; set; }
     }
     public class MileStoneApprovers
     {

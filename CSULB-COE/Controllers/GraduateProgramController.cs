@@ -5,12 +5,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
+using ThoughtFocus.Domain.Request.FieldWork;
 
 namespace CSULB_COE.Controllers
 {
@@ -237,6 +240,40 @@ namespace CSULB_COE.Controllers
                 //binaryReader.Close();
                 #endregion
                 BaseResponse response = _graduateProgramService.DeleteFormAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("DeleteInsructorAttachment")]
+        public BaseResponse DeleteInsructorAttachment(DeleteInsructorAttachmentRequest input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MYDOCS.png";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\pic2.jpg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                BaseResponse response = _graduateProgramService.DeleteInsructorAttachment(input);
                 return response;
             }
             catch (Exception ex)
@@ -676,6 +713,25 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetProgramConfigurationHandler")]
+        public ProgramConfigurationHandlerResponse GetProgramConfigurationHandler(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                ProgramConfigurationHandlerResponse response = new ProgramConfigurationHandlerResponse();
+                response = _graduateProgramService.GetProgramConfigurationHandler(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProgramConfigurationHandlerResponse response = new ProgramConfigurationHandlerResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         [HttpPost("UpdateFormStudentMessageBoard")]
         public BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input)
         {
@@ -690,6 +746,26 @@ namespace CSULB_COE.Controllers
                 BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to update data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("SaveFormGridNotes")]
+        public BaseResponse SaveFormGridNotes(FormSaveGridNotesRequest input)
+        {
+            try
+            {
+
+                BaseResponse response = _graduateProgramService.SaveFormGridNotes(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;
@@ -761,7 +837,81 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetLatestWaitlistNumber")]
+        public LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID,int FormID)
+        {
+            try
+            {
+                LatestWaitlistNumberResponse response = new LatestWaitlistNumberResponse();
+                response = _graduateProgramService.GetLatestWaitlistNumber(TermCode,ProgramID, FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                LatestWaitlistNumberResponse response = new LatestWaitlistNumberResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("BulkOfferNotOfferUpdateFormState")]
+        public BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.BulkOfferNotOfferUpdateFormState(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateRecommendation")]
+        public BaseResponse UpdateRecommendation(UpdateRecommendation input)
+        {
+            try
+            {
 
+                BaseResponse response = _graduateProgramService.UpdateRecommendation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update recommendation data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("DeleteRecommendation")]
+        public BaseResponse DeleteRecommendation(DeleteRecommendations input)
+        {
+            try
+            {
+
+                BaseResponse response = _graduateProgramService.DeleteRecommendation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete recommendation data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
 
         private string GetFileType(string fileExt)
@@ -795,5 +945,99 @@ namespace CSULB_COE.Controllers
             return contentType;
         }
 
+
+        [HttpPost("SendMailtoPendingRecommendations")]
+        public AdhocMailLogResponse SendMailtoPendingRecommendations(PendingRecommendationsRequest input)
+        {
+            try
+            {
+                AdhocMailLogResponse response = _graduateProgramService.SendNotificationforPendingRecommendations(input);
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdhocMailLogResponse response = new AdhocMailLogResponse();
+                response.IsSuccess = false;
+                response.Message = "There is an error while sending the notifications, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateProgramApplicationDates")]
+        public BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateProgramApplicationDates(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update program application dates , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetProgramApplicationDates")]
+        public ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode)
+        {
+            try
+            {
+                ProgramApplicationDates response = new ProgramApplicationDates();
+                response = _graduateProgramService.GetProgramApplicationDates(programID, termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProgramApplicationDates response = new ProgramApplicationDates();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetApplicationProgramsforDates")]
+        public ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode)
+        {
+            try
+            {
+                ApplicationProgramResponse response = _graduateProgramService.GetApplicationProgramsforDates(userID, applicationTypeID, termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramResponse response = new ApplicationProgramResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("RevertBackToPreviousState")]
+        public BaseResponse RevertBacktoPreviousState(int formID)
+        {
+            try
+            {
+
+                BaseResponse response = _graduateProgramService.RevertBacktoPreviousState(formID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Revert Back to Previous State , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

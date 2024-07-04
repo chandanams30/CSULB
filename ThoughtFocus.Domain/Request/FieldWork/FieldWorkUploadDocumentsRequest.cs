@@ -13,5 +13,6 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public byte[] FileContent { get; set; }
         public DateTime ValidTill { get; set; }
         public string Comments { get; set; }
+        public DateTime UploadedDate { get; set; }
     }
 }

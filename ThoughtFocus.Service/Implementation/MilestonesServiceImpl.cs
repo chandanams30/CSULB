@@ -87,7 +87,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@isPublished", SqlDbType.Bit) { Value = input.isPublished },
                                           new SqlParameter("@isMandatory", SqlDbType.Bit) { Value = input.isMandatory },
                                           new SqlParameter("@createdByUserID", SqlDbType.BigInt) { Value = input.createdByUserID },
-                                          new SqlParameter("@MileStoneApprovers", SqlDbType.Structured) { Value = approvers }
+                                          new SqlParameter("@MileStoneApprovers", SqlDbType.Structured) { Value = approvers },
+                                          new SqlParameter("@MilestoneTypeID", SqlDbType.BigInt) { Value = input.MilestoneTypeID }
                                         };
 
             int ID = _helper.InsertTable("[dbo].[UpsertMilestone]", parameters);
@@ -213,7 +214,7 @@ namespace ThoughtFocus.Service.Implementation
                                               new MilestoneApplicationFormsList
                                               {
                                                   MilestoneFormsID = Convert.ToInt32(row["MilestoneFormsID"]),
-                                                  MilestoneID = Convert.ToInt32(row["MilestoneID"]),
+                                                  MilestonePublishedFormID = Convert.ToInt32(row["MilestonePublishedFormID"]),
                                                   FormID = Convert.ToInt32(row["FormID"]),
                                                   Status = Convert.ToBoolean(row["Status"]),
                                                   MilestoneName = Convert.ToString(row["MilestoneName"])
@@ -260,7 +261,7 @@ namespace ThoughtFocus.Service.Implementation
                                               new MilestoneApplicationForm
                                               {
                                                   MilestoneFormID = Convert.ToInt32(row["MilestoneFormID"]),
-                                                  MilestoneID = Convert.ToInt32(row["MilestoneID"]),
+                                                  MilestonePublishedFormID = Convert.ToInt32(row["MilestonePublishedFormID"]),
                                                   FormID = Convert.ToInt32(row["FormID"]),
                                                   MilestoneFilledForm = Convert.ToString(row["MilestoneFilledForm"]),
                                                   Status = Convert.ToBoolean(row["Status"]),
@@ -333,7 +334,9 @@ namespace ThoughtFocus.Service.Implementation
                                                                      isMandatory = Convert.ToBoolean(row["isMandatory"]),
                                                                      CreatedBy = Convert.ToInt32(row["CreatedBy"]),
                                                                      CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                                                                     CreatedByName = Convert.ToString(row["CreatedByName"])
+                                                                     CreatedByName = Convert.ToString(row["CreatedByName"]),
+                                                                     MilestoneTypeID = Convert.ToInt32(row["MilestoneTypeID"]),
+                                                                     MilestoneTypeName = Convert.ToString(row["MilestoneTypeName"])
 
                                                                  }).FirstOrDefault();
 
@@ -390,6 +393,524 @@ namespace ThoughtFocus.Service.Implementation
 
                                            }).ToList();
 
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public MilestoneTypesResponse GetMilestoneTypes()
+        {
+            MilestoneTypesResponse obj = new MilestoneTypesResponse();
+            SqlParameter[] parameters = {
+
+                                        };
+
+            DataTable dtMilestoneTypes = _helper.GetDataTable("[dbo].[GetMilestoneTypes]", parameters);
+            try
+            {
+                if (dtMilestoneTypes.Rows.Count > 0)
+                {
+
+
+
+                    obj.MilestoneTypes = dtMilestoneTypes.AsEnumerable().Select(row =>
+                                           new MilestoneTypes
+                                           {
+                                               ID = Convert.ToInt32(row["ID"]),
+                                               Name = Convert.ToString(row["Name"])
+
+                                           }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse UpsertMilestoneTemplate(UpsertMilestoneTemplateRequest input)
+        {
+           // DataTable approvers = _utils.ToDataTable(input.MileStoneApprovers);
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@MilestoneTemplateID", SqlDbType.BigInt) { Value = input.MilestoneTemplateID },
+                                          new SqlParameter("@MilestoneName", SqlDbType.NVarChar,50) { Value = input.MilestoneName },
+                                          new SqlParameter("@MilestoneDescription", SqlDbType.NVarChar,500) { Value = input.MilestoneDescription },
+                                          new SqlParameter("@MilestoneForm", SqlDbType.NVarChar,-1) { Value = input.MilestoneForm },
+                                          new SqlParameter("@isReadyToPublish", SqlDbType.Bit) { Value = input.isReadyToPublish },
+                                          new SqlParameter("@createdByUserID", SqlDbType.BigInt) { Value = input.createdByUserID }
+                                         
+                                        };
+            int ID = _helper.InsertTable("[Milestone].[UpsertMilestoneTemplate]", parameters);
+            response.Message = "Milestone Saved Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public MilestoneTemplateListResponse GetMilestoneTemplateList(bool isReadyToPublish)
+        {
+            MilestoneTemplateListResponse obj = new MilestoneTemplateListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@isReadyToPublish", SqlDbType.Bit) { Value = isReadyToPublish }
+                                        };
+
+            DataTable dtMilestoneTemplateList = _helper.GetDataTable("[Milestone].[GetMilestoneTemplateList]", parameters);
+            try
+            {
+                if (dtMilestoneTemplateList.Rows.Count > 0)
+                {
+
+
+
+                    obj.MilestoneTemplateList = dtMilestoneTemplateList.AsEnumerable().Select(row =>
+                                           new MilestoneTemplateList
+                                           {
+                                               MilestoneList = Convert.ToString(row["MilestoneList"])
+
+                                           }).FirstOrDefault();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public MilestoneTemplateByIDResponse GetMilestoneTemplateByID(int MilestoneTemplateID)
+        {
+            MilestoneTemplateByIDResponse obj = new MilestoneTemplateByIDResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@MilestoneTemplateID", SqlDbType.BigInt) { Value = MilestoneTemplateID }
+                                        };
+
+            DataTable dtMilestoneTemplate = _helper.GetDataTable("[Milestone].[GetMilestoneTemplateByID]", parameters);
+            try
+            {
+                if (dtMilestoneTemplate.Rows.Count > 0)
+                {
+
+                    obj.MilestoneTemplate = Convert.ToString(dtMilestoneTemplate.Rows[0]["MilestoneTempate"]);
+
+                    //obj.MilestoneTemplateByID = dtMilestoneTemplate.AsEnumerable().Select(row =>
+                    //                       new MilestoneTemplateByID
+                    //                       {
+                    //                           MilestoneTemplate = Convert.ToString(row["MilestoneTempate"])
+
+                    //                       }).FirstOrDefault();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public MilestonesApproverTypesResponse GetMilestoneApproverTypes()
+        {
+            MilestonesApproverTypesResponse obj = new MilestonesApproverTypesResponse();
+            SqlParameter[] parameters = {
+
+                                        };
+
+            DataTable dtMilestoneApproverTypes = _helper.GetDataTable("[dbo].[GetMilestoneApproverTypes]", parameters);
+            try
+            {
+                if (dtMilestoneApproverTypes.Rows.Count > 0)
+                {
+
+
+
+                    obj.ApproverTypes = dtMilestoneApproverTypes.AsEnumerable().Select(row =>
+                                           new MilestonesApproverTypes
+                                           {
+                                               ApproverTypeID = Convert.ToInt32(row["ID"]),
+                                               Name = Convert.ToString(row["Name"])
+
+                                           }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse PublishMilestoneForm(PublishMilestoneFormRequest input)
+        {
+            DataTable approvers = _utils.ToDataTable(input.MilestonePublishedFormApprovers);
+            DataTable FormUsers = _utils.ToDataTable(input.MilestonePublishedFormUsers);
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+
+                                          new SqlParameter("@MilestoneTemplateID", SqlDbType.BigInt) { Value = input.MilestoneTemplateID },
+                                          new SqlParameter("@MilestoneName", SqlDbType.NVarChar,50) { Value = input.MilestoneName },
+                                          new SqlParameter("@MilestoneDescription", SqlDbType.NVarChar,500) { Value = input.MilestoneDescription },
+                                          new SqlParameter("@MilestoneForm", SqlDbType.NVarChar,-1) { Value = input.MilestoneForm },
+                                          new SqlParameter("@createdByUserID", SqlDbType.BigInt) { Value = input.createdByUserID },
+                                          new SqlParameter("@isMandatory", SqlDbType.Bit) { Value = input.isMandatory },
+                                          new SqlParameter("@MilestonePublishedFormApprovers", SqlDbType.Structured) { Value = approvers },
+                                          new SqlParameter("@MilestonePublishedFormUsers", SqlDbType.Structured) { Value = FormUsers },
+                                          new SqlParameter("@MilestoneTypeID", SqlDbType.BigInt) { Value = input.MilestoneTypeID },
+                                          new SqlParameter("@MilestoneRequirement", SqlDbType.NVarChar,500) { Value = input.MilestoneRequirement },
+                                        };
+
+            int ID = _helper.InsertTable("[Milestone].[PublishMilestoneForm]", parameters);
+            response.Message = "Milestone Published Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public MilestoneUsersListResponse GetMilestoneUsersList(int RoleID, int ProgramID, string TermCode)
+        {
+            MilestoneUsersListResponse obj = new MilestoneUsersListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = RoleID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode }
+                                        };
+
+            DataTable dtMilestoneTemplate = _helper.GetDataTable("[Milestone].[GetMilestoneUsersList]", parameters);
+            try
+            {
+                if (dtMilestoneTemplate.Rows.Count > 0)
+                {
+
+                    obj.MilestoneUsersList = Convert.ToString(dtMilestoneTemplate.Rows[0]["MilestoneUsersList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public MilestoneProgramTermListResponse GetMilestoneProgramTermList()
+        {
+            MilestoneProgramTermListResponse obj = new MilestoneProgramTermListResponse();
+            SqlParameter[] parameters = {
+                                          
+                                        };
+
+            DataTable dtMilestoneTemplate = _helper.GetDataTable("[Milestone].[GetMilestoneProgramTermList]", parameters);
+            try
+            {
+                if (dtMilestoneTemplate.Rows.Count > 0)
+                {
+
+                    obj.MilestoneProgramTermList = Convert.ToString(dtMilestoneTemplate.Rows[0]["MilestoneProgramTermList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public MilestonePublishedFormsListResponse GetMilestonePublishedFormsList(int UserID)
+        {
+            MilestonePublishedFormsListResponse obj = new MilestonePublishedFormsListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+                                        };
+
+            DataTable dtMilestoneTemplate = _helper.GetDataTable("[Milestone].[GetMilestonePublishedFormsList]", parameters);
+            try
+            {
+                if (dtMilestoneTemplate.Rows.Count > 0)
+                {
+
+                    obj.MilestonePublishedFormsList = Convert.ToString(dtMilestoneTemplate.Rows[0]["MilestonePublishedFormsList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneUsersListResponse GetMilestoneUsersList()
+        {
+            GetMilestoneUsersListResponse obj = new GetMilestoneUsersListResponse();
+            SqlParameter[] parameters = {
+                                            
+                                        };
+
+            DataTable dtMilestoneUserList = _helper.GetDataTable("[Milestone].[GetMilestoneUsersList]", parameters);
+            try
+            {
+                if (dtMilestoneUserList.Rows.Count > 0)
+                {
+
+                    obj.MilestoneUsersList = Convert.ToString(dtMilestoneUserList.Rows[0]["GetMilestoneUsersList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneFilledFormByUserListResponse GetMilestoneFilledFormByUserList(int UserID)
+        {
+            GetMilestoneFilledFormByUserListResponse obj = new GetMilestoneFilledFormByUserListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+                                        };
+
+            DataTable dtMilestoneFilledForm = _helper.GetDataTable("[Milestone].[GetMilestoneFilledFormByUserList]", parameters);
+            try
+            {
+                if (dtMilestoneFilledForm.Rows.Count > 0)
+                {
+
+                    obj.MilestoneFilledFormByUserList = Convert.ToString(dtMilestoneFilledForm.Rows[0]["GetMilestoneFilledFormByUserList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+
+        }
+
+        public GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID)
+        {
+            GetMilestoneFilledFormByPublishedFormListResponse obj = new GetMilestoneFilledFormByPublishedFormListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@MilestonePublishedFormID", SqlDbType.BigInt) { Value = MilestonePublishedFormID },
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+                                        };
+
+            DataTable dtMilestonePublishedForm = _helper.GetDataTable("[Milestone].[GetMilestoneFilledFormByPublishedFormList]", parameters);
+            try
+            {
+                if (dtMilestonePublishedForm.Rows.Count > 0)
+                {
+
+                    obj.MilestonePublishedFormsList = Convert.ToString(dtMilestonePublishedForm.Rows[0]["MilestonePublishedFormsList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneRequirementListResponse GetMilestoneRequirementList()
+        {
+            GetMilestoneRequirementListResponse obj = new GetMilestoneRequirementListResponse();
+            SqlParameter[] parameters = { };
+
+            DataTable dtMilestoneRequirementList = _helper.GetDataTable("[Milestone].[GetMilestoneRequirementList]", parameters);
+            try
+            {
+                if (dtMilestoneRequirementList.Rows.Count > 0)
+                {
+
+                    obj.MilestoneRequirementList = Convert.ToString(dtMilestoneRequirementList.Rows[0]["MilestonePublishedFormsList"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID)
+        {
+            GetMilestoneSubmittedFormsListResponse obj = new GetMilestoneSubmittedFormsListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@RoleId", SqlDbType.BigInt) { Value = RoleID },
+                                            new SqlParameter("@ApproverUserID", SqlDbType.BigInt) { Value = ApproverUserID }
+                                        };
+
+            DataTable dtMilestoneFormsList = _helper.GetDataTable("[Milestone].[GetMilestoneSubmittedFormsList]", parameters);
+            try
+            {
+                if (dtMilestoneFormsList.Rows.Count > 0)
+                {
+
+                    obj.milestoneSubmittedFormsList = dtMilestoneFormsList.AsEnumerable().Select(row =>
+                                               new GetMilestoneSubmittedFormsResponse
+                                               {
+                                                   MilestoneFormID = Convert.ToInt32(row["MilestoneFormID"]),
+                                                   ApproverName = Convert.ToString(row["ApproverName"]),
+                                                   CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                                                   State = Convert.ToString(row["State"]),
+                                                   CSULBID = Convert.ToString(row["CSULBID"]),
+                                                   StudentName = Convert.ToString(row["StudentName"]),
+                                                   Name = Convert.ToString(row["Name"]),
+                                                   MilestoneName = Convert.ToString(row["MilestoneName"])
+                                               }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID)
+        {
+            GetMilestoneWorkflowProcessTransitionHistoryResponse obj = new GetMilestoneWorkflowProcessTransitionHistoryResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@MilestoneFormID", SqlDbType.BigInt) { Value = MilestoneFormID }
+                                        };
+
+            DataTable dtMilestonePublishedForm = _helper.GetDataTable("[Milestone].[GetWorkflowProcessTransitionHistory]", parameters);
+            try
+            {
+                if (dtMilestonePublishedForm.Rows.Count > 0)
+                {
+
+                    obj.WorkflowTransitionHistory = Convert.ToString(dtMilestonePublishedForm.Rows[0]["WorkflowTransitionHistory"]);
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 

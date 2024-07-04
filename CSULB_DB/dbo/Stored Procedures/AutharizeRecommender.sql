@@ -25,7 +25,7 @@ BEGIN
 					,JSON_QUERY((
 							SELECT 
 								--RA.[ID] AS [RecomendationAttachmentID],
-								CASE WHEN D.[ID]=3 THEN 'Completed Recommendation Form (Attached in Email)' ELSE D.[Name] END AS [DocumentName]
+								CASE WHEN D.[ID]=3 THEN 'Completed Recommendation Form (Attached in Email)' WHEN D.[ID]=18 AND F.[ProgramID]=6 THEN 'Optional Recommendation Letter' ELSE D.[Name] END AS [DocumentName]
 								,D.[ID] AS [DocumentID]
 								,RA.[FileName]
 								,RA.[FileExtn]

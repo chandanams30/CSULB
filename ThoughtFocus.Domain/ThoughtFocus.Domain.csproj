@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <Folder Include="Request\Application\" />
-    <Folder Include="Request\InitialCredentialProgram\" />
     <Folder Include="Request\User\" />
     <Folder Include="Response\User\" />
   </ItemGroup>
