@@ -2330,7 +2330,7 @@ namespace ThoughtFocus.Service.Implementation
                     obj.Courses = dtCourses.AsEnumerable().Select(row =>
                                               new FieldWorkCourse
                                               {
-                                                  Value = Convert.ToString(row["Id"]),
+                                                  Value = Convert.ToInt32(row["Id"]),
                                                   Label = Convert.ToString(row["Name"])
                                               }).ToList();
                     obj.IsSuccess = true;
@@ -2424,7 +2424,7 @@ namespace ThoughtFocus.Service.Implementation
                     obj.Categories = dtCategories.AsEnumerable().Select(row =>
                                               new FieldWorkCoursesCategory
                                               {
-                                                  Value = Convert.ToString(row["ID"]),
+                                                  Value = Convert.ToInt32(row["ID"]),
                                                   Label = Convert.ToString(row["Category"])
                                               }).ToList();
                     obj.IsSuccess = true;
@@ -2451,8 +2451,15 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse obj = new BaseResponse();
             try
             {
+                if (input.DocumentsConfig != null)
+                {
+                    foreach (var item in input.DocumentsConfig)
+                    {
+                        item.CourseId = input.CourseId;
+                    }
+                }
 
-                DataTable documentConfigTable = ToDataTable(input.DocumentConfig);
+                DataTable documentConfigTable = ToDataTable(input.DocumentsConfig);
 
                 SqlParameter[] parameters =
                                         {
@@ -2483,7 +2490,7 @@ namespace ThoughtFocus.Service.Implementation
                 {
 
                     obj.IsSuccess = false;
-                    obj.Message = "Course Configuratoin Update Error";
+                    obj.Message = "Course Configuration Update Error";
 
 
                 }

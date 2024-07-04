@@ -10,7 +10,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
     }
     public class FieldWorkCoursesCategory
     {
-        public string Value { get; set; }
+        public int Value { get; set; }
         public string Label { get; set; }
     }
 }
