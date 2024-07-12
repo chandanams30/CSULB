@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Milestones;
 
 namespace ThoughtFocus.Service.Interfaces
@@ -15,7 +16,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse AssignMilestoneProgram(AssignMilestoneToProgram input);
         PublishedMilestonesListResponse GetPublishedMilestoneList(int ProgramID, string TermCode);
         MilestoneApplicationFormsListResponse GetMilestoneApplicationFormsList(int UserID, int FormID, int ProgramID, string TermCode);
-        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID);
+        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID);
         GetMilestoneResponse GetMilestone(int MilestoneID);
         MilestoneApproverUserListResponse GetMilestoneApproverUserList();
         MilestoneTypesResponse GetMilestoneTypes();
@@ -34,5 +35,6 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID);
         GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID);
         ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode);
+        SemesterListResponse GetDistinctSemesterList();
     }
 }

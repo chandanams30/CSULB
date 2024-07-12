@@ -22,6 +22,7 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public MilestoneApplicationForm MilestoneApplicationForm { get; set; }
         public MilestoneFormActivityHandler MilestoneFormActivityHandler { get; set; }
         public MileStoneFilledFormApprovers MileStoneFilledFormApprovers { get; set; }
+        public StudentDetails StudentDetails { get; set; }
     }
     public class MilestoneApplicationForm
     {
@@ -33,6 +34,7 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public string MilestoneForm { get; set; }
         public string MilestoneName { get; set; }
         public bool isEditable { get; set; }
+        public string MilestoneDescription { get; set; }
     }
     public class MilestoneFormActivityHandler
     {
@@ -41,5 +43,14 @@ namespace ThoughtFocus.Domain.Response.Milestones
     public class MileStoneFilledFormApprovers
     {
         public string MileStoneFilledFormApproversDetails { get; set; }
+    }
+    public class StudentDetails
+    {
+        public int ID { get; set; }
+        public int CSULBID { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+
     }
 }
