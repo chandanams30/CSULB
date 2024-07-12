@@ -73,6 +73,7 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public string MilestoneName { get; set; }
         public int FormID { get; set; }
         public string TermName { get; set; }
+        public int MilestonePublishedFormID { get; set; }
     }
     public class GetMilestoneWorkflowProcessTransitionHistoryResponse : BaseResponse
     {
