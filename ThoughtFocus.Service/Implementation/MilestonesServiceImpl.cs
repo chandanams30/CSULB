@@ -8,8 +8,10 @@ using System.Linq;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Domain.Response.StudentProfile;
@@ -243,15 +245,18 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID)
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID,int MilestonePublishedFormID)
         {
             GetMilestoneApplicationFormResponse obj = new GetMilestoneApplicationFormResponse();
+            if (MilestoneFormID == 0)
+            {
+                MilestoneFormID = GetMilestoneFormID(UserID,FormID,MilestoneFormID,MilestonePublishedFormID);
+            }
             SqlParameter[] parameters = {
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                             new SqlParameter("@MilestoneFormID", SqlDbType.BigInt) { Value = MilestoneFormID },
                                             new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
                                         };
-
             DataSet dtMilestones = _helper.GetDataSet("[dbo].[GetMilestoneFilledForm]", parameters);
             try
             {
@@ -269,8 +274,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   Status = Convert.ToBoolean(row["Status"]),
                                                   MilestoneForm = Convert.ToString(row["MilestoneForm"]),
                                                   MilestoneName = Convert.ToString(row["MilestoneName"]),
-                                                  isEditable = Convert.ToBoolean(row["isEditable"])
-
+                                                  isEditable = Convert.ToBoolean(row["isEditable"]),
+                                                  MilestoneDescription = Convert.ToString(row["MilestoneDescription"])
                                               }).FirstOrDefault();
 
                     obj.MilestoneApplicationForm = objMAF;
@@ -290,12 +295,22 @@ namespace ThoughtFocus.Service.Implementation
                                              MileStoneFilledFormApproversDetails = Convert.ToString(row["MileStoneFilledFormApprovers"])
 
                                          }).FirstOrDefault();
-
                     obj.MileStoneFilledFormApprovers = objMFFA;
+
+                    StudentDetails objSD = dtMilestones.Tables[3].AsEnumerable().Select(row =>
+                                              new StudentDetails
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                                  FirstName = Convert.ToString(row["FirstName"]),
+                                                  LastName = Convert.ToString(row["LastName"]),
+                                                  Email = Convert.ToString(row["Email"])
+                                              }).FirstOrDefault();
+
+                    obj.StudentDetails = objSD;
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
-
                 }
                 else
                 {
@@ -310,6 +325,31 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        private int GetMilestoneFormID(int UserID,int FormID,int MilestoneFormID,int MilestonePublishedFormID)
+        {
+            //get the MilestoneFormID
+                MilestoneApplicationFormsListResponse response = new MilestoneApplicationFormsListResponse();
+                SqlParameter[] parameters1 = {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = ""}
+                                        };
+                DataTable dtFilledFormList = _helper.GetDataTable("[dbo].[GetMilestoneFilledFormsList]", parameters1);
+                if (dtFilledFormList.Rows.Count > 0)
+                {
+
+                    response.MilestoneApplicationFormsList = dtFilledFormList.AsEnumerable().Where(row => row.Field<long>("MilestonePublishedFormID") == MilestonePublishedFormID).Select(row =>
+                                              new MilestoneApplicationFormsList
+                                              {
+                                                  MilestoneFormsID = Convert.ToInt32(row["MilestoneFormsID"]),
+
+                                              }).ToList();
+                    MilestoneFormID = response.MilestoneApplicationFormsList.Select(form => form.MilestoneFormsID).FirstOrDefault();
+
+                }
+            return MilestoneFormID;
         }
 
         public GetMilestoneResponse GetMilestone(int MilestoneID)
@@ -881,7 +921,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    ProgramName = Convert.ToString(row["ProgramName"]),
                                                    MilestoneName = Convert.ToString(row["MilestoneName"]),
                                                    FormID = Convert.ToInt32(row["FormId"]),
-                                                   TermName = Convert.ToString(row["TermName"])
+                                                   TermName = Convert.ToString(row["TermName"]),
+                                                   MilestonePublishedFormID = Convert.ToInt32(row["MilestonePublishedFormID"])
                                                }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -950,6 +991,38 @@ namespace ThoughtFocus.Service.Implementation
                                               {
                                                   ProgramID = Convert.ToInt32(row["ID"]),
                                                   ProgramName = Convert.ToString(row["ProgramName"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public SemesterListResponse GetDistinctSemesterList()
+        {
+            SemesterListResponse obj = new SemesterListResponse();
+            SqlParameter[] parameters = { };
+            DataTable dtSemesters = _helper.GetDataTable("[dbo].[GetDistinctSemesterList]", parameters);
+            try
+            {
+                if (dtSemesters.Rows.Count > 0)
+                {
+                    obj.Semesters = dtSemesters.AsEnumerable().Select(row =>
+                                              new Domain.Response.GraduateProgram.Semester
+                                              {
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  TermName = Convert.ToString(row["Name"])
                                               }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
