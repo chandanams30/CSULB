@@ -486,5 +486,23 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetApplicationProgramsByTermCode")]
+        public ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode)
+        {
+            try
+            {
+                ApplicationProgramsResponse response = _milestonesService.GetApplicationProgramsByTermCode(termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramsResponse response = new ApplicationProgramsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
