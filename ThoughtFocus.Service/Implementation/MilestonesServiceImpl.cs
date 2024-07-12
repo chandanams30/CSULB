@@ -10,7 +10,9 @@ using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Milestones;
+using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
 
 namespace ThoughtFocus.Service.Implementation
@@ -874,10 +876,12 @@ namespace ThoughtFocus.Service.Implementation
                                                    ApproverName = Convert.ToString(row["ApproverName"]),
                                                    CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
                                                    State = Convert.ToString(row["State"]),
-                                                   CSULBID = Convert.ToString(row["CSULBID"]),
+                                                   CSULBID = Convert.ToInt32(row["CSULBID"]),
                                                    StudentName = Convert.ToString(row["StudentName"]),
-                                                   Name = Convert.ToString(row["Name"]),
-                                                   MilestoneName = Convert.ToString(row["MilestoneName"])
+                                                   ProgramName = Convert.ToString(row["ProgramName"]),
+                                                   MilestoneName = Convert.ToString(row["MilestoneName"]),
+                                                   FormID = Convert.ToInt32(row["FormId"]),
+                                                   TermName = Convert.ToString(row["TermName"])
                                                }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -914,6 +918,41 @@ namespace ThoughtFocus.Service.Implementation
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode)
+        {
+            ApplicationProgramsResponse obj = new ApplicationProgramsResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = termCode }
+                                        };
+
+            DataTable dtProgramList = _helper.GetDataTable("[dbo].[GetApplicationProgramsByTermCode]", parameters);
+            try
+            {
+                if (dtProgramList.Rows.Count > 0)
+                {
+                    obj.ProgramsList = dtProgramList.AsEnumerable().Select(row =>
+                                              new ApplicationProgram
+                                              {
+                                                  ProgramID = Convert.ToInt32(row["ID"]),
+                                                  ProgramName = Convert.ToString(row["ProgramName"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
                 }
                 else
                 {
