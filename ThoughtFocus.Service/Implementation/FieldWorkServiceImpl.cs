@@ -2377,7 +2377,7 @@ namespace ThoughtFocus.Service.Implementation
                     activityLogConfig.EnableActivityLog = Convert.ToBoolean(dtCourseConfig.Rows[0]["EnableActivityLog"]);
                     activityLogConfig.AutoCompute = Convert.ToBoolean(dtCourseConfig.Rows[0]["AutoCompute"]);
                     activityLogConfig.FieldWorkHours = Convert.ToString(dtCourseConfig.Rows[0]["FieldWorkHours"]);
-                    activityLogConfig.CategoryID = Convert.ToInt32(dtCourseConfig.Rows[0]["CategoryID"]);
+                    activityLogConfig.CategoryID = Convert.ToString(dtCourseConfig.Rows[0]["CategoryID"]) == "0" ? "" : Convert.ToString(dtCourseConfig.Rows[0]["CategoryID"]);
                     activityLogConfig.RecordByDate = Convert.ToBoolean(dtCourseConfig.Rows[0]["RecordByDate"]);
 
 
@@ -2424,7 +2424,7 @@ namespace ThoughtFocus.Service.Implementation
                     obj.Categories = dtCategories.AsEnumerable().Select(row =>
                                               new FieldWorkCoursesCategory
                                               {
-                                                  Value = Convert.ToInt32(row["ID"]),
+                                                  Value = Convert.ToString(row["ID"]),
                                                   Label = Convert.ToString(row["Category"])
                                               }).ToList();
                     obj.IsSuccess = true;
@@ -2466,7 +2466,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@CourseId", SqlDbType.Int) { Value = input.CourseId },
                                           new SqlParameter("@EnableActivityLog", SqlDbType.Bit) { Value = input.EnableActivityLog },
                                           new SqlParameter("@AutoCompute", SqlDbType.Bit) { Value = input.AutoCompute },
-                                          new SqlParameter("@CategoryID", SqlDbType.Int) { Value = input.CategoryID },
+                                          new SqlParameter("@CategoryID", SqlDbType.Int) { Value = Convert.ToInt16(input.CategoryID) },
                                           new SqlParameter("@RecordByDate", SqlDbType.Bit) { Value = input.RecordByDate },
                                           new SqlParameter("@FieldWorkHours", SqlDbType.Int) { Value = input.FieldWorkHours },
                                           new SqlParameter("@DocumentConfig", SqlDbType.Structured) { Value = documentConfigTable }
