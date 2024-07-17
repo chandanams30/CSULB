@@ -5,6 +5,7 @@ using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Milestones;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 
 namespace ThoughtFocus.Service.Interfaces
 {
@@ -36,5 +37,7 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID);
         ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode);
         SemesterListResponse GetDistinctSemesterList();
+        BaseResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input);
+        FormAttachments DownloadMilestoneFormAttachments(string FileName);
     }
 }

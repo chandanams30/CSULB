@@ -35,6 +35,8 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public string MilestoneName { get; set; }
         public bool isEditable { get; set; }
         public string MilestoneDescription { get; set; }
+        public string StatusName { get; set; }
+        public DateTime SubmittedDate { get; set; }
     }
     public class MilestoneFormActivityHandler
     {
