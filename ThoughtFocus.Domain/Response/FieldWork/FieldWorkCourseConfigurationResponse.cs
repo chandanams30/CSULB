@@ -25,7 +25,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public bool EnableActivityLog { get; set; }
         public bool AutoCompute { get; set; }
         public string FieldWorkHours { get; set; }
-        public int CategoryID { get; set; }
+        public string CategoryID { get; set; }
         public bool RecordByDate { get; set; }
         public List<FieldWorkDocuments> DocumentsConfig { get; set; }
 
