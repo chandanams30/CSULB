@@ -12,7 +12,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public bool AutoCompute { get; set; }
         public bool RecordByDate { get; set; }
         
-        public int CategoryID { get; set; }
+        public string CategoryID { get; set; }
         public int FieldWorkHours { get; set; }
 
         public List<FieldWorkDocumentConfig> DocumentsConfig { get; set; }
