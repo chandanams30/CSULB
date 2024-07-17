@@ -1,14 +1,19 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using iTextSharp.text.pdf;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
@@ -16,6 +21,9 @@ using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
+using iTextSharp.text;
+using ThoughtFocus.Domain.Enumeration;
+using ThoughtFocus.Domain.Response.Form;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -275,7 +283,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   MilestoneForm = Convert.ToString(row["MilestoneForm"]),
                                                   MilestoneName = Convert.ToString(row["MilestoneName"]),
                                                   isEditable = Convert.ToBoolean(row["isEditable"]),
-                                                  MilestoneDescription = Convert.ToString(row["MilestoneDescription"])
+                                                  MilestoneDescription = Convert.ToString(row["MilestoneDescription"]),
+                                                  StatusName = Convert.ToString(row["StatusName"]),
+                                                  SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"])
                                               }).FirstOrDefault();
 
                     obj.MilestoneApplicationForm = objMAF;
@@ -334,7 +344,8 @@ namespace ThoughtFocus.Service.Implementation
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                             new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
                                             new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
-                                            new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = ""}
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = ""},
+                                            new SqlParameter("@MilestonePublishedFormId", SqlDbType.BigInt) { Value = MilestonePublishedFormID}
                                         };
                 DataTable dtFilledFormList = _helper.GetDataTable("[dbo].[GetMilestoneFilledFormsList]", parameters1);
                 if (dtFilledFormList.Rows.Count > 0)
@@ -1040,6 +1051,215 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        public BaseResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input)
+        {
+            BaseResponse response = new BaseResponse();
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string userFolderName = string.Empty;
+                int userID = 0;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.GUID);
+                input.GUID = fileDetails.FileName;
+
+                //split Filename using '~'
+                string[] splitFileName = input.GUID.ToString().Split('~');
+                string uploadControlName = Convert.ToString(splitFileName[0]);
+                int formID = Convert.ToInt32(splitFileName[1]);
+                int milestonePublishedFormID = Convert.ToInt32(splitFileName[2]);
+                string GUID = Convert.ToString(splitFileName[3]);
+                fileName = "DOC" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss");
+
+                // get userID
+                SqlParameter[] parameters =
+                                 { 
+                                    new SqlParameter("@FormId", SqlDbType.Int) { Value = formID }
+                                 };
+
+                DataTable dtForm = _helper.GetDataTable("[dbo].[GetFormDetails]", parameters);
+                if (dtForm.Rows.Count > 0)
+                {
+                    userID = Convert.ToInt32(dtForm.Rows[0]["UserID"]);
+                }
+                string folderName = userID + "~" + "Milestone" + "_" + fileName;
+                if (input.GUID != string.Empty)
+                {
+
+                    fileExtension = fileDetails.FileExtension;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                }
+
+                SqlParameter[] parameters1 =
+                                         {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID},
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@MilestonePublishedFormID", SqlDbType.BigInt) { Value = milestonePublishedFormID },
+                                          new SqlParameter("@GUID", SqlDbType.UniqueIdentifier, 250) { Value = new Guid(GUID) },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@FolderName", SqlDbType.VarChar, 100) { Value = folderName },
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertMilestoneFormAttachment]", parameters1);
+                string[] folderSplit = folderName.ToString().Split('~');
+                userFolderName = folderSplit[0].ToString();
+                string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Milestone");
+                        if (Directory.Exists(dirForm))
+                        {
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Milestone");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+                return response;
+            }
+        }
+        public FormAttachments DownloadMilestoneFormAttachments(string FileName)
+        {
+            FormAttachments obj = new FormAttachments();
+            AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(FileName);
+            FileName = fileDetails.FileName;
+
+            //split Filename using '~'
+            string[] splitFileName = FileName.ToString().Split('~');
+            string GUID = Convert.ToString(splitFileName[3]);
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@GUID", SqlDbType.UniqueIdentifier) { Value = new Guid(GUID) }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetMilestoneFormAttachment]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new FormAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtension"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Milestone"), row["FileName"].ToString() + "." + Convert.ToString(row["FileExtension"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        private AttachmentFileDetails GetAttachedFileSplitValues(string filename)
+        {
+            AttachmentFileDetails fileObject = new AttachmentFileDetails();
+            string uploadedFileName = filename;
+            string[] splitter = uploadedFileName.Split('.');
+            StringBuilder fileNameAppender = new StringBuilder();
+            string fileExtension = uploadedFileName.Split('.').Last();
+            int length = splitter.Length;
+            for (int i = 0; i < splitter.Length; i++)
+            {
+                if (i == length - 2 && length > 2)
+                    fileNameAppender.Append(splitter[i]);
+                else if (length == 2)
+                {
+                    fileNameAppender.Append(splitter[i]);
+                    break;
+                }
+                else
+                {
+                    if (i != length - 1)
+                        fileNameAppender.Append(splitter[i] + ".");
+                }
+            }
+            fileObject.FileName = fileNameAppender.ToString();
+            fileObject.FileExtension = fileExtension;
+            return fileObject;
+        }
+        private byte[] GetImageFilecontent(byte[] fileContent)
+        {
+            byte[] inputStream = null;
+            string documentName = string.Empty;
+            using (MemoryStream stream = new System.IO.MemoryStream())
+            {
+                //Initialize the PDF document object.
+                using (iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 10f, 10f, 10f, 10f))
+                {
+                    PdfWriter.GetInstance(pdfDoc, stream).SetFullCompression();
+                    pdfDoc.Open();
+
+                    //Add the Image file to the PDF document object.
+                    iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(fileContent);
+
+                    //Scaling the image
+                    if (pic.Height > pic.Width)
+                    {
+                        float percentage = 0.0f;
+                        percentage = 700 / pic.Height;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    else
+                    {
+                        float percentage = 0.0f;
+                        percentage = 540 / pic.Width;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    pdfDoc.Add(pic);
+                    pdfDoc.Close();
+                    inputStream = stream.ToArray();
+                }
+            }
+            return inputStream;
+        }
+        public byte[] GetFileContent(string userFolderPath, string fileName)
+        {
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            string filepath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, fileName));
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
+        }
+        private string GetAttachmentsFolderName(string combinedString)
+        {
+            string[] folderSplit = combinedString.ToString().Split('~');
+            string userFolderName = folderSplit[0].ToString();
+            return userFolderName;
         }
     }
 }
