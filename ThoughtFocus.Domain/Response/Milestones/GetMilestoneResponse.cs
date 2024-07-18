@@ -88,4 +88,8 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public int ProgramID { get; set; }
         public string ProgramName { get; set; }
     }
+    public class MilestoneFormAttachmentResponse : BaseResponse
+    {
+        public string fileName { get; set; }
+    }
 }

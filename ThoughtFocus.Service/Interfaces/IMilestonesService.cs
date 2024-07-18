@@ -37,7 +37,7 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID);
         ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode);
         SemesterListResponse GetDistinctSemesterList();
-        BaseResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input);
+        MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input);
         FormAttachments DownloadMilestoneFormAttachments(string FileName);
     }
 }

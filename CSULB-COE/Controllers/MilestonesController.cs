@@ -525,8 +525,8 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("UpsertFormAttachment")]
-        public BaseResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input)
+        [HttpPost("UpsertMilestoneFormAttachment")]
+        public MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input)
         {
             try
             {
@@ -545,12 +545,12 @@ namespace CSULB_COE.Controllers
                 //fs.Dispose();
                 //binaryReader.Close();
                 #endregion
-                BaseResponse response = _milestonesService.UpsertMilestoneFormAttachment(input);
+                MilestoneFormAttachmentResponse response = _milestonesService.UpsertMilestoneFormAttachment(input);
                 return response;
             }
             catch (Exception ex)
             {
-                BaseResponse response = new BaseResponse();
+                MilestoneFormAttachmentResponse response = new MilestoneFormAttachmentResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
