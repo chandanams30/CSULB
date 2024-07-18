@@ -1052,9 +1052,9 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public BaseResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input)
+        public MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input)
         {
-            BaseResponse response = new BaseResponse();
+            MilestoneFormAttachmentResponse response = new MilestoneFormAttachmentResponse();
             if (input.FileContent != null && input.FileContent.Length > 0)
             {
                 string fileName = string.Empty;
@@ -1144,6 +1144,7 @@ namespace ThoughtFocus.Service.Implementation
                             File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
                         }
                     }
+                response.fileName = fileName;
                 response.IsSuccess = true;
                 response.Message = "Form attachment Uploaded Successfully";
                 return response;
