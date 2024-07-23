@@ -128,21 +128,50 @@ namespace ThoughtFocus.Service.Implementation
 
                                         };
 
-            DataTable dtResult = _helper.GetDataTable("[dbo].[UpsertMilestoneFilledForm]", parameters);
-            if(dtResult.Rows.Count>0)
+            DataSet dtMilestones = _helper.GetDataSet("[dbo].[UpsertMilestoneFilledForm]", parameters);
+            if (dtMilestones.Tables[0].Rows.Count > 0)
             {
-                if(Convert.ToInt32(dtResult.Rows[0]["Status"])==1)
+                //send mail to approver
+                if (input.ActivityDefinitionID == 3 || input.ActivityDefinitionID == 6)
+                {
+                    if (dtMilestones.Tables[1].Rows.Count > 0)
+                    {
+                        string approverName = string.Empty;
+                        string approverEmail = string.Empty;
+                        string studentName = string.Empty;
+                        string programName = string.Empty;
+                        string milestoneName = string.Empty;
+                        if (!string.IsNullOrEmpty(Convert.ToString(dtMilestones.Tables[1].Rows[0]["ApproverEmail"])))
+                        {
+                            approverEmail = Convert.ToString(dtMilestones.Tables[1].Rows[0]["ApproverEmail"]);
+                            approverName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["ApproverName"]);
+                            studentName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["StudentName"]);
+                            programName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["ProgramName"]);
+                            milestoneName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["MilestoneName"]);
+                            string body = GetMailBodyTemplate("MilestoneApprove.html");
+                            string logoText = "cid:myImageID";
+                            body = body.Replace("[[logoPath]]", logoText)
+                                       .Replace("[[approverName]]", approverName)
+                                       .Replace("[[studentName]]", studentName)
+                                       .Replace("[[programName]]", programName)
+                                       .Replace("[[milestoneName]]", milestoneName);
+                            string subject = "Approve Milestone Form";
+                            _sendMail.SendEmail(approverEmail, "", "COMMON", subject, body, "");
+                        }
+                    }
+                }
+                
+                if (Convert.ToInt32(dtMilestones.Tables[0].Rows[0]["Status"]) == 1)
                 {
                     response.Message = "Milestone Added Successfully";
                     response.IsSuccess = true;
                 }
                 else
                 {
-                    response.Message = Convert.ToString(dtResult.Rows[0]["Message"]);
+                    response.Message = Convert.ToString(dtMilestones.Tables[0].Rows[0]["Message"]);
                     response.IsSuccess = true;
                 }
             }
-            
             return response;
         }
 
@@ -182,7 +211,7 @@ namespace ThoughtFocus.Service.Implementation
                                               new PublishedMilestonesList
                                               {
                                                   MilestonesByProgramTerm = Convert.ToString(row["MilestonesByProgramTerm"])
-                                             
+
                                               }).FirstOrDefault();
 
 
@@ -253,12 +282,12 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID,int MilestonePublishedFormID)
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID)
         {
             GetMilestoneApplicationFormResponse obj = new GetMilestoneApplicationFormResponse();
             if (MilestoneFormID == 0)
             {
-                MilestoneFormID = GetMilestoneFormID(UserID,FormID,MilestoneFormID,MilestonePublishedFormID);
+                MilestoneFormID = GetMilestoneFormID(UserID, FormID, MilestoneFormID, MilestonePublishedFormID);
             }
             SqlParameter[] parameters = {
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
@@ -336,30 +365,30 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        private int GetMilestoneFormID(int UserID,int FormID,int MilestoneFormID,int MilestonePublishedFormID)
+        private int GetMilestoneFormID(int UserID, int FormID, int MilestoneFormID, int MilestonePublishedFormID)
         {
             //get the MilestoneFormID
-                MilestoneApplicationFormsListResponse response = new MilestoneApplicationFormsListResponse();
-                SqlParameter[] parameters1 = {
+            MilestoneApplicationFormsListResponse response = new MilestoneApplicationFormsListResponse();
+            SqlParameter[] parameters1 = {
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                             new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
                                             new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
                                             new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = ""},
                                             new SqlParameter("@MilestonePublishedFormId", SqlDbType.BigInt) { Value = MilestonePublishedFormID}
                                         };
-                DataTable dtFilledFormList = _helper.GetDataTable("[dbo].[GetMilestoneFilledFormsList]", parameters1);
-                if (dtFilledFormList.Rows.Count > 0)
-                {
+            DataTable dtFilledFormList = _helper.GetDataTable("[dbo].[GetMilestoneFilledFormsList]", parameters1);
+            if (dtFilledFormList.Rows.Count > 0)
+            {
 
-                    response.MilestoneApplicationFormsList = dtFilledFormList.AsEnumerable().Where(row => row.Field<long>("MilestonePublishedFormID") == MilestonePublishedFormID).Select(row =>
-                                              new MilestoneApplicationFormsList
-                                              {
-                                                  MilestoneFormsID = Convert.ToInt32(row["MilestoneFormsID"]),
+                response.MilestoneApplicationFormsList = dtFilledFormList.AsEnumerable().Where(row => row.Field<long>("MilestonePublishedFormID") == MilestonePublishedFormID).Select(row =>
+                                          new MilestoneApplicationFormsList
+                                          {
+                                              MilestoneFormsID = Convert.ToInt32(row["MilestoneFormsID"]),
 
-                                              }).ToList();
-                    MilestoneFormID = response.MilestoneApplicationFormsList.Select(form => form.MilestoneFormsID).FirstOrDefault();
+                                          }).ToList();
+                MilestoneFormID = response.MilestoneApplicationFormsList.Select(form => form.MilestoneFormsID).FirstOrDefault();
 
-                }
+            }
             return MilestoneFormID;
         }
 
@@ -427,16 +456,16 @@ namespace ThoughtFocus.Service.Implementation
         {
             MilestoneApproverUserListResponse obj = new MilestoneApproverUserListResponse();
             SqlParameter[] parameters = {
-                                           
+
                                         };
 
             DataTable dtMilestones = _helper.GetDataTable("[dbo].[GetMilestoneApproverUserList]", parameters);
             try
             {
-                if (dtMilestones.Rows.Count>0)
+                if (dtMilestones.Rows.Count > 0)
                 {
 
-                 
+
 
                     obj.MilestoneApproverUserList = dtMilestones.AsEnumerable().Select(row =>
                                            new MilestoneApproverUserList
@@ -509,7 +538,7 @@ namespace ThoughtFocus.Service.Implementation
 
         public BaseResponse UpsertMilestoneTemplate(UpsertMilestoneTemplateRequest input)
         {
-           // DataTable approvers = _utils.ToDataTable(input.MileStoneApprovers);
+            // DataTable approvers = _utils.ToDataTable(input.MileStoneApprovers);
             BaseResponse response = new BaseResponse();
             SqlParameter[] parameters =
                                        {
@@ -519,7 +548,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@MilestoneForm", SqlDbType.NVarChar,-1) { Value = input.MilestoneForm },
                                           new SqlParameter("@isReadyToPublish", SqlDbType.Bit) { Value = input.isReadyToPublish },
                                           new SqlParameter("@createdByUserID", SqlDbType.BigInt) { Value = input.createdByUserID }
-                                         
+
                                         };
             int ID = _helper.InsertTable("[Milestone].[UpsertMilestoneTemplate]", parameters);
             response.Message = "Milestone Saved Successfully";
@@ -716,7 +745,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             MilestoneProgramTermListResponse obj = new MilestoneProgramTermListResponse();
             SqlParameter[] parameters = {
-                                          
+
                                         };
 
             DataTable dtMilestoneTemplate = _helper.GetDataTable("[Milestone].[GetMilestoneProgramTermList]", parameters);
@@ -781,7 +810,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             GetMilestoneUsersListResponse obj = new GetMilestoneUsersListResponse();
             SqlParameter[] parameters = {
-                                            
+
                                         };
 
             DataTable dtMilestoneUserList = _helper.GetDataTable("[Milestone].[GetMilestoneUsersList]", parameters);
@@ -953,11 +982,12 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID)
+        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID, int RoleID)
         {
             GetMilestoneWorkflowProcessTransitionHistoryResponse obj = new GetMilestoneWorkflowProcessTransitionHistoryResponse();
             SqlParameter[] parameters = {
-                                            new SqlParameter("@MilestoneFormID", SqlDbType.BigInt) { Value = MilestoneFormID }
+                                            new SqlParameter("@MilestoneFormID", SqlDbType.BigInt) { Value = MilestoneFormID },
+                                            new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = RoleID }
                                         };
 
             DataTable dtMilestonePublishedForm = _helper.GetDataTable("[Milestone].[GetWorkflowProcessTransitionHistory]", parameters);
@@ -1076,7 +1106,7 @@ namespace ThoughtFocus.Service.Implementation
 
                 // get userID
                 SqlParameter[] parameters =
-                                 { 
+                                 {
                                     new SqlParameter("@FormId", SqlDbType.Int) { Value = formID }
                                  };
 
@@ -1115,35 +1145,35 @@ namespace ThoughtFocus.Service.Implementation
                 string[] folderSplit = folderName.ToString().Split('~');
                 userFolderName = folderSplit[0].ToString();
                 string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
-                    if (Directory.Exists(dirUserFolderPath))
+                if (Directory.Exists(dirUserFolderPath))
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Milestone");
+                    if (Directory.Exists(dirForm))
                     {
-                        string dirForm = Path.Combine(dirUserFolderPath, "Milestone");
-                        if (Directory.Exists(dirForm))
-                        {
-                            {
-                                File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
-                            }
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(dirForm);
-                            {
-                                File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        string dirForm = Path.Combine(dirUserFolderPath, "Milestone");
-                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
-                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
-                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
-                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-                        dirFieldWorkFolder.SetAccessControl(dSecurity);
                         {
                             File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
                         }
                     }
+                    else
+                    {
+                        Directory.CreateDirectory(dirForm);
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                }
+                else
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Milestone");
+                    DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                    DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                    DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                    dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                    dirFieldWorkFolder.SetAccessControl(dSecurity);
+                    {
+                        File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                    }
+                }
                 response.fileName = fileName;
                 response.IsSuccess = true;
                 response.Message = "Form attachment Uploaded Successfully";
@@ -1178,6 +1208,79 @@ namespace ThoughtFocus.Service.Implementation
                                               FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString()), "Milestone"), row["FileName"].ToString() + "." + Convert.ToString(row["FileExtension"]))
                                           }).FirstOrDefault();
 
+            return obj;
+        }
+        public PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID)
+        {
+            PublishedMilestoneDetailsResponse obj = new PublishedMilestoneDetailsResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@MilestoneTemplateID", SqlDbType.BigInt) { Value = MilestoneTemplateID }
+                                        };
+
+            DataSet dtMilestoneTemplate = _helper.GetDataSet("[Milestone].[GetPublishedMilestoneDetails]", parameters);
+            try
+            {
+                if (obj.publishedMilestoneDetails == null)
+                {
+                    obj.publishedMilestoneDetails = new PublishedMilestoneDetails();
+                }
+                if (dtMilestoneTemplate.Tables[0].Rows.Count > 0 && dtMilestoneTemplate.Tables[1].Rows.Count > 0 && dtMilestoneTemplate.Tables[2].Rows.Count > 0)
+                {
+
+                    var milestoneDetail = dtMilestoneTemplate.Tables[0].AsEnumerable().Select(row =>
+                                            new PublishedMilestoneDetails
+                                            {
+                                                MilestoneName = Convert.ToString(row["MilestoneName"]),
+                                                MilestoneDescription = Convert.ToString(row["MilestoneDescription"]),
+                                                ProgramName = Convert.ToString(row["ProgramName"]),
+                                                TermName = Convert.ToString(row["TermName"])
+                                            }).FirstOrDefault();
+
+                    if (milestoneDetail != null)
+                    {
+                        obj.publishedMilestoneDetails.MilestoneName = milestoneDetail.MilestoneName;
+                        obj.publishedMilestoneDetails.MilestoneDescription = milestoneDetail.MilestoneDescription;
+                        obj.publishedMilestoneDetails.ProgramName = milestoneDetail.ProgramName;
+                        obj.publishedMilestoneDetails.TermName = milestoneDetail.TermName;
+                    }
+                    var approvers = dtMilestoneTemplate.Tables[1].AsEnumerable().Select(row =>
+                                           new PublishedMilestoneDetails
+                                           {
+                                               Approvers = Convert.ToString(row["ApproversName"])
+
+                                           }).FirstOrDefault();
+                    if(approvers != null)
+                    {
+                        obj.publishedMilestoneDetails.Approvers = approvers.Approvers;
+                    }
+
+                    var students = dtMilestoneTemplate.Tables[2].AsEnumerable().Select(row =>
+                                         new PublishedMilestoneDetails
+                                         {
+                                             Students = Convert.ToString(row["StudentsName"])
+
+                                         }).FirstOrDefault();
+                    if (students != null)
+                    {
+                        obj.publishedMilestoneDetails.Students = students.Students;
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
             return obj;
         }
         private AttachmentFileDetails GetAttachedFileSplitValues(string filename)
@@ -1261,6 +1364,16 @@ namespace ThoughtFocus.Service.Implementation
             string[] folderSplit = combinedString.ToString().Split('~');
             string userFolderName = folderSplit[0].ToString();
             return userFolderName;
+        }
+        private string GetMailBodyTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/EmailTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
         }
     }
 }

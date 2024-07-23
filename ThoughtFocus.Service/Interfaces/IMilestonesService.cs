@@ -34,10 +34,11 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID);
         GetMilestoneRequirementListResponse GetMilestoneRequirementList();
         GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID);
-        GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID);
+        GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID, int RoleID);
         ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode);
         SemesterListResponse GetDistinctSemesterList();
         MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input);
         FormAttachments DownloadMilestoneFormAttachments(string FileName);
+        PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID);
     }
 }

@@ -472,11 +472,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetMilestoneWorkflowProcessTransitionHistory")]
-        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID)
+        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID, int RoleID)
         {
             try
             {
-                GetMilestoneWorkflowProcessTransitionHistoryResponse response = _milestonesService.GetMilestoneWorkflowProcessTransitionHistory(MilestoneFormID);
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = _milestonesService.GetMilestoneWorkflowProcessTransitionHistory(MilestoneFormID,RoleID);
                 return response;
             }
             catch (Exception ex)
@@ -580,6 +580,24 @@ namespace CSULB_COE.Controllers
 
                 _logger.LogError(ex, ex.Message);
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetPublishedMilestoneDetails")]
+        public PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID)
+        {
+            try
+            {
+                PublishedMilestoneDetailsResponse response = _milestonesService.GetPublishedMilestoneDetails(MilestoneTemplateID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PublishedMilestoneDetailsResponse response = new PublishedMilestoneDetailsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
             }
         }
         private string GetFileType(string fileExt)
