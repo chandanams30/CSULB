@@ -1283,6 +1283,52 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public StudentMilestoneListResponse GetStudentsMilestone(int UserID)
+        {
+            StudentMilestoneListResponse obj = new StudentMilestoneListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+                                        };
+
+            DataTable dtMilestoneList = _helper.GetDataTable("[Milestone].[ApplyStudentMilestone]", parameters);
+            try
+            {
+                if (dtMilestoneList.Rows.Count > 0)
+                {
+                    obj.studentsMilestone = dtMilestoneList.AsEnumerable().Select(row =>
+                                              new StudentMilestoneList
+                                              {
+                                                  MilestoneFormID = Convert.ToInt32(row["MilestoneFormID"]),
+                                                  MilestonePublishedFormID = Convert.ToInt32(row["MilestonePublishedFormID"]),
+                                                  ApproverName = Convert.ToString(row["ApproverName"]),
+                                                  StudentName = Convert.ToString(row["StudentName"]),
+                                                  CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                                                  State = Convert.ToString(row["State"]),
+                                                  CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                                  ProgramName = Convert.ToString(row["ProgramName"]),
+                                                  MilestoneName = Convert.ToString(row["MilestoneName"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  FormId = Convert.ToInt32(row["FormId"]),
+                                                  TermName = Convert.ToString(row["TermName"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
         private AttachmentFileDetails GetAttachedFileSplitValues(string filename)
         {
             AttachmentFileDetails fileObject = new AttachmentFileDetails();
