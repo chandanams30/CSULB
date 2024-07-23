@@ -600,6 +600,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("ApplyStudentMilestone")]
+        public StudentMilestoneListResponse ApplyStudentMilestone(int UserID)
+        {
+            try
+            {
+                StudentMilestoneListResponse response = _milestonesService.GetStudentsMilestone(UserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentMilestoneListResponse response = new StudentMilestoneListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         private string GetFileType(string fileExt)
         {
             string contentType = string.Empty;

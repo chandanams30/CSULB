@@ -40,5 +40,6 @@ namespace ThoughtFocus.Service.Interfaces
         MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input);
         FormAttachments DownloadMilestoneFormAttachments(string FileName);
         PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID);
+        StudentMilestoneListResponse GetStudentsMilestone(int UserID);
     }
 }
