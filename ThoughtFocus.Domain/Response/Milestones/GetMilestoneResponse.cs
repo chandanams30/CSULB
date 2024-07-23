@@ -61,6 +61,20 @@ namespace ThoughtFocus.Domain.Response.Milestones
     {
         public List<GetMilestoneSubmittedFormsResponse> milestoneSubmittedFormsList { get; set; }
     }
+    public class PublishedMilestoneDetailsResponse : BaseResponse
+    {
+        public PublishedMilestoneDetails publishedMilestoneDetails { get; set; }
+    }
+    public class PublishedMilestoneDetails
+    {
+        public string MilestoneName { get; set; }
+        public string MilestoneDescription { get; set; }
+        public string ProgramName { get; set; }
+        public string TermName { get; set; }
+        public string Approvers { get; set; }
+        public string Students { get; set; }
+
+    }
     public class GetMilestoneSubmittedFormsResponse
     {
         public int MilestoneFormID { get; set; }
