@@ -91,11 +91,11 @@ namespace CSULB_COE.Controllers
         }
         
         [HttpGet("GetMilestoneApplicationForm")]
-        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID,int MilestoneFormID, int FormID, int MilestonePublishedFormID)
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID,int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply)
         {
             try
             {
-                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID,MilestoneFormID, FormID,MilestonePublishedFormID);
+                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID,MilestoneFormID, FormID,MilestonePublishedFormID,IsReApply);
                 return response;
             }
             catch (Exception ex)
