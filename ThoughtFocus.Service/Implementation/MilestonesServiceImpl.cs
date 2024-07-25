@@ -282,12 +282,12 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID)
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID, bool IsReApply)
         {
             GetMilestoneApplicationFormResponse obj = new GetMilestoneApplicationFormResponse();
             if (MilestoneFormID == 0)
             {
-                MilestoneFormID = GetMilestoneFormID(UserID, FormID, MilestoneFormID, MilestonePublishedFormID);
+                MilestoneFormID = GetMilestoneFormID(UserID, FormID, MilestoneFormID, MilestonePublishedFormID,IsReApply);
             }
             SqlParameter[] parameters = {
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
@@ -347,9 +347,9 @@ namespace ThoughtFocus.Service.Implementation
                                               }).FirstOrDefault();
 
                     obj.StudentDetails = objSD;
-
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
+                   
                 }
                 else
                 {
@@ -365,7 +365,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        private int GetMilestoneFormID(int UserID, int FormID, int MilestoneFormID, int MilestonePublishedFormID)
+        private int GetMilestoneFormID(int UserID, int FormID, int MilestoneFormID, int MilestonePublishedFormID, bool IsReApply)
         {
             //get the MilestoneFormID
             MilestoneApplicationFormsListResponse response = new MilestoneApplicationFormsListResponse();
@@ -374,7 +374,8 @@ namespace ThoughtFocus.Service.Implementation
                                             new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
                                             new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
                                             new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = ""},
-                                            new SqlParameter("@MilestonePublishedFormId", SqlDbType.BigInt) { Value = MilestonePublishedFormID}
+                                            new SqlParameter("@MilestonePublishedFormId", SqlDbType.BigInt) { Value = MilestonePublishedFormID},
+                                            new SqlParameter("@IsReApply", SqlDbType.Bit ) { Value = IsReApply }
                                         };
             DataTable dtFilledFormList = _helper.GetDataTable("[dbo].[GetMilestoneFilledFormsList]", parameters1);
             if (dtFilledFormList.Rows.Count > 0)

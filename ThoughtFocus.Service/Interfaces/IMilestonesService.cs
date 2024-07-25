@@ -17,7 +17,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse AssignMilestoneProgram(AssignMilestoneToProgram input);
         PublishedMilestonesListResponse GetPublishedMilestoneList(int ProgramID, string TermCode);
         MilestoneApplicationFormsListResponse GetMilestoneApplicationFormsList(int UserID, int FormID, int ProgramID, string TermCode);
-        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID);
+        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply);
         GetMilestoneResponse GetMilestone(int MilestoneID);
         MilestoneApproverUserListResponse GetMilestoneApproverUserList();
         MilestoneTypesResponse GetMilestoneTypes();
