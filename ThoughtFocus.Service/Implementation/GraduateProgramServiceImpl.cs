@@ -225,7 +225,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"]),
                                                   //ShowBulkCheckBox = Convert.ToBoolean(row["ShowBulkCheckBox"]),
                                                   Email = Convert.ToString(row["Email"]),
-                                                  AlternateEmail = Convert.ToString(row["AlternateEmail"])
+                                                  AlternateEmail = Convert.ToString(row["AlternateEmail"]),
+                                                  ResumeUploadStatus = Convert.ToString(row["ResumeUploadStatus"]),
+                                                  SOPUploadStatus = Convert.ToString(row["SOPUploadStatus"])
                                               }).ToList();
                     }
                     if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
