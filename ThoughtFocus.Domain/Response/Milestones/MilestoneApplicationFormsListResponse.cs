@@ -23,6 +23,7 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public MilestoneFormActivityHandler MilestoneFormActivityHandler { get; set; }
         public MileStoneFilledFormApprovers MileStoneFilledFormApprovers { get; set; }
         public StudentDetails StudentDetails { get; set; }
+        public MileStoneFilledFormExternalApprovers MileStoneFilledFormExternalApprovers { get; set; }
     }
     public class MilestoneApplicationForm
     {
@@ -53,6 +54,9 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-
+    }
+    public class MileStoneFilledFormExternalApprovers
+    {
+        public string ExternalApprovers { get; set; }
     }
 }
