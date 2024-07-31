@@ -16,11 +16,13 @@ using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
+using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
+using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
 
@@ -34,6 +36,7 @@ namespace CSULB_COE.Controllers
         public IGraduateProgramService _graduateProgramService;
         public IInitialCredentialProgramService _initialCredentialProgramService;
         public IFieldWorkService _fieldWorkService;
+        public IMilestonesService _milestonesService;
         private readonly IApplicationService _applicationService;
         private readonly IConfiguration _configuration;
         private readonly ISqlDBUtility _helper;
@@ -41,7 +44,8 @@ namespace CSULB_COE.Controllers
               ILogger<GraduateProgramController> logger, IApplicationService applicationService
             , IConfiguration configuration, ISqlDBUtility helper 
             ,IInitialCredentialProgramService initialCredentialProgramService
-            ,IFieldWorkService fieldWorkService)
+            ,IFieldWorkService fieldWorkService
+            ,IMilestonesService milestonesService)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
@@ -50,6 +54,7 @@ namespace CSULB_COE.Controllers
             _helper = helper;
             _initialCredentialProgramService = initialCredentialProgramService;
             _fieldWorkService = fieldWorkService;
+            _milestonesService = milestonesService;
         }
 
 
@@ -820,44 +825,263 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        //[HttpPost("UpdateRecommendation")]
-        //public BaseResponse UpdateRecommendation(UpdateRecommendation input)
-        //{
-        //    try
-        //    {
+        [HttpPost("GetFormDispositionsAssessment")]
+        public FormDispositionsAssessmentResponse GetFormDispositionsAssessment(FormDispositionsAssessmentRequest input)
+        {
+            try
+            {
+                FormDispositionsAssessmentResponse response = _initialCredentialProgramService.GetFormDispositionsAssessment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormDispositionsAssessmentResponse response = new FormDispositionsAssessmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFormPrerequisites")]
+        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID)
+        {
+            try
+            {
+                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId, FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormPrerequisitesResponse response = new FormPrerequisitesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertFormDispositionsAssessment")]
+        public BaseResponse UpsertFormDispositionsAssessment(UpsertFormDispositionsAssessmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
 
-        //        BaseResponse response = _graduateProgramService.UpdateRecommendation(input);
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        BaseResponse response = new BaseResponse();
-        //        response.IsSuccess = false;
-        //        response.Message = "Failed to update recommendation data , please try after sometime";
-        //        response.StackTrace = ex.Message;
-        //        _logger.LogError(ex, ex.Message);
-        //        return response;
-        //    }
-        //}
-        //[HttpPost("DeleteRecommendation")]
-        //public BaseResponse DeleteRecommendation(DeleteRecommendations input)
-        //{
-        //    try
-        //    {
+                response = _initialCredentialProgramService.UpsertFormDispositionsAssessment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFormSubSectionSubmitForReview")]
+        public BaseResponse UpdateFormSubSectionSubmitForReview(UpdateFormSubSectionSubmitForReviewRequest input)
+        {
+            try
+            {
 
-        //        BaseResponse response = _graduateProgramService.DeleteRecommendation(input);
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        BaseResponse response = new BaseResponse();
-        //        response.IsSuccess = false;
-        //        response.Message = "Failed to delete recommendation data , please try after sometime";
-        //        response.StackTrace = ex.Message;
-        //        _logger.LogError(ex, ex.Message);
-        //        return response;
-        //    }
-        //}
+                BaseResponse response = _initialCredentialProgramService.UpdateFormSubSectionSubmitForReview(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UploadFieldWorkRequiredDocuments")]
+        public BaseResponse UploadFieldWorkRequiredDocuments(FieldWorkUploadDocumentsRequest input)
+        {
+            #region testing with manual file , actual file will come as byte array 
+            //-------------just for testing - comment it after testing
+            //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
+            //string filepath = "D:\\CSULB\\Document\\TBCTC_Approval.pdf";
+            //byte[] fileContent = null;
+            //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            //long byteLength = new System.IO.FileInfo(filepath).Length;
+            //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            //input.FileContent = fileContent;
+            //fs.Close();
+            //fs.Dispose();
+            //binaryReader.Close();
+            //string fc = fileContent.ToString();
+            //----end comment----------------------------------------
+            #endregion
+
+            try
+            {
+                BaseResponse response = _fieldWorkService.UpdateFieldWorkDocumentValidation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("DownloadRequiredDocuments")]
+        public IActionResult DownloadRequiredDocuments(int userId, int fieldworkAttachmentId)
+        {
+            byte[] inputStream = null;
+            string fileType = string.Empty;
+            string fileName = string.Empty;
+
+            FieldWorkProfileAttachments obj = _fieldWorkService.DownloadRequiredDocuments(userId, fieldworkAttachmentId);
+            fileName = obj.FileName;
+            inputStream = obj.FileContent;
+            string[] fileSplit = obj.FileName.Split('.');
+            string fileextension = obj.FileName.Split('.').Last();
+            fileType = GetFileType(fileextension);
+            //fileType = GetFileType(fileSplit[1]);
+            //Response.Headers.Add("Content-Disposition", "inline");
+            //return File(inputStream, fileType);
+            return File(inputStream, fileType, fileName);
+        }
+        [HttpGet("GetMilestoneSubmittedFormsList")]
+        public GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID)
+        {
+            try
+            {
+                GetMilestoneSubmittedFormsListResponse response = _milestonesService.GetMilestoneSubmittedFormsList(RoleID, ApproverUserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneSubmittedFormsListResponse response = new GetMilestoneSubmittedFormsListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetMilestoneApplicationForm")]
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID, bool IsReApply)
+        {
+            try
+            {
+                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID, MilestoneFormID, FormID, MilestonePublishedFormID, IsReApply);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneApplicationFormResponse response = new GetMilestoneApplicationFormResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetMilestoneWorkflowProcessTransitionHistory")]
+        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID, int RoleID)
+        {
+            try
+            {
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = _milestonesService.GetMilestoneWorkflowProcessTransitionHistory(MilestoneFormID, RoleID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = new GetMilestoneWorkflowProcessTransitionHistoryResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertMilestoneFilledForm")]
+        public BaseResponse UpsertMilestoneFilledForm(UpsertMilestoneFilledFormRequest input)
+        {
+            try
+            {
+                BaseResponse response = _milestonesService.UpsertMilestoneFilledForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("ApplyStudentMilestone")]
+        public StudentMilestoneListResponse ApplyStudentMilestone(int UserID)
+        {
+            try
+            {
+                StudentMilestoneListResponse response = _milestonesService.GetStudentsMilestone(UserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentMilestoneListResponse response = new StudentMilestoneListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+            //[HttpPost("UpdateRecommendation")]
+            //public BaseResponse UpdateRecommendation(UpdateRecommendation input)
+            //{
+            //    try
+            //    {
+
+            //        BaseResponse response = _graduateProgramService.UpdateRecommendation(input);
+            //        return response;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        BaseResponse response = new BaseResponse();
+            //        response.IsSuccess = false;
+            //        response.Message = "Failed to update recommendation data , please try after sometime";
+            //        response.StackTrace = ex.Message;
+            //        _logger.LogError(ex, ex.Message);
+            //        return response;
+            //    }
+            //}
+            //[HttpPost("DeleteRecommendation")]
+            //public BaseResponse DeleteRecommendation(DeleteRecommendations input)
+            //{
+            //    try
+            //    {
+
+            //        BaseResponse response = _graduateProgramService.DeleteRecommendation(input);
+            //        return response;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        BaseResponse response = new BaseResponse();
+            //        response.IsSuccess = false;
+            //        response.Message = "Failed to delete recommendation data , please try after sometime";
+            //        response.StackTrace = ex.Message;
+            //        _logger.LogError(ex, ex.Message);
+            //        return response;
+            //    }
+            //}
 
 
         private string GetFileType(string fileExt)

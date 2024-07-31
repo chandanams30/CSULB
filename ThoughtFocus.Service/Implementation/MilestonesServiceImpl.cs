@@ -124,7 +124,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ApproverComments", SqlDbType.NVarChar,-1) { Value = input.ApproverComments },
                                           new SqlParameter("@ActivityDefinitionID", SqlDbType.BigInt) { Value = input.ActivityDefinitionID },
                                           new SqlParameter("@ActivityDefinitionState", SqlDbType.NVarChar,-1) { Value = input.ActivityDefinitionState },
-                                          new SqlParameter("@ActivityControlLabel", SqlDbType.NVarChar,20) { Value = input.ActivityControlLabel }
+                                          new SqlParameter("@ActivityControlLabel", SqlDbType.NVarChar,20) { Value = input.ActivityControlLabel },
+                                          new SqlParameter("@ExternalApprovers", SqlDbType.NVarChar,-1) { Value = input.ExternalApprovers }
 
                                         };
 
@@ -141,6 +142,9 @@ namespace ThoughtFocus.Service.Implementation
                         string studentName = string.Empty;
                         string programName = string.Empty;
                         string milestoneName = string.Empty;
+                        int milestoneApproverType = 0;
+                        string body = string.Empty;
+                        string approverIdentifier = string.Empty;
                         if (!string.IsNullOrEmpty(Convert.ToString(dtMilestones.Tables[1].Rows[0]["ApproverEmail"])))
                         {
                             approverEmail = Convert.ToString(dtMilestones.Tables[1].Rows[0]["ApproverEmail"]);
@@ -148,13 +152,24 @@ namespace ThoughtFocus.Service.Implementation
                             studentName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["StudentName"]);
                             programName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["ProgramName"]);
                             milestoneName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["MilestoneName"]);
-                            string body = GetMailBodyTemplate("MilestoneApprove.html");
+                            milestoneApproverType = Convert.ToInt32(dtMilestones.Tables[1].Rows[0]["MilestoneApproverTypeID"]);
+                            approverIdentifier = Convert.ToString(dtMilestones.Tables[1].Rows[0]["ExternalApprovalIdentifier"]);
+                            string link = _configuration["ApplicationKeys:PartnerUserBaseURL"] + approverIdentifier;
+                            if (milestoneApproverType == 1)
+                            {
+                                body = GetMailBodyTemplate("MilestoneApprove.html");
+                            }
+                            else
+                            {
+                                body = GetMailBodyTemplate("MilestoneExternalApprover.html");
+                            }
                             string logoText = "cid:myImageID";
                             body = body.Replace("[[logoPath]]", logoText)
                                        .Replace("[[approverName]]", approverName)
                                        .Replace("[[studentName]]", studentName)
                                        .Replace("[[programName]]", programName)
-                                       .Replace("[[milestoneName]]", milestoneName);
+                                       .Replace("[[milestoneName]]", milestoneName)
+                                       .Replace("[[link]]", link);
                             string subject = "Approve Milestone Form";
                             _sendMail.SendEmail(approverEmail, "", "COMMON", subject, body, "");
                         }
@@ -345,8 +360,15 @@ namespace ThoughtFocus.Service.Implementation
                                                   LastName = Convert.ToString(row["LastName"]),
                                                   Email = Convert.ToString(row["Email"])
                                               }).FirstOrDefault();
-
                     obj.StudentDetails = objSD;
+                    MileStoneFilledFormExternalApprovers objMFFEA = dtMilestones.Tables[4].AsEnumerable().Select(row =>
+                                              new MileStoneFilledFormExternalApprovers
+                                              {
+                                                    ExternalApprovers = Convert.ToString(row["MileStoneFilledFormExternalApprovers"])
+                                              }).FirstOrDefault();
+                    obj.MileStoneFilledFormExternalApprovers = objMFFEA;
+
+                    
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
                    
