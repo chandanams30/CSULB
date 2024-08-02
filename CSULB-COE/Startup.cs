@@ -154,6 +154,9 @@ namespace CSULB_COE
             //Student Profile
             services.AddScoped<IStudentProfile, StudentProfileImpl>();
 
+            //Guests
+            services.AddScoped<IGuestsService, GuestsServiceImpl>();
+
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {

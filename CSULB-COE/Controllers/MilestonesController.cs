@@ -91,11 +91,11 @@ namespace CSULB_COE.Controllers
         }
         
         [HttpGet("GetMilestoneApplicationForm")]
-        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID,int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply)
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID,int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply,bool IsExternalApprover)
         {
             try
             {
-                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID,MilestoneFormID, FormID,MilestonePublishedFormID,IsReApply);
+                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID,MilestoneFormID, FormID,MilestonePublishedFormID,IsReApply,IsExternalApprover);
                 return response;
             }
             catch (Exception ex)
@@ -611,6 +611,25 @@ namespace CSULB_COE.Controllers
             catch (Exception ex)
             {
                 StudentMilestoneListResponse response = new StudentMilestoneListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("SendRemainderToApprover")]
+        public BaseResponse SendRemainderToApprover(string ExternalApprovalIdentifier, int MilestoneFormID)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _milestonesService.SendRemainderToApprover(ExternalApprovalIdentifier, MilestoneFormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;

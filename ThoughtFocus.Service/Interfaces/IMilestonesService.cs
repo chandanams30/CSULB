@@ -17,7 +17,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse AssignMilestoneProgram(AssignMilestoneToProgram input);
         PublishedMilestonesListResponse GetPublishedMilestoneList(int ProgramID, string TermCode);
         MilestoneApplicationFormsListResponse GetMilestoneApplicationFormsList(int UserID, int FormID, int ProgramID, string TermCode);
-        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply);
+        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply, bool IsExternalApprover);
         GetMilestoneResponse GetMilestone(int MilestoneID);
         MilestoneApproverUserListResponse GetMilestoneApproverUserList();
         MilestoneTypesResponse GetMilestoneTypes();
@@ -41,5 +41,6 @@ namespace ThoughtFocus.Service.Interfaces
         FormAttachments DownloadMilestoneFormAttachments(string FileName);
         PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID);
         StudentMilestoneListResponse GetStudentsMilestone(int UserID);
+        BaseResponse SendRemainderToApprover(string ExternalApprovalIdentifier, int MilestoneFormID);
     }
 }

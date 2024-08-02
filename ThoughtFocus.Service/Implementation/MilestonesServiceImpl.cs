@@ -24,6 +24,7 @@ using ThoughtFocus.Service.Interfaces;
 using iTextSharp.text;
 using ThoughtFocus.Domain.Enumeration;
 using ThoughtFocus.Domain.Response.Form;
+using ThoughtFocus.Domain.Response.Guests;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -125,7 +126,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ActivityDefinitionID", SqlDbType.BigInt) { Value = input.ActivityDefinitionID },
                                           new SqlParameter("@ActivityDefinitionState", SqlDbType.NVarChar,-1) { Value = input.ActivityDefinitionState },
                                           new SqlParameter("@ActivityControlLabel", SqlDbType.NVarChar,20) { Value = input.ActivityControlLabel },
-                                          new SqlParameter("@ExternalApprovers", SqlDbType.NVarChar,-1) { Value = input.ExternalApprovers }
+                                          new SqlParameter("@ExternalApprovers", SqlDbType.NVarChar,-1) { Value = input.ExternalApprovers },
+                                          new SqlParameter("@IsExternalApprover", SqlDbType.Bit) { Value = input.IsExternalApprover }
 
                                         };
 
@@ -154,7 +156,7 @@ namespace ThoughtFocus.Service.Implementation
                             milestoneName = Convert.ToString(dtMilestones.Tables[1].Rows[0]["MilestoneName"]);
                             milestoneApproverType = Convert.ToInt32(dtMilestones.Tables[1].Rows[0]["MilestoneApproverTypeID"]);
                             approverIdentifier = Convert.ToString(dtMilestones.Tables[1].Rows[0]["ExternalApprovalIdentifier"]);
-                            string link = _configuration["ApplicationKeys:PartnerUserBaseURL"] + approverIdentifier;
+                            string link = _configuration["ApplicationKeys:ExternalApproverBaseURL"] + approverIdentifier;
                             if (milestoneApproverType == 1)
                             {
                                 body = GetMailBodyTemplate("MilestoneApprove.html");
@@ -178,7 +180,7 @@ namespace ThoughtFocus.Service.Implementation
                 
                 if (Convert.ToInt32(dtMilestones.Tables[0].Rows[0]["Status"]) == 1)
                 {
-                    response.Message = "Milestone Added Successfully";
+                    response.Message = "Milestone "+ input.ActivityControlLabel + " Successfully";
                     response.IsSuccess = true;
                 }
                 else
@@ -297,7 +299,7 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID, bool IsReApply)
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID, bool IsReApply,bool IsExternalApprover)
         {
             GetMilestoneApplicationFormResponse obj = new GetMilestoneApplicationFormResponse();
             if (MilestoneFormID == 0)
@@ -307,7 +309,8 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters = {
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                             new SqlParameter("@MilestoneFormID", SqlDbType.BigInt) { Value = MilestoneFormID },
-                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
+                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
+                                            new SqlParameter("@IsExternalApprover", SqlDbType.Bit) { Value = IsExternalApprover}
                                         };
             DataSet dtMilestones = _helper.GetDataSet("[dbo].[GetMilestoneFilledForm]", parameters);
             try
@@ -1350,6 +1353,58 @@ namespace ThoughtFocus.Service.Implementation
                 obj.Message = "Data Retrieval Failed , Please contact site admin ";
                 obj.StackTrace = ex.Message;
             }
+            return obj;
+        }
+        public BaseResponse SendRemainderToApprover(string Identifier, int MilestoneFormID)
+        {
+            BaseResponse obj = new BaseResponse();
+
+            SqlParameter[] parameters =
+                              {
+                                          new SqlParameter("@ExternalApprovalIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(Identifier) },
+                                          new SqlParameter("@MilestoneFormID", SqlDbType.BigInt) { Value = MilestoneFormID }
+                               };
+
+            DataTable dtMilestones = _helper.GetDataTable("[Milestone].[GetMilestoneSubmittedFormsListForExternalApprovers]", parameters);
+            if (dtMilestones.Rows.Count > 0)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(Convert.ToString(dtMilestones.Rows[0]["ApproverEmail"])))
+                    {
+                        string approverEmail = Convert.ToString(dtMilestones.Rows[0]["ApproverEmail"]);
+                        string approverName = Convert.ToString(dtMilestones.Rows[0]["ApproverName"]);
+                        string studentName = Convert.ToString(dtMilestones.Rows[0]["StudentName"]);
+                        string programName = Convert.ToString(dtMilestones.Rows[0]["ProgramName"]);
+                        string milestoneName = Convert.ToString(dtMilestones.Rows[0]["MilestoneName"]);
+                        string link = _configuration["ApplicationKeys:ExternalApproverBaseURL"] + Identifier;
+                        string body = GetMailBodyTemplate("MilestoneExternalApprover.html");
+                        string logoText = "cid:myImageID";
+                        body = body.Replace("[[logoPath]]", logoText)
+                                   .Replace("[[approverName]]", approverName)
+                                   .Replace("[[studentName]]", studentName)
+                                   .Replace("[[programName]]", programName)
+                                   .Replace("[[milestoneName]]", milestoneName)
+                                   .Replace("[[link]]", link);
+                        string subject = "Approve Milestone Form";
+                        _sendMail.SendEmail(approverEmail, "", "COMMON", subject, body, "");
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Mail sent successfully !";
+                }
+                catch (Exception ee)
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "Failure sending mail.";
+                }
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "No Data .";
+            }
+
+
             return obj;
         }
         private AttachmentFileDetails GetAttachedFileSplitValues(string filename)
