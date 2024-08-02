@@ -17,5 +17,6 @@ namespace ThoughtFocus.Domain.Request.Milestones
         public string ActivityDefinitionState { get; set; }
         public string ActivityControlLabel { get; set; }
         public string ExternalApprovers { get; set; }
+        public bool IsExternalApprover { get; set; }
     }
 }
