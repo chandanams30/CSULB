@@ -124,7 +124,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID,formID,programID,termCode);
+                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID,formID,programID,termCode,false);
                 return response;
             }
             catch (Exception ex)
@@ -289,6 +289,7 @@ namespace CSULB_COE.Controllers
                     int userID = Convert.ToInt32(keyValueDictionary["userID"]);
                     int programID = Convert.ToInt32(keyValueDictionary["programID"]);
                     string termCode = keyValueDictionary["termCode"];
+                    bool showMileStone = true;
                     SqlParameter[] parameters =
                                              {
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
@@ -301,12 +302,12 @@ namespace CSULB_COE.Controllers
                     if (dtAppliedForms.Rows.Count > 0)
                     {
                         formID = Convert.ToInt32(dtAppliedForms.Rows[0]["FormID"]);
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone);
                     }
                     else
                     {
                         formID = 0;
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone);
                     }
                     return response;
                 }
