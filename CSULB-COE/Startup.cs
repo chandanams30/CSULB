@@ -157,6 +157,9 @@ namespace CSULB_COE
             //Guests
             services.AddScoped<IGuestsService, GuestsServiceImpl>();
 
+            //Rubrics
+            services.AddScoped<IRubricsService, RubricsServiceImpl>();
+
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
