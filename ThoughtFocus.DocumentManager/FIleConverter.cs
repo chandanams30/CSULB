@@ -4,11 +4,11 @@ using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Office.Interop.Word;
-using Microsoft.Office.Interop.Excel;
-using Microsoft.Office.Interop.PowerPoint;
+//using Microsoft.Office.Interop.Excel;
+//using Microsoft.Office.Interop.PowerPoint;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using ppt = Microsoft.Office.Interop.PowerPoint;
+//using ppt = Microsoft.Office.Interop.PowerPoint;
 using System.IO;
 
 namespace ThoughtFocus.DocumentManager
@@ -91,32 +91,32 @@ namespace ThoughtFocus.DocumentManager
         public void ConvertSpreadsheetToPDF(string srcFilename, string dstFilename)
         {
             ////Console.WriteLine("Converting spreadsheet: {0} to {1}", srcFilename, dstFilename);
-            Microsoft.Office.Interop.Excel.ApplicationClass MSExcelDoc;
-            MSExcelDoc = new Microsoft.Office.Interop.Excel.ApplicationClass();
+            //Microsoft.Office.Interop.Excel.ApplicationClass MSExcelDoc;
+            //MSExcelDoc = new Microsoft.Office.Interop.Excel.ApplicationClass();
 
-            try
-            {
-                Microsoft.Office.Interop.Excel.Workbook wkb = MSExcelDoc.Workbooks.Open(srcFilename);
-                Microsoft.Office.Interop.Excel.Worksheet myWorkSheet = (Microsoft.Office.Interop.Excel.Worksheet)wkb.Worksheets.get_Item(1);
-                XlFixedFormatType paramExportFormat = XlFixedFormatType.xlTypePDF;
-                XlFixedFormatQuality paramExportQuality = XlFixedFormatQuality.xlQualityStandard;
-                bool paramOpenAfterPublish = false, paramIncludeDocProps = true;
-                bool paramIgnorePrintAreas = true; //To Ignore PrintArea if set in Excel
-                object paramFromPage = Type.Missing;
-                object paramToPage = Type.Missing;
+            //try
+            //{
+            //    Microsoft.Office.Interop.Excel.Workbook wkb = MSExcelDoc.Workbooks.Open(srcFilename);
+            //    Microsoft.Office.Interop.Excel.Worksheet myWorkSheet = (Microsoft.Office.Interop.Excel.Worksheet)wkb.Worksheets.get_Item(1);
+            //    XlFixedFormatType paramExportFormat = XlFixedFormatType.xlTypePDF;
+            //    XlFixedFormatQuality paramExportQuality = XlFixedFormatQuality.xlQualityStandard;
+            //    bool paramOpenAfterPublish = false, paramIncludeDocProps = true;
+            //    bool paramIgnorePrintAreas = true; //To Ignore PrintArea if set in Excel
+            //    object paramFromPage = Type.Missing;
+            //    object paramToPage = Type.Missing;
 
-                //wkb.ExportAsFixedFormat(Microsoft.Office.Interop.Excel.XlFixedFormatType.xlTypePDF, dstFilename)
-                wkb.ExportAsFixedFormat(paramExportFormat, dstFilename, paramExportQuality, paramIncludeDocProps, paramIgnorePrintAreas, paramFromPage, paramToPage, paramOpenAfterPublish);
-                //Console.WriteLine("Spredsheet converstion completed");
-            }
-            catch (Exception e)
-            {
-                //Console.WriteLine("{0} Exception caught.", e);
-            }
-            finally
-            {
-                MSExcelDoc.Quit();
-            }
+            //    //wkb.ExportAsFixedFormat(Microsoft.Office.Interop.Excel.XlFixedFormatType.xlTypePDF, dstFilename)
+            //    wkb.ExportAsFixedFormat(paramExportFormat, dstFilename, paramExportQuality, paramIncludeDocProps, paramIgnorePrintAreas, paramFromPage, paramToPage, paramOpenAfterPublish);
+            //    //Console.WriteLine("Spredsheet converstion completed");
+            //}
+            //catch (Exception e)
+            //{
+            //    //Console.WriteLine("{0} Exception caught.", e);
+            //}
+            //finally
+            //{
+            //    MSExcelDoc.Quit();
+            //}
         }
         #region Convert PPT TO PDF
         //public void ConvertPPTToPDF(string srcFilename, string dstFilename)
@@ -244,38 +244,38 @@ namespace ThoughtFocus.DocumentManager
 
         public void ConvertWorksheetRangeToPDF()
         {
-            Microsoft.Office.Interop.Excel.Application xlsApp = new Microsoft.Office.Interop.Excel.Application();
-            xlsApp.ScreenUpdating = false;
-            Microsoft.Office.Interop.Excel.Workbook xlsBook;
-            XlFixedFormatType paramExportFormat = XlFixedFormatType.xlTypePDF;
-            XlFixedFormatQuality paramExportQuality = XlFixedFormatQuality.xlQualityStandard;
-            bool paramOpenAfterPublish = false, paramIncludeDocProps = true, paramIgnorePrintAreas = true;
-            object paramFromPage = Type.Missing;
-            object paramToPage = Type.Missing;
-            xlsBook = xlsApp.Workbooks.Open(@"D:\Projects\CSLUB\MergerPOC\Files\X02.xls", false, false);
-            Microsoft.Office.Interop.Excel.Worksheet srcWorksheet = (Microsoft.Office.Interop.Excel.Worksheet)xlsBook.Worksheets.get_Item(1); ;
-            var range = srcWorksheet.Range["C10"];
-            range.ExportAsFixedFormat(paramExportFormat, @"D:\Projects\CSLUB\MergerPOC\Files\bb.pdf", paramExportQuality, paramIncludeDocProps, paramIgnorePrintAreas, paramFromPage, paramToPage, paramOpenAfterPublish);
-            xlsBook.Close(false);
-            xlsApp.Quit();
+            //Microsoft.Office.Interop.Excel.Application xlsApp = new Microsoft.Office.Interop.Excel.Application();
+            //xlsApp.ScreenUpdating = false;
+            //Microsoft.Office.Interop.Excel.Workbook xlsBook;
+            //XlFixedFormatType paramExportFormat = XlFixedFormatType.xlTypePDF;
+            //XlFixedFormatQuality paramExportQuality = XlFixedFormatQuality.xlQualityStandard;
+            //bool paramOpenAfterPublish = false, paramIncludeDocProps = true, paramIgnorePrintAreas = true;
+            //object paramFromPage = Type.Missing;
+            //object paramToPage = Type.Missing;
+            //xlsBook = xlsApp.Workbooks.Open(@"D:\Projects\CSLUB\MergerPOC\Files\X02.xls", false, false);
+            //Microsoft.Office.Interop.Excel.Worksheet srcWorksheet = (Microsoft.Office.Interop.Excel.Worksheet)xlsBook.Worksheets.get_Item(1); ;
+            //var range = srcWorksheet.Range["C10"];
+            //range.ExportAsFixedFormat(paramExportFormat, @"D:\Projects\CSLUB\MergerPOC\Files\bb.pdf", paramExportQuality, paramIncludeDocProps, paramIgnorePrintAreas, paramFromPage, paramToPage, paramOpenAfterPublish);
+            //xlsBook.Close(false);
+            //xlsApp.Quit();
 
         }
 
         public void ConvertWorksheetToPDF(string srcFileName, string sheetName)
         {
-            Microsoft.Office.Interop.Excel.Application xlsApp = new Microsoft.Office.Interop.Excel.Application();
-            xlsApp.ScreenUpdating = false;
-            Microsoft.Office.Interop.Excel.Workbook xlsBook;
-            XlFixedFormatType paramExportFormat = XlFixedFormatType.xlTypePDF;
-            XlFixedFormatQuality paramExportQuality = XlFixedFormatQuality.xlQualityStandard;
-            bool paramOpenAfterPublish = false, paramIncludeDocProps = true, paramIgnorePrintAreas = true;
-            object paramFromPage = Type.Missing;
-            object paramToPage = Type.Missing;
-            xlsBook = xlsApp.Workbooks.Open(srcFileName, false, false);
-            Microsoft.Office.Interop.Excel.Worksheet worksheet = (Microsoft.Office.Interop.Excel.Worksheet)xlsBook.Worksheets[sheetName];
-            worksheet.ExportAsFixedFormat(paramExportFormat, @"D:\Projects\CSLUB\MergerPOC\Files\aa.pdf", paramExportQuality, paramIncludeDocProps, paramIgnorePrintAreas, paramFromPage, paramToPage, paramOpenAfterPublish);
-            xlsBook.Close(false);
-            xlsApp.Quit();
+            //Microsoft.Office.Interop.Excel.Application xlsApp = new Microsoft.Office.Interop.Excel.Application();
+            //xlsApp.ScreenUpdating = false;
+            //Microsoft.Office.Interop.Excel.Workbook xlsBook;
+            //XlFixedFormatType paramExportFormat = XlFixedFormatType.xlTypePDF;
+            //XlFixedFormatQuality paramExportQuality = XlFixedFormatQuality.xlQualityStandard;
+            //bool paramOpenAfterPublish = false, paramIncludeDocProps = true, paramIgnorePrintAreas = true;
+            //object paramFromPage = Type.Missing;
+            //object paramToPage = Type.Missing;
+            //xlsBook = xlsApp.Workbooks.Open(srcFileName, false, false);
+            //Microsoft.Office.Interop.Excel.Worksheet worksheet = (Microsoft.Office.Interop.Excel.Worksheet)xlsBook.Worksheets[sheetName];
+            //worksheet.ExportAsFixedFormat(paramExportFormat, @"D:\Projects\CSLUB\MergerPOC\Files\aa.pdf", paramExportQuality, paramIncludeDocProps, paramIgnorePrintAreas, paramFromPage, paramToPage, paramOpenAfterPublish);
+            //xlsBook.Close(false);
+            //xlsApp.Quit();
         }
 
      
