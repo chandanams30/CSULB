@@ -20,5 +20,11 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public DateTime ? SubmittedDate { get; set; }
 
     }
+    public class SaveStudentAggrementRequest
+    {
+        public string CSULBID { get; set; }
+        public bool IsAgreed { get; set; }
+        public DateTime AgreedDate { get; set; }
+    }
 
 }
