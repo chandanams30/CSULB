@@ -18,5 +18,6 @@ namespace ThoughtFocus.Service.Interfaces
         SemesterTermListResponse GetSemesterList(int applicationId);
         ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode);
         StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID);
+        BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input);
     }
 }

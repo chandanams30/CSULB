@@ -48,6 +48,9 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string SSNNumber { get; set; }
         public string AcademicIntegrityStatement { get; set; }
         public DateTime SubmittedDate { get; set; }
+        public bool IsAgreed { get; set; }
+        public DateTime ? AgreedDate { get; set; }
+
     }
     public class StudentProfileSearchResponse : BaseResponse
     {

@@ -87,7 +87,9 @@ namespace ThoughtFocus.Service.Implementation
                         DateOfBirth = Convert.ToDateTime(row["DateOfBirth"] == DBNull.Value ? null : row["DateOfBirth"]),
                         SSNNumber = Convert.ToString(row["SSNNumber"] == DBNull.Value ? null : row["SSNNumber"]),
                         AcademicIntegrityStatement = Convert.ToString(row["AcademicIntegrityStatement"] == DBNull.Value ? null : row["AcademicIntegrityStatement"]),
-                        SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"])
+                        SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"]),
+                        IsAgreed = Convert.ToBoolean(row["IsAgreed"] == DBNull.Value ? null : row["IsAgreed"]),
+                        AgreedDate = row["AgreedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AgreedDate"]) : null
                     }).FirstOrDefault();
                     if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
                     {
@@ -375,6 +377,21 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        public BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@csulbId", SqlDbType.VarChar,9) { Value = input.CSULBID  },
+                                          new SqlParameter("@IsAgreed", SqlDbType.Bit) { Value = input.IsAgreed },
+                                          new SqlParameter("@AgreedDate", SqlDbType.DateTime) { Value = input.AgreedDate }
+                                        };
+
+            int id = _helper.InsertTable("[dbo].[SaveStudentAggrement]", parameters);
+            response.Message = "Student Aggrement saved successfully";
+            response.IsSuccess = true;
+            return response;
         }
         private string EncryptSSNNumber(string clearText)
         {
