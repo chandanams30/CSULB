@@ -167,6 +167,184 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public GetRubricSubmittedFormsListResponse GetRubricSubmittedFormsList(int UserID, int ProgramID, string TermCode)
+        {
+            GetRubricSubmittedFormsListResponse obj = new GetRubricSubmittedFormsListResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                            new SqlParameter("@Termcode", SqlDbType.NChar, 50) { Value = TermCode }
+                                        };
+
+            DataTable dtRubricFormsList = _helper.GetDataTable("[Rubrics].[GetRubricSubmittedFormsList]", parameters);
+            try
+            {
+                if (dtRubricFormsList.Rows.Count > 0)
+                {
+                    obj.rubricSubmittedFormsList = dtRubricFormsList.AsEnumerable().Select(row =>
+                                               new GetRubricSubmittedFormsResponse
+                                               {
+                                                   FilledRubricID = Convert.ToInt32(row["FilledRubricID"]),
+                                                   PublishRubricID = Convert.ToInt32(row["PublishRubricID"]),
+                                                   CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                                                   TemplateID = Convert.ToInt32(row["TemplateID"]),
+                                                   CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                                   StudentName = Convert.ToString(row["StudentName"]),
+                                                   ProgramName = Convert.ToString(row["ProgramName"]),
+                                                   TemplateName = Convert.ToString(row["TemplateName"]),
+                                                   FormID = Convert.ToInt32(row["FormId"]),
+                                                   TermName = Convert.ToString(row["TermName"]),
+                                                   ReviewerName = Convert.ToString(row["ReviewerName"]),
+                                                   ReviewerID = Convert.ToInt32(row["ReviewerID"]),
+                                                   TermCode = Convert.ToString(row["TermCode"]),
+                                                   State = Convert.ToString(row["Status"])
+                                               }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public PublishedRubricsDetailsResponse GetPublishedRubricsDetails(int TemplateID)
+        {
+            PublishedRubricsDetailsResponse obj = new PublishedRubricsDetailsResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@ID", SqlDbType.BigInt) { Value = TemplateID }
+                                        };
+
+            DataTable dtRubricFormDetails = _helper.GetDataTable("[Rubrics].[GetPublishedRubricsDetails]", parameters);
+            try
+            {
+                if (dtRubricFormDetails.Rows.Count > 0)
+                {
+                              RubricsDetails objRD = dtRubricFormDetails.AsEnumerable().Select(row =>
+                                               new RubricsDetails
+                                               {
+                                                   TemplateName = Convert.ToString(row["TemplateName"]),
+                                                   TemplateDescription = Convert.ToString(row["TemplateDescription"]),
+                                                   TermName = Convert.ToString(row["TermName"]),
+                                                   ProgramName = Convert.ToString(row["ProgramName"]),
+                                                   TemplateForm = Convert.ToString(row["TemplateForm"]),
+                                                   TotalPoints = Convert.ToInt32(row["TotalPoints"]),
+                                               }).FirstOrDefault();
+                               obj.rubricsDetails = objRD;
+                               obj.IsSuccess = true;
+                               obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpsertRubricsFilledForm(UpsertRubricsFilledFormRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+
+                                          new SqlParameter("@PublishedRubricsID", SqlDbType.BigInt) { Value = input.PublishedRubricsID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@RubricForm", SqlDbType.NVarChar, -1) { Value = input.RubricForm },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@Status", SqlDbType.Int) { Value = input.Status },
+                                          new SqlParameter("@CreatedBy", SqlDbType.BigInt) { Value = input.CreatedBy },
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID }
+                                        };
+            DataTable dtRubrics = _helper.GetDataTable("[Rubrics].[InsertFilledRubrics]", parameters);
+            if (dtRubrics.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Rubrics Submitted Successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to Submit Rubrics";
+                    response.IsSuccess = true;
+                }
+            }
+            return response;
+        }
+        public RubricsApplicationFormResponse GetRubricsApplicationForm(RubricsApplicationFormRequest input)
+        {
+            RubricsApplicationFormResponse obj = new RubricsApplicationFormResponse();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@FilledRubricID", SqlDbType.BigInt) { Value = input.FilledRubricID },
+                                          new SqlParameter("@PublishedRubricsID", SqlDbType.BigInt) { Value = input.PublishedRubricsID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@TemplateID", SqlDbType.BigInt) { Value = input.TemplateID },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@CreatedBy", SqlDbType.BigInt) { Value = input.CreatedBy }
+                                        };
+
+            DataSet dsRubricFormDetails = _helper.GetDataSet("[Rubrics].[GetFilledRubricsDetails]", parameters);
+            try
+            {
+                if (dsRubricFormDetails.Tables[0].Rows.Count > 0 && dsRubricFormDetails.Tables[1].Rows.Count > 0)
+                {
+                    RubricsApplicationForm objRAF = dsRubricFormDetails.Tables[0].AsEnumerable().Select(row =>
+                                     new RubricsApplicationForm
+                                     {
+                                         FilledRubricID = Convert.ToInt32(row["ID"]),
+                                         PublishedRubricID = Convert.ToInt32(row["PublishedRubricID"]),
+                                         FormID = Convert.ToInt32(row["FormID"]),
+                                         RubricForm = Convert.ToString(row["RubricForm"]),
+                                         UserID = Convert.ToInt32(row["UserID"]),
+                                         Status = Convert.ToInt32(row["Status"]),
+                                         ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                         TermCode = Convert.ToString(row["TermCode"]),
+                                         ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
+                                         TemplateName = Convert.ToString(row["TemplateName"]),
+                                         TemplateDescription = Convert.ToString(row["TemplateDescription"]),
+                                         TotalPoints = Convert.ToInt32(row["TotalPoints"]),
+                                     }).FirstOrDefault();
+                    obj.rubricsApplicationForm = objRAF;
+
+                    RubricsFormActivityHandler objRFAH = dsRubricFormDetails.Tables[1].AsEnumerable().Select(row =>
+                                            new RubricsFormActivityHandler
+                                            {
+                                                ActivityHandler = Convert.ToString(row["RubricsFormActivityHandler"])
+                                            }).FirstOrDefault();
+
+                    obj.rubricsFormActivityHandler = objRFAH;
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
 
     }
 }

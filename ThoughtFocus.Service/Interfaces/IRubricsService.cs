@@ -13,5 +13,9 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpsertRubricsTemplate(UpsertRubricsTemplateRequest input);
         BaseResponse PublishRubricsForm(PublishRubricsFormRequest input);
         RubricsTemplateByIDResponse GetRubricsTemplateByID(int TemplateID);
+        GetRubricSubmittedFormsListResponse GetRubricSubmittedFormsList(int UserID, int ProgramID, string TermCode);
+        PublishedRubricsDetailsResponse GetPublishedRubricsDetails(int TemplateID);
+        BaseResponse UpsertRubricsFilledForm(UpsertRubricsFilledFormRequest input);
+        RubricsApplicationFormResponse GetRubricsApplicationForm(RubricsApplicationFormRequest input);
     }
 }
