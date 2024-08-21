@@ -26,4 +26,23 @@ namespace ThoughtFocus.Domain.Request.Rubrics
         public int CreatedBy { get; set; }
         public bool IsActive { get; set; }
     }
+    public class UpsertRubricsFilledFormRequest
+    {
+        public int PublishedRubricsID { get; set; }
+        public int FormID { get; set; }
+        public string RubricForm { get; set; }
+        public int UserID { get; set; }
+        public int Status { get; set; }
+        public int CreatedBy { get; set; }
+        public int ID { get; set; }
+    }
+    public class RubricsApplicationFormRequest
+    {
+        public int FilledRubricID { get; set; }
+        public int PublishedRubricsID { get; set; }
+        public int FormID { get; set; }
+        public int TemplateID { get; set; }
+        public int UserID { get; set; }
+        public int CreatedBy { get; set; }
+    }
 }

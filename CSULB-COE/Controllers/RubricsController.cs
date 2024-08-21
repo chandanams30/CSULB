@@ -101,5 +101,77 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetRubricSubmittedFormsList")]
+        public GetRubricSubmittedFormsListResponse GetRubricSubmittedFormsList(int UserID, int ProgramID,string TermCode)
+        {
+            try
+            {
+                GetRubricSubmittedFormsListResponse response = _rubricsService.GetRubricSubmittedFormsList(UserID,ProgramID,TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetRubricSubmittedFormsListResponse response = new GetRubricSubmittedFormsListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetPublishedRubricsDetails")]
+        public PublishedRubricsDetailsResponse GetPublishedRubricsDetails(int TemplateID)
+        {
+            try
+            {
+                PublishedRubricsDetailsResponse response = _rubricsService.GetPublishedRubricsDetails(TemplateID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PublishedRubricsDetailsResponse response = new PublishedRubricsDetailsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertRubricsFilledForm")]
+        public BaseResponse UpsertRubricsFilledForm(UpsertRubricsFilledFormRequest input)
+        {
+            try
+            {
+                BaseResponse response = _rubricsService.UpsertRubricsFilledForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("RubricsApplicationForm")]
+        public RubricsApplicationFormResponse GetRubricsApplicationForm(RubricsApplicationFormRequest input)
+        {
+            try
+            {
+                RubricsApplicationFormResponse response = _rubricsService.GetRubricsApplicationForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                RubricsApplicationFormResponse response = new RubricsApplicationFormResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
