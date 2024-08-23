@@ -33,8 +33,7 @@ namespace ThoughtFocus.Domain.Request.Rubrics
         public string RubricForm { get; set; }
         public int UserID { get; set; }
         public int Status { get; set; }
-        public int CreatedBy { get; set; }
-        public int ID { get; set; }
+        public int FilledRubricID { get; set; }
     }
     public class RubricsApplicationFormRequest
     {

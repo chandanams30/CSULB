@@ -267,8 +267,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RubricForm", SqlDbType.NVarChar, -1) { Value = input.RubricForm },
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@Status", SqlDbType.Int) { Value = input.Status },
-                                          new SqlParameter("@CreatedBy", SqlDbType.BigInt) { Value = input.CreatedBy },
-                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID }
+                                          new SqlParameter("@filledRubricID", SqlDbType.BigInt) { Value = input.FilledRubricID }
                                         };
             DataTable dtRubrics = _helper.GetDataTable("[Rubrics].[InsertFilledRubrics]", parameters);
             if (dtRubrics.Rows.Count > 0)
