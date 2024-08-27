@@ -127,10 +127,10 @@ namespace ThoughtFocus.Service.Implementation
                     response.Message = "Rubrics Template Published Successfully";
                     response.IsSuccess = true;
                 }
-                else if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "FAILURE")
+               else 
                 {
-                    response.Message = "Failed to Publish Rubrics Template";
-                    response.IsSuccess = true;
+                    response.Message = Convert.ToString(dtRubrics.Rows[0]["RESULT"]);
+                    response.IsSuccess = false;
                 }
             }
             return response;
