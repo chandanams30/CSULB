@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32407.337
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThoughtFocus.CSULB-CED.App", "CSULB-COE\ThoughtFocus.CSULB-CED.App.csproj", "{A0AE1C73-2D33-47FA-A3DA-E27D668D7854}"
 EndProject
@@ -48,6 +48,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "7-DB", "7-DB", "{18A7373E-809B-4366-A0E0-946B87188F8E}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "CSULB_DB", "CSULB_DB\CSULB_DB.sqlproj", "{252921CF-093E-4217-9E20-C1619FDD075A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThoughtFocus.CSULB-CED.App.UnitTest", "ThoughtFocus.CSULB-CED.App.UnitTest\ThoughtFocus.CSULB-CED.App.UnitTest.csproj", "{0278E9B0-1F78-4F07-9554-9B0C35BA304A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +115,10 @@ Global
 		{252921CF-093E-4217-9E20-C1619FDD075A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{252921CF-093E-4217-9E20-C1619FDD075A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{252921CF-093E-4217-9E20-C1619FDD075A}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{0278E9B0-1F78-4F07-9554-9B0C35BA304A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0278E9B0-1F78-4F07-9554-9B0C35BA304A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0278E9B0-1F78-4F07-9554-9B0C35BA304A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0278E9B0-1F78-4F07-9554-9B0C35BA304A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,6 +145,7 @@ Global
 		{D991BA48-86E2-4A04-829E-A08CFC03F440} = {2A4BCA24-6E4D-48C0-B81A-CDA9A609A3B5}
 		{18A7373E-809B-4366-A0E0-946B87188F8E} = {CC26D84F-661B-4D3D-8251-FDA447696F7A}
 		{252921CF-093E-4217-9E20-C1619FDD075A} = {18A7373E-809B-4366-A0E0-946B87188F8E}
+		{0278E9B0-1F78-4F07-9554-9B0C35BA304A} = {1B0E6099-29E7-4B87-A93C-5E7925772573}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {83F55F36-70F9-4973-BD23-2F66771C0405}
