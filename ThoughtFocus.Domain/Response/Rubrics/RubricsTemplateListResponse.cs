@@ -72,6 +72,11 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public string TemplateName { get; set; }
         public string TemplateDescription { get; set; }
         public int TotalPoints { get; set; }
+        public string StudentName { get; set; }
+        public string ProgramName { get; set; }
+        public string TermName { get; set; }
+        public string StudentEmail { get; set; }
+        public int CSULBID { get; set; }
     }
     public class RubricsFormActivityHandler
     {
