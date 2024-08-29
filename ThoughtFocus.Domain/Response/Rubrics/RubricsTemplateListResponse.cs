@@ -48,6 +48,7 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public int ReviewerID { get; set; }
         public string TermCode { get; set; }
         public string State { get; set; }
+        public bool ShowSideBySideReview { get; set; }
     }
     public class RubricsDetails
     {
@@ -65,7 +66,7 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public int FormID { get; set; }
         public string RubricForm { get; set; }
         public int UserID { get; set; }
-        public int Status { get; set; }
+        public string State { get; set; }
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public int ApplicationTypeID { get; set; }
@@ -77,6 +78,7 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public string TermName { get; set; }
         public string StudentEmail { get; set; }
         public int CSULBID { get; set; }
+        public string ReviewerName { get; set; }
     }
     public class RubricsFormActivityHandler
     {
