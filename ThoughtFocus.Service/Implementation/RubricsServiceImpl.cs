@@ -197,7 +197,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    ReviewerName = Convert.ToString(row["ReviewerName"]),
                                                    ReviewerID = Convert.ToInt32(row["ReviewerID"]),
                                                    TermCode = Convert.ToString(row["TermCode"]),
-                                                   State = Convert.ToString(row["Status"])
+                                                   State = Convert.ToString(row["Status"]),
+                                                   ShowSideBySideReview = Convert.ToBoolean(row["ShowSideBySideReview"])
                                                }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -310,7 +311,7 @@ namespace ThoughtFocus.Service.Implementation
                                          FormID = Convert.ToInt32(row["FormID"]),
                                          RubricForm = Convert.ToString(row["RubricForm"]),
                                          UserID = Convert.ToInt32(row["UserID"]),
-                                         Status = Convert.ToInt32(row["Status"]),
+                                         State = Convert.ToString(row["Status"]),
                                          ProgramID = Convert.ToInt32(row["ProgramID"]),
                                          TermCode = Convert.ToString(row["TermCode"]),
                                          ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
@@ -321,7 +322,8 @@ namespace ThoughtFocus.Service.Implementation
                                          ProgramName = Convert.ToString(row["ProgramName"]),
                                          TermName = Convert.ToString(row["TermName"]),
                                          StudentEmail = Convert.ToString(row["StudentEmail"]),
-                                         CSULBID = Convert.ToInt32(row["CSULBID"])
+                                         CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                         ReviewerName = Convert.ToString(row["ReviewerName"])
                                      }).FirstOrDefault();
                     obj.rubricsApplicationForm = objRAF;
 
