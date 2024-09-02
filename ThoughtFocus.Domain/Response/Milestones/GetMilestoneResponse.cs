@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.Domain.Response.StudentProfile;
 
 namespace ThoughtFocus.Domain.Response.Milestones
 {
@@ -60,19 +61,49 @@ namespace ThoughtFocus.Domain.Response.Milestones
     {
         public List<GetMilestoneSubmittedFormsResponse> milestoneSubmittedFormsList { get; set; }
     }
+    public class PublishedMilestoneDetailsResponse : BaseResponse
+    {
+        public PublishedMilestoneDetails publishedMilestoneDetails { get; set; }
+    }
+    public class PublishedMilestoneDetails
+    {
+        public string MilestoneName { get; set; }
+        public string MilestoneDescription { get; set; }
+        public string ProgramName { get; set; }
+        public string TermName { get; set; }
+        public string Approvers { get; set; }
+        public string Students { get; set; }
+
+    }
     public class GetMilestoneSubmittedFormsResponse
     {
         public int MilestoneFormID { get; set; }
         public string ApproverName { get; set; }
         public DateTime CreatedDate { get; set; }
         public string State { get; set; }
-        public string CSULBID { get; set; }
+        public int CSULBID { get; set; }
         public string StudentName { get; set; }
-        public string Name { get; set; }
+        public string ProgramName { get; set; }
         public string MilestoneName { get; set; }
+        public int FormID { get; set; }
+        public string TermName { get; set; }
+        public int MilestonePublishedFormID { get; set; }
     }
     public class GetMilestoneWorkflowProcessTransitionHistoryResponse : BaseResponse
     {
         public string WorkflowTransitionHistory { get; set; }
+    }
+    public class ApplicationProgramsResponse : BaseResponse
+    {
+        public List<ApplicationProgram> ProgramsList { get; set; }
+    }
+    public class ApplicationProgram
+    {
+        public int ProgramID { get; set; }
+        public string ProgramName { get; set; }
+    }
+    public class MilestoneFormAttachmentResponse : BaseResponse
+    {
+        public string fileName { get; set; }
     }
 }

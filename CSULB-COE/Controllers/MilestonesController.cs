@@ -7,8 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Service.Interfaces;
 
@@ -88,11 +91,11 @@ namespace CSULB_COE.Controllers
         }
         
         [HttpGet("GetMilestoneApplicationForm")]
-        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID,int MilestoneFormID, int FormID)
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID,int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply,bool IsExternalApprover)
         {
             try
             {
-                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID,MilestoneFormID, FormID);
+                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID,MilestoneFormID, FormID,MilestonePublishedFormID,IsReApply,IsExternalApprover);
                 return response;
             }
             catch (Exception ex)
@@ -469,11 +472,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetMilestoneWorkflowProcessTransitionHistory")]
-        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID)
+        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID, int RoleID)
         {
             try
             {
-                GetMilestoneWorkflowProcessTransitionHistoryResponse response = _milestonesService.GetMilestoneWorkflowProcessTransitionHistory(MilestoneFormID);
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = _milestonesService.GetMilestoneWorkflowProcessTransitionHistory(MilestoneFormID,RoleID);
                 return response;
             }
             catch (Exception ex)
@@ -485,6 +488,184 @@ namespace CSULB_COE.Controllers
                 _logger.LogError(ex, ex.Message);
                 return response;
             }
+        }
+        [HttpGet("GetApplicationProgramsByTermCode")]
+        public ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode)
+        {
+            try
+            {
+                ApplicationProgramsResponse response = _milestonesService.GetApplicationProgramsByTermCode(termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramsResponse response = new ApplicationProgramsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetDistinctSemesterList")]
+        public SemesterListResponse GetDistinctSemesterList()
+        {
+            try
+            {
+                SemesterListResponse response = _milestonesService.GetDistinctSemesterList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                SemesterListResponse response = new SemesterListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertMilestoneFormAttachment")]
+        public MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\Screenshot 2024-06-27 162131.png";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\timelog from S4.pdf";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                MilestoneFormAttachmentResponse response = _milestonesService.UpsertMilestoneFormAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneFormAttachmentResponse response = new MilestoneFormAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("DownloadMilestoneFormAttachments")]
+        public IActionResult DownloadMilestoneFormAttachments(string FileName)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                FormAttachments obj = _milestonesService.DownloadMilestoneFormAttachments(FileName);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetPublishedMilestoneDetails")]
+        public PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID)
+        {
+            try
+            {
+                PublishedMilestoneDetailsResponse response = _milestonesService.GetPublishedMilestoneDetails(MilestoneTemplateID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PublishedMilestoneDetailsResponse response = new PublishedMilestoneDetailsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("ApplyStudentMilestone")]
+        public StudentMilestoneListResponse ApplyStudentMilestone(int UserID)
+        {
+            try
+            {
+                StudentMilestoneListResponse response = _milestonesService.GetStudentsMilestone(UserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentMilestoneListResponse response = new StudentMilestoneListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("SendRemainderToApprover")]
+        public BaseResponse SendRemainderToApprover(string ExternalApprovalIdentifier, int MilestoneFormID)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _milestonesService.SendRemainderToApprover(ExternalApprovalIdentifier, MilestoneFormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        private string GetFileType(string fileExt)
+        {
+            string contentType = string.Empty;
+            switch (fileExt.ToUpper())
+            {
+                case "PDF":
+                    contentType = "application/pdf";
+                    break;
+                case "DOCX":
+                    contentType = "Application/msword";
+                    break;
+                case "DOC":
+                    contentType = "Application/msword";
+                    break;
+                case "XLSX":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "XLS":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "JPG":
+                    contentType = "image/jpeg";
+                    break;
+                case "JPEG":
+                    contentType = "image/jpeg";
+                    break;
+
+            }
+            return contentType;
         }
     }
 }

@@ -16,11 +16,14 @@ using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
+using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
+using ThoughtFocus.Domain.Response.Milestones;
+using ThoughtFocus.Domain.Response.Guests;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
 
@@ -34,14 +37,18 @@ namespace CSULB_COE.Controllers
         public IGraduateProgramService _graduateProgramService;
         public IInitialCredentialProgramService _initialCredentialProgramService;
         public IFieldWorkService _fieldWorkService;
+        public IMilestonesService _milestonesService;
         private readonly IApplicationService _applicationService;
         private readonly IConfiguration _configuration;
         private readonly ISqlDBUtility _helper;
+        public IGuestsService _guestsService;
         public GuestsController(IGraduateProgramService graduateProgramService ,
               ILogger<GraduateProgramController> logger, IApplicationService applicationService
             , IConfiguration configuration, ISqlDBUtility helper 
             ,IInitialCredentialProgramService initialCredentialProgramService
-            ,IFieldWorkService fieldWorkService)
+            ,IFieldWorkService fieldWorkService
+            ,IMilestonesService milestonesService
+            ,IGuestsService guestsService)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
@@ -50,6 +57,8 @@ namespace CSULB_COE.Controllers
             _helper = helper;
             _initialCredentialProgramService = initialCredentialProgramService;
             _fieldWorkService = fieldWorkService;
+            _milestonesService = milestonesService;
+            _guestsService = guestsService;
         }
 
 
@@ -115,7 +124,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID,formID,programID,termCode);
+                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID,formID,programID,termCode,false);
                 return response;
             }
             catch (Exception ex)
@@ -280,6 +289,7 @@ namespace CSULB_COE.Controllers
                     int userID = Convert.ToInt32(keyValueDictionary["userID"]);
                     int programID = Convert.ToInt32(keyValueDictionary["programID"]);
                     string termCode = keyValueDictionary["termCode"];
+                    bool showMileStone = true;
                     SqlParameter[] parameters =
                                              {
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
@@ -292,12 +302,12 @@ namespace CSULB_COE.Controllers
                     if (dtAppliedForms.Rows.Count > 0)
                     {
                         formID = Convert.ToInt32(dtAppliedForms.Rows[0]["FormID"]);
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone);
                     }
                     else
                     {
                         formID = 0;
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone);
                     }
                     return response;
                 }
@@ -948,6 +958,174 @@ namespace CSULB_COE.Controllers
             //return File(inputStream, fileType);
             return File(inputStream, fileType, fileName);
         }
+        
+        [HttpGet("GetMilestoneApplicationForm")]
+        public GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID, bool IsReApply,bool IsExternalApprover)
+        {
+            try
+            {
+                GetMilestoneApplicationFormResponse response = _milestonesService.GetMilestoneApplicationForm(UserID, MilestoneFormID, FormID, MilestonePublishedFormID, IsReApply, IsExternalApprover);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneApplicationFormResponse response = new GetMilestoneApplicationFormResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetMilestoneWorkflowProcessTransitionHistory")]
+        public GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID, int RoleID)
+        {
+            try
+            {
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = _milestonesService.GetMilestoneWorkflowProcessTransitionHistory(MilestoneFormID, RoleID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneWorkflowProcessTransitionHistoryResponse response = new GetMilestoneWorkflowProcessTransitionHistoryResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertMilestoneFilledForm")]
+        public BaseResponse UpsertMilestoneFilledForm(UpsertMilestoneFilledFormRequest input)
+        {
+            try
+            {
+                BaseResponse response = _milestonesService.UpsertMilestoneFilledForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("ApplyStudentMilestone")]
+        public StudentMilestoneListResponse ApplyStudentMilestone(int UserID)
+        {
+            try
+            {
+                StudentMilestoneListResponse response = _milestonesService.GetStudentsMilestone(UserID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentMilestoneListResponse response = new StudentMilestoneListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetMilestoneSubmittedFormsList")]
+        public GetMilestoneSubmittedFormsList GetMilestoneSubmittedFormsList(int UserID, int FormID,string ExternalApprovalIdentifier)
+        {
+            try
+            {
+                GetMilestoneSubmittedFormsList response = _guestsService.GetMilestoneSubmittedFormsList(UserID,FormID, ExternalApprovalIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetMilestoneSubmittedFormsList response = new GetMilestoneSubmittedFormsList();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("SendRemainderToApprover")]
+        public BaseResponse SendRemainderToApprover(string ExternalApprovalIdentifier, int MilestoneFormID)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _milestonesService.SendRemainderToApprover(ExternalApprovalIdentifier, MilestoneFormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertMilestoneFormAttachment")]
+        public MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\Screenshot 2024-06-27 162131.png";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\timelog from S4.pdf";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                //string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                MilestoneFormAttachmentResponse response = _milestonesService.UpsertMilestoneFormAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneFormAttachmentResponse response = new MilestoneFormAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("DownloadMilestoneFormAttachments")]
+        public IActionResult DownloadMilestoneFormAttachments(string FileName)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                ThoughtFocus.Domain.Request.GraduateProgram.FormAttachments obj = _milestonesService.DownloadMilestoneFormAttachments(FileName);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
         //[HttpPost("UpdateRecommendation")]
         //public BaseResponse UpdateRecommendation(UpdateRecommendation input)
         //{

@@ -34,4 +34,9 @@ namespace ThoughtFocus.Domain.Request.Milestones
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
     }
+    public class UpsertMilestoneFormAttachment
+    {
+        public string GUID { get; set; }
+        public byte[] FileContent { get; set; }
+    }
 }

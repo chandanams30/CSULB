@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Request.Milestones;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Milestones;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 
 namespace ThoughtFocus.Service.Interfaces
 {
@@ -15,7 +17,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse AssignMilestoneProgram(AssignMilestoneToProgram input);
         PublishedMilestonesListResponse GetPublishedMilestoneList(int ProgramID, string TermCode);
         MilestoneApplicationFormsListResponse GetMilestoneApplicationFormsList(int UserID, int FormID, int ProgramID, string TermCode);
-        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID);
+        GetMilestoneApplicationFormResponse GetMilestoneApplicationForm(int UserID, int MilestoneFormID, int FormID, int MilestonePublishedFormID,bool IsReApply, bool IsExternalApprover);
         GetMilestoneResponse GetMilestone(int MilestoneID);
         MilestoneApproverUserListResponse GetMilestoneApproverUserList();
         MilestoneTypesResponse GetMilestoneTypes();
@@ -32,6 +34,13 @@ namespace ThoughtFocus.Service.Interfaces
         GetMilestoneFilledFormByPublishedFormListResponse GetMilestoneFilledFormByPublishedFormList(int MilestonePublishedFormID, int UserID);
         GetMilestoneRequirementListResponse GetMilestoneRequirementList();
         GetMilestoneSubmittedFormsListResponse GetMilestoneSubmittedFormsList(int RoleID, int ApproverUserID);
-        GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID);
+        GetMilestoneWorkflowProcessTransitionHistoryResponse GetMilestoneWorkflowProcessTransitionHistory(int MilestoneFormID, int RoleID);
+        ApplicationProgramsResponse GetApplicationProgramsByTermCode(string termCode);
+        SemesterListResponse GetDistinctSemesterList();
+        MilestoneFormAttachmentResponse UpsertMilestoneFormAttachment(UpsertMilestoneFormAttachment input);
+        FormAttachments DownloadMilestoneFormAttachments(string FileName);
+        PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID);
+        StudentMilestoneListResponse GetStudentsMilestone(int UserID);
+        BaseResponse SendRemainderToApprover(string ExternalApprovalIdentifier, int MilestoneFormID);
     }
 }
