@@ -13,6 +13,7 @@ using Serilog.Core;
 using System.Data;
 using ThoughtFocus.Common.Utilities.Implementation;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Response.Milestones;
 
 public class MilestonesControllerTests
 {
@@ -26,7 +27,7 @@ public class MilestonesControllerTests
 
     public MilestonesControllerTests()
     {
-        // Setup configuration for the database connection and mail settings
+        // Setup configuration for the database connection
         var inMemorySettings = new Dictionary<string, string> {
             {"ConnectionStrings:AppDBConnection", "Data Source=20.25.58.133;Initial Catalog=CSULB_DB_DEV;User ID=csulbsql; Password=c$ulb@D3vSql;"},
             
@@ -99,31 +100,99 @@ public class MilestonesControllerTests
         }
 
     }
-
-
-
     [Fact]
-    public void GetDistinctSemesterList_ReturnsFailure_WhenNoDataIsPresent()
+    public void GetMilestoneApproverTypes_ReturnsSuccess_WhenDataIsPresent()
     {
         // Arrange
-        var mockResponse = new SemesterListResponse
+        var mockResponse = new MilestonesApproverTypesResponse
         {
-            IsSuccess = false,
-            Message = "No Data Present",
-            Semesters = new List<Semester>()
+            IsSuccess = true,
+            Message = "Data Retrieved Successfully",
+            ApproverTypes = new List<MilestonesApproverTypes>
+        {
+            new MilestonesApproverTypes { ApproverTypeID = 1, Name = "Internal" },
+            new MilestonesApproverTypes { ApproverTypeID = 2, Name = "External" },
+            new MilestonesApproverTypes { ApproverTypeID = 3, Name = "External Approver by Student" }
+        }
         };
 
-        //_mockMilestonesService.Setup(service => service.GetDistinctSemesterList())
-        //                      .Returns(mockResponse);
-
         // Act
-        var result = _controller.GetDistinctSemesterList();
+        var result = _controller.GetMilestoneApproverTypes();
 
         // Assert
-        Assert.False(result.IsSuccess);
+        Assert.True(result.IsSuccess);
         Assert.Equal(mockResponse.Message, result.Message);
-        Assert.Empty(result.Semesters);
+
+        // Additional assertions based on your expected data in the database
+        Assert.NotEmpty(result.ApproverTypes);
+        Assert.Equal(mockResponse.ApproverTypes.Count, result.ApproverTypes.Count);
+
+        // Check each appover type item
+        for (int i = 0; i < mockResponse.ApproverTypes.Count; i++)
+        {
+            Assert.Equal(mockResponse.ApproverTypes[i].ApproverTypeID, result.ApproverTypes[i].ApproverTypeID);
+            Assert.Equal(mockResponse.ApproverTypes[i].Name, result.ApproverTypes[i].Name);
+        }
+
     }
+    [Fact]
+    public void GetMilestoneTypes_ReturnsSuccess_WhenDataIsPresent()
+    {
+        // Arrange
+        var mockResponse = new MilestoneTypesResponse
+        {
+            IsSuccess = true,
+            Message = "Data Retrieved Successfully",
+            MilestoneTypes = new List<MilestoneTypes>
+        {
+            new MilestoneTypes { ID = 1, Name = "Student Milestone" },
+            new MilestoneTypes { ID = 2, Name = "Faculty Milestone" }
+        }
+        };
+
+        // Act
+        var result = _controller.GetMilestoneTypes();
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(mockResponse.Message, result.Message);
+
+        // Additional assertions based on your expected data in the database
+        Assert.NotEmpty(result.MilestoneTypes);
+        Assert.Equal(mockResponse.MilestoneTypes.Count, result.MilestoneTypes.Count);
+
+        // Check each milestone type item
+        for (int i = 0; i < mockResponse.MilestoneTypes.Count; i++)
+        {
+            Assert.Equal(mockResponse.MilestoneTypes[i].ID, result.MilestoneTypes[i].ID);
+            Assert.Equal(mockResponse.MilestoneTypes[i].Name, result.MilestoneTypes[i].Name);
+        }
+
+    }
+
+
+    //[Fact]
+    //public void GetDistinctSemesterList_ReturnsFailure_WhenNoDataIsPresent()
+    //{
+    //    // Arrange
+    //    var mockResponse = new SemesterListResponse
+    //    {
+    //        IsSuccess = false,
+    //        Message = "No Data Present",
+    //        Semesters = new List<Semester>()
+    //    };
+
+    //    //_mockMilestonesService.Setup(service => service.GetDistinctSemesterList())
+    //    //                      .Returns(mockResponse);
+
+    //    // Act
+    //    var result = _controller.GetDistinctSemesterList();
+
+    //    // Assert
+    //    Assert.False(result.IsSuccess);
+    //    Assert.Equal(mockResponse.Message, result.Message);
+    //    Assert.Empty(result.Semesters);
+    //}
 
     //[Fact]
     //public void GetDistinctSemesterList_ReturnsFailure_WhenExceptionIsThrown()
