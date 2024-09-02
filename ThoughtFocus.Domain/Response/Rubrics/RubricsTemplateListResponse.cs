@@ -49,6 +49,7 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public string TermCode { get; set; }
         public string State { get; set; }
         public bool ShowSideBySideReview { get; set; }
+        public int ProgramId { get; set; }
     }
     public class RubricsDetails
     {
