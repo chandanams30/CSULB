@@ -198,7 +198,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    ReviewerID = Convert.ToInt32(row["ReviewerID"]),
                                                    TermCode = Convert.ToString(row["TermCode"]),
                                                    State = Convert.ToString(row["Status"]),
-                                                   ShowSideBySideReview = Convert.ToBoolean(row["ShowSideBySideReview"])
+                                                   ShowSideBySideReview = Convert.ToBoolean(row["ShowSideBySideReview"]),
+                                                   ProgramId = Convert.ToInt32(row["ProgramId"])
                                                }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";

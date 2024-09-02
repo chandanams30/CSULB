@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using ThoughtFocus.Domain.Response.Application;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using ThoughtFocus.Domain.Request.StudentProfile;
+using ThoughtFocus.Domain.Response;
 
 namespace CSULB_COE.Controllers
 {
@@ -19,11 +21,14 @@ namespace CSULB_COE.Controllers
     {
         public ILogger<ApplicationController> _logger;
         private readonly IApplicationService _applicationService;
+        public IStudentProfile _studentProfileService;
         public ApplicationController(IApplicationService applicationService
-                                    ,ILogger<ApplicationController> logger)
+                                    ,ILogger<ApplicationController> logger
+                                    ,IStudentProfile studentProfileService)
         {
             _applicationService = applicationService;
             _logger = logger;
+            _studentProfileService = studentProfileService;
         }
 
         [HttpGet("GetApplicationList")]
@@ -63,6 +68,25 @@ namespace CSULB_COE.Controllers
                 return BadRequest();
             }
 
+        }
+        [HttpPost("SaveStudentAggrement")]
+        public BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _studentProfileService.SaveStudentAggrement(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
         }
     }
 }
