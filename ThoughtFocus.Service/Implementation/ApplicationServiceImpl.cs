@@ -77,7 +77,8 @@ namespace ThoughtFocus.Service.Implementation
                                          new StudentNotificationResponse
                                          {
                                              ShowNotification = Convert.ToBoolean(row["ShowNotification"]),
-                                             Message = Convert.ToString(row["Message"])
+                                             Message = Convert.ToString(row["Message"]),
+                                             ShowAgreement = Convert.ToBoolean(row["ShowAgreement"])
                                          }).FirstOrDefault();
             }
 
