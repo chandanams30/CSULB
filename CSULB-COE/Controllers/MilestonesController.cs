@@ -510,6 +510,7 @@ namespace CSULB_COE.Controllers
         [HttpGet("GetDistinctSemesterList")]
         public SemesterListResponse GetDistinctSemesterList()
         {
+            //added test case to this endpoint
             try
             {
                 SemesterListResponse response = _milestonesService.GetDistinctSemesterList();

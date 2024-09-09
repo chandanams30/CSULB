@@ -61,7 +61,7 @@ public class MilestonesControllerTests
     [Fact]
     public void GetDistinctSemesterList_ReturnsSuccess_WhenDataIsPresent()
     {
-        // Arrange
+        // Arrange - to intialiaze mock response
         var mockResponse = new SemesterListResponse
         {
             IsSuccess = true,
