@@ -26,12 +26,12 @@ namespace ThoughtFocus.Service.Implementation
         private readonly ISqlDBUtility _helper;
         private readonly IConfiguration _configuration;
         private readonly ISendMail _sendMail;
-        public ILogger<SearchApplicationImpl> _logger;
+        public ILogger<StudentProfileImpl> _logger;
 
         public StudentProfileImpl(ISqlDBUtility helper
                                          , IConfiguration configuration
                                          , ISendMail sendMail
-                                         , ILogger<SearchApplicationImpl> logger)
+                                         , ILogger<StudentProfileImpl> logger)
         {
             _helper = helper;
             _configuration = configuration;
@@ -393,7 +393,7 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
-        private string EncryptSSNNumber(string clearText)
+        public string EncryptSSNNumber(string clearText)
         {
             string encryptionKey = _configuration["ApplicationKeys:EncryptionKey"];
             byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);
@@ -415,7 +415,7 @@ namespace ThoughtFocus.Service.Implementation
 
             return clearText;
         }
-        private string DecryptSSNNumber(string cipherText)
+        public string DecryptSSNNumber(string cipherText)
         {
             string encryptionKey = _configuration["ApplicationKeys:EncryptionKey"];
             byte[] cipherBytes = Convert.FromBase64String(cipherText);

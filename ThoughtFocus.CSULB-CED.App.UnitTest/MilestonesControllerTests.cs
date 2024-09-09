@@ -28,14 +28,10 @@ public class MilestonesControllerTests
     public MilestonesControllerTests()
     {
         // Setup configuration for the database connection
-        var inMemorySettings = new Dictionary<string, string> {
-            {"ConnectionStrings:AppDBConnection", "Data Source=20.25.58.133;Initial Catalog=CSULB_DB_DEV;User ID=csulbsql; Password=c$ulb@D3vSql;"},
-            
-        };
-
         _configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings)
-            .Build();
+    .SetBasePath(Directory.GetCurrentDirectory()) // Set the base path to the current directory
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // Load the appsettings.json file
+    .Build();
         var sqlDbLogger = new LoggerFactory().CreateLogger<SqlDBUtility>();
         _sqlDBUtility = new SqlDBUtility(sqlDbLogger, _configuration);
         var sendMailLogger = new LoggerFactory().CreateLogger<SendMail>();
@@ -169,6 +165,33 @@ public class MilestonesControllerTests
         }
 
     }
+    [Fact]
+    public void GetApplicationProgramsByTermCode_ReturnsSuccess_WhenDataIsPresent()
+    {
+        // Arrange
+        string termCode = "2243";
+        var mockResponse = new ApplicationProgramsResponse
+        {
+            IsSuccess = true,
+            Message = "Data Retrieved Successfully",
+            ProgramsList = new List<ApplicationProgram>
+        {
+            new ApplicationProgram { ProgramID = 1, ProgramName = "Education Specialist Credential Program (ESCP" },
+            new ApplicationProgram { ProgramID = 2, ProgramName = "Multiple Subject Credential Program (MSCP)" }
+        }
+        };
+
+        // Act
+        var result = _controller.GetApplicationProgramsByTermCode(termCode);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(mockResponse.Message, result.Message);
+
+        // Additional assertions based on your expected data
+        Assert.NotEmpty(result.ProgramsList);
+        Assert.Equal(mockResponse.ProgramsList.Count, result.ProgramsList.Count);
+    }
 
 
     //[Fact]
@@ -182,31 +205,31 @@ public class MilestonesControllerTests
     //        Semesters = new List<Semester>()
     //    };
 
-    //    //_mockMilestonesService.Setup(service => service.GetDistinctSemesterList())
-    //    //                      .Returns(mockResponse);
+        //    //_mockMilestonesService.Setup(service => service.GetDistinctSemesterList())
+        //    //                      .Returns(mockResponse);
 
-    //    // Act
-    //    var result = _controller.GetDistinctSemesterList();
+        //    // Act
+        //    var result = _controller.GetDistinctSemesterList();
 
-    //    // Assert
-    //    Assert.False(result.IsSuccess);
-    //    Assert.Equal(mockResponse.Message, result.Message);
-    //    Assert.Empty(result.Semesters);
-    //}
+        //    // Assert
+        //    Assert.False(result.IsSuccess);
+        //    Assert.Equal(mockResponse.Message, result.Message);
+        //    Assert.Empty(result.Semesters);
+        //}
 
-    //[Fact]
-    //public void GetDistinctSemesterList_ReturnsFailure_WhenExceptionIsThrown()
-    //{
-    //    // Arrange
-    //    //_mockMilestonesService.Setup(service => service.GetDistinctSemesterList())
-    //    //                      .Throws(new Exception("Database error"));
+        //[Fact]
+        //public void GetDistinctSemesterList_ReturnsFailure_WhenExceptionIsThrown()
+        //{
+        //    // Arrange
+        //    //_mockMilestonesService.Setup(service => service.GetDistinctSemesterList())
+        //    //                      .Throws(new Exception("Database error"));
 
-    //    // Act
-    //    var result = _controller.GetDistinctSemesterList();
+        //    // Act
+        //    var result = _controller.GetDistinctSemesterList();
 
-    //    // Assert
-    //    Assert.False(result.IsSuccess);
-    //    Assert.Equal("Failed to retrieve data , please try after sometime", result.Message);
-    //    Assert.Equal("Database error", result.StackTrace);
-    //}
+        //    // Assert
+        //    Assert.False(result.IsSuccess);
+        //    Assert.Equal("Failed to retrieve data , please try after sometime", result.Message);
+        //    Assert.Equal("Database error", result.StackTrace);
+        //}
 }
