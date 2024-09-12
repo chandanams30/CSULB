@@ -160,6 +160,9 @@ namespace CSULB_COE
             //Rubrics
             services.AddScoped<IRubricsService, RubricsServiceImpl>();
 
+            //Interviews
+            services.AddScoped<IInterviewService, InterviewServiceImpl>();
+
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
