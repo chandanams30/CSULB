@@ -36,4 +36,13 @@ namespace ThoughtFocus.Domain.Response.Interviews
         public string ProgramName { get; set; }
         public string Semester { get; set; }
     }
+    public class InterviewersList : BaseResponse
+    {
+        public List<InterviewersListResponse> interviewersList { get; set; }
+    }
+    public class InterviewersListResponse
+    {
+        public int UserId { get; set; }
+        public string DisplayName { get; set; }
+    }
 }

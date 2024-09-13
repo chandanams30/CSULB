@@ -7,6 +7,7 @@ using System;
 using ThoughtFocus.Domain.Request.Interviews;
 using ThoughtFocus.Domain.Request.Rubrics;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.Interviews;
 using ThoughtFocus.Domain.Response.Rubrics;
 using ThoughtFocus.Service.Interfaces;
@@ -15,7 +16,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class InterviewsController : ControllerBase
     {
         private ILogger<InterviewsController> _logger;
@@ -94,6 +95,25 @@ namespace CSULB_COE.Controllers
             catch (Exception ex)
             {
                 InterviewList response = new InterviewList();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetInterviewerList")]
+
+        public InterviewersList GetInterviewerList()
+        {
+            try
+            {
+                InterviewersList response = _interviewService.GetInterviewerList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                InterviewersList response = new InterviewersList();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;

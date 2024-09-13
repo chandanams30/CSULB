@@ -13,5 +13,6 @@ namespace ThoughtFocus.Service.Interfaces
         InterviewDetails GetInterviewDetails(int InterviewId);
         BaseResponse UpsertInterviewSlots(UpsertInterviewSlots input);
         InterviewList GetInterviewList(int UserId);
+        InterviewersList GetInterviewerList();
     }
 }

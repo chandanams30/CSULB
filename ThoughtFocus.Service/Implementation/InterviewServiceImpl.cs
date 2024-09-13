@@ -168,8 +168,40 @@ namespace ThoughtFocus.Service.Implementation
                                                InterviewDescription = Convert.ToString(row["InterviewDescription"]),
                                                ProgramName = Convert.ToString(row["ProgramName"]),
                                                Semester = Convert.ToString(row["Semester"]),
-                                               InterviewName = Convert.ToString(row["DisplayName"]),
+                                               InterviewName = Convert.ToString(row["InterviewName"]),
 
+                                           }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public InterviewersList GetInterviewerList()
+        {
+            InterviewersList obj = new InterviewersList();
+            SqlParameter[] parameters = {};
+            DataTable dtInterviewerList = _helper.GetDataTable("[Interview].[GetInterviewerList]", parameters);
+            try
+            {
+                if (dtInterviewerList.Rows.Count > 0)
+                {
+                    obj.interviewersList = dtInterviewerList.AsEnumerable().Select(row =>
+                                           new InterviewersListResponse
+                                           {
+                                               UserId = Convert.ToInt32(row["UserId"]),
+                                               DisplayName = Convert.ToString(row["DisplayName"])
                                            }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
