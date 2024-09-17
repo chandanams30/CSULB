@@ -36,9 +36,9 @@ namespace ThoughtFocus.Service.Implementation
             _logger = logger;
             _utils = utils;
         }
-        public BaseResponse UpsertInterview(UpsertInterview input)
+        public InterviewBasicDetailsResponse UpsertInterview(UpsertInterview input)
         {
-            BaseResponse response = new BaseResponse();
+            InterviewBasicDetailsResponse response = new InterviewBasicDetailsResponse();
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@InterviewName", SqlDbType.NVarChar, 50) { Value = input.InterviewName },
@@ -55,6 +55,19 @@ namespace ThoughtFocus.Service.Implementation
             DataTable dtInterviews = _helper.GetDataTable("[Interview].[InsertInterview]", parameters);
             if (dtInterviews.Rows.Count > 0)
             {
+                response.interviewBasicDetails = dtInterviews.AsEnumerable().Select(row=>
+                                            new InterviewBasicDetails
+                                            {
+                                                InterviewId = Convert.ToInt32(row["Id"]),
+                                                InterviewName = Convert.ToString(row["InterviewName"]),
+                                                InterviewDescription = Convert.ToString(row["InterviewDescription"]),
+                                                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
+                                                TermCode = Convert.ToString(row["TermCode"]),
+                                                IsActive = Convert.ToBoolean(row["IsActive"]),
+                                                ProgramId = Convert.ToInt32(row["ProgramId"]),
+                                                InterviewFor = Convert.ToInt32(row["InterviewFor"]),
+                                                Status = Convert.ToString(row["Status"]),
+                                            }).FirstOrDefault();
 
                 if (Convert.ToString(dtInterviews.Rows[0]["RESULT"]) == "SUCCESS")
                 {

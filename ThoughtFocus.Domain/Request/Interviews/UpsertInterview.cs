@@ -30,4 +30,8 @@ namespace ThoughtFocus.Domain.Request.Interviews
         public string InterviewLink { get; set; }
         public int InterviewSlotId { get; set; }
     }
+    public class UpsertInterviewSlotsList
+    {
+        public List<UpsertInterviewSlots> interviewSlotsList { get; set; }
+    }
 }

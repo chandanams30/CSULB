@@ -9,7 +9,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IInterviewService
     {
-        BaseResponse UpsertInterview(UpsertInterview input);
+        InterviewBasicDetailsResponse UpsertInterview(UpsertInterview input);
         InterviewDetails GetInterviewDetails(int InterviewId);
         BaseResponse UpsertInterviewSlots(UpsertInterviewSlots input);
         InterviewList GetInterviewList(int UserId);

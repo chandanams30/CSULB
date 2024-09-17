@@ -31,16 +31,16 @@ namespace CSULB_COE.Controllers
             _interviewService = interviewService;
         }
         [HttpPost("UpsertInterview")]
-        public BaseResponse UpsertInterview(UpsertInterview input)
+        public InterviewBasicDetailsResponse UpsertInterview(UpsertInterview input)
         {
             try
             {
-                BaseResponse response = _interviewService.UpsertInterview(input);
+                InterviewBasicDetailsResponse response = _interviewService.UpsertInterview(input);
                 return response;
             }
             catch (Exception ex)
             {
-                BaseResponse response = new BaseResponse();
+                InterviewBasicDetailsResponse response = new InterviewBasicDetailsResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
@@ -67,11 +67,15 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("UpsertInterviewSlots")]
-        public BaseResponse UpsertInterviewSlots(UpsertInterviewSlots input)
+        public BaseResponse UpsertInterviewSlots(UpsertInterviewSlotsList inputs)
         {
             try
             {
-                BaseResponse response = _interviewService.UpsertInterviewSlots(input);
+                BaseResponse response = new BaseResponse();
+                foreach (UpsertInterviewSlots input in inputs.interviewSlotsList)
+                {
+                   response = _interviewService.UpsertInterviewSlots(input);
+                }
                 return response;
             }
             catch (Exception ex)

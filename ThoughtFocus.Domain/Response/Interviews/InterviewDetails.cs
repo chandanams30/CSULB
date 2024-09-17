@@ -45,4 +45,20 @@ namespace ThoughtFocus.Domain.Response.Interviews
         public int UserId { get; set; }
         public string DisplayName { get; set; }
     }
+    public class InterviewBasicDetails
+    {
+        public int InterviewId { get; set; }
+        public string InterviewName { get; set; }
+        public string InterviewDescription { get; set; }
+        public int CreatedBy { get; set; }
+        public bool IsActive { get; set; }
+        public int ProgramId { get; set; }
+        public string TermCode { get; set; }
+        public int InterviewFor { get; set; }
+        public string Status { get; set; }
+    }
+    public class InterviewBasicDetailsResponse : BaseResponse
+    {
+        public InterviewBasicDetails interviewBasicDetails { get; set; }
+    }
 }
