@@ -52,15 +52,15 @@ namespace ThoughtFocus.Common.Utilities.Implementation
                 AlternateView htmlView = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
 
                 string imagePath=Path.GetFullPath("SupportFiles/Img/logo.jpeg");
-                string signature = Path.GetFullPath("SupportFiles/Img/Jessica_sign.jpeg");
+                //string signature = Path.GetFullPath("SupportFiles/Img/Jessica_sign.jpeg");
                 //Add Image
                 LinkedResource theEmailImage = new LinkedResource(imagePath, MediaTypeNames.Image.Jpeg);
                 theEmailImage.ContentId = "myImageID";
-                LinkedResource signatureImage = new LinkedResource(signature, MediaTypeNames.Image.Jpeg);
-                signatureImage.ContentId = "mySignatureImageID";
+                //LinkedResource signatureImage = new LinkedResource(signature, MediaTypeNames.Image.Jpeg);
+                //signatureImage.ContentId = "mySignatureImageID";
                 //Add the Image to the Alternate view
                 htmlView.LinkedResources.Add(theEmailImage);
-                htmlView.LinkedResources.Add(signatureImage);
+                //htmlView.LinkedResources.Add(signatureImage);
 
                 //Add view to the Email Message
                 mail.AlternateViews.Add(htmlView);

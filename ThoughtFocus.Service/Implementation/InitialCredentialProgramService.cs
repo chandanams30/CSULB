@@ -1059,7 +1059,7 @@ namespace ThoughtFocus.Service.Implementation
             string body = string.Empty;
             string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
             string logoText = "cid:myImageID";
-            string signatureText = "cid:mySignatureImageID";
+            //string signatureText = "cid:mySignatureImageID";
             string date= DateTime.Now.ToString("MM-dd-yyyy");
             string templateName = string.Empty;
             if (applicantInfo.Rows.Count>=0)
@@ -1071,7 +1071,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             if (input.Status != string.Empty)
             {
-                EmailResult emailResult = GetMailTemplate(templateName, input, programName, logoText, applicantName, date, signatureText);
+                EmailResult emailResult = GetMailTemplate(templateName, input, programName, logoText, applicantName, date);
                 try
                 {
                     _sendMail.SendEmail(applicantEmail, "", "COMMON", emailResult.Subject, emailResult.Body, "");
@@ -1088,7 +1088,7 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-        private EmailResult GetMailTemplate(string templateName, UpdateFormSubSectionApproveralRequest input,string programName,string logoText,string applicantName,string date,string signatureText)
+        private EmailResult GetMailTemplate(string templateName, UpdateFormSubSectionApproveralRequest input,string programName,string logoText,string applicantName,string date)
         {
             string Subject = string.Empty;
             EmailResult obj=new EmailResult();
@@ -1152,8 +1152,7 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[applicantName]]", applicantName)
                                .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
                                .Replace("[[programName]]", programName)
-                               .Replace("[[date]]", date)
-                               .Replace("[[Signature]]", signatureText);
+                               .Replace("[[date]]", date);
             return obj;
 
         }
