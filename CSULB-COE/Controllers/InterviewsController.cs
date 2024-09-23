@@ -49,11 +49,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetInterviewDetails")]
-        public InterviewDetails GetInterviewDetails(int InterviewId)
+        public InterviewDetails GetInterviewDetails(int InterviewId,int UserId)
         {
             try
             {
-                InterviewDetails response = _interviewService.GetInterviewDetails(InterviewId);
+                InterviewDetails response = _interviewService.GetInterviewDetails(InterviewId, UserId);
                 return response;
             }
             catch (Exception ex)
@@ -67,20 +67,17 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("UpsertInterviewSlots")]
-        public BaseResponse UpsertInterviewSlots(UpsertInterviewSlotsList inputs)
+        public InterviewSlotsList UpsertInterviewSlots(UpsertInterviewSlots input)
         {
             try
             {
-                BaseResponse response = new BaseResponse();
-                foreach (UpsertInterviewSlots input in inputs.interviewSlotsList)
-                {
-                   response = _interviewService.UpsertInterviewSlots(input);
-                }
+                input.InterviewLink = "<a href=\"http://20.25.58.133/CSULBced-dev/swagger/index.html\">Development</a>";
+                InterviewSlotsList response = _interviewService.UpsertInterviewSlots(input);
                 return response;
             }
             catch (Exception ex)
             {
-                BaseResponse response = new BaseResponse();
+                InterviewSlotsList response = new InterviewSlotsList();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
