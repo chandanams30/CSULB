@@ -387,7 +387,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    RubricForm = Convert.ToString(row["RubricForm"]),
                                                    ProgramID = Convert.ToInt32(row["ProgramID"]),
                                                    TemplateDescription = Convert.ToString(row["TemplateDescription"]),
-                                                   TotalPoints = Convert.ToInt32(row["TotalPoints"])
+                                                   TotalPoints = Convert.ToInt32(row["TotalPoints"]),
+                                                   StudentEmail = Convert.ToString(row["Email"])
                                                }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
