@@ -71,7 +71,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                input.InterviewLink = "<a href=\"http://20.25.58.133/CSULBced-dev/swagger/index.html\">Development</a>";
+                //input.InterviewLink = "<a href=\"http://20.25.58.133/CSULBced-dev/swagger/index.html\">Development</a>";
                 InterviewSlotsList response = _interviewService.UpsertInterviewSlots(input);
                 return response;
             }
@@ -117,6 +117,24 @@ namespace CSULB_COE.Controllers
                 InterviewersList response = new InterviewersList();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateInterviewStudentAction")]
+        public BaseResponse UpdateInterviewStudentAction(InterviewStudentAction input)
+        {
+            try
+            {
+                BaseResponse response = _interviewService.UpdateInterviewStudentAction(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

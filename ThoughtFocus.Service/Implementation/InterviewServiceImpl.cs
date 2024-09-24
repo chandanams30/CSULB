@@ -183,7 +183,7 @@ namespace ThoughtFocus.Service.Implementation
                 response.interviewSlotsList = dtInterviewsSlots.Tables[1].AsEnumerable().Select(row =>
                                             new InterviewSlots
                                             {
-                                                InterviewSlotId = row["InterviewSlotId"] == DBNull.Value ? 0 : Convert.ToInt32(row["InterviewSlotId"]),
+                                                InterviewSlotId = row["Id"] == DBNull.Value ? 0 : Convert.ToInt32(row["Id"]),
                                                 InterviewDate = row["InterviewDate"] == DBNull.Value ? null : Convert.ToDateTime(row["InterviewDate"]).ToString("MM-dd-yyyy"),
                                                 StartTime = Convert.ToString(row["StartTime"] == DBNull.Value ? null : row["StartTime"]),
                                                 EndTime = Convert.ToString(row["EndTime"] == DBNull.Value ? null : row["EndTime"]),
@@ -194,6 +194,7 @@ namespace ThoughtFocus.Service.Implementation
                                                 Interviewer = row["Interviewers"] == DBNull.Value ? 0 : Convert.ToInt32(row["Interviewers"]),
                                                 Student = row["Students"] == DBNull.Value ? 0 : Convert.ToInt32(row["Students"]),
                                             }).ToList();
+
                 //notify student
                 string email = string.Empty;
                 string interviewName = string.Empty;
@@ -207,40 +208,43 @@ namespace ThoughtFocus.Service.Implementation
                 string body = string.Empty;
                 string logoText = "cid:myImageID";
                 string interviewLocation = string.Empty;
-                if (!string.IsNullOrEmpty(Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["Email"])))
+                if (dtInterviewsSlots.Tables[0].Columns.Contains("Email"))
                 {
-                    email = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["Email"]);
-                    interviewName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["InterviewName"]);
-                    studentName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["StudentName"]);
-                    programName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["ProgramName"]);
-                    termName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["Semester"]);
-                    DateTime interviewDate = (DateTime)dtInterviewsSlots.Tables[0].Rows[0]["InterviewDate"];
-                    interviewStartDate= interviewDate.ToString("MM-dd-yyyy");
-                    TimeSpan startTimeSpan = (TimeSpan)dtInterviewsSlots.Tables[0].Rows[0]["StartTime"];
-                    TimeSpan endTimeSpan = (TimeSpan)dtInterviewsSlots.Tables[0].Rows[0]["EndTime"];
-                    startTime = DateTime.Today.Add(startTimeSpan).ToString("h:mmtt").ToUpper(); 
-                    endTime = DateTime.Today.Add(endTimeSpan).ToString("h:mmtt").ToUpper();     
-                    link = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["InterviewLink"]);
-                    interviewLocation = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["InterviewLocation"]);
-                    if (interviewLocation == "Online")
+                    if (!string.IsNullOrEmpty(Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["Email"])))
                     {
-                        body = GetMailBodyTemplate("Online_Interview__MailTemplate.html");
+                        email = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["Email"]);
+                        interviewName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["InterviewName"]);
+                        studentName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["StudentName"]);
+                        programName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["ProgramName"]);
+                        termName = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["Semester"]);
+                        DateTime interviewDate = (DateTime)dtInterviewsSlots.Tables[0].Rows[0]["InterviewDate"];
+                        interviewStartDate = interviewDate.ToString("MM-dd-yyyy");
+                        TimeSpan startTimeSpan = (TimeSpan)dtInterviewsSlots.Tables[0].Rows[0]["StartTime"];
+                        TimeSpan endTimeSpan = (TimeSpan)dtInterviewsSlots.Tables[0].Rows[0]["EndTime"];
+                        startTime = DateTime.Today.Add(startTimeSpan).ToString("h:mmtt").ToUpper();
+                        endTime = DateTime.Today.Add(endTimeSpan).ToString("h:mmtt").ToUpper();
+                        link = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["InterviewLink"]);
+                        interviewLocation = Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["InterviewLocation"]);
+                        if (interviewLocation == "Online")
+                        {
+                            body = GetMailBodyTemplate("Online_Interview__MailTemplate.html");
+                        }
+                        else if (interviewLocation == "Offline")
+                        {
+                            body = GetMailBodyTemplate("Offline_Interview_MailTemplate.html");
+                        }
+                        body = body.Replace("[[logoPath]]", logoText)
+                                   .Replace("[[interviewName]]", interviewName)
+                                   .Replace("[[studentName]]", studentName)
+                                   .Replace("[[programName]]", programName)
+                                   .Replace("[[termName]]", termName)
+                                   .Replace("[[link]]", link)
+                                   .Replace("[[interviewStartDate]]", interviewStartDate)
+                                   .Replace("[[interviewStartTime]]", startTime)
+                                   .Replace("[[interviewEndTime]]", endTime);
+                        string subject = "Interview Details";
+                        _sendMail.SendEmail(email, "", "COMMON", subject, body, "");
                     }
-                    else if (interviewLocation == "Offline")
-                    {
-                        body = GetMailBodyTemplate("Offline_Interview_MailTemplate.html");
-                    }
-                    body = body.Replace("[[logoPath]]", logoText)
-                               .Replace("[[interviewName]]", interviewName)
-                               .Replace("[[studentName]]", studentName)
-                               .Replace("[[programName]]", programName)
-                               .Replace("[[termName]]", termName)
-                               .Replace("[[link]]", link)
-                               .Replace("[[interviewStartDate]]", interviewStartDate)
-                               .Replace("[[interviewStartTime]]", startTime)
-                               .Replace("[[interviewEndTime]]", endTime);
-                    string subject = "Interview Details";
-                    _sendMail.SendEmail(email, "", "COMMON", subject, body, "");
                 }
 
                 if (Convert.ToString(dtInterviewsSlots.Tables[0].Rows[0]["RESULT"]) == "SUCCESS")
@@ -335,6 +339,31 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        public BaseResponse UpdateInterviewStudentAction(InterviewStudentAction input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@Status", SqlDbType.NVarChar, 50) { Value = input.Status },
+                                          new SqlParameter("@InterviewSlotId", SqlDbType.BigInt) { Value = input.InterviewSlotId }
+                                       };
+
+            DataTable dtInterviewResponse = _helper.GetDataTable("[Interview].[InterviewStudentAction]", parameters);
+            if (dtInterviewResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtInterviewResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Interview " + input.Status + "ed" + " Successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtInterviewResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to" + input.Status + "Interview";
+                    response.IsSuccess = true;
+                }
+            }
+            return response;
         }
         private string GetMailBodyTemplate(string templateName)
         {

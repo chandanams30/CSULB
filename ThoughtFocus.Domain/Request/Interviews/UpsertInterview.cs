@@ -32,6 +32,11 @@ namespace ThoughtFocus.Domain.Request.Interviews
         public string InterviewLink { get; set; }
         public int InterviewSlotId { get; set; }
     }
+    public class InterviewStudentAction
+    {
+        public string Status { get; set; }
+        public int InterviewSlotId { get; set; }
+    }
     //public class UpsertInterviewSlotsList
     //{
     //    public int InterviewId { get; set; }

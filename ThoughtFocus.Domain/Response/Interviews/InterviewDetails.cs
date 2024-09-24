@@ -82,7 +82,7 @@ namespace ThoughtFocus.Domain.Response.Interviews
     }
     public class InterviewSlots 
     {
-        public int InterviewId { get; set; }
+        //public int InterviewId { get; set; }
         public string InterviewDate { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }

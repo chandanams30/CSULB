@@ -14,5 +14,6 @@ namespace ThoughtFocus.Service.Interfaces
         InterviewSlotsList UpsertInterviewSlots(UpsertInterviewSlots input);
         InterviewList GetInterviewList(int UserId);
         InterviewersList GetInterviewerList();
+        BaseResponse UpdateInterviewStudentAction(InterviewStudentAction input);
     }
 }
