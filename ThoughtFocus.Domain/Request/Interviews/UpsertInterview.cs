@@ -36,6 +36,7 @@ namespace ThoughtFocus.Domain.Request.Interviews
     {
         public string Status { get; set; }
         public int InterviewSlotId { get; set; }
+        public string ReasonforReschedule { get; set; }
     }
     //public class UpsertInterviewSlotsList
     //{

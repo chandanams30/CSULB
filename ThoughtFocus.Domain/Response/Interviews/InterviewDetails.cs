@@ -38,6 +38,10 @@ namespace ThoughtFocus.Domain.Response.Interviews
         public string InterviewLink { get; set; }
         public int Interviewer {  get; set; }
         public int Student { get; set; }
+        public string ReasonforReschedule { get; set; }
+        public bool ShowAcceptInterview { get; set; }
+        public bool ShowRejectInterview { get; set; }
+        public bool ShowRescheduleInterview { get; set; }
     }
     public class InterviewList : BaseResponse
     {

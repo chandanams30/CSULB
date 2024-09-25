@@ -93,12 +93,12 @@ namespace ThoughtFocus.Service.Implementation
                                            new SqlParameter("@InterviewId", SqlDbType.BigInt) { Value = InterviewId },
                                            new SqlParameter("@UserId", SqlDbType.BigInt) { Value = UserId }
                                         };
-            DataSet dtInterviewDetails = _helper.GetDataSet("[Interview].[InterviewDetails]", parameters);
+            DataTable dtInterviewDetails = _helper.GetDataTable("[Interview].[InterviewDetails]", parameters);
             try
             {
-                if (dtInterviewDetails.Tables[0].Rows.Count > 0 && dtInterviewDetails.Tables[1].Rows.Count > 0)
+                if (dtInterviewDetails.Rows.Count > 0)
                 {
-                    BasicDetails objBD = dtInterviewDetails.Tables[0].AsEnumerable().Select(row =>
+                    BasicDetails objBD = dtInterviewDetails.AsEnumerable().Select(row =>
                                            new BasicDetails
                                            {
                                                InterviewId = Convert.ToInt32(row["InterviewId"]),
@@ -112,15 +112,15 @@ namespace ThoughtFocus.Service.Implementation
                                            }).FirstOrDefault();
 
                     obj.basicDetails = objBD;
-                    if (dtInterviewDetails.Tables[0].Rows[0]["InterviewSlotId"] != DBNull.Value)
+                    if (dtInterviewDetails.Rows[0]["InterviewSlotId"] != DBNull.Value)
                     {
-                        obj.slotsList = dtInterviewDetails.Tables[0].AsEnumerable().Select(row =>
+                        obj.slotsList = dtInterviewDetails.AsEnumerable().Select(row =>
                                             new SlotsList
                                             {
                                                 InterviewSlotId = row["InterviewSlotId"] == DBNull.Value ? 0 : Convert.ToInt32(row["InterviewSlotId"]),
                                                 InterviewDate = row["InterviewDate"] == DBNull.Value ? null : Convert.ToDateTime(row["InterviewDate"]).ToString("MM-dd-yyyy"),
-                                                StartTime = Convert.ToString(row["StartTime"] == DBNull.Value ? null : row["StartTime"]),
-                                                EndTime = Convert.ToString(row["EndTime"] == DBNull.Value ? null : row["EndTime"]),
+                                                StartTime = row["StartTime"] == DBNull.Value ? null : ((TimeSpan)row["StartTime"]).ToString(@"hh\:mm"),
+                                                EndTime = row["EndTime"] == DBNull.Value ? null : ((TimeSpan)row["EndTime"]).ToString(@"hh\:mm"),
                                                 InterviewerName = Convert.ToString(row["InterviewerName"]),
                                                 StudentName = Convert.ToString(row["StudentName"]),
                                                 Status = Convert.ToString(row["Status"]),
@@ -129,13 +129,11 @@ namespace ThoughtFocus.Service.Implementation
                                                 InterviewLink = Convert.ToString(row["InterviewLink"]),
                                                 Interviewer = row["Interviewers"] == DBNull.Value ? 0 : Convert.ToInt32(row["Interviewers"]),
                                                 Student = row["Students"] == DBNull.Value ? 0 : Convert.ToInt32(row["Students"]),
+                                                ReasonforReschedule = Convert.ToString(row["ReasonforReschedule"]),
+                                                ShowAcceptInterview = Convert.ToBoolean(row["ShowAcceptInterview"]),
+                                                ShowRejectInterview = Convert.ToBoolean(row["ShowRejectInterview"]),
+                                                ShowRescheduleInterview = Convert.ToBoolean(row["ShowRescheduleInterview"])
                                             }).ToList();
-
-                        obj.interviewSateHandler = dtInterviewDetails.Tables[1].AsEnumerable().Select(row =>
-                                                   new InterviewSateHandler
-                                                   {
-                                                       StateHandler = Convert.ToString(row["InterviewStateHandler"])
-                                                   }).FirstOrDefault();
                     }
                     else
                     {
@@ -185,14 +183,15 @@ namespace ThoughtFocus.Service.Implementation
                                             {
                                                 InterviewSlotId = row["Id"] == DBNull.Value ? 0 : Convert.ToInt32(row["Id"]),
                                                 InterviewDate = row["InterviewDate"] == DBNull.Value ? null : Convert.ToDateTime(row["InterviewDate"]).ToString("MM-dd-yyyy"),
-                                                StartTime = Convert.ToString(row["StartTime"] == DBNull.Value ? null : row["StartTime"]),
-                                                EndTime = Convert.ToString(row["EndTime"] == DBNull.Value ? null : row["EndTime"]),
+                                                StartTime = row["StartTime"] == DBNull.Value ? null : ((TimeSpan)row["StartTime"]).ToString(@"hh\:mm"),
+                                                EndTime = row["EndTime"] == DBNull.Value ? null : ((TimeSpan)row["EndTime"]).ToString(@"hh\:mm"),
                                                 Status = Convert.ToString(row["Status"]),
                                                 InterviewComments = Convert.ToString(row["InterviewerComments"]),
                                                 InterviewLocation = Convert.ToString(row["InterviewLocation"]),
                                                 InterviewLink = Convert.ToString(row["InterviewLink"]),
                                                 Interviewer = row["Interviewers"] == DBNull.Value ? 0 : Convert.ToInt32(row["Interviewers"]),
                                                 Student = row["Students"] == DBNull.Value ? 0 : Convert.ToInt32(row["Students"]),
+                                                CreatedBy = row["CreatedBy"] == DBNull.Value ? 0 : Convert.ToInt32(row["CreatedBy"]),
                                             }).ToList();
 
                 //notify student
@@ -346,7 +345,8 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@Status", SqlDbType.NVarChar, 50) { Value = input.Status },
-                                          new SqlParameter("@InterviewSlotId", SqlDbType.BigInt) { Value = input.InterviewSlotId }
+                                          new SqlParameter("@InterviewSlotId", SqlDbType.BigInt) { Value = input.InterviewSlotId },
+                                          new SqlParameter("@ReasonforReschedule", SqlDbType.NVarChar, -1) { Value = input.ReasonforReschedule}
                                        };
 
             DataTable dtInterviewResponse = _helper.GetDataTable("[Interview].[InterviewStudentAction]", parameters);
@@ -354,7 +354,7 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (Convert.ToString(dtInterviewResponse.Rows[0]["RESULT"]) == "SUCCESS")
                 {
-                    response.Message = "Interview " + input.Status + "ed" + " Successfully";
+                    response.Message = input.Status == "reschedule" ? "Interview " + input.Status + "d successfully" : "Interview " + input.Status + "ed successfully";
                     response.IsSuccess = true;
                 }
                 else if (Convert.ToString(dtInterviewResponse.Rows[0]["RESULT"]) == "FAILURE")
