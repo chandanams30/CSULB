@@ -1507,7 +1507,8 @@ namespace ThoughtFocus.Service.Implementation
                                                isMailSent = Convert.ToBoolean(row["isMailSent"]),
                                                LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"] == DBNull.Value ? null : row["LetterOfRecommendationJSON"]),
                                                CanView = Convert.ToBoolean(row["CanView"]),
-                                               FileLink = Convert.ToString(row["FileLink"])
+                                               FileLink = Convert.ToString(row["FileLink"]),
+                                               ApplicationType = Convert.ToString(row["ApplicationType"])
                                            }).ToList();
                     }
                     else
@@ -1590,7 +1591,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RecommenderEmail", SqlDbType.VarChar,200) { Value = input.RecommenderEmail }
                                         };
 
-            DataTable recomDetails = _helper.GetDataTable("[Application].[UpsertLetterOfRecommendations]", parameters);
+            DataSet recomDetails = _helper.GetDataSet("[Application].[UpsertLetterOfRecommendations]", parameters);
             string logoText = "cid:myImageID";
             string recommenderName = string.Empty;
             string recommenderEmail = string.Empty;
@@ -1603,30 +1604,41 @@ namespace ThoughtFocus.Service.Implementation
             string subject = string.Empty;
             try
             {
-                if (recomDetails.Rows.Count > 0)
+                if (recomDetails.Tables[1].Rows.Count > 0)
                 {
-                    // send mail to the recommender with the URL link  
-                    recommenderName = Convert.ToString(recomDetails.Rows[0]["RecommenderName"]);
-                    recommenderEmail = Convert.ToString(recomDetails.Rows[0]["RecommenderEmail"]);
-                    recommenderURL = Convert.ToString(recomDetails.Rows[0]["RecommenderURL"]);
-                    recommenderIdentifier = Convert.ToString(recomDetails.Rows[0]["RecommenderIdentifier"]);
-                    applicantName = Convert.ToString(recomDetails.Rows[0]["StudentName"]);
-                    link = recommenderURL + recommenderIdentifier;
-                    body = GetMailBodyTemplateByProgramID(input.ProgramID);
-                    //link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
-                    body = body.Replace("[[logoPath]]", logoText)
-                        .Replace("[[applicantname]]", applicantName)
-                        .Replace("[[link]]", link);
-                    if (input.ProgramID == 2)
-                        subject = "CSULB MSCP Clinical Practice Evaluation Form";
-                    if (input.ProgramID == 4)
-                        subject = "CSULB SSCP Clinical Practice Evaluation Form";
-                    _sendMail.SendEmail(recommenderEmail, "", "COMMON", subject, body, "");
-                    isMailSent = true;
-                    UpdateLetterOfRecommendationsMailSent(input, isMailSent);
+                    if (Convert.ToString(recomDetails.Tables[1].Rows[0]["Status"]) == "FAILURE")
+                    {
+                        response.Message = Convert.ToString(recomDetails.Tables[1].Rows[0]["Message"]);
+                        response.IsSuccess = false;
+                    }
+                    else
+                    {
+                        if (recomDetails.Tables[0].Rows.Count > 0)
+                        {
+                            // send mail to the recommender with the URL link  
+                            recommenderName = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderName"]);
+                            recommenderEmail = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderEmail"]);
+                            recommenderURL = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderURL"]);
+                            recommenderIdentifier = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderIdentifier"]);
+                            applicantName = Convert.ToString(recomDetails.Tables[0].Rows[0]["StudentName"]);
+                            link = recommenderURL + recommenderIdentifier;
+                            body = GetMailBodyTemplateByProgramID(input.ProgramID);
+                            //link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+                            body = body.Replace("[[logoPath]]", logoText)
+                                .Replace("[[applicantname]]", applicantName)
+                                .Replace("[[link]]", link);
+                            if (input.ProgramID == 2)
+                                subject = "CSULB MSCP Clinical Practice Evaluation Form";
+                            if (input.ProgramID == 4)
+                                subject = "CSULB SSCP Clinical Practice Evaluation Form";
+                            _sendMail.SendEmail(recommenderEmail, "", "COMMON", subject, body, "");
+                            isMailSent = true;
+                            UpdateLetterOfRecommendationsMailSent(input, isMailSent);
+                        }
+                        response.Message = "Evaluation added and mail sent successfully";
+                        response.IsSuccess = true;
+                    }
                 }
-                response.Message = "Recommendation added and mail sent successfully";
-                response.IsSuccess = true;
 
 
             }
@@ -1674,12 +1686,12 @@ namespace ThoughtFocus.Service.Implementation
         {
             FormAttachments obj = new FormAttachments();
             byte[] fileContentJSONToPDF = new byte[0];
-            if (input.ProgramFormIdentifier == "SSCP")
+            if (input.ApplicationType == "ICP-SSCP")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForSSCP(input.LetterOfRecommendationJSON);
                 obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             }
-            else if (input.ProgramFormIdentifier == "MSCP")
+            else if (input.ApplicationType == "ICP-MSCP" || input.ApplicationType == "Fieldwork-FW")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForMSCP(input.LetterOfRecommendationJSON);
                 obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";

@@ -27,5 +27,6 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
     {
         public string LetterOfRecommendationJSON { get; set; }
         public string ProgramFormIdentifier { get;set; }
+        public string ApplicationType { get; set; }
     }
 }
