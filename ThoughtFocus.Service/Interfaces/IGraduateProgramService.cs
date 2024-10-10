@@ -59,5 +59,6 @@ namespace ThoughtFocus.Service.Interfaces
         ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode);
         ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode);
         BaseResponse RevertBacktoPreviousState(int formID);
+        BaseResponse MoveApplicationToSemester(MoveApplicationToSemesterRequest input);
     }
 }
