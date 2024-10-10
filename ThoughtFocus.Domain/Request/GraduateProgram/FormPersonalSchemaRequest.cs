@@ -12,4 +12,11 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public string TermCode { get; set; }
         public string FormSchema { get; set; }
     }
+    public class MoveApplicationToSemesterRequest
+    {
+        public int FormID { get; set; }
+        public string TermCode { get; set; }
+        public string FormSchema { get; set; }
+
+    }
 }

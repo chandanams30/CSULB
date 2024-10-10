@@ -1039,5 +1039,23 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("MoveApplicationToSemester")]
+        public BaseResponse MoveApplicationToSemester(MoveApplicationToSemesterRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.MoveApplicationToSemester(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update semester , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
