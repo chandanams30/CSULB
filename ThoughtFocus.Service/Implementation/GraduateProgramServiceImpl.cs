@@ -3765,6 +3765,32 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
+        public BaseResponse MoveApplicationToSemester(MoveApplicationToSemesterRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar, -1) { Value = input.FormSchema }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[MoveApplicationToSemester]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated Semester Successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the semester";
+                    response.IsSuccess = true;
+                }
+            }
+            return response;
+        }
+        
     }
 
 
