@@ -25,5 +25,6 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string EvaluationJSON { get; set; }
         public bool CanView { get; set; }
         public string FileLink { get; set; }
+        public string ApplicationType { get; set; }
     }
 }

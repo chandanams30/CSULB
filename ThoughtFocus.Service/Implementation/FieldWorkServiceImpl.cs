@@ -1668,7 +1668,8 @@ namespace ThoughtFocus.Service.Implementation
                                                       isMailSent = Convert.ToBoolean(row["isMailSent"]),
                                                       EvaluationJSON = Convert.ToString(row["EvaluationJSON"] == DBNull.Value ? null : row["EvaluationJSON"]),
                                                       CanView = Convert.ToBoolean(row["CanView"]),
-                                                      FileLink = Convert.ToString(row["FileLink"])
+                                                      FileLink = Convert.ToString(row["FileLink"]),
+                                                      ApplicationType = Convert.ToString(row["ApplicationType"])
                                                   }).ToList();
 
                     }
@@ -1711,7 +1712,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@EvaluatorEmail", SqlDbType.VarChar,200) { Value = input.EvaluatorEmail }
                                         };
 
-            DataTable evaluationDetails = _helper.GetDataTable("[FieldWork].[UpsertEvaluation]", parameters);
+            DataSet evaluationDetails = _helper.GetDataSet("[FieldWork].[UpsertEvaluation]", parameters);
             string logoText = "cid:myImageID";
             string evaluatorName = string.Empty;
             string evaluatorEmail = string.Empty;
@@ -1723,33 +1724,44 @@ namespace ThoughtFocus.Service.Implementation
             bool isMailSent = false;
             try
             {
-                if (evaluationDetails.Rows.Count > 0)
+                if (evaluationDetails.Tables[1].Rows.Count > 0)
                 {
-                    // send mail to the evaluator with the URL link  
-                    evaluatorName = Convert.ToString(evaluationDetails.Rows[0]["EvaluatorName"]);
-                    evaluatorEmail = Convert.ToString(evaluationDetails.Rows[0]["EvaluatorEmail"]);
-                    evaluationURL = Convert.ToString(evaluationDetails.Rows[0]["EvaluationURL"]);
-                    evaluationIdentifier = Convert.ToString(evaluationDetails.Rows[0]["EvaluationIdentifier"]);
-                    applicantName = Convert.ToString(evaluationDetails.Rows[0]["StudentName"]);
-                    link = evaluationURL + evaluationIdentifier;
-                    body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
-                    body = body.Replace("[[logoPath]]", logoText)
-                        .Replace("[[applicantname]]", applicantName)
-                        .Replace("[[link]]", link);
-
-                    string subject = "CSULB MSCP Clinical Practice Evaluation Form";
-                    _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
-                    isMailSent = true;
-                    SqlParameter[] parmeter1 =
+                    if (Convert.ToString(evaluationDetails.Tables[1].Rows[0]["Status"]) == "FAILURE")
                     {
-                        new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
-                    };
-                    DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
-                    string id = evalDetails.Rows[0]["EvaluationID"].ToString();
-                    UpdateEvaluationMailSent(input, isMailSent, id);
-                 }
-                response.Message = "Evaluation added and mail sent successfully";
-                response.IsSuccess = true;
+                        response.Message = Convert.ToString(evaluationDetails.Tables[1].Rows[0]["Message"]);
+                        response.IsSuccess = false;
+                    }
+                    else
+                    {
+                        if (evaluationDetails.Tables[0].Rows.Count > 0)
+                        {
+                            // send mail to the evaluator with the URL link  
+                            evaluatorName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluatorName"]);
+                            evaluatorEmail = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluatorEmail"]);
+                            evaluationURL = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluationURL"]);
+                            evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluationIdentifier"]);
+                            applicantName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["StudentName"]);
+                            link = evaluationURL + evaluationIdentifier;
+                            body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
+                            body = body.Replace("[[logoPath]]", logoText)
+                                .Replace("[[applicantname]]", applicantName)
+                                .Replace("[[link]]", link);
+
+                            string subject = "CSULB MSCP Clinical Practice Evaluation Form";
+                            _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                            isMailSent = true;
+                            SqlParameter[] parmeter1 =
+                            {
+                                new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
+                            };
+                            DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
+                            string id = evalDetails.Rows[0]["EvaluationID"].ToString();
+                            UpdateEvaluationMailSent(input, isMailSent, id);
+                        }
+                        response.Message = "Evaluation added and mail sent successfully";
+                        response.IsSuccess = true;
+                    }
+                }
             }
             catch (Exception ex)
             {
