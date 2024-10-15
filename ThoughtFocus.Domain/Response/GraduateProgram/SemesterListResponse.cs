@@ -13,4 +13,13 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string TermCode { get; set; }
         public string TermName { get; set; }
     }
+    public class RecommenderMailBodyResponse : BaseResponse
+    {
+        public RecommenderBody recommenderResponse { get; set; }
+    }
+    public class RecommenderBody
+    {
+        public int ID { get; set; }
+        public string RecommenderMailBody { get; set; }
+    }
 }
