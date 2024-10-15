@@ -29,6 +29,7 @@ using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Interfaces;
 using static ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata;
+using static ThoughtFocus.Domain.Response.FieldWork.FieldWorkActivityLogListResponse;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -543,6 +544,7 @@ namespace ThoughtFocus.Service.Implementation
         public FieldWorkActivityLogListResponse GetFieldWorkActivityLog(int userId, int fieldworkId)
         {
             FieldWorkActivityLogListResponse obj = new FieldWorkActivityLogListResponse();
+            DownloadDetail objDD = new DownloadDetail();
             List<FieldWorkActivityLogResponse> objList = new List<FieldWorkActivityLogResponse>();
 
             SqlParameter[] parameters =
@@ -568,13 +570,39 @@ namespace ThoughtFocus.Service.Implementation
                                                   status = Convert.ToString(row["Status"]),
                                                   ShowCheckbox = Convert.ToBoolean(row["ShowCheckbox"])
                                               }).ToList();
+
                 obj.activityLogHandler = dtActivityLog.Tables[1].AsEnumerable().Select(row =>
                                        new FieldWorkActivityLogHandler
                                        {
                                            ActivityLogHandler = Convert.ToString(row["AcitivityLogHandler"])
                                        }).FirstOrDefault();
 
+                Summary objSummary = dtActivityLog.Tables[2].AsEnumerable().Select(row =>
+                                                    new Summary
+                                                    {
+                                                        ExpectedHours = Convert.ToDecimal(row["ExpectedHours"]),
+                                                        LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
+                                                        SentForApproval = Convert.ToDecimal(row["SentforApproval"]),
+                                                        ApprovedHours = Convert.ToDecimal(row["ApprovedHours"])
+                                                    }).FirstOrDefault();
+                objDD.summary = objSummary;
+
+                FieldWorkInformation objFI = dtActivityLog.Tables[3].AsEnumerable().Select(row =>
+                                                new FieldWorkInformation
+                                                {
+                                                    StudentName = Convert.ToString(row["StudentName"]),
+                                                    CourseName = Convert.ToString(row["CourseTitle"]),
+                                                    Semester = Convert.ToString(row["Term"]),
+                                                    Instructor = Convert.ToString(row["SupervisorName"]),
+                                                    StudentID = Convert.ToString(row["StudentID"]),
+                                                    CourseNumber = Convert.ToString(row["Course"]),
+                                                    Section = Convert.ToInt32(row["Section"])
+                                                }).FirstOrDefault();
+                objDD.fieldWorkInformation = objFI;
+                obj.downloadDetails = objDD;
+
                 obj.fieldWorkList = objList;
+                
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully";
             }
