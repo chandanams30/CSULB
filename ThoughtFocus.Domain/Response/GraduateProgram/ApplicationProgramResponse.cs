@@ -6,9 +6,13 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
 {
     public class ApplicationProgramResponse : BaseResponse
     {
-      public List<ApplicationPrograms> ApplicationPrograms { get; set; }
-      public HeaderDetails HeaderDetails { get; set; }
-      public List<Semester> Semesters { get; set; }
+        public List<ApplicationPrograms> ApplicationPrograms { get; set; }
+        public HeaderDetails HeaderDetails { get; set; }
+        public List<Semester> Semesters { get; set; }
+    }
+    public class ApplicationProgramsListResponse :BaseResponse
+    {
+        public List<ApplicationProgramsList> ApplicationProgramsList { get; set; }
     }
     public class ApplicationPrograms
     {
@@ -38,5 +42,10 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public int programID { get; set; }
         //public bool showBulkDeny { get; set; }
         //public bool showBulkOffer { get; set; }
+    }
+    public class ApplicationProgramsList
+    {
+        public int ProgramID { get; set; }
+        public string ProgramName { get; set; }
     }
 }

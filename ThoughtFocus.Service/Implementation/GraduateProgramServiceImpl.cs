@@ -1175,14 +1175,27 @@ namespace ThoughtFocus.Service.Implementation
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[i]["ApplicantName"]);
                         applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[i]["ApplicationDeadline"]);
                         RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
+                        string beforeBody = string.Empty;
+                        string afterBody = string.Empty;
+                        if (programID == 1 || programID == 2 || programID == 4 || programID == 6 || programID == 27 || programID == 28)
+                        {
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                        else
+                        {
+                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
 
                         link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                         body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[RecommenderName]]", recommenderName)
                             .Replace("[[applicantname]]", applicantsName)
                             .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
-                            .Replace("[[link]]", link)
-                            ;
+                            .Replace("[[link]]", link);
 
                         string subject = "Attention: CSULB Recommendation Request";
                         if (RecommenderMailTemplateAttachement)
@@ -1503,7 +1516,21 @@ namespace ThoughtFocus.Service.Implementation
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                         applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[0]["ApplicationDeadline"]);
                         RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
-                        programID = Convert.ToInt32(dsRec.Tables[0].Rows[0]["ProgramID"]); 
+                        programID = Convert.ToInt32(dsRec.Tables[0].Rows[0]["ProgramID"]);
+                        string beforeBody = string.Empty;
+                        string afterBody = string.Empty;
+                        if (programID == 1 || programID == 2 || programID == 4 || programID == 6 || programID == 27 || programID == 28)
+                        {
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                        else
+                        {
+                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
                         link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                         body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[RecommenderName]]", recommenderName)
@@ -1511,38 +1538,38 @@ namespace ThoughtFocus.Service.Implementation
                             .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
                             .Replace("[[link]]", link)
                             ;
-                    string subject = "Attention: CSULB Recommendation Request";
-                    if (RecommenderMailTemplateAttachement)
-                    {
-                        userFolderPath = "SupportFiles/EmailAttachments";
-                        templateFileName = "Recommender_Template_" + programID + ".pdf";
-                        byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                        //_logger.LogInformation(fileContent.Length.ToString());
-                        if (fileContent == null || fileContent.Length < 1)
+                        string subject = "Attention: CSULB Recommendation Request";
+                        if (RecommenderMailTemplateAttachement)
                         {
-                            templateFileName = "Recommender_Template.pdf";
-                            fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                        }
-                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
-                        {
-                            if (fileContent != null && fileContent.Length > 0)
+                            userFolderPath = "SupportFiles/EmailAttachments";
+                            templateFileName = "Recommender_Template_" + programID + ".pdf";
+                            byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                            //_logger.LogInformation(fileContent.Length.ToString());
+                            if (fileContent == null || fileContent.Length < 1)
                             {
-                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
-                                obj.IsSuccess = true;
-                                obj.Message = "Mail sent successfully !";
+                                templateFileName = "Recommender_Template.pdf";
+                                fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                            }
+                            if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                            {
+                                if (fileContent != null && fileContent.Length > 0)
+                                {
+                                    _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
+                                    obj.IsSuccess = true;
+                                    obj.Message = "Mail sent successfully !";
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                        else
                         {
-                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, "");
-                                obj.IsSuccess = true;
-                                obj.Message = "Mail sent successfully !";
+                            if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                            {
+                                    _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, "");
+                                    obj.IsSuccess = true;
+                                    obj.Message = "Mail sent successfully !";
                             
+                            }
                         }
-                    }
 
                 }
             }
@@ -3790,7 +3817,103 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
-        
+        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId)
+        {
+            ApplicationProgramsListResponse obj = new ApplicationProgramsListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
+                                       };
+
+            DataTable dtApplicationPrograms = _helper.GetDataTable("[dbo].[GetProgramsByApplicationType]", parameters);
+            try
+            {
+                if (dtApplicationPrograms.Rows.Count > 0)
+                {
+                    obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Select(row =>
+                                              new ApplicationProgramsList
+                                              {
+                                                  ProgramID = Convert.ToInt32(row["ID"]),
+                                                  ProgramName = Convert.ToString(row["Name"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId, int programID)
+        {
+            RecommenderMailBodyResponse obj = new RecommenderMailBodyResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID }
+                                       };
+
+            DataTable dtRecom = _helper.GetDataTable("[dbo].[GetRecommenderMailBody]", parameters);
+            try
+            {
+                if (dtRecom.Rows.Count > 0)
+                {
+                    obj.recommenderResponse = dtRecom.AsEnumerable().Select(row =>
+                                              new RecommenderBody
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  RecommenderMailBody = Convert.ToString(row["RecommenderMailBody"])
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpdateRecommenderMailBody(RecommenderBody input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
+                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.RecommenderMailBody }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateRecommenderMailBody]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated recommender mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the recommender mail body";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
     }
 
 

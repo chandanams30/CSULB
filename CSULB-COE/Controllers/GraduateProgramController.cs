@@ -14,6 +14,7 @@ using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
 using ThoughtFocus.Domain.Request.FieldWork;
+using ThoughtFocus.Domain.Response.StudentProfile;
 
 namespace CSULB_COE.Controllers
 {
@@ -25,13 +26,16 @@ namespace CSULB_COE.Controllers
         public ILogger<GraduateProgramController> _logger;
         public IGraduateProgramService _graduateProgramService;
         private readonly IConfiguration _configuration;
+        public IStudentProfile _studentProfileService;
         public GraduateProgramController(IGraduateProgramService graduateProgramService ,
-              ILogger<GraduateProgramController> logger
-            , IConfiguration configuration)
+              ILogger<GraduateProgramController> logger,
+              IConfiguration configuration,
+              IStudentProfile studentProfileService)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
             _configuration = configuration;
+            _studentProfileService = studentProfileService;
         }
         [HttpGet("GetApplicationPrograms")]
         public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
@@ -1052,6 +1056,75 @@ namespace CSULB_COE.Controllers
                 BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to update semester , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetApplicationList")]
+        public IActionResult GetApplicationList(int userId)
+        {
+            try
+            {
+                List<ApplicationList> response = _studentProfileService.GetApplications(userId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest();
+            }
+
+        }
+        [HttpGet("GetApplicationProgramList")]
+        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId)
+        {
+            try
+            {
+                ApplicationProgramsListResponse response = _graduateProgramService.GetApplicationProgramList(applicationId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramsListResponse response = new ApplicationProgramsListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetRecommenderMailBody")]
+        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId,int programID)
+        {
+            try
+            {
+                RecommenderMailBodyResponse response = _graduateProgramService.GetRecommenderMailBody(applicationId,programID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                RecommenderMailBodyResponse response = new RecommenderMailBodyResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateRecommenderMailBody")]
+        public BaseResponse UpdateRecommenderMailBody(RecommenderBody input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateRecommenderMailBody(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;
