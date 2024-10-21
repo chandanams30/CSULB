@@ -88,5 +88,20 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetApplicationsForAdminPanel")]
+        public IActionResult GetApplicationsForAdminPanel(int userId)
+        {
+            try
+            {
+                List<ApplicationProgram> response = _applicationService.GetApplicationsForAdminPanel(userId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest();
+            }
+
+        }
     }
 }

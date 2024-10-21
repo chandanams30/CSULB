@@ -53,7 +53,7 @@ namespace ThoughtFocus.Service.Interfaces
         LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID, int FormID);
         BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input);
         BaseResponse UpdateRecommendation(UpdateRecommendation input);
-        public BaseResponse DeleteRecommendation(DeleteRecommendations input);
+        BaseResponse DeleteRecommendation(DeleteRecommendations input);
         AdhocMailLogResponse SendNotificationforPendingRecommendations(PendingRecommendationsRequest input);
         BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input);
         ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode);
