@@ -9,5 +9,6 @@ namespace ThoughtFocus.Service.Interfaces
     {
         List<ApplicationListResponse> GetApplications(int userId);
         StudentNotificationResponse GetStudentNotification(string CSULBID);
+        List<ApplicationProgram> GetApplicationsForAdminPanel(int userId);
     }
 }
