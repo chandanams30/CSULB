@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace ThoughtFocus.Domain.Response.Rubrics
 {
@@ -50,6 +52,7 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public string State { get; set; }
         public bool ShowSideBySideReview { get; set; }
         public int ProgramId { get; set; }
+        public DownloadDetails downloadDetails { get; set; }
     }
     public class RubricsDetails
     {
@@ -84,5 +87,28 @@ namespace ThoughtFocus.Domain.Response.Rubrics
     public class RubricsFormActivityHandler
     {
         public string ActivityHandler { get; set; }
+    }
+    public class DownloadDetails
+    {
+        [JsonProperty("Student Name")]
+        public string StudentName { get; set; }
+        [JsonProperty("Campus ID")]
+        public int CSULBID { get; set; }
+        [JsonProperty("Program Name")]
+        public string ProgramName { get; set; }
+        [JsonProperty("Rubrics Name")]
+        public string TemplateName { get; set; }
+        [JsonProperty("Term")]
+        public string TermName { get; set; }
+        [JsonProperty("Reviewer Name")]
+        public string ReviewerName { get; set; }
+        [JsonProperty("Rubrics State")]
+        public string State { get; set; }
+        [JsonProperty("Rubrics Form")]
+        public string Form {  get; set; }
+        [JsonProperty("Total Points")]
+        public int TotalPoints { get; set; }
+        [JsonProperty("Scored Points")]
+        public int ScoredPoints { get; set; }
     }
 }
