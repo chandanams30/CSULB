@@ -182,25 +182,41 @@ namespace ThoughtFocus.Service.Implementation
                 if (dtRubricFormsList.Rows.Count > 0)
                 {
                     obj.rubricSubmittedFormsList = dtRubricFormsList.AsEnumerable().Select(row =>
-                                               new GetRubricSubmittedFormsResponse
-                                               {
-                                                   FilledRubricID = Convert.ToInt32(row["FilledRubricID"]),
-                                                   PublishRubricID = Convert.ToInt32(row["PublishRubricID"]),
-                                                   CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                                                   TemplateID = Convert.ToInt32(row["TemplateID"]),
-                                                   CSULBID = Convert.ToInt32(row["CSULBID"]),
-                                                   StudentName = Convert.ToString(row["StudentName"]),
-                                                   ProgramName = Convert.ToString(row["ProgramName"]),
-                                                   TemplateName = Convert.ToString(row["TemplateName"]),
-                                                   FormID = Convert.ToInt32(row["FormId"]),
-                                                   TermName = Convert.ToString(row["TermName"]),
-                                                   ReviewerName = Convert.ToString(row["ReviewerName"]),
-                                                   ReviewerID = Convert.ToInt32(row["ReviewerID"]),
-                                                   TermCode = Convert.ToString(row["TermCode"]),
-                                                   State = Convert.ToString(row["Status"]),
-                                                   ShowSideBySideReview = Convert.ToBoolean(row["ShowSideBySideReview"]),
-                                                   ProgramId = Convert.ToInt32(row["ProgramId"])
-                                               }).ToList();
+                        new GetRubricSubmittedFormsResponse
+                        {
+                            FilledRubricID = Convert.ToInt32(row["FilledRubricID"]),
+                            PublishRubricID = Convert.ToInt32(row["PublishRubricID"]),
+                            CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                            TemplateID = Convert.ToInt32(row["TemplateID"]),
+                            CSULBID = Convert.ToInt32(row["CSULBID"]),
+                            StudentName = Convert.ToString(row["StudentName"]),
+                            ProgramName = Convert.ToString(row["ProgramName"]),
+                            TemplateName = Convert.ToString(row["TemplateName"]),
+                            FormID = Convert.ToInt32(row["FormId"]),
+                            TermName = Convert.ToString(row["TermName"]),
+                            ReviewerName = Convert.ToString(row["ReviewerName"]),
+                            ReviewerID = Convert.ToInt32(row["ReviewerID"]),
+                            TermCode = Convert.ToString(row["TermCode"]),
+                            State = Convert.ToString(row["Status"]),
+                            ShowSideBySideReview = Convert.ToBoolean(row["ShowSideBySideReview"]),
+                            ProgramId = Convert.ToInt32(row["ProgramId"]),
+
+                            // New mapping for DownloadDetails
+                            downloadDetails = new DownloadDetails
+                            {
+                                StudentName = Convert.ToString(row["StudentName"]),
+                                CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                ProgramName = Convert.ToString(row["ProgramName"]),
+                                TemplateName = Convert.ToString(row["TemplateName"]),
+                                TermName = Convert.ToString(row["TermName"]),
+                                ReviewerName = Convert.ToString(row["ReviewerName"]),
+                                State = Convert.ToString(row["Status"]),
+                                Form = Convert.ToString(row["Rubric"]),
+                                TotalPoints = Convert.ToInt32(row["TotalPoints"]),
+                                ScoredPoints = Convert.ToInt32(row["ScoredPoints"])
+                            }
+                        }).ToList();
+
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
                 }
@@ -269,7 +285,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RubricForm", SqlDbType.NVarChar, -1) { Value = input.RubricForm },
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@Status", SqlDbType.Int) { Value = input.Status },
-                                          new SqlParameter("@filledRubricID", SqlDbType.BigInt) { Value = input.FilledRubricID }
+                                          new SqlParameter("@filledRubricID", SqlDbType.BigInt) { Value = input.FilledRubricID },
+                                          new SqlParameter("@ScoredPoints", SqlDbType.BigInt) { Value = input.ScoredPoints }
                                         };
             DataTable dtRubrics = _helper.GetDataTable("[Rubrics].[InsertFilledRubrics]", parameters);
             if (dtRubrics.Rows.Count > 0)
