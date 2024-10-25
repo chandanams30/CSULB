@@ -1721,6 +1721,175 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public FormExperienceAttachmentResponse UpsertFormExperienceAttachment(FormExperienceAttachmentRequest input)
+        {
+            FormExperienceAttachmentResponse response = new FormExperienceAttachmentResponse();
+            string currentDateTime = DateTime.Now.ToString("MMddyyyyHHmmss");
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string userFolderName = string.Empty;
+                int userID = 0;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.GUID);
+                input.GUID = fileDetails.FileName;
+                fileName = input.FormID + "_" + "Experience" + "_" + currentDateTime;
+
+                // get userID
+                SqlParameter[] parameters =
+                                 {
+                                    new SqlParameter("@FormId", SqlDbType.Int) { Value = input.FormID }
+                                 };
+
+                DataTable dtForm = _helper.GetDataTable("[dbo].[GetFormDetails]", parameters);
+                if (dtForm.Rows.Count > 0)
+                {
+                    userID = Convert.ToInt32(dtForm.Rows[0]["UserID"]);
+                }
+                string folderName = userID + "~" + fileName;
+                if (input.GUID != string.Empty)
+                {
+
+                    fileExtension = fileDetails.FileExtension;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                }
+
+                SqlParameter[] parameters1 =
+                                         {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID},
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@GUID", SqlDbType.UniqueIdentifier, 250) { Value = new Guid(input.GUID) },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@FolderName", SqlDbType.VarChar, 100) { Value = folderName },
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertFormExperienceAttachment]", parameters1);
+                string[] folderSplit = folderName.ToString().Split('~');
+                userFolderName = folderSplit[0].ToString();
+                string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                if (Directory.Exists(dirUserFolderPath))
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    if (Directory.Exists(dirForm))
+                    {
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(dirForm);
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                }
+                else
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                    DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                    DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                    dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                    dirFieldWorkFolder.SetAccessControl(dSecurity);
+                    {
+                        File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                    }
+                }
+                response.fileName = "Experience" + "_"+ currentDateTime;
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+                return response;
+            }
+        }
+        public FormAttachments DownloadFormExperienceAttachment(string GUID)
+        {
+            FormAttachments obj = new FormAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@GUID", SqlDbType.UniqueIdentifier) { Value = new Guid(GUID) }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetFormExperienceAttachment]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new FormAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtension"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFormExperienceFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString())), row["FileName"].ToString() + "." + Convert.ToString(row["FileExtension"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        private byte[] GetImageFilecontent(byte[] fileContent)
+        {
+            byte[] inputStream = null;
+            string documentName = string.Empty;
+            using (MemoryStream stream = new System.IO.MemoryStream())
+            {
+                //Initialize the PDF document object.
+                using (iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 10f, 10f, 10f, 10f))
+                {
+                    PdfWriter.GetInstance(pdfDoc, stream).SetFullCompression();
+                    pdfDoc.Open();
+
+                    //Add the Image file to the PDF document object.
+                    iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(fileContent);
+
+                    //Scaling the image
+                    if (pic.Height > pic.Width)
+                    {
+                        float percentage = 0.0f;
+                        percentage = 700 / pic.Height;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    else
+                    {
+                        float percentage = 0.0f;
+                        percentage = 540 / pic.Width;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    pdfDoc.Add(pic);
+                    pdfDoc.Close();
+                    inputStream = stream.ToArray();
+                }
+            }
+            return inputStream;
+        }
+        public byte[] GetFormExperienceFileContent(string userFolderPath, string fileName)
+        {
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            string[] pathSplitter = fileName.ToString().Split('_');
+            string fullFileName = pathSplitter[0].ToString();
+            // string identifierFolder = pathSplitter[1].ToString();
+            string userPath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, "Form"));
+            string filepath = Path.Combine(userPath, fileName);
+            // string filepath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, fileName));
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
+        }
         public byte[] GetPDFFromJSONForSSCP(string jsonString)
         {
                 byte[] pdfFileContent = null;
