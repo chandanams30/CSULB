@@ -52,6 +52,7 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public string State { get; set; }
         public bool ShowSideBySideReview { get; set; }
         public int ProgramId { get; set; }
+        public string Form { get; set; }
         public DownloadDetails downloadDetails { get; set; }
     }
     public class RubricsDetails
@@ -104,8 +105,6 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public string ReviewerName { get; set; }
         [JsonProperty("Rubrics State")]
         public string State { get; set; }
-        [JsonProperty("Rubrics Form")]
-        public string Form {  get; set; }
         [JsonProperty("Total Points")]
         public int TotalPoints { get; set; }
         [JsonProperty("Scored Points")]
