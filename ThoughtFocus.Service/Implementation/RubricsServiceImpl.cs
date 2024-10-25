@@ -200,6 +200,7 @@ namespace ThoughtFocus.Service.Implementation
                             State = Convert.ToString(row["Status"]),
                             ShowSideBySideReview = Convert.ToBoolean(row["ShowSideBySideReview"]),
                             ProgramId = Convert.ToInt32(row["ProgramId"]),
+                            Form = Convert.ToString(row["Rubric"]),
 
                             // New mapping for DownloadDetails
                             downloadDetails = new DownloadDetails
@@ -211,7 +212,6 @@ namespace ThoughtFocus.Service.Implementation
                                 TermName = Convert.ToString(row["TermName"]),
                                 ReviewerName = Convert.ToString(row["ReviewerName"]),
                                 State = Convert.ToString(row["Status"]),
-                                Form = Convert.ToString(row["Rubric"]),
                                 TotalPoints = Convert.ToInt32(row["TotalPoints"]),
                                 ScoredPoints = Convert.ToInt32(row["ScoredPoints"])
                             }
