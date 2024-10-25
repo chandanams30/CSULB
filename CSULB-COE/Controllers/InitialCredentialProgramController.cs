@@ -340,11 +340,11 @@ namespace CSULB_COE.Controllers
             return contentType;
         }
         [HttpGet("GetFormPrerequisites")]
-        public FormPrerequisitesResponse GetFormPrerequisites(int UserId,int FormID)
+        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID)
         {
             try
             {
-                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId,FormID);
+                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId, FormID);
                 return response;
             }
             catch (Exception ex)
@@ -367,7 +367,8 @@ namespace CSULB_COE.Controllers
 
                 #region to get the file content from local
                 //byte[] fileContent = null;
-                //string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                //string filepath = "D:\\ExcelDoc\\CTC_10232024162937.pdf";
                 //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
                 //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
                 //long byteLength = new System.IO.FileInfo(filepath).Length;
@@ -401,7 +402,7 @@ namespace CSULB_COE.Controllers
                 byte[] inputStream = null;
                 string fileType = string.Empty;
                 string fileName = string.Empty;
-                DownloadEducationalInformationalAttachment obj = _initialCredentialProgramService.GetFormEducationInformationAttachment(FormID,UniqueID);
+                DownloadEducationalInformationalAttachment obj = _initialCredentialProgramService.GetFormEducationInformationAttachment(FormID, UniqueID);
                 fileName = obj.FileName;
                 inputStream = obj.FileContent;
                 string[] fileSplit = fileName.Split('.');
@@ -437,11 +438,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetFormSubSectionApproversDetails")]
-        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID,int UserID, int FormSubSectionID,string SubSectionIdentifiers)
+        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers)
         {
             try
             {
-                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID,UserID,FormSubSectionID,SubSectionIdentifiers);
+                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID, UserID, FormSubSectionID, SubSectionIdentifiers);
                 return response;
             }
             catch (Exception ex)
@@ -511,7 +512,7 @@ namespace CSULB_COE.Controllers
                 byte[] inputStream = null;
                 string fileType = string.Empty;
                 string fileName = string.Empty;
-              
+
                 ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.GetAdditionalOfficialDocument(input);
                 fileName = obj.Filename;
                 inputStream = obj.FileContent;
@@ -532,7 +533,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                
+
                 BaseResponse response = _initialCredentialProgramService.DeleteAdditionalOfficialDocument(input);
                 return response;
             }
@@ -667,6 +668,24 @@ namespace CSULB_COE.Controllers
 
                 _logger.LogError(ex, ex.Message);
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("DeleteSubSectionAttachment")]
+        public BaseResponse DeleteSubSectionAttachments(DeleteSubSectionAttachmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = _initialCredentialProgramService.DeleteSubSectionAttachments(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
             }
         }
 

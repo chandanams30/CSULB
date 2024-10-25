@@ -22,4 +22,16 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public bool IsSubmitForReview { get; set; }
 
     }
+    public class DeleteSubSectionAttachmentRequest
+    {
+        public int FormID { get; set; }
+        public string FileName { get; set; }
+
+    }
+    public class FormExperienceAttachmentRequest
+    {
+        public string GUID { get; set; }
+        public byte[] FileContent { get; set; }
+        public int FormID { get; set; }
+    }
 }
