@@ -1499,7 +1499,7 @@ namespace ThoughtFocus.Service.Implementation
                                                FormID = Convert.ToInt32(row["FormID"]),
                                                RecommenderName = Convert.ToString(row["RecommenderName"]),
                                                RecommenderEmail = Convert.ToString(row["RecommenderEmail"]),
-                                               CreatedBy = Convert.ToInt16(row["CreatedBY"]),
+                                               CreatedBy = Convert.ToInt32(row["CreatedBY"]),
                                                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
                                                RecommenderURL = Convert.ToString(row["RecommenderURL"]),
                                                RecommenderURLValidTill = Convert.ToDateTime(row["RecommenderURLValidTill"] == DBNull.Value ? null : row["RecommenderURLValidTill"]),
