@@ -2227,7 +2227,7 @@ namespace ThoughtFocus.Service.Implementation
                 string logoText = "cid:myImageID";
                 applicantsName= Convert.ToString(dtResponse.Rows[0]["ApplicantName"]);
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
-                ccMail= Convert.ToString(dtResponse.Rows[0]["altEmail"]);
+                ccMail= Convert.ToString(dtResponse.Rows[0]["RecommenderEmail"]);
                 subject = "Recommendation Submitted";
                 if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP")
                 {
