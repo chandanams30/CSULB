@@ -1734,7 +1734,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            //input.LetterOfRecommendationJSON = "{\r\n\t\"personalInfo\": {\r\n\t\t\"position_title\": \"sdf\",\r\n\t\t\"recommenderFirstName\": \"awge\",\r\n\t\t\"recommenderLastName\": \"\",\r\n\t\t\"studentName\": \"Ailym Arciga\",\r\n\t\t\"campusID\": \"014169166\",\r\n\t\t\"email\": \"Ailym.Arciga@student.csulb.edu\"\r\n\t},\r\n\t\"signatureOfRecommender\": {\r\n\t\t\"name\": \"chandana\",\r\n\t\t\"date\": \"07/30/2024\"\r\n\t},\r\n\t\"academicCompetency\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"professionalism\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"dispositionsPersonalityCharacter\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Area Needs Improvement\"\r\n\t},\r\n\t\"specialEducation\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"studentOverAllRank\": \"Top 5% One of the best\"\r\n}";
+            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"applicantFirstName\":\"Carina\",\"applicantLastName\":\"Aguilera Mendoza\",\"credentialSubjectArea\":\"\",\"campusID\":\"027673813\",\"recommenderFirstName\":\"tesqa\",\"recommenderLastName\":\"\",\"institution\":\"Instititution\",\"position_title\":\" Title\",\"telephoneContact\":\"(777) 777 - 7777\",\"email\":\"madhutest1503@gmail.com\"},\"applicantRelatedAnswers\":{\"answer1\":\"test\",\"answer2\":\" Title\",\"answer3\":\" Title\",\"answer4\":\" Title\",\"answer5\":[{\"qualities\":\"Intellectual Capacity\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Ability To Work With Others\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Maturity\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Potential for Teaching\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Professional Conduct / Deposition\",\"value\":\"Below Average Bottom 1/3\"}],\"answer6\":\"Recommend\"},\"signatureOfRecommender\":{\"name\":\"chandana\",\"date\":\"11/05/2024\"},\"comments\":\"test\"}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
@@ -2227,7 +2227,7 @@ namespace ThoughtFocus.Service.Implementation
                 string logoText = "cid:myImageID";
                 applicantsName= Convert.ToString(dtResponse.Rows[0]["ApplicantName"]);
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
-                ccMail= Convert.ToString(dtResponse.Rows[0]["altEmail"]);
+                ccMail= Convert.ToString(dtResponse.Rows[0]["RecommenderEmail"]);
                 subject = "Recommendation Submitted";
                 if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP")
                 {
