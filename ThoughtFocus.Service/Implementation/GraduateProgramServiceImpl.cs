@@ -241,7 +241,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   programID = Convert.ToInt32(row["ProgramID"]),
                                                   showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"]),
                                                   showBulkDeny = Convert.ToBoolean(row["showBulkDeny"]),
-                                                  showBulkOffer = Convert.ToBoolean(row["showBulkOffer"])
+                                                  showBulkOffer = Convert.ToBoolean(row["showBulkOffer"]),
+                                                  showDeletedFormsButton = Convert.ToBoolean(row["showDeletedFormsButton"])
                                               }).FirstOrDefault();
                     }
 
