@@ -63,5 +63,7 @@ namespace ThoughtFocus.Service.Interfaces
         ApplicationProgramsListResponse GetApplicationProgramList(int applicationTypeID);
         RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId, int programID);
         BaseResponse UpdateRecommenderMailBody(RecommenderBody input);
+        BaseResponse UpsertDecisionLetters(DecisionLettersRequest input);
+        DecisionLettersResponse GetDecisionLetters(string programIdentifier, string offeredCategories, string decisionType);
     }
 }

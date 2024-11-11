@@ -1130,5 +1130,42 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("UpsertDecisionLetters")]
+        public BaseResponse UpsertDecisionLetters(DecisionLettersRequest input)
+        {
+            try
+            {
+                input.MailBody = "<p>Dear [[ApplicantName]],</p><p>Your program application materials to the [[programName]] has been not offered.</p><p>You may track the status of your official transcripts and university application at <a href=\"http://www.csulb.edu/admissions/applicant-self-service\" target=\"_blank\">CSULB Applicant Self Service</a>.</p><p>Please let us know if you have any questions or concerns. We are here to help. </p><p>Warm regards</P><p>CSULB College of Education Graduate Studies Office<br/><a href=\"http://www.csulb.edu/ced/graduate\" target=\"_blank\">www.csulb.edu/ced/graduate</a><br/><a href=\"mailto:ced-gradstudies@csulb.edu\">ced-gradstudies@csulb.edu</a><br/>(562) 985-8476</p>";
+                BaseResponse response = _graduateProgramService.UpsertDecisionLetters(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetDecisionLetters")]
+        public DecisionLettersResponse GetDecisionLetters(string programIdentifier, string offeredCategories,string decisionType)
+        {
+            try
+            {
+                DecisionLettersResponse response = _graduateProgramService.GetDecisionLetters(programIdentifier,offeredCategories,decisionType);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                DecisionLettersResponse response = new DecisionLettersResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
