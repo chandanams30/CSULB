@@ -3917,6 +3917,100 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public BaseResponse UpsertDecisionLetters(DecisionLettersRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@DecisionLettersID", SqlDbType.BigInt) { Value = input.DecisionLettersID },
+                                          new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar,10) { Value = input.ProgramIdentifier },
+                                          new SqlParameter("@OfferedCategories", SqlDbType.NVarChar,50) { Value = input.OfferedCategories },
+                                          new SqlParameter("@DecisionType", SqlDbType.NVarChar,50) { Value = input.DecisionType },
+                                          new SqlParameter("@MailBody", SqlDbType.NVarChar, -1) { Value = input.MailBody },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[Application].[UpsertDecisionLetters]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated admit letter mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the admit letter mail body";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public DecisionLettersResponse GetDecisionLetters(string programIdentifier, string offeredCategories, string decisionType)
+        {
+            DecisionLettersResponse obj = new DecisionLettersResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = programIdentifier },
+                                            new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = offeredCategories },
+                                            new SqlParameter("@DecisionType", SqlDbType.NVarChar , 50) { Value = decisionType }
+                                       };
+
+            DataSet dtDL = _helper.GetDataSet("[Application].[GetDecisionLetters]", parameters);
+            try
+            {
+                if (dtDL.Tables[0].Rows.Count > 0)
+                {
+                    if (dtDL.Tables[0].Rows[0]["ID"] != DBNull.Value)
+                    {
+                        obj.finalDecision = dtDL.Tables[0].AsEnumerable().Select(row =>
+                                                new FinalDecision
+                                                {
+                                                    ID = Convert.ToInt32(row["ID"]),
+                                                    Decision = Convert.ToString(row["Decision"])
+                                                }).ToList();
+                    }
+                    else
+                    {
+                        obj.finalDecision = null;
+                    }
+                    if (dtDL.Tables[1].Rows.Count > 0)
+                    {
+                        if (dtDL.Tables[1].Rows[0]["ProgramIdentifier"] != DBNull.Value)
+                        {
+                            obj.decisionLetters = dtDL.Tables[1].AsEnumerable().Select(row =>
+                                                  new DecisionLetters
+                                                  {
+                                                      DecisionLettersID = Convert.ToInt32(row["DecisionLettersID"]),
+                                                      ProgramIdentifier = Convert.ToString(row["ProgramIdentifier"]),
+                                                      OfferedCategories = Convert.ToString(row["OfferedCategories"]),
+                                                      DecisionType = Convert.ToString(row["DecisionType"]),
+                                                      MailBody = Convert.ToString(row["MailBody"]),
+                                                      CreatedByUserID = Convert.ToInt32(row["CreatedByUserID"]),
+                                                      UpdatedDateTime = Convert.ToDateTime(row["UpdatedDateTime"])
+                                                  }).FirstOrDefault();
+                        }
+                        else
+                        {
+                            obj.decisionLetters = null;
+                        }
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
     }
 
 
