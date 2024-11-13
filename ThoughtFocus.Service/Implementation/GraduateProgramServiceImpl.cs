@@ -1104,6 +1104,9 @@ namespace ThoughtFocus.Service.Implementation
                     string body = string.Empty;
                     string programName = string.Empty;
                     string finalDecision = string.Empty;
+                    string decisionType = string.Empty;
+                    string beforeBody = string.Empty;
+                    string afterBody = string.Empty;
 
                     applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                     toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
@@ -1113,16 +1116,36 @@ namespace ThoughtFocus.Service.Implementation
                     if (formStateID == 10)
                     {
                         subject = "Application Offered";
-                        if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
-                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
-                        else
-                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
+                        decisionType = "Offered";
+                        //if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
+                        //    //body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
+                        //else
+                        //    body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
                     }
                     else
                     {
                         subject = "Application Not Offered";
-                        body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                        decisionType = "Not Offered";
+                        //body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
                     }
+                    SqlParameter[] parameters2 ={
+                                            new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = "" },
+                                            new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = finalDecision },
+                                            new SqlParameter("@DecisionType", SqlDbType.NVarChar , 50) { Value = decisionType },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programID }
+                                       };
+
+                    DataSet dtDL = _helper.GetDataSet("[Application].[GetDecisionLetters]", parameters2);
+                    if (dtDL.Tables[1].Rows.Count > 0)
+                    {
+                        if (dtDL.Tables[1].Rows[0]["MailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
+                        }
+                    }
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
                     body = body.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", applicantsName)
                                .Replace("[[programName]]", programName)
@@ -3548,7 +3571,9 @@ namespace ThoughtFocus.Service.Implementation
                         string subject = string.Empty;
                         string body = string.Empty;
                         string programName = string.Empty;
-
+                        string decisionType = string.Empty;
+                        string beforeBody = string.Empty;
+                        string afterBody = string.Empty;
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                         toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
                         ccMail = Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
@@ -3556,18 +3581,39 @@ namespace ThoughtFocus.Service.Implementation
                         if (input.FormStateID == 10)
                         {
                             subject = "Application Offered";
-                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
+                            decisionType = "Offered";
+                            //body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
                         }
                         else
                         {
                             subject = "Application Not Offered";
-                            body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                            decisionType = "Not Offered";
+                        //body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                    }
+                    SqlParameter[] parameters2 ={
+                                            new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = "" },
+                                            new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = "" },
+                                            new SqlParameter("@DecisionType", SqlDbType.NVarChar , 50) { Value = decisionType },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = input.ProgramID }
+                                       };
+
+                    DataSet dtDL = _helper.GetDataSet("[Application].[GetDecisionLetters]", parameters2);
+                    if (dtDL.Tables[1].Rows.Count > 0)
+                    {
+                        if (dtDL.Tables[1].Rows[0]["MailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
                         }
-                        body = body.Replace("[[logoPath]]", logoText)
+                    }
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
+                    
+                    body = body.Replace("[[logoPath]]", logoText)
                                    .Replace("[[ApplicantName]]", applicantsName)
                                    .Replace("[[programName]]", programName);
-                        byte[] inputStr = null;
-                        _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
+                    byte[] inputStr = null;
+                    _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
                     }
                 }
             response.IsSuccess = true;
