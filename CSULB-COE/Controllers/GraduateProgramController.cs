@@ -1135,7 +1135,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                input.MailBody = "<p>Dear [[ApplicantName]],</p><p>Your program application materials to the [[programName]] has been not offered.</p><p>You may track the status of your official transcripts and university application at <a href=\"http://www.csulb.edu/admissions/applicant-self-service\" target=\"_blank\">CSULB Applicant Self Service</a>.</p><p>Please let us know if you have any questions or concerns. We are here to help. </p><p>Warm regards</P><p>CSULB College of Education Graduate Studies Office<br/><a href=\"http://www.csulb.edu/ced/graduate\" target=\"_blank\">www.csulb.edu/ced/graduate</a><br/><a href=\"mailto:ced-gradstudies@csulb.edu\">ced-gradstudies@csulb.edu</a><br/>(562) 985-8476</p>";
+                //input.MailBody = "<p>Dear [[ApplicantName]],</p><p>Your program application materials to the [[programName]] has been not offered.</p><p>You may track the status of your official transcripts and university application at <a href=\"http://www.csulb.edu/admissions/applicant-self-service\" target=\"_blank\">CSULB Applicant Self Service</a>.</p><p>Please let us know if you have any questions or concerns. We are here to help. </p><p>Warm regards</P><p>CSULB College of Education Graduate Studies Office<br/><a href=\"http://www.csulb.edu/ced/graduate\" target=\"_blank\">www.csulb.edu/ced/graduate</a><br/><a href=\"mailto:ced-gradstudies@csulb.edu\">ced-gradstudies@csulb.edu</a><br/>(562) 985-8476</p>";
                 BaseResponse response = _graduateProgramService.UpsertDecisionLetters(input);
                 return response;
             }
