@@ -2545,6 +2545,43 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
+        public StandardsAndSchoolTypeDropdownList GetStandardsAndSchoolTypeDropdown(int categoryID, string dropdownType)
+        {
+            StandardsAndSchoolTypeDropdownList obj = new StandardsAndSchoolTypeDropdownList();
+            SqlParameter[] parameters = {
+                                           new SqlParameter("@CategoryID", SqlDbType.BigInt) { Value = categoryID },
+                                           new SqlParameter("@DropdownType", SqlDbType.VarChar,20) { Value = dropdownType },
+                                        };
+            DataTable dtDropDownList = _helper.GetDataTable("[FieldWork].[GetStandardsAndSchoolTypeDropdown]", parameters);
+            try
+            {
+                if (dtDropDownList.Rows.Count > 0)
+                {
+                    obj.DropdownList = dtDropDownList.AsEnumerable().Select(row =>
+                                              new StandardsAndSchoolTypeDropdown
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  Name = Convert.ToString(row["NAME"]),
+                                                  Description = Convert.ToString(row["DESCRIPTION"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
 
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
         {

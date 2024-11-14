@@ -57,5 +57,6 @@ namespace ThoughtFocus.Service.Interfaces
         FieldWorkCourseConfiguration GetFieldWorkCourseConfiguration(int courseId);
         FieldWorkCoursesCategoryList GetFieldWorkCoursesCategories();
         BaseResponse UpdateFieldWorkCourseConfiguration(FieldWorkCourseConfigurationRequest input);
+        StandardsAndSchoolTypeDropdownList GetStandardsAndSchoolTypeDropdown(int categoryID, string dropdownType);
     }
 }

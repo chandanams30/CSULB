@@ -4057,6 +4057,109 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public DropDownListResponse GetDropDownList(int programId, string controlLabel)
+        {
+            DropDownListResponse obj = new DropDownListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programId },
+                                            new SqlParameter("@ControlLabel", SqlDbType.VarChar,50) { Value = controlLabel }
+                                       };
+
+            DataTable dtDD = _helper.GetDataTable("[Master].[Get_Dropdowns_for_ICP_and_DOCT]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+                    obj.DropDowns = dtDD.AsEnumerable().Select(row =>
+                                              new DropDowns
+                                              {
+                                                  DropdownId = Convert.ToInt32(row["DropdownId"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  ControlLabel = Convert.ToString(row["ControlLabel"]),
+                                                  ControlValue = Convert.ToString(row["ControlValue"]),
+                                                  Active = Convert.ToBoolean(row["Active"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ControlLabelListResponse GetControlLabelList(int programId)
+        {
+            ControlLabelListResponse obj = new ControlLabelListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programId }
+                                       };
+
+            DataTable dtCL = _helper.GetDataTable("[Master].[Get_Program_Term_for_ICP_and_GRAD]", parameters);
+            try
+            {
+                if (dtCL.Rows.Count > 0)
+                {
+                    obj.ConrolLabels = dtCL.AsEnumerable().Select(row =>
+                                              new ConrolLabel
+                                              {
+                                                  ControlLabel = Convert.ToString(row["ControlLabel"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpsertDropDown(DropDownRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = input.ProgramId },
+                                          new SqlParameter("@ControlLabel", SqlDbType.NVarChar,50) { Value = input.ControlLabel },
+                                          new SqlParameter("@ControlValue", SqlDbType.NVarChar,-1) { Value = input.ControlValue },
+                                          new SqlParameter("@Active", SqlDbType.Bit) { Value = input.Active },
+                                          new SqlParameter("@Action", SqlDbType.BigInt) { Value = input.Action},
+                                          new SqlParameter("@DropdownId", SqlDbType.BigInt) { Value = input.DropdownId}
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[Master].[Get_Dropdowns_for_ICP_and_GRAD]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Dropdowns Added successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "There was an error occured during the operation";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
     }
 
 
