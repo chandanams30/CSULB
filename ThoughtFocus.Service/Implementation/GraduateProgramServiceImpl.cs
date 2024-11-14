@@ -4065,7 +4065,7 @@ namespace ThoughtFocus.Service.Implementation
                                             new SqlParameter("@ControlLabel", SqlDbType.VarChar,50) { Value = controlLabel }
                                        };
 
-            DataTable dtDD = _helper.GetDataTable("[Master].[Get_Dropdowns_for_ICP_and_DOCT]", parameters);
+            DataTable dtDD = _helper.GetDataTable("[Master].[Get_Dropdowns_for_ICP_and_GRAD]", parameters);
             try
             {
                 if (dtDD.Rows.Count > 0)
@@ -4144,7 +4144,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@Action", SqlDbType.BigInt) { Value = input.Action},
                                           new SqlParameter("@DropdownId", SqlDbType.BigInt) { Value = input.DropdownId}
                                         };
-            DataTable dtResponse = _helper.GetDataTable("[Master].[Get_Dropdowns_for_ICP_and_GRAD]", parameters);
+            DataTable dtResponse = _helper.GetDataTable("[Master].[Upsert_Dropdowns_for_ICP_and_GRAD]", parameters);
             if (dtResponse.Rows.Count > 0)
             {
                 if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
