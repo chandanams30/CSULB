@@ -2563,7 +2563,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   ID = Convert.ToInt32(row["ID"]),
                                                   Name = Convert.ToString(row["NAME"]),
                                                   Description = Convert.ToString(row["DESCRIPTION"]),
-                                                  Active = Convert.ToBoolean(row["Active"])
+                                                  Active = Convert.ToBoolean(row["IsActive"])
                                               }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
