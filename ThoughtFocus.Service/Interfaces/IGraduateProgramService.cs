@@ -65,5 +65,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateRecommenderMailBody(RecommenderBody input);
         BaseResponse UpsertDecisionLetters(DecisionLettersRequest input);
         DecisionLettersResponse GetDecisionLetters(string programIdentifier, string offeredCategories, string decisionType);
+        DropDownListResponse GetDropDownList(int programId, string controlLabel);
+        BaseResponse UpsertDropDown(DropDownRequest input);
+        ControlLabelListResponse GetControlLabelList(int programId);
     }
 }

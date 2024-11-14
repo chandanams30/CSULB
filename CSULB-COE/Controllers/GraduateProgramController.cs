@@ -1167,5 +1167,59 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetDropDownList")]
+        public DropDownListResponse GetDropDownList(int programId,string controlLabel)
+        {
+            try
+            {
+                DropDownListResponse response = _graduateProgramService.GetDropDownList(programId,controlLabel);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                DropDownListResponse response = new DropDownListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetControlLabelList")]
+        public ControlLabelListResponse GetControlLabelList(int programId)
+        {
+            try
+            {
+                ControlLabelListResponse response = _graduateProgramService.GetControlLabelList(programId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ControlLabelListResponse response = new ControlLabelListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertDropDown")]
+        public BaseResponse UpsertDropDown(DropDownRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpsertDropDown(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
