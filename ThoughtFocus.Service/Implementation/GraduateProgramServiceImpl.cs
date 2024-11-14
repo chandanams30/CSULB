@@ -4147,14 +4147,14 @@ namespace ThoughtFocus.Service.Implementation
             DataTable dtResponse = _helper.GetDataTable("[Master].[Upsert_Dropdowns_for_ICP_and_GRAD]", parameters);
             if (dtResponse.Rows.Count > 0)
             {
-                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
                 {
-                    response.Message = "Dropdowns Added successfully";
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
                     response.IsSuccess = true;
                 }
-                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
                 {
-                    response.Message = "There was an error occured during the operation";
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
                     response.IsSuccess = false;
                 }
             }
