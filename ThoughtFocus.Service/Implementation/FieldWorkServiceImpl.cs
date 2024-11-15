@@ -2557,12 +2557,12 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtDropDownList.Rows.Count > 0)
                 {
-                    obj.DropdownList = dtDropDownList.AsEnumerable().Select(row =>
+                    obj.dropDowns = dtDropDownList.AsEnumerable().Select(row =>
                                               new StandardsAndSchoolTypeDropdown
                                               {
-                                                  ID = Convert.ToInt32(row["ID"]),
-                                                  Name = Convert.ToString(row["NAME"]),
-                                                  Description = Convert.ToString(row["DESCRIPTION"]),
+                                                  DropdownId = Convert.ToInt32(row["ID"]),
+                                                  ControlLabel = Convert.ToString(row["NAME"]),
+                                                  ControlValue = Convert.ToString(row["DESCRIPTION"]),
                                                   Active = Convert.ToBoolean(row["IsActive"])
                                               }).ToList();
                     obj.IsSuccess = true;
@@ -2582,6 +2582,35 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        public BaseResponse UpsertDropDown(UpdateDropDownRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.DropdownId },
+                                          new SqlParameter("@CategoryID", SqlDbType.BigInt) { Value = input.CategoryID },
+                                          new SqlParameter("@DropdownType", SqlDbType.VarChar,20) { Value = input.DropdownType},
+                                          new SqlParameter("@ActionFlag", SqlDbType.BigInt) { Value = input.Action },
+                                          new SqlParameter("@Name", SqlDbType.VarChar,250) { Value = input.ControlLabel },
+                                          new SqlParameter("@Description", SqlDbType.VarChar, -1) { Value = input.ControlValue},
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID}
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[FieldWork].[AddEditDeleteDropdown]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
         }
 
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)

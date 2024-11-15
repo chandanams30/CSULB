@@ -22,6 +22,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     }
     public class ConrolLabel
     {
-        public string ControlLabel { get; set; }
+        public string Label { get; set; }
+        public string Value { get; set; }
     }
 }

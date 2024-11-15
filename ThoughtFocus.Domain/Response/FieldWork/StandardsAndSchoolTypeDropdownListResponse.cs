@@ -6,13 +6,13 @@ namespace ThoughtFocus.Domain.Response.FieldWork
 {
     public class StandardsAndSchoolTypeDropdownList : BaseResponse
     {
-        public List<StandardsAndSchoolTypeDropdown> DropdownList { get; set; }
+        public List<StandardsAndSchoolTypeDropdown> dropDowns { get; set; }
     }
     public class StandardsAndSchoolTypeDropdown
     {
-        public int ID { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public int DropdownId { get; set; }
+        public string ControlLabel { get; set; }
+        public string ControlValue { get; set; }
         public bool Active { get; set; }
     }
 

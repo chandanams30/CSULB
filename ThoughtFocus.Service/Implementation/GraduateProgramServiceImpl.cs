@@ -3866,7 +3866,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
-        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId)
+        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId,string identifier)
         {
             ApplicationProgramsListResponse obj = new ApplicationProgramsListResponse();
             SqlParameter[] parameters ={
@@ -3878,12 +3878,24 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtApplicationPrograms.Rows.Count > 0)
                 {
-                    obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Select(row =>
+                    if (identifier == "Drop Down")
+                    {
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 12 || row.Field<long>("ID") == 20).Select(row =>
                                               new ApplicationProgramsList
                                               {
                                                   ProgramID = Convert.ToInt32(row["ID"]),
                                                   ProgramName = Convert.ToString(row["Name"])
                                               }).ToList();
+                    }
+                    else
+                    {
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Select(row =>
+                                                  new ApplicationProgramsList
+                                                  {
+                                                      ProgramID = Convert.ToInt32(row["ID"]),
+                                                      ProgramName = Convert.ToString(row["Name"])
+                                                  }).ToList();
+                    }
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
@@ -4112,7 +4124,8 @@ namespace ThoughtFocus.Service.Implementation
                     obj.ConrolLabels = dtCL.AsEnumerable().Select(row =>
                                               new ConrolLabel
                                               {
-                                                  ControlLabel = Convert.ToString(row["ControlLabel"])
+                                                   Label= Convert.ToString(row["ControlLabel"]),
+                                                   Value = Convert.ToString(row["ControlLabel"])
                                               }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";

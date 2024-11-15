@@ -893,6 +893,25 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("UpsertDropDown")]
+        public BaseResponse UpsertDropDown(UpdateDropDownRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpsertDropDown(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to Save Activity Log, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         private string GetFolderName(int userId, int fieldWorkID)
         {
