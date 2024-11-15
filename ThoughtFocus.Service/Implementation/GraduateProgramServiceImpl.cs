@@ -3878,7 +3878,7 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtApplicationPrograms.Rows.Count > 0)
                 {
-                    if (identifier == "Drop Down")
+                    if (applicationId == 2 && identifier == "Drop Down")
                     {
                         obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 12 || row.Field<long>("ID") == 20).Select(row =>
                                               new ApplicationProgramsList
