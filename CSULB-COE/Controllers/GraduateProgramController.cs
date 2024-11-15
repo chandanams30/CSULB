@@ -1062,11 +1062,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetApplicationList")]
-        public IActionResult GetApplicationList(int userId)
+        public IActionResult GetApplicationList(int userId,string identifier)
         {
             try
             {
-                List<ApplicationList> response = _studentProfileService.GetApplications(userId);
+                List<ApplicationList> response = _studentProfileService.GetApplications(userId,identifier);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -1077,11 +1077,11 @@ namespace CSULB_COE.Controllers
 
         }
         [HttpGet("GetApplicationProgramList")]
-        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId)
+        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId,string identifier)
         {
             try
             {
-                ApplicationProgramsListResponse response = _graduateProgramService.GetApplicationProgramList(applicationId);
+                ApplicationProgramsListResponse response = _graduateProgramService.GetApplicationProgramList(applicationId,identifier);
                 return response;
             }
             catch (Exception ex)

@@ -60,7 +60,7 @@ namespace ThoughtFocus.Service.Interfaces
         ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode);
         BaseResponse RevertBacktoPreviousState(int formID);
         BaseResponse MoveApplicationToSemester(MoveApplicationToSemesterRequest input);
-        ApplicationProgramsListResponse GetApplicationProgramList(int applicationTypeID);
+        ApplicationProgramsListResponse GetApplicationProgramList(int applicationTypeID,string identifier);
         RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId, int programID);
         BaseResponse UpdateRecommenderMailBody(RecommenderBody input);
         BaseResponse UpsertDecisionLetters(DecisionLettersRequest input);

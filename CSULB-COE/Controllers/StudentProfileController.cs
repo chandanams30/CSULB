@@ -125,11 +125,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetApplicationList")]
-        public IActionResult GetApplicationList(int userId)
+        public IActionResult GetApplicationList(int userId,string identifier)
         {
             try
             {
-                List<ApplicationList> response = _studentProfileService.GetApplications(userId);
+                List<ApplicationList> response = _studentProfileService.GetApplications(userId,identifier);
                 return Ok(response);
             }
             catch (Exception ex)
