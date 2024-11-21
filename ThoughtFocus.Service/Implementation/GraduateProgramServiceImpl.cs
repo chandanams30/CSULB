@@ -4121,12 +4121,24 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtCL.Rows.Count > 0)
                 {
-                    obj.ConrolLabels = dtCL.AsEnumerable().Select(row =>
+                    if (programId > 6)
+                    {
+                        obj.ConrolLabels = dtCL.AsEnumerable().Where(row=> row.Field<string>("ControlLabel") == "PersonalInformation").Select(row =>
                                               new ConrolLabel
                                               {
-                                                   Label= Convert.ToString(row["ControlLabel"]),
-                                                   Value = Convert.ToString(row["ControlLabel"])
+                                                  Label = "Confirm Program Option Applying to",
+                                                  Value = Convert.ToString(row["ControlLabel"])
                                               }).ToList();
+                    }
+                    else
+                    {
+                        obj.ConrolLabels = dtCL.AsEnumerable().Select(row =>
+                                                  new ConrolLabel
+                                                  {
+                                                      Label = Convert.ToString(row["ControlLabel"]),
+                                                      Value = Convert.ToString(row["ControlLabel"])
+                                                  }).ToList();
+                    }
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
