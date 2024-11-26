@@ -4082,15 +4082,30 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtDD.Rows.Count > 0)
                 {
-                    obj.DropDowns = dtDD.AsEnumerable().Select(row =>
+                    if (programId > 6)
+                    {
+                        obj.DropDowns = dtDD.AsEnumerable().Where(row => row.Field<string>("ControlLabel") == "PersonalInformation").Select(row =>
                                               new DropDowns
                                               {
                                                   DropdownId = Convert.ToInt32(row["DropdownId"]),
                                                   ProgramID = Convert.ToInt32(row["ProgramID"]),
-                                                  ControlLabel = Convert.ToString(row["ControlLabel"]),
+                                                  ControlLabel = "Confirm Program Option Applying to",
                                                   ControlValue = Convert.ToString(row["ControlValue"]),
                                                   Active = Convert.ToBoolean(row["Active"])
                                               }).ToList();
+                    }
+                    else
+                    {
+                        obj.DropDowns = dtDD.AsEnumerable().Select(row =>
+                                                  new DropDowns
+                                                  {
+                                                      DropdownId = Convert.ToInt32(row["DropdownId"]),
+                                                      ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                      ControlLabel = Convert.ToString(row["ControlLabel"]),
+                                                      ControlValue = Convert.ToString(row["ControlValue"]),
+                                                      Active = Convert.ToBoolean(row["Active"])
+                                                  }).ToList();
+                    }
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
