@@ -106,6 +106,10 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dsUserValidationData.Tables.Count > 0)
                 {
+                    var superAdminCSULBIDs = _configuration["ApplicationKeys:SuperAdminCSULBID"].Split(',').Select(id => id.Trim());
+
+                    // Get the CSULBID from the DataTable
+                    var currentCSULBID = Convert.ToString(dsUserValidationData.Tables[0].Rows[0]["CSULBID"]);
                     User _user = dsUserValidationData.Tables[0].AsEnumerable().Select(row =>
                                               new User
                                               {
@@ -113,8 +117,13 @@ namespace ThoughtFocus.Service.Implementation
                                                   FirstName = Convert.ToString(row["FirstName"]),
                                                   LastName = Convert.ToString(row["LastName"]),
                                                   Email = Convert.ToString(row["Email"]),
-                                                  CSULBID = Convert.ToString(row["CSULBID"])
+                                                  CSULBID = Convert.ToString(row["CSULBID"]),
                                               }).FirstOrDefault();
+                    // Check if the current CSULBID is in the SuperAdmin list
+                    if (superAdminCSULBIDs.Contains(currentCSULBID))
+                    {
+                        obj.IsSuperAdmin = true;
+                    }
 
                     obj.Roles = dsUserValidationData.Tables[1].AsEnumerable().Select(row =>
                                               new Roles
