@@ -119,18 +119,17 @@ namespace ThoughtFocus.Service.Implementation
                                                   Email = Convert.ToString(row["Email"]),
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
                                               }).FirstOrDefault();
-                    // Check if the current CSULBID is in the SuperAdmin list
-                    if (superAdminCSULBIDs.Contains(currentCSULBID))
-                    {
-                        obj.IsSuperAdmin = true;
-                    }
-
                     obj.Roles = dsUserValidationData.Tables[1].AsEnumerable().Select(row =>
                                               new Roles
                                               {
                                                   RoleId = Convert.ToInt32(row["RoleId"]),
                                                   RoleName = Convert.ToString(row["RoleName"])
                                               }).ToList();
+                    // Check if the current CSULBID is in the SuperAdmin list
+                    if((currentCSULBID == "" && Convert.ToInt32(dsUserValidationData.Tables[1].Rows[0]["RoleId"]) == 1) || superAdminCSULBIDs.Contains(currentCSULBID)) 
+                    {
+                        obj.IsSuperAdmin = true;
+                    }
 
                     obj.UserId = Convert.ToInt32(_user.Id);
                     obj.UserName = model.Username;
