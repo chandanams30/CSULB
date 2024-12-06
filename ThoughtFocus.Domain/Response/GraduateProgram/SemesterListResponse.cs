@@ -22,4 +22,13 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public int ID { get; set; }
         public string RecommenderMailBody { get; set; }
     }
+    public class EvaluatorMailBodyResponse : BaseResponse
+    {
+        public EvaluatorBody evaluatorResponse { get; set; }
+    }
+    public class EvaluatorBody
+    {
+        public int ID { get; set; }
+        public string EvaluatorMailBody { get; set; }
+    }
 }

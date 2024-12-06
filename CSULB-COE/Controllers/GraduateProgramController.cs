@@ -1221,5 +1221,41 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetEvaluatorMailBody")]
+        public EvaluatorMailBodyResponse GetEvaluatorMailBody(int applicationId, int programID,string identifier)
+        {
+            try
+            {
+                EvaluatorMailBodyResponse response = _graduateProgramService.GetEvaluatorMailBody(applicationId, programID,identifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                EvaluatorMailBodyResponse response = new EvaluatorMailBodyResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateEvaluatorMailBody")]
+        public BaseResponse UpdateEvaluatorMailBody(EvaluatorBody input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateEvaluatorMailBody(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

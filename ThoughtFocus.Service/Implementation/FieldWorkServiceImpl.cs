@@ -1770,7 +1770,20 @@ namespace ThoughtFocus.Service.Implementation
                             evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluationIdentifier"]);
                             applicantName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["StudentName"]);
                             link = evaluationURL + evaluationIdentifier;
-                            body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
+                            //get evaluation mail body
+                            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
+                                       };
+                            DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
+                            body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                            //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
                             body = body.Replace("[[logoPath]]", logoText)
                                 .Replace("[[applicantname]]", applicantName)
                                 .Replace("[[link]]", link);
@@ -1857,6 +1870,17 @@ namespace ThoughtFocus.Service.Implementation
         public BaseResponse UpdateEvaluationJSON(UpdateEvaluationJSONRequest input)
         {
             BaseResponse response = new BaseResponse();
+            string logoText = "cid:myImageID";
+            string evaluatorEmail = string.Empty;
+            string applicantName = string.Empty;
+            string body = string.Empty;
+            bool isMailSent = false;
+            string subject = string.Empty;
+            string beforeBody = string.Empty;
+            string afterBody = string.Empty;
+            string studentEmail = string.Empty;
+            UpsertEvaluationRequest upsertEvaluationRequest = new UpsertEvaluationRequest();
+
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@EvaluationID", SqlDbType.BigInt) { Value = input.EvaluationID },
@@ -1867,7 +1891,44 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@EvaluationJSON", SqlDbType.VarChar, -1) { Value = input.EvaluationJSON }
                                         };
 
-            int ID = _helper.InsertTable("[FieldWork].[UpdateEvaluationJSON]", parameters);
+            DataSet dtDLLOR = _helper.GetDataSet("[FieldWork].[UpdateEvaluationJSON]", parameters);
+
+            if (dtDLLOR.Tables[1].Rows.Count > 0)
+            {
+                evaluatorEmail = dtDLLOR.Tables[1].Rows[0]["EvaluatorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["EvaluatorEmail"]) : "";
+                applicantName = dtDLLOR.Tables[1].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["ApplicantName"]) : "";
+                studentEmail = dtDLLOR.Tables[1].Rows[0]["StudentEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["StudentEmail"]) : "";
+            }
+
+            upsertEvaluationRequest.EvaluationID = input.EvaluationID;
+            upsertEvaluationRequest.UserID = input.UserID;
+            upsertEvaluationRequest.ProgramID = input.ProgramID;
+            upsertEvaluationRequest.TermCode = input.TermCode;
+            upsertEvaluationRequest.FieldWorkID = input.FieldWorkID;
+
+            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt, 10) { Value = 1 },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = 2 },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar) { Value = "Student Confirmation Mail" },
+
+                                       };
+            DataSet dtDL = _helper.GetDataSet("[Application].[GetEvaluatorEmail]", parameters1);
+            if (dtDL.Tables[1].Rows.Count > 0)
+            {
+                if (dtDL.Tables[1].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
+                {
+                    body = Convert.ToString(dtDL.Tables[1].Rows[0]["EvaluatorMailBody"]);
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
+                    body = body.Replace("[[logoPath]]", logoText)
+                            .Replace("[[applicantname]]", applicantName);
+                    subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
+                    _sendMail.SendEmail(studentEmail, evaluatorEmail, "COMMON", subject, body, "");
+                    isMailSent = true;
+                    UpdateEvaluationMailSent(upsertEvaluationRequest, isMailSent, Convert.ToString(input.EvaluationID));
+                }
+            }
             response.Message = "Data updated successfully";
             response.IsSuccess = true;
             return response;

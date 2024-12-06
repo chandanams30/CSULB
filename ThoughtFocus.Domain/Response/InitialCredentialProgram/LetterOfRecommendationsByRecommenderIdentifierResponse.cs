@@ -23,6 +23,8 @@ namespace ThoughtFocus.Domain.Response.InitialCredentialProgram
         public string StudentEmail { get;set; }
         public string ProgramName { get; set; }
         public string TermName { get; set; }
-      
+        public int ProgramID { get; set; }
+
+
     }
 }
