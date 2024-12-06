@@ -1893,11 +1893,11 @@ namespace ThoughtFocus.Service.Implementation
 
             DataSet dtDLLOR = _helper.GetDataSet("[FieldWork].[UpdateEvaluationJSON]", parameters);
 
-            if (dtDLLOR.Tables[1].Rows.Count > 0)
+            if (dtDLLOR.Tables[0].Rows.Count > 0)
             {
-                evaluatorEmail = dtDLLOR.Tables[1].Rows[0]["EvaluatorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["EvaluatorEmail"]) : "";
-                applicantName = dtDLLOR.Tables[1].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["ApplicantName"]) : "";
-                studentEmail = dtDLLOR.Tables[1].Rows[0]["StudentEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["StudentEmail"]) : "";
+                evaluatorEmail = dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"]) : "";
+                applicantName = dtDLLOR.Tables[0].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["ApplicantName"]) : "";
+                studentEmail = dtDLLOR.Tables[0].Rows[0]["StudentEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["StudentEmail"]) : "";
             }
 
             upsertEvaluationRequest.EvaluationID = input.EvaluationID;
@@ -1913,11 +1913,11 @@ namespace ThoughtFocus.Service.Implementation
 
                                        };
             DataSet dtDL = _helper.GetDataSet("[Application].[GetEvaluatorEmail]", parameters1);
-            if (dtDL.Tables[1].Rows.Count > 0)
+            if (dtDL.Tables[0].Rows.Count > 0)
             {
-                if (dtDL.Tables[1].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
+                if (dtDL.Tables[0].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
                 {
-                    body = Convert.ToString(dtDL.Tables[1].Rows[0]["EvaluatorMailBody"]);
+                    body = Convert.ToString(dtDL.Tables[0].Rows[0]["EvaluatorMailBody"]);
                     beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
                     afterBody = "</body></html>";
                     body = $"{beforeBody}{body}{afterBody}";
