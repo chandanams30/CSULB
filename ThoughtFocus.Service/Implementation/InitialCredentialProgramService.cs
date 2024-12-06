@@ -32,6 +32,7 @@ using Newtonsoft.Json.Linq;
 using iTextSharp.text.html.simpleparser;
 using iTextSharp.text.pdf;
 using iTextSharp.text;
+using Microsoft.Office.Interop.Word;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1561,7 +1562,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
                                                   StudentEmail = Convert.ToString(row["StudentEmail"]),
                                                   ProgramName = Convert.ToString(row["ProgramName"]),
-                                                  TermName = Convert.ToString(row["TermName"])
+                                                  TermName = Convert.ToString(row["TermName"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"])
                                               }).FirstOrDefault();
 
 
@@ -1622,8 +1624,21 @@ namespace ThoughtFocus.Service.Implementation
                             recommenderIdentifier = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderIdentifier"]);
                             applicantName = Convert.ToString(recomDetails.Tables[0].Rows[0]["StudentName"]);
                             link = recommenderURL + recommenderIdentifier;
-                            body = GetMailBodyTemplateByProgramID(input.ProgramID);
-                            //link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
+                            //get evaluation mail body
+                            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
+                                       };
+                            DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
+                            body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                            //body = GetMailBodyTemplateByProgramID(input.ProgramID);
+
                             body = body.Replace("[[logoPath]]", logoText)
                                 .Replace("[[applicantname]]", applicantName)
                                 .Replace("[[link]]", link);
@@ -1667,6 +1682,18 @@ namespace ThoughtFocus.Service.Implementation
         public BaseResponse UpdateLetterOfRecommendationsJSON(UpdateLetterOfRecommendationsJSONRequest input)
         {
             BaseResponse response = new BaseResponse();
+            UpsertLetterOfRecommendationsRequest upsertLetterOfRecommendations = new UpsertLetterOfRecommendationsRequest();
+            string logoText = "cid:myImageID";
+            string evaluatorEmail = string.Empty;
+            string applicantName = string.Empty;
+            string body = string.Empty;
+            bool isMailSent = false;
+            string subject = string.Empty;
+            string beforeBody = string.Empty;
+            string afterBody = string.Empty;
+            string studentEmail = string.Empty;
+
+
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@LetterOfRecommendationID", SqlDbType.BigInt) { Value = input.LetterOfRecommendationID },
@@ -1677,7 +1704,44 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = input.LetterOfRecommendationJSON }
                                         };
 
-            int ID = _helper.InsertTable("[Application].[UpdateLetterOfRecommendationsJSON]", parameters);
+            DataSet dtDLLOR = _helper.GetDataSet("[Application].[UpdateLetterOfRecommendationsJSON]", parameters);
+            if (dtDLLOR.Tables[1].Rows.Count > 0)
+            {
+                evaluatorEmail = dtDLLOR.Tables[1].Rows[0]["EvaluatorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["EvaluatorEmail"]) : "";
+                applicantName = dtDLLOR.Tables[1].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["ApplicantName"]) : "";
+                studentEmail = dtDLLOR.Tables[1].Rows[0]["StudentEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[1].Rows[0]["StudentEmail"]) : "";
+            }
+
+            upsertLetterOfRecommendations.FormID = input.FormID;
+            upsertLetterOfRecommendations.UserID = input.UserID;
+            upsertLetterOfRecommendations.ProgramID = input.ProgramID;
+            upsertLetterOfRecommendations.LetterOfRecommendationID = input.LetterOfRecommendationID;
+            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt, 10) { Value = 1 },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar) { Value = "Student Confirmation Mail" },
+
+                                       };
+            DataSet dtDL = _helper.GetDataSet("[Application].[GetEvaluatorEmail]", parameters1);
+            if (dtDL.Tables[0].Rows.Count > 0)
+            {
+                if (dtDL.Tables[0].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
+                {
+                    body = Convert.ToString(dtDL.Tables[0].Rows[0]["EvaluatorMailBody"]);
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
+                    body = body.Replace("[[logoPath]]", logoText)
+                            .Replace("[[applicantname]]", applicantName);
+                    if (input.ProgramID == 2)
+                        subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
+                    if (input.ProgramID == 4)
+                        subject = "CSULB SSCP Clinical Practice Evaluation Submitted";
+                    _sendMail.SendEmail(studentEmail, evaluatorEmail, "COMMON", subject, body, "");
+                    isMailSent = true;
+                    UpdateLetterOfRecommendationsMailSent(upsertLetterOfRecommendations, isMailSent);
+                }
+            }
             response.Message = "Data updated successfully";
             response.IsSuccess = true;
             return response;

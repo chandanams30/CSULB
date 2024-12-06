@@ -3886,7 +3886,16 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtApplicationPrograms.Rows.Count > 0)
                 {
-                    if (applicationId == 2 && identifier == "Drop Down")
+                    if (applicationId == 1 && identifier == "Evaluation")
+                    {
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 2 || row.Field<long>("ID") == 4).Select(row =>
+                                              new ApplicationProgramsList
+                                              {
+                                                  ProgramID = Convert.ToInt32(row["ID"]),
+                                                  ProgramName = Convert.ToString(row["Name"])
+                                              }).ToList();
+                    }
+                    else if (applicationId == 2 && identifier == "Drop Down")
                     {
                         obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 12 || row.Field<long>("ID") == 20).Select(row =>
                                               new ApplicationProgramsList
@@ -4203,6 +4212,68 @@ namespace ThoughtFocus.Service.Implementation
                 else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
                 {
                     response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public EvaluatorMailBodyResponse GetEvaluatorMailBody(int applicationId, int programID, string identifier)
+        {
+            EvaluatorMailBodyResponse obj = new EvaluatorMailBodyResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = identifier }
+                                       };
+
+            DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters);
+            try
+            {
+                if (dtEval.Rows.Count > 0)
+                {
+                    obj.evaluatorResponse = dtEval.AsEnumerable().Select(row =>
+                                              new EvaluatorBody
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  EvaluatorMailBody = Convert.ToString(row["EvaluatorMailBody"])
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpdateEvaluatorMailBody(EvaluatorBody input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
+                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.EvaluatorMailBody }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateRecommenderMailBody]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated clinical practice evaluation mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the clinical practice evaluation mail body";
                     response.IsSuccess = false;
                 }
             }

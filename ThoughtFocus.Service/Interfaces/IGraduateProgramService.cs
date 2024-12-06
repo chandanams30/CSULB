@@ -68,5 +68,7 @@ namespace ThoughtFocus.Service.Interfaces
         DropDownListResponse GetDropDownList(int programId, string controlLabel);
         BaseResponse UpsertDropDown(DropDownRequest input);
         ControlLabelListResponse GetControlLabelList(int programId);
+        EvaluatorMailBodyResponse GetEvaluatorMailBody(int applicationId, int programID, string identifier);
+        BaseResponse UpdateEvaluatorMailBody(EvaluatorBody input);
     }
 }
