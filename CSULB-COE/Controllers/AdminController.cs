@@ -70,11 +70,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetUserOptionList")]
-        public UserDataOptionListResponse GetUserOptionList()
+        public UserDataOptionListResponse GetUserOptionList(int UserID)
         {
             try
             {
-                UserDataOptionListResponse response = _adminService.GetUserOptionList();
+                UserDataOptionListResponse response = _adminService.GetUserOptionList(UserID);
                 return response;
             }
             catch (Exception ex)

@@ -11,7 +11,7 @@ namespace ThoughtFocus.Service.Interfaces
     {
         RolesListResponse GetRolesList();
         UserListResponse GetUsersList(string searchString,int RoleID);
-        UserDataOptionListResponse GetUserOptionList();
+        UserDataOptionListResponse GetUserOptionList(int UserID);
         UserDetailResponse GetUser(int UserID);
         CommunityDistrictListResponse GetCommunityDistrictList();
         CommunitySchoolListResponse GetCommunitySchoolList();
