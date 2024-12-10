@@ -259,10 +259,11 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public UserDataOptionListResponse GetUserOptionList()
+        public UserDataOptionListResponse GetUserOptionList(int UserID)
         {
             UserDataOptionListResponse obj = new UserDataOptionListResponse();
             SqlParameter[] parameters = {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                         };
 
             DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUserDataOptionList]", parameters);
