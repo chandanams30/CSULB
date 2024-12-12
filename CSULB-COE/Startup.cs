@@ -155,7 +155,7 @@ namespace CSULB_COE
             services.AddScoped<IStudentProfile, StudentProfileImpl>();
 
             //Guests
-            services.AddScoped<IGuestsService, GuestsServiceImpl>();
+            //services.AddScoped<IGuestsService, GuestsServiceImpl>();
 
             //Rubrics
             services.AddScoped<IRubricsService, RubricsServiceImpl>();
