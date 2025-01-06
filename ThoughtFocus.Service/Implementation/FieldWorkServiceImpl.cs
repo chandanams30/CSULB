@@ -72,8 +72,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   College = Convert.ToString(row["College"]),
                                                   Section = Convert.ToString(row["Section"]),
                                                   Term = Convert.ToString(row["Term"]),
-                                                  FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
-                                                 ,
+                                                  FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
                                                   UIHandler = Convert.ToString(row["UIHandler"])
                                               }).FirstOrDefault();
 
@@ -164,11 +163,12 @@ namespace ThoughtFocus.Service.Implementation
                                         };
 
             DataTable dtFieldWorkList = _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
+            var courseList = _configuration["ApplicationKeys:FieldWorkValidCourses"].Split(',').Select(id => id.Trim());
             try
             {
                 if (dtFieldWorkList.Rows.Count > 0)
                 {
-                    obj = dtFieldWorkList.AsEnumerable().Select(row =>
+                    obj = dtFieldWorkList.AsEnumerable().Where(row => courseList.Any(course => string.Equals(Convert.ToString(row["CourseName"]), course, StringComparison.OrdinalIgnoreCase))).Select(row =>
                                               new FieldWorkResponse
                                               {
                                                   FieldWorkId = Convert.ToInt32(row["ID"]),
@@ -184,7 +184,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
                                                   PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"]),
                                                   LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
-                                                  ApprovedHours = Convert.ToDecimal(row["ApprovedHours"])
+                                                  ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
+                                                  CourseName = Convert.ToString(row["CourseName"])
 
                                               }).ToList();
 
