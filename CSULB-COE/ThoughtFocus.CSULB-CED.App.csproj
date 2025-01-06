@@ -37,6 +37,7 @@
     <PackageReference Include="Microsoft.Owin.Security" Version="4.2.2" />
     <PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.2.2" />
     <PackageReference Include="Microsoft.Owin.Security.OpenIdConnect" Version="4.2.2" />
+    <PackageReference Include="Nancy" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Owin" Version="1.0.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
