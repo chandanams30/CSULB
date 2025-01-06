@@ -21,6 +21,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string UIHandler { get; set; }
         public decimal LoggedHours { get; set; }
         public decimal ApprovedHours { get; set; }
+        public string CourseName { get; set; }
     }
 
     public class FieldWorkListResponse:BaseResponse
