@@ -16,6 +16,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public InterviwerInformation Interviewer { get; set; }
         public ProgramCoordinator ProgramCoordinator { get; set; }
         public FinalDecisionJSON FinalDecision { get; set; }
+
     }
 
     public class FormBasicInformation
@@ -41,6 +42,9 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public int WaitlistNumber { get; set; }
         public string WaitlistComments {  get; set; }
         public string FinalDecision { get; set; }
+        public string CertifyDescription { get; set; }
+
+
     }
     public class FormStateHandler
     {
@@ -91,6 +95,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public string Instructor { get; set; }
     }
+
     public class InterviwerInformation
     {
         public string Interviewer { get; set; }
