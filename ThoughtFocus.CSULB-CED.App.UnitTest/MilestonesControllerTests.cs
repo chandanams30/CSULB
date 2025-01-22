@@ -177,8 +177,11 @@ public class MilestonesControllerTests
             ProgramsList = new List<ApplicationProgram>
         {
             new ApplicationProgram { ProgramID = 1, ProgramName = "Education Specialist Credential Program (ESCP" },
-            new ApplicationProgram { ProgramID = 2, ProgramName = "Multiple Subject Credential Program (MSCP)" }
-        }
+            new ApplicationProgram { ProgramID = 2, ProgramName = "Multiple Subject Credential Program (MSCP)" },
+            new ApplicationProgram { ProgramID = 3, ProgramName=  "PK-3 Early Childhood Education Specialist Instruction Credential Program (PK-3CP)"},
+            new ApplicationProgram { ProgramID = 4, ProgramName = "Single Subject Credential Program (SSCP)" },
+            new ApplicationProgram { ProgramID = 5, ProgramName = "Urban Dual Credential Program (UDCP)" },
+            }
         };
 
         // Act
