@@ -127,10 +127,10 @@ namespace ThoughtFocus.Service.Implementation
                     response.Message = "Rubrics Template Published Successfully";
                     response.IsSuccess = true;
                 }
-                else if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "FAILURE")
+               else 
                 {
-                    response.Message = "Failed to Publish Rubrics Template";
-                    response.IsSuccess = true;
+                    response.Message = Convert.ToString(dtRubrics.Rows[0]["RESULT"]);
+                    response.IsSuccess = false;
                 }
             }
             return response;
@@ -182,23 +182,41 @@ namespace ThoughtFocus.Service.Implementation
                 if (dtRubricFormsList.Rows.Count > 0)
                 {
                     obj.rubricSubmittedFormsList = dtRubricFormsList.AsEnumerable().Select(row =>
-                                               new GetRubricSubmittedFormsResponse
-                                               {
-                                                   FilledRubricID = Convert.ToInt32(row["FilledRubricID"]),
-                                                   PublishRubricID = Convert.ToInt32(row["PublishRubricID"]),
-                                                   CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                                                   TemplateID = Convert.ToInt32(row["TemplateID"]),
-                                                   CSULBID = Convert.ToInt32(row["CSULBID"]),
-                                                   StudentName = Convert.ToString(row["StudentName"]),
-                                                   ProgramName = Convert.ToString(row["ProgramName"]),
-                                                   TemplateName = Convert.ToString(row["TemplateName"]),
-                                                   FormID = Convert.ToInt32(row["FormId"]),
-                                                   TermName = Convert.ToString(row["TermName"]),
-                                                   ReviewerName = Convert.ToString(row["ReviewerName"]),
-                                                   ReviewerID = Convert.ToInt32(row["ReviewerID"]),
-                                                   TermCode = Convert.ToString(row["TermCode"]),
-                                                   State = Convert.ToString(row["Status"])
-                                               }).ToList();
+                        new GetRubricSubmittedFormsResponse
+                        {
+                            FilledRubricID = Convert.ToInt32(row["FilledRubricID"]),
+                            PublishRubricID = Convert.ToInt32(row["PublishRubricID"]),
+                            CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                            TemplateID = Convert.ToInt32(row["TemplateID"]),
+                            CSULBID = Convert.ToInt32(row["CSULBID"]),
+                            StudentName = Convert.ToString(row["StudentName"]),
+                            ProgramName = Convert.ToString(row["ProgramName"]),
+                            TemplateName = Convert.ToString(row["TemplateName"]),
+                            FormID = Convert.ToInt32(row["FormId"]),
+                            TermName = Convert.ToString(row["TermName"]),
+                            ReviewerName = Convert.ToString(row["ReviewerName"]),
+                            ReviewerID = Convert.ToInt32(row["ReviewerID"]),
+                            TermCode = Convert.ToString(row["TermCode"]),
+                            State = Convert.ToString(row["Status"]),
+                            ShowSideBySideReview = Convert.ToBoolean(row["ShowSideBySideReview"]),
+                            ProgramId = Convert.ToInt32(row["ProgramId"]),
+                            Form = Convert.ToString(row["Rubric"]),
+
+                            // New mapping for DownloadDetails
+                            downloadDetails = new DownloadDetails
+                            {
+                                StudentName = Convert.ToString(row["StudentName"]),
+                                CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                ProgramName = Convert.ToString(row["ProgramName"]),
+                                TemplateName = Convert.ToString(row["TemplateName"]),
+                                TermName = Convert.ToString(row["TermName"]),
+                                ReviewerName = Convert.ToString(row["ReviewerName"]),
+                                State = Convert.ToString(row["Status"]),
+                                TotalPoints = Convert.ToInt32(row["TotalPoints"]),
+                                ScoredPoints = Convert.ToInt32(row["ScoredPoints"])
+                            }
+                        }).ToList();
+
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
                 }
@@ -267,7 +285,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RubricForm", SqlDbType.NVarChar, -1) { Value = input.RubricForm },
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@Status", SqlDbType.Int) { Value = input.Status },
-                                          new SqlParameter("@filledRubricID", SqlDbType.BigInt) { Value = input.FilledRubricID }
+                                          new SqlParameter("@filledRubricID", SqlDbType.BigInt) { Value = input.FilledRubricID },
+                                          new SqlParameter("@ScoredPoints", SqlDbType.BigInt) { Value = input.ScoredPoints }
                                         };
             DataTable dtRubrics = _helper.GetDataTable("[Rubrics].[InsertFilledRubrics]", parameters);
             if (dtRubrics.Rows.Count > 0)
@@ -310,13 +329,19 @@ namespace ThoughtFocus.Service.Implementation
                                          FormID = Convert.ToInt32(row["FormID"]),
                                          RubricForm = Convert.ToString(row["RubricForm"]),
                                          UserID = Convert.ToInt32(row["UserID"]),
-                                         Status = Convert.ToInt32(row["Status"]),
+                                         State = Convert.ToString(row["Status"]),
                                          ProgramID = Convert.ToInt32(row["ProgramID"]),
                                          TermCode = Convert.ToString(row["TermCode"]),
                                          ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
                                          TemplateName = Convert.ToString(row["TemplateName"]),
                                          TemplateDescription = Convert.ToString(row["TemplateDescription"]),
                                          TotalPoints = Convert.ToInt32(row["TotalPoints"]),
+                                         StudentName = Convert.ToString(row["StudentName"]),
+                                         ProgramName = Convert.ToString(row["ProgramName"]),
+                                         TermName = Convert.ToString(row["TermName"]),
+                                         StudentEmail = Convert.ToString(row["StudentEmail"]),
+                                         CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                         ReviewerName = Convert.ToString(row["ReviewerName"])
                                      }).FirstOrDefault();
                     obj.rubricsApplicationForm = objRAF;
 
@@ -327,6 +352,61 @@ namespace ThoughtFocus.Service.Implementation
                                             }).FirstOrDefault();
 
                     obj.rubricsFormActivityHandler = objRFAH;
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ShowSideBySideReviewResponse ShowSideBySideReview(int ProgramID, string TermCode, int FormId, int PublishedRubricID)
+        {
+            ShowSideBySideReviewResponse obj = new ShowSideBySideReviewResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                            new SqlParameter("@Termcode", SqlDbType.VarChar, 10) { Value = TermCode },
+                                            new SqlParameter("@FormId", SqlDbType.BigInt) { Value = FormId },
+                                            new SqlParameter("@PublishedRubricID", SqlDbType.BigInt) { Value = PublishedRubricID }
+                                        };
+
+            DataTable dtRubricDetails = _helper.GetDataTable("[Rubrics].[ShowSideBySideReview]", parameters);
+            try
+            {
+                if (dtRubricDetails.Rows.Count > 0)
+                {
+                    obj.showSideBySideReview = dtRubricDetails.AsEnumerable().Select(row =>
+                                               new ShowSideBySideReview
+                                               {
+                                                   FilledRubricID = Convert.ToInt32(row["FilledRubricID"]),
+                                                   PublishRubricID = Convert.ToInt32(row["PublishRubricID"]),
+                                                   CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                                                   TemplateID = Convert.ToInt32(row["TemplateID"]),
+                                                   CSULBID = Convert.ToInt32(row["CSULBID"]),
+                                                   StudentName = Convert.ToString(row["StudentName"]),
+                                                   ProgramName = Convert.ToString(row["ProgramName"]),
+                                                   TemplateName = Convert.ToString(row["TemplateName"]),
+                                                   FormID = Convert.ToInt32(row["FormId"]),
+                                                   TermName = Convert.ToString(row["TermName"]),
+                                                   ReviewerName = Convert.ToString(row["ReviewerName"]),
+                                                   ReviewerID = Convert.ToInt32(row["ReviewerID"]),
+                                                   TermCode = Convert.ToString(row["TermCode"]),
+                                                   State = Convert.ToString(row["Status"]),
+                                                   RubricForm = Convert.ToString(row["RubricForm"]),
+                                                   ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                   TemplateDescription = Convert.ToString(row["TemplateDescription"]),
+                                                   TotalPoints = Convert.ToInt32(row["TotalPoints"]),
+                                                   StudentEmail = Convert.ToString(row["Email"])
+                                               }).ToList();
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
                 }

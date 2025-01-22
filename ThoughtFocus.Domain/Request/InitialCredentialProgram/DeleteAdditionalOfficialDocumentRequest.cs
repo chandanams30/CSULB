@@ -28,4 +28,10 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public string FileName { get; set; }
 
     }
+    public class FormExperienceAttachmentRequest
+    {
+        public string GUID { get; set; }
+        public byte[] FileContent { get; set; }
+        public int FormID { get; set; }
+    }
 }

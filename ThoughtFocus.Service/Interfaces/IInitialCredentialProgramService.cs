@@ -44,6 +44,8 @@ namespace ThoughtFocus.Service.Interfaces
         public byte[] GetPDFFromJSONForSSCP(string jsonString);
         public byte[] GetPDFFromJSONForMSCP(string jsonString);
         public BaseResponse DeleteSubSectionAttachments(DeleteSubSectionAttachmentRequest input);
+        FormExperienceAttachmentResponse UpsertFormExperienceAttachment(FormExperienceAttachmentRequest input);
+        FormAttachments DownloadFormExperienceAttachment(string GUID);
 
     }
 }

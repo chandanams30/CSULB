@@ -32,6 +32,7 @@ using Newtonsoft.Json.Linq;
 using iTextSharp.text.html.simpleparser;
 using iTextSharp.text.pdf;
 using iTextSharp.text;
+using Microsoft.Office.Interop.Word;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1059,7 +1060,7 @@ namespace ThoughtFocus.Service.Implementation
             string body = string.Empty;
             string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
             string logoText = "cid:myImageID";
-            string signatureText = "cid:mySignatureImageID";
+            //string signatureText = "cid:mySignatureImageID";
             string date= DateTime.Now.ToString("MM-dd-yyyy");
             string templateName = string.Empty;
             if (applicantInfo.Rows.Count>=0)
@@ -1071,7 +1072,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             if (input.Status != string.Empty)
             {
-                EmailResult emailResult = GetMailTemplate(templateName, input, programName, logoText, applicantName, date, signatureText);
+                EmailResult emailResult = GetMailTemplate(templateName, input, programName, logoText, applicantName, date);
                 try
                 {
                     _sendMail.SendEmail(applicantEmail, "", "COMMON", emailResult.Subject, emailResult.Body, "");
@@ -1088,7 +1089,7 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-        private EmailResult GetMailTemplate(string templateName, UpdateFormSubSectionApproveralRequest input,string programName,string logoText,string applicantName,string date,string signatureText)
+        private EmailResult GetMailTemplate(string templateName, UpdateFormSubSectionApproveralRequest input,string programName,string logoText,string applicantName,string date)
         {
             string Subject = string.Empty;
             EmailResult obj=new EmailResult();
@@ -1152,8 +1153,7 @@ namespace ThoughtFocus.Service.Implementation
                                .Replace("[[applicantName]]", applicantName)
                                .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
                                .Replace("[[programName]]", programName)
-                               .Replace("[[date]]", date)
-                               .Replace("[[Signature]]", signatureText);
+                               .Replace("[[date]]", date);
             return obj;
 
         }
@@ -1500,7 +1500,7 @@ namespace ThoughtFocus.Service.Implementation
                                                FormID = Convert.ToInt32(row["FormID"]),
                                                RecommenderName = Convert.ToString(row["RecommenderName"]),
                                                RecommenderEmail = Convert.ToString(row["RecommenderEmail"]),
-                                               CreatedBy = Convert.ToInt16(row["CreatedBY"]),
+                                               CreatedBy = Convert.ToInt32(row["CreatedBY"]),
                                                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
                                                RecommenderURL = Convert.ToString(row["RecommenderURL"]),
                                                RecommenderURLValidTill = Convert.ToDateTime(row["RecommenderURLValidTill"] == DBNull.Value ? null : row["RecommenderURLValidTill"]),
@@ -1508,7 +1508,8 @@ namespace ThoughtFocus.Service.Implementation
                                                isMailSent = Convert.ToBoolean(row["isMailSent"]),
                                                LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"] == DBNull.Value ? null : row["LetterOfRecommendationJSON"]),
                                                CanView = Convert.ToBoolean(row["CanView"]),
-                                               FileLink = Convert.ToString(row["FileLink"])
+                                               FileLink = Convert.ToString(row["FileLink"]),
+                                               ApplicationType = Convert.ToString(row["ApplicationType"])
                                            }).ToList();
                     }
                     else
@@ -1561,7 +1562,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
                                                   StudentEmail = Convert.ToString(row["StudentEmail"]),
                                                   ProgramName = Convert.ToString(row["ProgramName"]),
-                                                  TermName = Convert.ToString(row["TermName"])
+                                                  TermName = Convert.ToString(row["TermName"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"])
                                               }).FirstOrDefault();
 
 
@@ -1591,7 +1593,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@RecommenderEmail", SqlDbType.VarChar,200) { Value = input.RecommenderEmail }
                                         };
 
-            DataTable recomDetails = _helper.GetDataTable("[Application].[UpsertLetterOfRecommendations]", parameters);
+            DataSet recomDetails = _helper.GetDataSet("[Application].[UpsertLetterOfRecommendations]", parameters);
             string logoText = "cid:myImageID";
             string recommenderName = string.Empty;
             string recommenderEmail = string.Empty;
@@ -1604,30 +1606,54 @@ namespace ThoughtFocus.Service.Implementation
             string subject = string.Empty;
             try
             {
-                if (recomDetails.Rows.Count > 0)
+                if (recomDetails.Tables[1].Rows.Count > 0)
                 {
-                    // send mail to the recommender with the URL link  
-                    recommenderName = Convert.ToString(recomDetails.Rows[0]["RecommenderName"]);
-                    recommenderEmail = Convert.ToString(recomDetails.Rows[0]["RecommenderEmail"]);
-                    recommenderURL = Convert.ToString(recomDetails.Rows[0]["RecommenderURL"]);
-                    recommenderIdentifier = Convert.ToString(recomDetails.Rows[0]["RecommenderIdentifier"]);
-                    applicantName = Convert.ToString(recomDetails.Rows[0]["StudentName"]);
-                    link = recommenderURL + recommenderIdentifier;
-                    body = GetMailBodyTemplateByProgramID(input.ProgramID);
-                    //link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
-                    body = body.Replace("[[logoPath]]", logoText)
-                        .Replace("[[applicantname]]", applicantName)
-                        .Replace("[[link]]", link);
-                    if (input.ProgramID == 2)
-                        subject = "CSULB MSCP Clinical Practice Evaluation Form";
-                    if (input.ProgramID == 4)
-                        subject = "CSULB SSCP Clinical Practice Evaluation Form";
-                    _sendMail.SendEmail(recommenderEmail, "", "COMMON", subject, body, "");
-                    isMailSent = true;
-                    UpdateLetterOfRecommendationsMailSent(input, isMailSent);
+                    if (Convert.ToString(recomDetails.Tables[1].Rows[0]["Status"]) == "FAILURE")
+                    {
+                        response.Message = Convert.ToString(recomDetails.Tables[1].Rows[0]["Message"]);
+                        response.IsSuccess = false;
+                    }
+                    else
+                    {
+                        if (recomDetails.Tables[0].Rows.Count > 0)
+                        {
+                            // send mail to the recommender with the URL link  
+                            recommenderName = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderName"]);
+                            recommenderEmail = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderEmail"]);
+                            recommenderURL = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderURL"]);
+                            recommenderIdentifier = Convert.ToString(recomDetails.Tables[0].Rows[0]["RecommenderIdentifier"]);
+                            applicantName = Convert.ToString(recomDetails.Tables[0].Rows[0]["StudentName"]);
+                            link = recommenderURL + recommenderIdentifier;
+                            //get evaluation mail body
+                            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
+                                       };
+                            DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
+                            body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                            //body = GetMailBodyTemplateByProgramID(input.ProgramID);
+
+                            body = body.Replace("[[logoPath]]", logoText)
+                                .Replace("[[applicantname]]", applicantName)
+                                .Replace("[[link]]", link);
+                            if (input.ProgramID == 2)
+                                subject = "CSULB MSCP Clinical Practice Evaluation Form";
+                            if (input.ProgramID == 4)
+                                subject = "CSULB SSCP Clinical Practice Evaluation Form";
+                            _sendMail.SendEmail(recommenderEmail, "", "COMMON", subject, body, "");
+                            isMailSent = true;
+                            UpdateLetterOfRecommendationsMailSent(input, isMailSent);
+                        }
+                        response.Message = "Evaluation added and mail sent successfully";
+                        response.IsSuccess = true;
+                    }
                 }
-                response.Message = "Recommendation added and mail sent successfully";
-                response.IsSuccess = true;
 
 
             }
@@ -1656,6 +1682,18 @@ namespace ThoughtFocus.Service.Implementation
         public BaseResponse UpdateLetterOfRecommendationsJSON(UpdateLetterOfRecommendationsJSONRequest input)
         {
             BaseResponse response = new BaseResponse();
+            UpsertLetterOfRecommendationsRequest upsertLetterOfRecommendations = new UpsertLetterOfRecommendationsRequest();
+            string logoText = "cid:myImageID";
+            string evaluatorEmail = string.Empty;
+            string applicantName = string.Empty;
+            string body = string.Empty;
+            bool isMailSent = false;
+            string subject = string.Empty;
+            string beforeBody = string.Empty;
+            string afterBody = string.Empty;
+            string studentEmail = string.Empty;
+
+
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@LetterOfRecommendationID", SqlDbType.BigInt) { Value = input.LetterOfRecommendationID },
@@ -1666,7 +1704,44 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = input.LetterOfRecommendationJSON }
                                         };
 
-            int ID = _helper.InsertTable("[Application].[UpdateLetterOfRecommendationsJSON]", parameters);
+            DataSet dtDLLOR = _helper.GetDataSet("[Application].[UpdateLetterOfRecommendationsJSON]", parameters);
+            if (dtDLLOR.Tables[0].Rows.Count > 0)
+            {
+                evaluatorEmail = dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"]) : "";
+                applicantName = dtDLLOR.Tables[0].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["ApplicantName"]) : "";
+                studentEmail = dtDLLOR.Tables[0].Rows[0]["StudentEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["StudentEmail"]) : "";
+            }
+
+            upsertLetterOfRecommendations.FormID = input.FormID;
+            upsertLetterOfRecommendations.UserID = input.UserID;
+            upsertLetterOfRecommendations.ProgramID = input.ProgramID;
+            upsertLetterOfRecommendations.LetterOfRecommendationID = input.LetterOfRecommendationID;
+            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt, 10) { Value = 1 },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar) { Value = "Student Confirmation Mail" },
+
+                                       };
+            DataSet dtDL = _helper.GetDataSet("[Application].[GetEvaluatorEmail]", parameters1);
+            if (dtDL.Tables[0].Rows.Count > 0)
+            {
+                if (dtDL.Tables[0].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
+                {
+                    body = Convert.ToString(dtDL.Tables[0].Rows[0]["EvaluatorMailBody"]);
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
+                    body = body.Replace("[[logoPath]]", logoText)
+                            .Replace("[[applicantname]]", applicantName);
+                    if (input.ProgramID == 2)
+                        subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
+                    if (input.ProgramID == 4)
+                        subject = "CSULB SSCP Clinical Practice Evaluation Submitted";
+                    _sendMail.SendEmail(studentEmail, evaluatorEmail, "COMMON", subject, body, "");
+                    isMailSent = true;
+                    UpdateLetterOfRecommendationsMailSent(upsertLetterOfRecommendations, isMailSent);
+                }
+            }
             response.Message = "Data updated successfully";
             response.IsSuccess = true;
             return response;
@@ -1675,12 +1750,12 @@ namespace ThoughtFocus.Service.Implementation
         {
             FormAttachments obj = new FormAttachments();
             byte[] fileContentJSONToPDF = new byte[0];
-            if (input.ProgramFormIdentifier == "SSCP")
+            if (input.ApplicationType == "ICP-SSCP")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForSSCP(input.LetterOfRecommendationJSON);
                 obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             }
-            else if (input.ProgramFormIdentifier == "MSCP")
+            else if (input.ApplicationType == "ICP-MSCP" || input.ApplicationType == "Fieldwork-FW")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForMSCP(input.LetterOfRecommendationJSON);
                 obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
@@ -1709,6 +1784,175 @@ namespace ThoughtFocus.Service.Implementation
                 response.StackTrace = ex.Message;
             }
             return response;
+        }
+        public FormExperienceAttachmentResponse UpsertFormExperienceAttachment(FormExperienceAttachmentRequest input)
+        {
+            FormExperienceAttachmentResponse response = new FormExperienceAttachmentResponse();
+            string currentDateTime = DateTime.Now.ToString("MMddyyyyHHmmss");
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string userFolderName = string.Empty;
+                int userID = 0;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.GUID);
+                input.GUID = fileDetails.FileName;
+                fileName = input.FormID + "_" + "Experience" + "_" + currentDateTime;
+
+                // get userID
+                SqlParameter[] parameters =
+                                 {
+                                    new SqlParameter("@FormId", SqlDbType.Int) { Value = input.FormID }
+                                 };
+
+                DataTable dtForm = _helper.GetDataTable("[dbo].[GetFormDetails]", parameters);
+                if (dtForm.Rows.Count > 0)
+                {
+                    userID = Convert.ToInt32(dtForm.Rows[0]["UserID"]);
+                }
+                string folderName = userID + "~" + fileName;
+                if (input.GUID != string.Empty)
+                {
+
+                    fileExtension = fileDetails.FileExtension;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                }
+
+                SqlParameter[] parameters1 =
+                                         {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID},
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@GUID", SqlDbType.UniqueIdentifier, 250) { Value = new Guid(input.GUID) },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@FolderName", SqlDbType.VarChar, 100) { Value = folderName },
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertFormExperienceAttachment]", parameters1);
+                string[] folderSplit = folderName.ToString().Split('~');
+                userFolderName = folderSplit[0].ToString();
+                string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                if (Directory.Exists(dirUserFolderPath))
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    if (Directory.Exists(dirForm))
+                    {
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(dirForm);
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                }
+                else
+                {
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                    DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                    DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                    dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                    dirFieldWorkFolder.SetAccessControl(dSecurity);
+                    {
+                        File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                    }
+                }
+                response.fileName = "Experience" + "_"+ currentDateTime;
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+                return response;
+            }
+        }
+        public FormAttachments DownloadFormExperienceAttachment(string GUID)
+        {
+            FormAttachments obj = new FormAttachments();
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@GUID", SqlDbType.UniqueIdentifier) { Value = new Guid(GUID) }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetFormExperienceAttachment]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new FormAttachments
+                                          {
+                                              Filename = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtension"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetFormExperienceFileContent(Path.Combine(GetAttachmentsFolderName(row["FolderName"].ToString())), row["FileName"].ToString() + "." + Convert.ToString(row["FileExtension"]))
+                                          }).FirstOrDefault();
+
+            return obj;
+        }
+        private byte[] GetImageFilecontent(byte[] fileContent)
+        {
+            byte[] inputStream = null;
+            string documentName = string.Empty;
+            using (MemoryStream stream = new System.IO.MemoryStream())
+            {
+                //Initialize the PDF document object.
+                using (iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 10f, 10f, 10f, 10f))
+                {
+                    PdfWriter.GetInstance(pdfDoc, stream).SetFullCompression();
+                    pdfDoc.Open();
+
+                    //Add the Image file to the PDF document object.
+                    iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(fileContent);
+
+                    //Scaling the image
+                    if (pic.Height > pic.Width)
+                    {
+                        float percentage = 0.0f;
+                        percentage = 700 / pic.Height;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    else
+                    {
+                        float percentage = 0.0f;
+                        percentage = 540 / pic.Width;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    pdfDoc.Add(pic);
+                    pdfDoc.Close();
+                    inputStream = stream.ToArray();
+                }
+            }
+            return inputStream;
+        }
+        public byte[] GetFormExperienceFileContent(string userFolderPath, string fileName)
+        {
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            string[] pathSplitter = fileName.ToString().Split('_');
+            string fullFileName = pathSplitter[0].ToString();
+            // string identifierFolder = pathSplitter[1].ToString();
+            string userPath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, "Form"));
+            string filepath = Path.Combine(userPath, fileName);
+            // string filepath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, fileName));
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
         }
         public byte[] GetPDFFromJSONForSSCP(string jsonString)
         {

@@ -173,5 +173,23 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("ShowSideBySideReview")]
+        public ShowSideBySideReviewResponse ShowSideBySideReview(int ProgramID,string TermCode,int FormId,int PublishedRubricID)
+        {
+            try
+            {
+                ShowSideBySideReviewResponse response = _rubricsService.ShowSideBySideReview(ProgramID,TermCode,FormId,PublishedRubricID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ShowSideBySideReviewResponse response = new ShowSideBySideReviewResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

@@ -53,11 +53,22 @@ namespace ThoughtFocus.Service.Interfaces
         LatestWaitlistNumberResponse GetLatestWaitlistNumber(string TermCode, int ProgramID, int FormID);
         BaseResponse BulkOfferNotOfferUpdateFormState(BulkNotOfferFormStatusUpdateRequest input);
         BaseResponse UpdateRecommendation(UpdateRecommendation input);
-        public BaseResponse DeleteRecommendation(DeleteRecommendations input);
+        BaseResponse DeleteRecommendation(DeleteRecommendations input);
         AdhocMailLogResponse SendNotificationforPendingRecommendations(PendingRecommendationsRequest input);
         BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDatesRequest input);
         ProgramApplicationDates GetProgramApplicationDates(int programID, string termCode);
         ApplicationProgramResponse GetApplicationProgramsforDates(int userID, int applicationTypeID, string termCode);
         BaseResponse RevertBacktoPreviousState(int formID);
+        BaseResponse MoveApplicationToSemester(MoveApplicationToSemesterRequest input);
+        ApplicationProgramsListResponse GetApplicationProgramList(int applicationTypeID,string identifier);
+        RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId, int programID);
+        BaseResponse UpdateRecommenderMailBody(RecommenderBody input);
+        BaseResponse UpsertDecisionLetters(DecisionLettersRequest input);
+        DecisionLettersResponse GetDecisionLetters(string programIdentifier, string offeredCategories, string decisionType);
+        DropDownListResponse GetDropDownList(int programId, string controlLabel);
+        BaseResponse UpsertDropDown(DropDownRequest input);
+        ControlLabelListResponse GetControlLabelList(int programId);
+        EvaluatorMailBodyResponse GetEvaluatorMailBody(int applicationId, int programID, string identifier);
+        BaseResponse UpdateEvaluatorMailBody(EvaluatorBody input);
     }
 }

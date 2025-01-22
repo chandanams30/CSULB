@@ -15,5 +15,11 @@ namespace ThoughtFocus.Domain.Response.Application
     {
         public bool ShowNotification { get; set; }
         public string Message { get; set; }
+        public bool ShowAgreement { get; set; }
+    }
+    public class ApplicationProgram
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

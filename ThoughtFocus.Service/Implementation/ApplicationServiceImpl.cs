@@ -77,8 +77,32 @@ namespace ThoughtFocus.Service.Implementation
                                          new StudentNotificationResponse
                                          {
                                              ShowNotification = Convert.ToBoolean(row["ShowNotification"]),
-                                             Message = Convert.ToString(row["Message"])
+                                             Message = Convert.ToString(row["Message"]),
+                                             ShowAgreement = Convert.ToBoolean(row["ShowAgreement"])
                                          }).FirstOrDefault();
+            }
+
+            return obj;
+        }
+        public List<ApplicationProgram> GetApplicationsForAdminPanel(int userId)
+        {
+            // gets the list of applications
+            List<ApplicationProgram> obj = new List<ApplicationProgram>();
+
+            SqlParameter[] parameters =
+                                  {
+                                    new SqlParameter("@UserID", SqlDbType.NVarChar, 255) { Value = userId}
+                                  };
+
+            DataTable dtApplications = _helper.GetDataTable("[dbo].[GetApplicationsList]", parameters);
+            if (dtApplications.Rows.Count > 0)
+            {
+                obj = dtApplications.AsEnumerable().Select(row =>
+                                                         new ApplicationProgram
+                                                         {
+                                                             Id = Convert.ToInt32(row["Id"]),
+                                                             Name = Convert.ToString(row["Name"])
+                                                         }).ToList();
             }
 
             return obj;

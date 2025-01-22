@@ -125,11 +125,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetApplicationList")]
-        public IActionResult GetApplicationList(int userId)
+        public IActionResult GetApplicationList(int userId,string identifier)
         {
             try
             {
-                List<ApplicationList> response = _studentProfileService.GetApplications(userId);
+                List<ApplicationList> response = _studentProfileService.GetApplications(userId,identifier);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -188,25 +188,6 @@ namespace CSULB_COE.Controllers
                 StudentAppliedFormsByProgramsResponse response = new StudentAppliedFormsByProgramsResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
-                response.StackTrace = ex.Message;
-                _logger.LogError(ex, ex.Message);
-                return response;
-            }
-        }
-        [HttpPost("SaveStudentAggrement")]
-        public BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input)
-        {
-            try
-            {
-                BaseResponse response = new BaseResponse();
-                response = _studentProfileService.SaveStudentAggrement(input);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                BaseResponse response = new BaseResponse();
-                response.IsSuccess = false;
-                response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

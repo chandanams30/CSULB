@@ -115,10 +115,10 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     _fileConverter.ConvertDocumentToPDF(fi.FullName, oFile.ToString());
                 }
-                else if (fi.Extension.ToString().ToUpper().Equals(".XLS") || fi.Extension.ToString().ToUpper().Equals(".XLSX"))
-                {
-                    _fileConverter.ConvertSpreadsheetToPDF(fi.FullName, oFile.ToString());
-                }
+                //else if (fi.Extension.ToString().ToUpper().Equals(".XLS") || fi.Extension.ToString().ToUpper().Equals(".XLSX"))
+                //{
+                //    _fileConverter.ConvertSpreadsheetToPDF(fi.FullName, oFile.ToString());
+                //}
                 //else if (fi.Extension.ToString().ToUpper().Equals(".PPT") || fi.Extension.ToString().ToUpper().Equals(".PPTX"))
                 //{
                 //    fc.ConvertPPTToPDF(fi.FullName, oFile.ToString());

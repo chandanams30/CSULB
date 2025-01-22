@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace ThoughtFocus.Domain.Response.Rubrics
 {
@@ -48,6 +50,10 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public int ReviewerID { get; set; }
         public string TermCode { get; set; }
         public string State { get; set; }
+        public bool ShowSideBySideReview { get; set; }
+        public int ProgramId { get; set; }
+        public string Form { get; set; }
+        public DownloadDetails downloadDetails { get; set; }
     }
     public class RubricsDetails
     {
@@ -65,16 +71,43 @@ namespace ThoughtFocus.Domain.Response.Rubrics
         public int FormID { get; set; }
         public string RubricForm { get; set; }
         public int UserID { get; set; }
-        public int Status { get; set; }
+        public string State { get; set; }
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public int ApplicationTypeID { get; set; }
         public string TemplateName { get; set; }
         public string TemplateDescription { get; set; }
         public int TotalPoints { get; set; }
+        public string StudentName { get; set; }
+        public string ProgramName { get; set; }
+        public string TermName { get; set; }
+        public string StudentEmail { get; set; }
+        public int CSULBID { get; set; }
+        public string ReviewerName { get; set; }
     }
     public class RubricsFormActivityHandler
     {
         public string ActivityHandler { get; set; }
+    }
+    public class DownloadDetails
+    {
+        [JsonProperty("Student Name")]
+        public string StudentName { get; set; }
+        [JsonProperty("Campus ID")]
+        public int CSULBID { get; set; }
+        [JsonProperty("Program Name")]
+        public string ProgramName { get; set; }
+        [JsonProperty("Rubrics Name")]
+        public string TemplateName { get; set; }
+        [JsonProperty("Term")]
+        public string TermName { get; set; }
+        [JsonProperty("Reviewer Name")]
+        public string ReviewerName { get; set; }
+        [JsonProperty("Rubrics State")]
+        public string State { get; set; }
+        [JsonProperty("Total Points")]
+        public int TotalPoints { get; set; }
+        [JsonProperty("Scored Points")]
+        public int ScoredPoints { get; set; }
     }
 }

@@ -14,6 +14,7 @@ using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
 using ThoughtFocus.Domain.Request.FieldWork;
+using ThoughtFocus.Domain.Response.StudentProfile;
 
 namespace CSULB_COE.Controllers
 {
@@ -25,13 +26,16 @@ namespace CSULB_COE.Controllers
         public ILogger<GraduateProgramController> _logger;
         public IGraduateProgramService _graduateProgramService;
         private readonly IConfiguration _configuration;
+        public IStudentProfile _studentProfileService;
         public GraduateProgramController(IGraduateProgramService graduateProgramService ,
-              ILogger<GraduateProgramController> logger
-            , IConfiguration configuration)
+              ILogger<GraduateProgramController> logger,
+              IConfiguration configuration,
+              IStudentProfile studentProfileService)
         {
             _logger = logger;
             _graduateProgramService = graduateProgramService;
             _configuration = configuration;
+            _studentProfileService = studentProfileService;
         }
         [HttpGet("GetApplicationPrograms")]
         public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
@@ -1034,6 +1038,220 @@ namespace CSULB_COE.Controllers
                 BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to Revert Back to Previous State , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("MoveApplicationToSemester")]
+        public BaseResponse MoveApplicationToSemester(MoveApplicationToSemesterRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.MoveApplicationToSemester(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update semester , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetApplicationList")]
+        public IActionResult GetApplicationList(int userId,string identifier)
+        {
+            try
+            {
+                List<ApplicationList> response = _studentProfileService.GetApplications(userId,identifier);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest();
+            }
+
+        }
+        [HttpGet("GetApplicationProgramList")]
+        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId,string identifier)
+        {
+            try
+            {
+                ApplicationProgramsListResponse response = _graduateProgramService.GetApplicationProgramList(applicationId,identifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramsListResponse response = new ApplicationProgramsListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetRecommenderMailBody")]
+        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId,int programID)
+        {
+            try
+            {
+                RecommenderMailBodyResponse response = _graduateProgramService.GetRecommenderMailBody(applicationId,programID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                RecommenderMailBodyResponse response = new RecommenderMailBodyResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateRecommenderMailBody")]
+        public BaseResponse UpdateRecommenderMailBody(RecommenderBody input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateRecommenderMailBody(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertDecisionLetters")]
+        public BaseResponse UpsertDecisionLetters(DecisionLettersRequest input)
+        {
+            try
+            {
+                //input.MailBody = "<p>Dear [[ApplicantName]],</p><p>Your program application materials to the [[programName]] has been not offered.</p><p>You may track the status of your official transcripts and university application at <a href=\"http://www.csulb.edu/admissions/applicant-self-service\" target=\"_blank\">CSULB Applicant Self Service</a>.</p><p>Please let us know if you have any questions or concerns. We are here to help. </p><p>Warm regards</P><p>CSULB College of Education Graduate Studies Office<br/><a href=\"http://www.csulb.edu/ced/graduate\" target=\"_blank\">www.csulb.edu/ced/graduate</a><br/><a href=\"mailto:ced-gradstudies@csulb.edu\">ced-gradstudies@csulb.edu</a><br/>(562) 985-8476</p>";
+                BaseResponse response = _graduateProgramService.UpsertDecisionLetters(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetDecisionLetters")]
+        public DecisionLettersResponse GetDecisionLetters(string programIdentifier, string offeredCategories,string decisionType)
+        {
+            try
+            {
+                DecisionLettersResponse response = _graduateProgramService.GetDecisionLetters(programIdentifier,offeredCategories,decisionType);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                DecisionLettersResponse response = new DecisionLettersResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetDropDownList")]
+        public DropDownListResponse GetDropDownList(int programId,string controlLabel)
+        {
+            try
+            {
+                DropDownListResponse response = _graduateProgramService.GetDropDownList(programId,controlLabel);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                DropDownListResponse response = new DropDownListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetControlLabelList")]
+        public ControlLabelListResponse GetControlLabelList(int programId)
+        {
+            try
+            {
+                ControlLabelListResponse response = _graduateProgramService.GetControlLabelList(programId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ControlLabelListResponse response = new ControlLabelListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertDropDown")]
+        public BaseResponse UpsertDropDown(DropDownRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpsertDropDown(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetEvaluatorMailBody")]
+        public EvaluatorMailBodyResponse GetEvaluatorMailBody(int applicationId, int programID,string identifier)
+        {
+            try
+            {
+                EvaluatorMailBodyResponse response = _graduateProgramService.GetEvaluatorMailBody(applicationId, programID,identifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                EvaluatorMailBodyResponse response = new EvaluatorMailBodyResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateEvaluatorMailBody")]
+        public BaseResponse UpdateEvaluatorMailBody(EvaluatorBody input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateEvaluatorMailBody(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

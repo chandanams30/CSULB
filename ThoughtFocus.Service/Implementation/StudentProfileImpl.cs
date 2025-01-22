@@ -208,7 +208,7 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
-        public List<ApplicationList> GetApplications(int userId)
+        public List<ApplicationList> GetApplications(int userId,string identifier)
         {
             // gets the list of applications
             List<ApplicationList> obj = new List<ApplicationList>();
@@ -221,14 +221,28 @@ namespace ThoughtFocus.Service.Implementation
             DataTable dtApplications = _helper.GetDataTable("[dbo].[GetApplications]", parameters);
             if (dtApplications.Rows.Count > 0)
             {
-               //get only ICP/GPA/Doctoral applications
-                obj = dtApplications.AsEnumerable().Where(row => row.Field<long>("ID") == 1 || row.Field<long>("ID") == 2 || row.Field<long>("ID") == 3)
-                                                   .Select(row =>
-                                                         new ApplicationList
-                                                         {
-                                                             ApplicationId = Convert.ToInt32(row["ID"]),
-                                                             ApplicationName = Convert.ToString(row["Name"])
-                                                         }).ToList();
+                if (identifier == "Drop Down")
+                {
+                    //get only ICP/GPA/Field Work applications
+                    obj = dtApplications.AsEnumerable().Where(row => row.Field<long>("ID") == 1 || row.Field<long>("ID") == 2 || row.Field<long>("ID") == 4)
+                                                       .Select(row =>
+                                                             new ApplicationList
+                                                             {
+                                                                 ApplicationId = Convert.ToInt32(row["ID"]),
+                                                                 ApplicationName = Convert.ToString(row["Name"])
+                                                             }).ToList();
+                }
+                else
+                {
+                    //get only ICP/GPA/Doctoral applications
+                    obj = dtApplications.AsEnumerable().Where(row => row.Field<long>("ID") == 1 || row.Field<long>("ID") == 2 || row.Field<long>("ID") == 3)
+                                                       .Select(row =>
+                                                             new ApplicationList
+                                                             {
+                                                                 ApplicationId = Convert.ToInt32(row["ID"]),
+                                                                 ApplicationName = Convert.ToString(row["Name"])
+                                                             }).ToList();
+                }
             }
 
             return obj;

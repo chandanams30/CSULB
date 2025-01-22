@@ -241,7 +241,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   programID = Convert.ToInt32(row["ProgramID"]),
                                                   showAssignApplicationToReviewers = Convert.ToBoolean(row["showAssignApplicationToReviewers"]),
                                                   showBulkDeny = Convert.ToBoolean(row["showBulkDeny"]),
-                                                  showBulkOffer = Convert.ToBoolean(row["showBulkOffer"])
+                                                  showBulkOffer = Convert.ToBoolean(row["showBulkOffer"]),
+                                                  showDeletedFormsButton = Convert.ToBoolean(row["showDeletedFormsButton"])
                                               }).FirstOrDefault();
                     }
 
@@ -394,7 +395,9 @@ namespace ThoughtFocus.Service.Implementation
                                                    SubmittedDateTime = Convert.ToDateTime(row["SubmittedDateTime"] == DBNull.Value ? null : row["SubmittedDateTime"]),
                                                    WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"] == DBNull.Value ? null : row["WaitlistNumber"]),
                                                    WaitlistComments = Convert.ToString(row["WaitlistComments"] == DBNull.Value ? null : row["WaitlistComments"]),
-                                                   FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecision"])
+                                                   FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecision"]),
+                                                   CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"])
+
 
                                                }).FirstOrDefault();
 
@@ -1103,6 +1106,9 @@ namespace ThoughtFocus.Service.Implementation
                     string body = string.Empty;
                     string programName = string.Empty;
                     string finalDecision = string.Empty;
+                    string decisionType = string.Empty;
+                    string beforeBody = string.Empty;
+                    string afterBody = string.Empty;
 
                     applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                     toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
@@ -1112,16 +1118,36 @@ namespace ThoughtFocus.Service.Implementation
                     if (formStateID == 10)
                     {
                         subject = "Application Offered";
-                        if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
-                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
-                        else
-                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
+                        decisionType = "Offered";
+                        //if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
+                        //    //body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
+                        //else
+                        //    body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
                     }
                     else
                     {
                         subject = "Application Not Offered";
-                        body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                        decisionType = "Not Offered";
+                        //body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
                     }
+                    SqlParameter[] parameters2 ={
+                                            new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = "" },
+                                            new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = finalDecision },
+                                            new SqlParameter("@DecisionType", SqlDbType.NVarChar , 50) { Value = decisionType },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programID }
+                                       };
+
+                    DataSet dtDL = _helper.GetDataSet("[Application].[GetDecisionLetters]", parameters2);
+                    if (dtDL.Tables[1].Rows.Count > 0)
+                    {
+                        if (dtDL.Tables[1].Rows[0]["MailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
+                        }
+                    }
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
                     body = body.Replace("[[logoPath]]", logoText)
                                .Replace("[[ApplicantName]]", applicantsName)
                                .Replace("[[programName]]", programName)
@@ -1177,14 +1203,27 @@ namespace ThoughtFocus.Service.Implementation
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[i]["ApplicantName"]);
                         applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[i]["ApplicationDeadline"]);
                         RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
+                        string beforeBody = string.Empty;
+                        string afterBody = string.Empty;
+                        if (programID == 1 || programID == 2 || programID == 4 || programID == 6 || programID == 27 || programID == 28)
+                        {
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                        else
+                        {
+                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
 
                         link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                         body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[RecommenderName]]", recommenderName)
                             .Replace("[[applicantname]]", applicantsName)
                             .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
-                            .Replace("[[link]]", link)
-                            ;
+                            .Replace("[[link]]", link);
 
                         string subject = "Attention: CSULB Recommendation Request";
                         if (RecommenderMailTemplateAttachement)
@@ -1505,7 +1544,21 @@ namespace ThoughtFocus.Service.Implementation
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                         applicationDeadline = Convert.ToDateTime(dsRec.Tables[0].Rows[0]["ApplicationDeadline"]);
                         RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
-                        programID = Convert.ToInt32(dsRec.Tables[0].Rows[0]["ProgramID"]); 
+                        programID = Convert.ToInt32(dsRec.Tables[0].Rows[0]["ProgramID"]);
+                        string beforeBody = string.Empty;
+                        string afterBody = string.Empty;
+                        if (programID == 1 || programID == 2 || programID == 4 || programID == 6 || programID == 27 || programID == 28)
+                        {
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                        else
+                        {
+                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
                         link = @"<a href ='" + recommenderURL + "' target='_blank'>here</a>";
                         body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[RecommenderName]]", recommenderName)
@@ -1513,38 +1566,38 @@ namespace ThoughtFocus.Service.Implementation
                             .Replace("[[deadline]]", applicationDeadline.ToString("MM/dd/yyyy"))
                             .Replace("[[link]]", link)
                             ;
-                    string subject = "Attention: CSULB Recommendation Request";
-                    if (RecommenderMailTemplateAttachement)
-                    {
-                        userFolderPath = "SupportFiles/EmailAttachments";
-                        templateFileName = "Recommender_Template_" + programID + ".pdf";
-                        byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                        //_logger.LogInformation(fileContent.Length.ToString());
-                        if (fileContent == null || fileContent.Length < 1)
+                        string subject = "Attention: CSULB Recommendation Request";
+                        if (RecommenderMailTemplateAttachement)
                         {
-                            templateFileName = "Recommender_Template.pdf";
-                            fileContent = GetAttachmentContent(userFolderPath, templateFileName);
-                        }
-                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
-                        {
-                            if (fileContent != null && fileContent.Length > 0)
+                            userFolderPath = "SupportFiles/EmailAttachments";
+                            templateFileName = "Recommender_Template_" + programID + ".pdf";
+                            byte[] fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                            //_logger.LogInformation(fileContent.Length.ToString());
+                            if (fileContent == null || fileContent.Length < 1)
                             {
-                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
-                                obj.IsSuccess = true;
-                                obj.Message = "Mail sent successfully !";
+                                templateFileName = "Recommender_Template.pdf";
+                                fileContent = GetAttachmentContent(userFolderPath, templateFileName);
+                            }
+                            if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                            {
+                                if (fileContent != null && fileContent.Length > 0)
+                                {
+                                    _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, fileContent);
+                                    obj.IsSuccess = true;
+                                    obj.Message = "Mail sent successfully !";
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                        else
                         {
-                                _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, "");
-                                obj.IsSuccess = true;
-                                obj.Message = "Mail sent successfully !";
+                            if ((!string.IsNullOrEmpty(recommenderEmail)) && (!string.IsNullOrEmpty(body)))
+                            {
+                                    _sendMail.SendEmail(recommenderEmail, "", "RECOMMENDER", subject, body, "");
+                                    obj.IsSuccess = true;
+                                    obj.Message = "Mail sent successfully !";
                             
+                            }
                         }
-                    }
 
                 }
             }
@@ -1707,7 +1760,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            //input.LetterOfRecommendationJSON = "{\r\n\t\"personalInfo\": {\r\n\t\t\"position_title\": \"sdf\",\r\n\t\t\"recommenderFirstName\": \"awge\",\r\n\t\t\"recommenderLastName\": \"\",\r\n\t\t\"studentName\": \"Ailym Arciga\",\r\n\t\t\"campusID\": \"014169166\",\r\n\t\t\"email\": \"Ailym.Arciga@student.csulb.edu\"\r\n\t},\r\n\t\"signatureOfRecommender\": {\r\n\t\t\"name\": \"chandana\",\r\n\t\t\"date\": \"07/30/2024\"\r\n\t},\r\n\t\"academicCompetency\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"professionalism\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"dispositionsPersonalityCharacter\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Area Needs Improvement\"\r\n\t},\r\n\t\"specialEducation\": {\r\n\t\t\"comments\": \"\",\r\n\t\t\"scale\": \"Average (Satisfactory)\"\r\n\t},\r\n\t\"studentOverAllRank\": \"Top 5% One of the best\"\r\n}";
+            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"applicantFirstName\":\"Carina\",\"applicantLastName\":\"Aguilera Mendoza\",\"credentialSubjectArea\":\"\",\"campusID\":\"027673813\",\"recommenderFirstName\":\"tesqa\",\"recommenderLastName\":\"\",\"institution\":\"Instititution\",\"position_title\":\" Title\",\"telephoneContact\":\"(777) 777 - 7777\",\"email\":\"madhutest1503@gmail.com\"},\"applicantRelatedAnswers\":{\"answer1\":\"test\",\"answer2\":\" Title\",\"answer3\":\" Title\",\"answer4\":\" Title\",\"answer5\":[{\"qualities\":\"Intellectual Capacity\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Ability To Work With Others\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Maturity\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Potential for Teaching\",\"value\":\"Below Average Bottom 1/3\"},{\"qualities\":\"Professional Conduct / Deposition\",\"value\":\"Below Average Bottom 1/3\"}],\"answer6\":\"Recommend\"},\"signatureOfRecommender\":{\"name\":\"chandana\",\"date\":\"11/05/2024\"},\"comments\":\"test\"}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
@@ -2200,7 +2253,7 @@ namespace ThoughtFocus.Service.Implementation
                 string logoText = "cid:myImageID";
                 applicantsName= Convert.ToString(dtResponse.Rows[0]["ApplicantName"]);
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
-                ccMail= Convert.ToString(dtResponse.Rows[0]["altEmail"]);
+                ccMail= Convert.ToString(dtResponse.Rows[0]["RecommenderEmail"]);
                 subject = "Recommendation Submitted";
                 if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP")
                 {
@@ -3520,7 +3573,9 @@ namespace ThoughtFocus.Service.Implementation
                         string subject = string.Empty;
                         string body = string.Empty;
                         string programName = string.Empty;
-
+                        string decisionType = string.Empty;
+                        string beforeBody = string.Empty;
+                        string afterBody = string.Empty;
                         applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                         toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
                         ccMail = Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
@@ -3528,18 +3583,39 @@ namespace ThoughtFocus.Service.Implementation
                         if (input.FormStateID == 10)
                         {
                             subject = "Application Offered";
-                            body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
+                            decisionType = "Offered";
+                            //body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
                         }
                         else
                         {
                             subject = "Application Not Offered";
-                            body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                            decisionType = "Not Offered";
+                        //body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
+                    }
+                    SqlParameter[] parameters2 ={
+                                            new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = "" },
+                                            new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = "" },
+                                            new SqlParameter("@DecisionType", SqlDbType.NVarChar , 50) { Value = decisionType },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = input.ProgramID }
+                                       };
+
+                    DataSet dtDL = _helper.GetDataSet("[Application].[GetDecisionLetters]", parameters2);
+                    if (dtDL.Tables[1].Rows.Count > 0)
+                    {
+                        if (dtDL.Tables[1].Rows[0]["MailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
                         }
-                        body = body.Replace("[[logoPath]]", logoText)
+                    }
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
+                    
+                    body = body.Replace("[[logoPath]]", logoText)
                                    .Replace("[[ApplicantName]]", applicantsName)
                                    .Replace("[[programName]]", programName);
-                        byte[] inputStr = null;
-                        _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
+                    byte[] inputStr = null;
+                    _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
                     }
                 }
             response.IsSuccess = true;
@@ -3765,6 +3841,436 @@ namespace ThoughtFocus.Service.Implementation
             int ID = _helper.InsertTable("[dbo].[RevertBacktoPreviousState]", parameters);
             response.Message = "Reverted Back to Previous State Successfully";
             response.IsSuccess = true;
+            return response;
+        }
+        public BaseResponse MoveApplicationToSemester(MoveApplicationToSemesterRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar, -1) { Value = input.FormSchema }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[MoveApplicationToSemester]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated Semester Successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the semester";
+                    response.IsSuccess = true;
+                }
+            }
+            return response;
+        }
+        public ApplicationProgramsListResponse GetApplicationProgramList(int applicationId,string identifier)
+        {
+            ApplicationProgramsListResponse obj = new ApplicationProgramsListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
+                                       };
+
+            DataTable dtApplicationPrograms = _helper.GetDataTable("[dbo].[GetProgramsByApplicationType]", parameters);
+            try
+            {
+                if (dtApplicationPrograms.Rows.Count > 0)
+                {
+                    if (applicationId == 1 && identifier == "Evaluation")
+                    {
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 2 || row.Field<long>("ID") == 4).Select(row =>
+                                              new ApplicationProgramsList
+                                              {
+                                                  ProgramID = Convert.ToInt32(row["ID"]),
+                                                  ProgramName = Convert.ToString(row["Name"])
+                                              }).ToList();
+                    }
+                    else if (applicationId == 2 && identifier == "Drop Down")
+                    {
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 12 || row.Field<long>("ID") == 20).Select(row =>
+                                              new ApplicationProgramsList
+                                              {
+                                                  ProgramID = Convert.ToInt32(row["ID"]),
+                                                  ProgramName = Convert.ToString(row["Name"])
+                                              }).ToList();
+                    }
+                    else
+                    {
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Select(row =>
+                                                  new ApplicationProgramsList
+                                                  {
+                                                      ProgramID = Convert.ToInt32(row["ID"]),
+                                                      ProgramName = Convert.ToString(row["Name"])
+                                                  }).ToList();
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId, int programID)
+        {
+            RecommenderMailBodyResponse obj = new RecommenderMailBodyResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID }
+                                       };
+
+            DataTable dtRecom = _helper.GetDataTable("[dbo].[GetRecommenderMailBody]", parameters);
+            try
+            {
+                if (dtRecom.Rows.Count > 0)
+                {
+                    obj.recommenderResponse = dtRecom.AsEnumerable().Select(row =>
+                                              new RecommenderBody
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  RecommenderMailBody = Convert.ToString(row["RecommenderMailBody"])
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpdateRecommenderMailBody(RecommenderBody input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
+                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.RecommenderMailBody }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateRecommenderMailBody]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated recommender mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the recommender mail body";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public BaseResponse UpsertDecisionLetters(DecisionLettersRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@DecisionLettersID", SqlDbType.BigInt) { Value = input.DecisionLettersID },
+                                          new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar,10) { Value = input.ProgramIdentifier },
+                                          new SqlParameter("@OfferedCategories", SqlDbType.NVarChar,50) { Value = input.OfferedCategories },
+                                          new SqlParameter("@DecisionType", SqlDbType.NVarChar,50) { Value = input.DecisionType },
+                                          new SqlParameter("@MailBody", SqlDbType.NVarChar, -1) { Value = input.MailBody },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[Application].[UpsertDecisionLetters]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated admit letter mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the admit letter mail body";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public DecisionLettersResponse GetDecisionLetters(string programIdentifier, string offeredCategories, string decisionType)
+        {
+            DecisionLettersResponse obj = new DecisionLettersResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = programIdentifier },
+                                            new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = offeredCategories },
+                                            new SqlParameter("@DecisionType", SqlDbType.NVarChar , 50) { Value = decisionType }
+                                       };
+
+            DataSet dtDL = _helper.GetDataSet("[Application].[GetDecisionLetters]", parameters);
+            try
+            {
+                if (dtDL.Tables[0].Rows.Count > 0)
+                {
+                    if (dtDL.Tables[0].Rows[0]["ID"] != DBNull.Value)
+                    {
+                        obj.finalDecision = dtDL.Tables[0].AsEnumerable().Select(row =>
+                                                new FinalDecision
+                                                {
+                                                    ID = Convert.ToInt32(row["ID"]),
+                                                    Decision = Convert.ToString(row["Decision"])
+                                                }).ToList();
+                    }
+                    else
+                    {
+                        obj.finalDecision = null;
+                    }
+                    if (dtDL.Tables[1].Rows.Count > 0)
+                    {
+                        if (dtDL.Tables[1].Rows[0]["ProgramIdentifier"] != DBNull.Value)
+                        {
+                            obj.decisionLetters = dtDL.Tables[1].AsEnumerable().Select(row =>
+                                                  new DecisionLetters
+                                                  {
+                                                      DecisionLettersID = Convert.ToInt32(row["DecisionLettersID"]),
+                                                      ProgramIdentifier = Convert.ToString(row["ProgramIdentifier"]),
+                                                      OfferedCategories = Convert.ToString(row["OfferedCategories"]),
+                                                      DecisionType = Convert.ToString(row["DecisionType"]),
+                                                      MailBody = Convert.ToString(row["MailBody"]),
+                                                      CreatedByUserID = Convert.ToInt32(row["CreatedByUserID"]),
+                                                      UpdatedDateTime = Convert.ToDateTime(row["UpdatedDateTime"])
+                                                  }).FirstOrDefault();
+                        }
+                        else
+                        {
+                            obj.decisionLetters = null;
+                        }
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public DropDownListResponse GetDropDownList(int programId, string controlLabel)
+        {
+            DropDownListResponse obj = new DropDownListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programId },
+                                            new SqlParameter("@ControlLabel", SqlDbType.VarChar,50) { Value = controlLabel }
+                                       };
+
+            DataTable dtDD = _helper.GetDataTable("[Master].[Get_Dropdowns_for_ICP_and_GRAD]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+                    if (programId > 6)
+                    {
+                        obj.DropDowns = dtDD.AsEnumerable().Where(row => row.Field<string>("ControlLabel") == "PersonalInformation").Select(row =>
+                                              new DropDowns
+                                              {
+                                                  DropdownId = Convert.ToInt32(row["DropdownId"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  ControlLabel = "Confirm Program Option Applying to",
+                                                  ControlValue = Convert.ToString(row["ControlValue"]),
+                                                  Active = Convert.ToBoolean(row["Active"])
+                                              }).ToList();
+                    }
+                    else
+                    {
+                        obj.DropDowns = dtDD.AsEnumerable().Select(row =>
+                                                  new DropDowns
+                                                  {
+                                                      DropdownId = Convert.ToInt32(row["DropdownId"]),
+                                                      ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                      ControlLabel = Convert.ToString(row["ControlLabel"]),
+                                                      ControlValue = Convert.ToString(row["ControlValue"]),
+                                                      Active = Convert.ToBoolean(row["Active"])
+                                                  }).ToList();
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ControlLabelListResponse GetControlLabelList(int programId)
+        {
+            ControlLabelListResponse obj = new ControlLabelListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programId }
+                                       };
+
+            DataTable dtCL = _helper.GetDataTable("[Master].[Get_Program_Term_for_ICP_and_GRAD]", parameters);
+            try
+            {
+                if (dtCL.Rows.Count > 0)
+                {
+                    if (programId > 6)
+                    {
+                        obj.ConrolLabels = dtCL.AsEnumerable().Where(row=> row.Field<string>("ControlLabel") == "PersonalInformation").Select(row =>
+                                              new ConrolLabel
+                                              {
+                                                  Label = "Confirm Program Option Applying to",
+                                                  Value = Convert.ToString(row["ControlLabel"])
+                                              }).ToList();
+                    }
+                    else
+                    {
+                        obj.ConrolLabels = dtCL.AsEnumerable().Select(row =>
+                                                  new ConrolLabel
+                                                  {
+                                                      Label = Convert.ToString(row["ControlLabel"]),
+                                                      Value = Convert.ToString(row["ControlLabel"])
+                                                  }).ToList();
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpsertDropDown(DropDownRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = input.ProgramId },
+                                          new SqlParameter("@ControlLabel", SqlDbType.NVarChar,50) { Value = input.ControlLabel },
+                                          new SqlParameter("@ControlValue", SqlDbType.NVarChar,-1) { Value = input.ControlValue },
+                                          new SqlParameter("@Active", SqlDbType.Bit) { Value = input.Active },
+                                          new SqlParameter("@Action", SqlDbType.BigInt) { Value = input.Action},
+                                          new SqlParameter("@DropdownId", SqlDbType.BigInt) { Value = input.DropdownId}
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[Master].[Upsert_Dropdowns_for_ICP_and_GRAD]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public EvaluatorMailBodyResponse GetEvaluatorMailBody(int applicationId, int programID, string identifier)
+        {
+            EvaluatorMailBodyResponse obj = new EvaluatorMailBodyResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = identifier }
+                                       };
+
+            DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters);
+            try
+            {
+                if (dtEval.Rows.Count > 0)
+                {
+                    obj.evaluatorResponse = dtEval.AsEnumerable().Select(row =>
+                                              new EvaluatorBody
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  EvaluatorMailBody = Convert.ToString(row["EvaluatorMailBody"])
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpdateEvaluatorMailBody(EvaluatorBody input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
+                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.EvaluatorMailBody }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateRecommenderMailBody]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated clinical practice evaluation mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the clinical practice evaluation mail body";
+                    response.IsSuccess = false;
+                }
+            }
             return response;
         }
     }

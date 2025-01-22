@@ -29,6 +29,7 @@ using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Service.Interfaces;
 using static ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata;
+using static ThoughtFocus.Domain.Response.FieldWork.FieldWorkActivityLogListResponse;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -71,8 +72,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   College = Convert.ToString(row["College"]),
                                                   Section = Convert.ToString(row["Section"]),
                                                   Term = Convert.ToString(row["Term"]),
-                                                  FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"])
-                                                 ,
+                                                  FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
                                                   UIHandler = Convert.ToString(row["UIHandler"])
                                               }).FirstOrDefault();
 
@@ -163,11 +163,12 @@ namespace ThoughtFocus.Service.Implementation
                                         };
 
             DataTable dtFieldWorkList = _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
+            var courseList = _configuration["ApplicationKeys:FieldWorkValidCourses"].Split(',').Select(id => id.Trim());
             try
             {
                 if (dtFieldWorkList.Rows.Count > 0)
                 {
-                    obj = dtFieldWorkList.AsEnumerable().Select(row =>
+                    obj = dtFieldWorkList.AsEnumerable().Where(row => courseList.Any(course => string.Equals(Convert.ToString(row["CourseName"]), course, StringComparison.OrdinalIgnoreCase))).Select(row =>
                                               new FieldWorkResponse
                                               {
                                                   FieldWorkId = Convert.ToInt32(row["ID"]),
@@ -183,7 +184,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
                                                   PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"]),
                                                   LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
-                                                  ApprovedHours = Convert.ToDecimal(row["ApprovedHours"])
+                                                  ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
+                                                  CourseName = Convert.ToString(row["CourseName"])
 
                                               }).ToList();
 
@@ -543,6 +545,7 @@ namespace ThoughtFocus.Service.Implementation
         public FieldWorkActivityLogListResponse GetFieldWorkActivityLog(int userId, int fieldworkId)
         {
             FieldWorkActivityLogListResponse obj = new FieldWorkActivityLogListResponse();
+            DownloadDetail objDD = new DownloadDetail();
             List<FieldWorkActivityLogResponse> objList = new List<FieldWorkActivityLogResponse>();
 
             SqlParameter[] parameters =
@@ -568,13 +571,39 @@ namespace ThoughtFocus.Service.Implementation
                                                   status = Convert.ToString(row["Status"]),
                                                   ShowCheckbox = Convert.ToBoolean(row["ShowCheckbox"])
                                               }).ToList();
+
                 obj.activityLogHandler = dtActivityLog.Tables[1].AsEnumerable().Select(row =>
                                        new FieldWorkActivityLogHandler
                                        {
                                            ActivityLogHandler = Convert.ToString(row["AcitivityLogHandler"])
                                        }).FirstOrDefault();
 
+                Summary objSummary = dtActivityLog.Tables[2].AsEnumerable().Select(row =>
+                                                    new Summary
+                                                    {
+                                                        ExpectedHours = Convert.ToDecimal(row["ExpectedHours"]),
+                                                        LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
+                                                        SentForApproval = Convert.ToDecimal(row["SentforApproval"]),
+                                                        ApprovedHours = Convert.ToDecimal(row["ApprovedHours"])
+                                                    }).FirstOrDefault();
+                objDD.summary = objSummary;
+
+                FieldWorkInformation objFI = dtActivityLog.Tables[3].AsEnumerable().Select(row =>
+                                                new FieldWorkInformation
+                                                {
+                                                    StudentName = Convert.ToString(row["StudentName"]),
+                                                    CourseName = Convert.ToString(row["CourseTitle"]),
+                                                    Semester = Convert.ToString(row["Term"]),
+                                                    Instructor = Convert.ToString(row["SupervisorName"]),
+                                                    StudentID = Convert.ToString(row["StudentID"]),
+                                                    CourseNumber = Convert.ToString(row["Course"]),
+                                                    Section = Convert.ToInt32(row["Section"])
+                                                }).FirstOrDefault();
+                objDD.fieldWorkInformation = objFI;
+                obj.downloadDetails = objDD;
+
                 obj.fieldWorkList = objList;
+                
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully";
             }
@@ -1668,7 +1697,8 @@ namespace ThoughtFocus.Service.Implementation
                                                       isMailSent = Convert.ToBoolean(row["isMailSent"]),
                                                       EvaluationJSON = Convert.ToString(row["EvaluationJSON"] == DBNull.Value ? null : row["EvaluationJSON"]),
                                                       CanView = Convert.ToBoolean(row["CanView"]),
-                                                      FileLink = Convert.ToString(row["FileLink"])
+                                                      FileLink = Convert.ToString(row["FileLink"]),
+                                                      ApplicationType = Convert.ToString(row["ApplicationType"])
                                                   }).ToList();
 
                     }
@@ -1711,7 +1741,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@EvaluatorEmail", SqlDbType.VarChar,200) { Value = input.EvaluatorEmail }
                                         };
 
-            DataTable evaluationDetails = _helper.GetDataTable("[FieldWork].[UpsertEvaluation]", parameters);
+            DataSet evaluationDetails = _helper.GetDataSet("[FieldWork].[UpsertEvaluation]", parameters);
             string logoText = "cid:myImageID";
             string evaluatorName = string.Empty;
             string evaluatorEmail = string.Empty;
@@ -1723,33 +1753,57 @@ namespace ThoughtFocus.Service.Implementation
             bool isMailSent = false;
             try
             {
-                if (evaluationDetails.Rows.Count > 0)
+                if (evaluationDetails.Tables[1].Rows.Count > 0)
                 {
-                    // send mail to the evaluator with the URL link  
-                    evaluatorName = Convert.ToString(evaluationDetails.Rows[0]["EvaluatorName"]);
-                    evaluatorEmail = Convert.ToString(evaluationDetails.Rows[0]["EvaluatorEmail"]);
-                    evaluationURL = Convert.ToString(evaluationDetails.Rows[0]["EvaluationURL"]);
-                    evaluationIdentifier = Convert.ToString(evaluationDetails.Rows[0]["EvaluationIdentifier"]);
-                    applicantName = Convert.ToString(evaluationDetails.Rows[0]["StudentName"]);
-                    link = evaluationURL + evaluationIdentifier;
-                    body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
-                    body = body.Replace("[[logoPath]]", logoText)
-                        .Replace("[[applicantname]]", applicantName)
-                        .Replace("[[link]]", link);
-
-                    string subject = "CSULB MSCP Clinical Practice Evaluation Form";
-                    _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
-                    isMailSent = true;
-                    SqlParameter[] parmeter1 =
+                    if (Convert.ToString(evaluationDetails.Tables[1].Rows[0]["Status"]) == "FAILURE")
                     {
-                        new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
-                    };
-                    DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
-                    string id = evalDetails.Rows[0]["EvaluationID"].ToString();
-                    UpdateEvaluationMailSent(input, isMailSent, id);
-                 }
-                response.Message = "Evaluation added and mail sent successfully";
-                response.IsSuccess = true;
+                        response.Message = Convert.ToString(evaluationDetails.Tables[1].Rows[0]["Message"]);
+                        response.IsSuccess = false;
+                    }
+                    else
+                    {
+                        if (evaluationDetails.Tables[0].Rows.Count > 0)
+                        {
+                            // send mail to the evaluator with the URL link  
+                            evaluatorName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluatorName"]);
+                            evaluatorEmail = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluatorEmail"]);
+                            evaluationURL = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluationURL"]);
+                            evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluationIdentifier"]);
+                            applicantName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["StudentName"]);
+                            link = evaluationURL + evaluationIdentifier;
+                            //get evaluation mail body
+                            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
+                                       };
+                            DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
+                            body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                            //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
+                            body = body.Replace("[[logoPath]]", logoText)
+                                .Replace("[[applicantname]]", applicantName)
+                                .Replace("[[link]]", link);
+
+                            string subject = "CSULB MSCP Clinical Practice Evaluation Form";
+                            _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                            isMailSent = true;
+                            SqlParameter[] parmeter1 =
+                            {
+                                new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
+                            };
+                            DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
+                            string id = evalDetails.Rows[0]["EvaluationID"].ToString();
+                            UpdateEvaluationMailSent(input, isMailSent, id);
+                        }
+                        response.Message = "Evaluation added and mail sent successfully";
+                        response.IsSuccess = true;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -1817,6 +1871,17 @@ namespace ThoughtFocus.Service.Implementation
         public BaseResponse UpdateEvaluationJSON(UpdateEvaluationJSONRequest input)
         {
             BaseResponse response = new BaseResponse();
+            string logoText = "cid:myImageID";
+            string evaluatorEmail = string.Empty;
+            string applicantName = string.Empty;
+            string body = string.Empty;
+            bool isMailSent = false;
+            string subject = string.Empty;
+            string beforeBody = string.Empty;
+            string afterBody = string.Empty;
+            string studentEmail = string.Empty;
+            UpsertEvaluationRequest upsertEvaluationRequest = new UpsertEvaluationRequest();
+
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@EvaluationID", SqlDbType.BigInt) { Value = input.EvaluationID },
@@ -1827,7 +1892,44 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@EvaluationJSON", SqlDbType.VarChar, -1) { Value = input.EvaluationJSON }
                                         };
 
-            int ID = _helper.InsertTable("[FieldWork].[UpdateEvaluationJSON]", parameters);
+            DataSet dtDLLOR = _helper.GetDataSet("[FieldWork].[UpdateEvaluationJSON]", parameters);
+
+            if (dtDLLOR.Tables[0].Rows.Count > 0)
+            {
+                evaluatorEmail = dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"]) : "";
+                applicantName = dtDLLOR.Tables[0].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["ApplicantName"]) : "";
+                studentEmail = dtDLLOR.Tables[0].Rows[0]["StudentEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["StudentEmail"]) : "";
+            }
+
+            upsertEvaluationRequest.EvaluationID = input.EvaluationID;
+            upsertEvaluationRequest.UserID = input.UserID;
+            upsertEvaluationRequest.ProgramID = input.ProgramID;
+            upsertEvaluationRequest.TermCode = input.TermCode;
+            upsertEvaluationRequest.FieldWorkID = input.FieldWorkID;
+
+            SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt, 10) { Value = 1 },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = 2 },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar) { Value = "Student Confirmation Mail" },
+
+                                       };
+            DataSet dtDL = _helper.GetDataSet("[Application].[GetEvaluatorEmail]", parameters1);
+            if (dtDL.Tables[0].Rows.Count > 0)
+            {
+                if (dtDL.Tables[0].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
+                {
+                    body = Convert.ToString(dtDL.Tables[0].Rows[0]["EvaluatorMailBody"]);
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    afterBody = "</body></html>";
+                    body = $"{beforeBody}{body}{afterBody}";
+                    body = body.Replace("[[logoPath]]", logoText)
+                            .Replace("[[applicantname]]", applicantName);
+                    subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
+                    _sendMail.SendEmail(studentEmail, evaluatorEmail, "COMMON", subject, body, "");
+                    isMailSent = true;
+                    UpdateEvaluationMailSent(upsertEvaluationRequest, isMailSent, Convert.ToString(input.EvaluationID));
+                }
+            }
             response.Message = "Data updated successfully";
             response.IsSuccess = true;
             return response;
@@ -2504,6 +2606,73 @@ namespace ThoughtFocus.Service.Implementation
             }
 
             return obj;
+        }
+        public StandardsAndSchoolTypeDropdownList GetStandardsAndSchoolTypeDropdown(int categoryID, string dropdownType)
+        {
+            StandardsAndSchoolTypeDropdownList obj = new StandardsAndSchoolTypeDropdownList();
+            SqlParameter[] parameters = {
+                                           new SqlParameter("@CategoryID", SqlDbType.BigInt) { Value = categoryID },
+                                           new SqlParameter("@DropdownType", SqlDbType.VarChar,20) { Value = dropdownType },
+                                        };
+            DataTable dtDropDownList = _helper.GetDataTable("[FieldWork].[GetStandardsAndSchoolTypeDropdown]", parameters);
+            try
+            {
+                if (dtDropDownList.Rows.Count > 0)
+                {
+                    obj.dropDowns = dtDropDownList.AsEnumerable().Select(row =>
+                                              new StandardsAndSchoolTypeDropdown
+                                              {
+                                                  DropdownId = Convert.ToInt32(row["ID"]),
+                                                  ControlLabel = Convert.ToString(row["NAME"]),
+                                                  ControlValue = Convert.ToString(row["DESCRIPTION"]),
+                                                  Active = Convert.ToBoolean(row["IsActive"])
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpsertDropDown(UpdateDropDownRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.DropdownId },
+                                          new SqlParameter("@CategoryID", SqlDbType.BigInt) { Value = input.CategoryID },
+                                          new SqlParameter("@DropdownType", SqlDbType.VarChar,20) { Value = input.DropdownType},
+                                          new SqlParameter("@ActionFlag", SqlDbType.BigInt) { Value = input.Action },
+                                          new SqlParameter("@Name", SqlDbType.VarChar,250) { Value = input.ControlLabel },
+                                          new SqlParameter("@Description", SqlDbType.VarChar, -1) { Value = input.ControlValue},
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID}
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[FieldWork].[AddEditDeleteDropdown]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
         }
 
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)

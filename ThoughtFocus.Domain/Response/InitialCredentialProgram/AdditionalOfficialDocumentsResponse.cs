@@ -22,4 +22,8 @@ namespace ThoughtFocus.Domain.Response.InitialCredentialProgram
         public string UploadedByName { get; set; }
         public string CanView { get; set; }
     }
+    public class FormExperienceAttachmentResponse : BaseResponse
+    {
+        public string fileName { get; set; }
+    }
 }
