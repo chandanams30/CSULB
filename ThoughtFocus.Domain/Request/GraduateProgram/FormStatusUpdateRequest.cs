@@ -14,7 +14,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int FormStateID { get; set; }
         public int  WaitlistNumber { get; set; }
         public string WaitlistComments { get; set; }
-        //public int FinalDecision { get; set; }
+        public int FinalDecision { get; set; }
     }
     public class BulkNotOfferFormStatusUpdateRequest
     {

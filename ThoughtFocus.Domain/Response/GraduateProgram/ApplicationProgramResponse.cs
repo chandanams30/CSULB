@@ -41,8 +41,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string programName { get; set; }
         public int programID { get; set; }
         public bool showDeletedFormsButton { get; set; }
-        //public bool showBulkDeny { get; set; }
-        //public bool showBulkOffer { get; set; }
+        public bool showBulkDeny { get; set; }
+        public bool showBulkOffer { get; set; }
     }
     public class ApplicationProgramsList
     {

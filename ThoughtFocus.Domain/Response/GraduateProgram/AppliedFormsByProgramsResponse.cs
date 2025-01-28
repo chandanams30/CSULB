@@ -44,7 +44,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string ReviewerRecommendation { get; set; }
         public string FinalDecision { get; set; }
         public int WaitlistNumber { get; set; }
-        //public bool ShowBulkCheckBox { get; set; }
+        public bool ShowBulkCheckBox { get; set; }
         public string ResumeUploadStatus { get; set; }
         public string SOPUploadStatus {  get; set; }
         
