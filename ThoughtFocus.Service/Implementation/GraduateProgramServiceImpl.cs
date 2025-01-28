@@ -975,10 +975,10 @@ namespace ThoughtFocus.Service.Implementation
                     }
                 }
             }
-            //else if (input.FormStateID == 10 || input.FormStateID == 11 )
-            //{
-            //    sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode,input.FormStateID);
-            //}
+            else if (input.FormStateID == 10 || input.FormStateID == 11 )
+            {
+                sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode,input.FormStateID);
+            }
             response.IsSuccess = true;
             response.Message = "Data updated successfully";
             return response;
