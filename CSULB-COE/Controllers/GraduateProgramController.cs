@@ -806,6 +806,16 @@ namespace CSULB_COE.Controllers
             try
             {
                 BaseResponse response = new BaseResponse();
+                //string filepath = "D:\\TestFiles\\test.pdf";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
                 response = _graduateProgramService.AddRecommendation(input);
                 return response;
             }
