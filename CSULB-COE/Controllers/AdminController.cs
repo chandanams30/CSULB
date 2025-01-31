@@ -313,5 +313,67 @@ namespace CSULB_COE.Controllers
             }
         }
 
+        [HttpGet("GetFutureSemesterLists")]
+        //public UpcomingSemesterListResponse GetFutureSemesterLists()
+        public IActionResult GetFutureSemesterLists()
+        {
+            try
+            {
+                UpcomingSemesterListResponse response = _adminService.GetFutureSemesterList();
+                //return response;
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                UpcomingSemesterListResponse response = new UpcomingSemesterListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                // return response;
+                return BadRequest(" Bad Request");
+            }
+        }
+        [HttpGet("GetApplicationProgramsList")]
+        public IActionResult GetApplicationProgramsList()
+        {
+            try
+            {
+                ApplicationProgramListResponse response = _adminService.GetAllApplicationProgramsList();
+                //return response;
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramListResponse response = new ApplicationProgramListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                 //return response;
+                return BadRequest(" Bad Request");
+            }
+        }
+        [HttpPost("UpdateMultipleProgramApplicationDates")]
+        public BaseResponse UpdateMultipleProgramApplicationDates(UpdateProgramApplicationDates input)
+        {
+            try
+            {
+                BaseResponse response = _adminService.UpdateProgramApplicationDates(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update program application dates , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
     }
 }
