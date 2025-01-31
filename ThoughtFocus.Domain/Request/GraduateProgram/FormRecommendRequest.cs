@@ -14,6 +14,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public string LetterOfRecommendationJSON { get; set; }
         public string ProgramName { get; set; }
         public string ProgramFormIdentifier { get; set; }
+        public string Action {  get; set; }
 
         public List<FormAddRecommendationRequestAttachment> FormAddRecommendationRequestAttachment { get; set; }
     }
@@ -31,6 +32,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public string LetterOfRecommendationJSON { get; set; }
         public string ProgramFormIdentifier { get; set; }
         public List<FormAddRecommendationRequestAttachment> FormAddRecommendationRequestAttachment { get; set; }
+        public string Action {  get; set; }
     }
     public class DeleteRecommendations
     {

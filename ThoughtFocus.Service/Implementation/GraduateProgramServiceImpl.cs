@@ -1636,7 +1636,7 @@ namespace ThoughtFocus.Service.Implementation
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
             byte[] fileContentJSONToPDF = null;
-            //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    job_title: \"xxx\",\r\n    recommenderName: \"chandana\",\r\n    studentName: \"xello\",\r\n    occupation: \"ggg\",\r\n    organization: \"ttt\",\r\n    email: \"ttt@gmail.com\",\r\n    phone: \"34456456546\",\r\n  },\r\n  relationship: {\r\n    howLongApplicantKnown: \"1-2 Years\",\r\n    inWhatCapacityApplicantKnown: \"1-2 Years\",\r\n  },\r\n  referrenceRatings: [\r\n    {\r\n      quality: \"Communication Skills, Oral:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Communication Skills, Written:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Technology Skills:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Initiative:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Maturity:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Motivation for this program of study:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Creativity:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Ability to work with others:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Intellectual potential:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Present academic performance:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Potential for graduate work:\",\r\n      scale: \"1\",\r\n    },\r\n  ],\r\n  overAllRecommendationAdmission: \"Highest\",\r\n}";
+            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"job_title\":\"\",\"recommenderName\":\"testww\",\"studentName\":\"Isabela Flores\",\"occupation\":\"Occupation\",\"organization\":\"\",\"email\":\"chandana.shankaregowda@thoughtfocus.com\",\"phone\":\"\"},\"relationship\":{\"howLongApplicantKnown\":\"\",\"inWhatCapacityApplicantKnown\":\"\"},\"referrenceRatings\":[{\"quality\":\"Communication Skills, Oral:\",\"scale\":\"\"},{\"quality\":\"Communication Skills, Written:\",\"scale\":\"\"},{\"quality\":\"Technology Skills:\",\"scale\":\"\"},{\"quality\":\"Initiative:\",\"scale\":\"\"},{\"quality\":\"Maturity:\",\"scale\":\"\"},{\"quality\":\"Motivation for this program of study:\",\"scale\":\"\"},{\"quality\":\"Creativity:\",\"scale\":\"\"},{\"quality\":\"Ability to work with others:\",\"scale\":\"\"},{\"quality\":\"Intellectual potential:\",\"scale\":\"\"},{\"quality\":\"Present academic performance:\",\"scale\":\"\"},{\"quality\":\"Potential for graduate work:\",\"scale\":\"\"}],\"overAllRecommendationAdmission\":\"\"}";
             //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    job_title: \"xxx\",\r\n    recommenderName: \"chandana\",\r\n    studentName: \"xello\",\r\n    occupation: \"ggg\",\r\n    organization: \"ttt\",\r\n    email: \"ttt@gmail.com\",\r\n    phone: \"34456456546\",\r\n  },\r\n  relationship: {\r\n    howLongApplicantKnown: \"1-2 Years\",\r\n    inWhatCapacityApplicantKnown: \"1-2 Years\",\r\n  },\r\n  referrenceRatings: [\r\n    {\r\n      quality: \"Communication Skills, Oral:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Communication Skills, Written:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Technology Skills:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Initiative:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Maturity:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Motivation for this program of study:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Creativity:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Ability to work with others:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Intellectual potential:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Present academic performance:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Potential for graduate work:\",\r\n      scale: \"1\",\r\n    },\r\n  ],\r\n  overAllRecommendationAdmission: \"Highest\",\r\nquestion1:\"hello\",\r\nquestion2:\"world\",\r\n}";
             if ((input.LetterOfRecommendationJSON != string.Empty) && (input.LetterOfRecommendationJSON != null))
             {
@@ -1697,7 +1697,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
                                           new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
                                           new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
-                                          new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = letterOfRecommendationJSON }
+                                          new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = letterOfRecommendationJSON },
+                                          new SqlParameter("@State", SqlDbType.NVarChar, 10) { Value = input.Action }
                                         };
 
                     //int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
@@ -1747,7 +1748,7 @@ namespace ThoughtFocus.Service.Implementation
                 //}
             }
 
-            if (sendMail)
+            if (sendMail && input.Action =="submit")
             {
                 // send mail to the applicant 
                 //string programIdentifier = "";
@@ -1762,7 +1763,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    position_title: \"tt1\",\r\n    recommenderFirstName: \"chandana\",\r\n    recommenderLastName: \"\",\r\n    studentName: \"Neil Mccaffery\",\r\n    campusID: \"010459603\",\r\n    email: \"Neil.Mccaffery01@student.csulb.edu\"\r\n  },\r\n  signatureOfRecommender: {\r\n    name: \"chandana\",\r\n    date: \"06/18/2024\"\r\n  },\r\n  academicCompetency: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  professionalism: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  dispositionsPersonalityCharacter: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  specialEducation: {\r\n    comments: \"\",\r\n    scale: \"\"\r\n  },\r\n  studentOverAllRank: 5\r\n}";
+            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"position_title\":\"title\",\"recommenderFirstName\":\"chandana1\",\"recommenderLastName\":\"\",\"studentName\":\"Denise Copeland\",\"campusID\":\"010534405\",\"email\":\"Denise.Copeland01@student.csulb.edu\"},\"signatureOfRecommender\":{\"name\":\"\",\"date\":\"01/02/2025\"},\"academicCompetency\":{\"comments\":\"\",\"scale\":\"\"},\"professionalism\":{\"comments\":\"\",\"scale\":\"\"},\"dispositionsPersonalityCharacter\":{\"comments\":\"\",\"scale\":\"\"},\"specialEducation\":{\"comments\":\"\",\"scale\":\"\"},\"studentOverAllRank\":5}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
@@ -1811,6 +1812,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
                                           new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
                                           new SqlParameter("@LetterOfRecommendationJSON", SqlDbType.VarChar, -1) { Value = letterOfRecommendationJSON },
+                                          new SqlParameter("@State", SqlDbType.NVarChar, 10) { Value = input.Action }
                                         };
 
                     //int id = _helper.InsertTable("[dbo].[UpsertFormRecommend]", parameters);
@@ -1860,7 +1862,7 @@ namespace ThoughtFocus.Service.Implementation
                 //}
             }
 
-            if (sendMail)
+            if (sendMail && input.Action == "submit")
             {
                 // send mail to the applicant 
                 SendRecommendedConfirmMailToApplicant(input.RecommenderIdentifier,input.ProgramFormIdentifier);
