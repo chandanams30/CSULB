@@ -24,6 +24,10 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UploadMessageBoardAttachment(UploadMessageBoardAttachmentRequest input);
         BaseResponse UpsertCommunityDistrict(UpsertCommunityDistrictRequest input);
         BaseResponse UpsertCommunitySchool(UpsertCommunitySchoolRequest input);
+        UpcomingSemesterListResponse GetFutureSemesterList();
+        ApplicationProgramListResponse GetAllApplicationProgramsList();
+        BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDates input);
+
 
     }
 }
