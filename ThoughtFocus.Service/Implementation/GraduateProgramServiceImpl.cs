@@ -1498,6 +1498,8 @@ namespace ThoughtFocus.Service.Implementation
                 templateName = "UDCPRecommendationFormTemplate.htm";
             else if (programIdentifier.ToUpper() == "ESCP")
                 templateName = "ESCPRecommendationFormTemplate.htm";
+            else if (programIdentifier.ToUpper() == "PK-3CP")
+                templateName = "PK-3CPRecommendationFormTemplate.htm";
             else if (programIdentifier == "MS Special Education (SPED)")
                 templateName = "MSSPEDRecommendationFormTemplate.html";
             else
@@ -1761,7 +1763,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"position_title\":\"title\",\"recommenderFirstName\":\"chandana1\",\"recommenderLastName\":\"\",\"studentName\":\"Denise Copeland\",\"campusID\":\"010534405\",\"email\":\"Denise.Copeland01@student.csulb.edu\"},\"signatureOfRecommender\":{\"name\":\"\",\"date\":\"01/02/2025\"},\"academicCompetency\":{\"comments\":\"\",\"scale\":\"\"},\"professionalism\":{\"comments\":\"\",\"scale\":\"\"},\"dispositionsPersonalityCharacter\":{\"comments\":\"\",\"scale\":\"\"},\"specialEducation\":{\"comments\":\"\",\"scale\":\"\"},\"studentOverAllRank\":5}";
+            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"applicantFirstName\":\"Alexandria\",\"applicantLastName\":\"Chilver\",\"credentialSubjectArea\":\"\",\"campusID\":\"002520269\",\"recommenderFirstName\":\"Sachin A R Bhat\",\"recommenderLastName\":\"\",\"institution\":\"test\",\"position_title\":\"title\",\"telephoneContact\":\"(666) 666 - 6666\",\"email\":\"sachin.bhat@thoughtfocus.com\"},\"applicantRelatedAnswers\":{\"answer1\":\"eg\",\"answer2\":\"g\",\"answer3\":\"rg\",\"answer4\":\"eg\",\"answer5\":[{\"qualities\":\"Intellectual Capacity\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Ability To Work With Others\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Maturity\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Potential for Teaching\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Professional Conduct / Deposition\",\"value\":\"Average Middle 1/3\"}],\"answer6\":\"Recommend\"},\"signatureOfRecommender\":{\"name\":\"sachin\",\"date\":\"02/19/2025\"},\"comments\":\"\"}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
@@ -1874,7 +1876,7 @@ namespace ThoughtFocus.Service.Implementation
             byte[] pdfFileContent = null;
             string recommendationTemplateBody = string.Empty;
             JObject schema = JObject.Parse(jsonString);
-            if (programIdentifier.ToUpper()=="MSCP"|| programIdentifier.ToUpper() == "SSCP"|| programIdentifier.ToUpper() == "UDCP")
+            if (programIdentifier.ToUpper()=="MSCP"|| programIdentifier.ToUpper() == "SSCP"|| programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "PK-3CP")
             {
                 //TemplateStore<SSCP_MSCP_UDCP_Model> store = new TemplateStore<SSCP_MSCP_UDCP_Model>();
                 //SSCP_MSCP_UDCP_Model obj = new SSCP_MSCP_UDCP_Model();
@@ -2257,7 +2259,7 @@ namespace ThoughtFocus.Service.Implementation
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
                 ccMail= Convert.ToString(dtResponse.Rows[0]["RecommenderEmail"]);
                 subject = "Recommendation Submitted";
-                if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP")
+                if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP" || programIdentifier.ToUpper() == "PK-3CP")
                 {
                     body = GetMailBodyTemplate("Student_Recommendation_Confirmation_ICP.html");
                 }
