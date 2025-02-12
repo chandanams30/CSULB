@@ -595,30 +595,61 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public ApplicationProgramListResponse GetAllApplicationProgramsList()
+        public ApplicationProgramListResponse GetAllApplicationProgramsList(int applicationTypeID, string termCode)
         {
             ApplicationProgramListResponse obj = new ApplicationProgramListResponse();
-            DataSet dtApplicationProgramsList = new DataSet();
-            for (int i = 1; i <= 3; i++)
-            {
-                SqlParameter[] parameters ={
-                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = i }
+
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationTypeID },
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = termCode },
+
                                        };
-                //DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationPrograms]");
-                DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetProgramsByApplicationType]", parameters);
-                dtApplicationProgramsList.Merge(dtApplicationPrograms);
-            }
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetProgramsByApplication]", parameters);
 
             try
             {
-                if (dtApplicationProgramsList.Tables.Count > 0)
+                if (dtApplicationPrograms.Tables.Count > 0)
                 {
-                    obj.ApplicationProgramList = dtApplicationProgramsList.Tables[0].AsEnumerable().Select(row =>
+                    obj.ApplicationProgramList = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
                                                  new ApplicationProgramsList
                                                  {
                                                      ProgramID = Convert.ToInt32(row["ID"]),
                                                      ProgramName = Convert.ToString(row["Name"]),
                                                  }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ApplicationDatesResponse GetApplicationDates(string termCode)
+        {
+            ApplicationDatesResponse obj = new ApplicationDatesResponse();
+
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = termCode }
+
+                                       };
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationDates]", parameters);
+
+            try
+            {
+                if (dtApplicationPrograms.Tables.Count > 0)
+                {
+                    obj = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                                 new ApplicationDatesResponse
+                                                 {
+                                                     ApplicationOpenDate = Convert.ToDateTime(row["ApplicationOpenDate"]),
+                                                     ApplicationCloseDate = Convert.ToDateTime(row["ApplicationCloseDate"]),
+                                                     ApplicationDeadlineDate = Convert.ToDateTime(row["ApplicationDeadlineDate"]),
+                                                 }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -659,5 +690,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+
+
     }
 }

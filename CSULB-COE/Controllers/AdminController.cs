@@ -336,11 +336,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetApplicationProgramsList")]
-        public IActionResult GetApplicationProgramsList()
+        public IActionResult GetApplicationProgramsList(int applicationTypeID, string termCode)
         {
             try
             {
-                ApplicationProgramListResponse response = _adminService.GetAllApplicationProgramsList();
+                ApplicationProgramListResponse response = _adminService.GetAllApplicationProgramsList(applicationTypeID, termCode);
                 //return response;
                 return Ok(response);
 
@@ -353,6 +353,27 @@ namespace CSULB_COE.Controllers
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                  //return response;
+                return BadRequest(" Bad Request");
+            }
+        }
+        [HttpGet("GetApplicationDates")]
+        public IActionResult GetApplicationDates(string termCode)
+        {
+            try
+            {
+                ApplicationDatesResponse response = _adminService.GetApplicationDates(termCode);
+                //return response;
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                ApplicationDatesResponse response = new ApplicationDatesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                //return response;
                 return BadRequest(" Bad Request");
             }
         }
