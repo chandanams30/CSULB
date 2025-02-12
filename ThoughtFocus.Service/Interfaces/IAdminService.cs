@@ -25,8 +25,9 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpsertCommunityDistrict(UpsertCommunityDistrictRequest input);
         BaseResponse UpsertCommunitySchool(UpsertCommunitySchoolRequest input);
         UpcomingSemesterListResponse GetFutureSemesterList();
-        ApplicationProgramListResponse GetAllApplicationProgramsList();
+        ApplicationProgramListResponse GetAllApplicationProgramsList(int applicationTypeID, string termCode);
         BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDates input);
+        ApplicationDatesResponse GetApplicationDates(string termCode);
 
 
     }

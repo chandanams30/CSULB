@@ -32,4 +32,11 @@ namespace ThoughtFocus.Domain.Response.Admin
         public int ProgramID { get; set; }
         public string ProgramName { get; set; }
     }
+    public class ApplicationDatesResponse : BaseResponse
+    {
+        public DateTime ApplicationOpenDate { get; set; }
+        public DateTime ApplicationCloseDate { get; set; }
+        public DateTime ApplicationDeadlineDate { get; set; }
+
+    }
 }
