@@ -667,18 +667,23 @@ namespace ThoughtFocus.Service.Implementation
         public BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDates input)
         {
             BaseResponse response = new BaseResponse();
-            SqlParameter[] parameters =
+
+            foreach (var programID in input.ProgramID)
+            {
+                SqlParameter[] parameters =
                                        {
-                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@ProgramID", SqlDbType.Int) { Value = programID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
                                           new SqlParameter("@ApplicationOpens", SqlDbType.DateTime) {Value = input.ApplicationOpens},
                                           new SqlParameter("@ApplicationDeadline", SqlDbType.DateTime) {Value = input.ApplicationDeadline},
                                           new SqlParameter("@ApplicationCloseDate", SqlDbType.DateTime) {Value = input.ApplicationCloseDate},
                                           new SqlParameter("@Status", SqlDbType.Bit) {Value = input.Status}
                                         };
+                int ID = _helper.InsertTable("[dbo].[SaveProgramApplicationDates]", parameters);
+
+            }
             try
             {
-                int ID = _helper.InsertTable("[dbo].[SaveProgramApplicationDates]", parameters);
                 response.Message = "Program application dates saved successfully";
                 response.IsSuccess = true;
             }
