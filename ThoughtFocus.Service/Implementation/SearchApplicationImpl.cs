@@ -31,6 +31,7 @@ namespace ThoughtFocus.Service.Implementation
         }
         public StudentSearchResponse GetStudentSearchData(string searchString)
         {
+            // changes made in SP to enable fieldwork
             StudentSearchResponse obj = new StudentSearchResponse();
             SqlParameter[] parameters =
                                      {
