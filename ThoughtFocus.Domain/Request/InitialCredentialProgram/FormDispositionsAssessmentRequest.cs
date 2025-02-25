@@ -76,4 +76,25 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public bool IsApproved { get; set; }
         public string Status { get; set; }
     }
+    public class SaveClinicalPracticeEquivalencyAttachmentRequest
+    {
+        public int FormSubSectionID { get; set; }
+        public int FormID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string TermCode { get; set; }
+        public string FileName { get; set; }
+        public byte[] FileContent { get; set; }
+        public string FileExtn { get; set; }
+        public string SavedFileName { get; set; }
+        public int UserID { get; set; }
+
+    }
+    public class ClinicalPracticeEquivalencyAttachmentRequest
+    {
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public int FormSubSectionAttachmentID { get; set; }
+
+    }
 }

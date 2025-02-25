@@ -539,7 +539,7 @@ namespace ThoughtFocus.Service.Implementation
                                     {
 
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
-                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,10) { Value = SubSectionIdentifiers }
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,100) { Value = SubSectionIdentifiers }
                                     };
             DataTable dtName = _helper.GetDataTable("[Application].[GetFormSubSectionAttachmentFileName]", parameters);
 
@@ -2276,6 +2276,336 @@ namespace ThoughtFocus.Service.Implementation
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
 
             return pdfFileContent;
+        }
+        public BaseResponse SaveClinicalPracticeEquivalencyAttachment(SaveClinicalPracticeEquivalencyAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string fileExtensionWord = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+                string subSectionName = string.Empty;
+                string[] subSectionNameSplit;
+                bool isNotPDFExtension = false;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+
+                // pull the saved file name format SP Below
+                FormAttachmentFileNames fileNames = GetFormSubSectionAttachmentFileName(input.FormID, input.FileName);
+                if (input.FileName != string.Empty)
+                {
+                    //AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                    //subSectionNameSplit = fileNames.FileName.Split('_');
+                    //subSectionName = subSectionNameSplit[0];
+                    fileExtension = input.FileExtn;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // isNotPDFExtension = true;
+                        // logic to convert png to pdf 
+                        //byte[] imageContent = null;
+                        //imageContent = GetImageFilecontent(input.FileContent);
+                        //input.FileContent = null;
+                        //input.FileContent = imageContent;
+                        //fileExtension = "pdf";
+                    }
+
+
+                }
+                SqlParameter[] parameters =
+                                         {
+                                          new SqlParameter("@FormSubSectionID", SqlDbType.BigInt) { Value = input.FormSubSectionID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,100) { Value = input.SubSectionIdentifiers },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 200) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = input.FileExtn },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID }
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[Application].[SaveFormSubSectionAttachment]", parameters);
+                if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+                {
+                    string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                    userFolderName = folderSplit[0].ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+
+                    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    string subSection = Path.Combine(dirForm, input.SubSectionIdentifiers);
+                    //if (Directory.Exists(dirUserFolderPath))
+                    //{
+                    if (!Directory.Exists(dirUserFolderPath))
+                    {
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
+                        DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirsubsectionFolder.SetAccessControl(dSecurity);
+                    }
+                    //string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    //string subSection = Path.Combine(dirForm, subSectionName);
+                    if (!Directory.Exists(dirForm))
+                    {
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
+                        DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirsubsectionFolder.SetAccessControl(dSecurity);
+
+                    }
+                    if (!Directory.Exists(subSection))
+                    {
+                        DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
+                        DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirsubsectionFolder.SetAccessControl(dSecurity);
+                    }
+                    File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //if (Directory.Exists(dirForm))
+                    //{
+                    //    subSection = Path.Combine(dirForm, subSectionName);
+                    //    // copy the file here 
+                    //    //if (isNotPDFExtension)
+                    //    //{
+                    //    //    //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                    //    //}
+                    //    if (Directory.Exists(subSection))
+                    //    {
+
+                    //    }
+                    //    else
+                    //    {
+                    //        Directory.CreateDirectory(subSection);
+                    //        File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    Directory.CreateDirectory(dirForm);
+                    //    if (isNotPDFExtension)
+                    //    {
+                    //        //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                    //    }
+                    //    else
+                    //    {
+                    //        Directory.CreateDirectory(subSection);
+                    //        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //    }
+                    //}
+                    //}
+                    //else
+                    //{
+                    //    string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                    //    string subSection= Path.Combine(dirForm, subSectionName);
+                    //    DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                    //    DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                    //    DirectoryInfo dirsubsectionFolder = System.IO.Directory.CreateDirectory(subSection);
+                    //    DirectorySecurity dSecurity = dirsubsectionFolder.GetAccessControl();
+                    //    dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                    //    dirsubsectionFolder.SetAccessControl(dSecurity);
+                    //    if (isNotPDFExtension)
+                    //    {
+                    //        //byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                    //    }
+                    //    else
+                    //    {
+                    //        File.WriteAllBytes(Path.Combine(subSection, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                    //    }
+                    //}
+                    // now delete the old file based on the file name return from DB call above 
+                }
+
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+
+                return response;
+            }
+        }
+        public FormSubsectionAttachmentDownloadResponse GetClinicalPracticeEquivalencyAttachment(ClinicalPracticeEquivalencyAttachmentRequest input)
+        {
+            FormSubsectionAttachmentDownloadResponse obj = new FormSubsectionAttachmentDownloadResponse();
+
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@FormSubSectionID", SqlDbType.BigInt) { Value = input.FormSubSectionID },
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,10) { Value = input.SubSectionIdentifiers },
+                                          new SqlParameter("@FormSubSectionAttachmentID", SqlDbType.BigInt) { Value = input.FormSubSectionAttachmentID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[Application].[GetFormSubSectionAttachment]", parameters);
+
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new FormSubsectionAttachmentDownloadResponse
+                                          {
+                                              ID = Convert.ToInt32(row["ID"]),
+                                              FormID = Convert.ToInt32(row["FormID"]),
+                                              FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
+                                              FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FolderName = Convert.ToString(row["FolderName"]),
+                                              CreatedBy = Convert.ToInt32(row["CreatedBy"]),
+                                              CreatedDate = Convert.ToDateTime(row["CreatedDate"] == DBNull.Value ? null : row["CreatedDate"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetClinicalPracticeEquivalencyContent(_utils.GetAttachmentsFolderName(row["FolderName"].ToString()), _utils.GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]),input.SubSectionIdentifiers)
+                                          }).FirstOrDefault();
+            obj.IsSuccess = true;
+            obj.Message = "Attachment retrieved Successfully";
+
+            return obj;
+        }
+        public ClinicalPracticeEquivalencyAttachmentList GetClinicalPracticeEquivalencyAttachmentList(int UserID, int FormID)
+        {
+            ClinicalPracticeEquivalencyAttachmentList respone = new ClinicalPracticeEquivalencyAttachmentList();
+            Attachments obj = new Attachments
+            {
+                pv = new PV(),
+                pc = new PC()
+            };
+
+            SqlParameter[] parameters =
+                                      {
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
+                                       };
+
+            DataTable dtCPEAL = _helper.GetDataTable("[Application].[GetClinicalPracticeEquivalencySection]", parameters);
+
+            try
+            {
+                if (dtCPEAL.Rows.Count > 0)
+                {
+                    bool hasPV = dtCPEAL.AsEnumerable().Any(row => row.Field<string>("SubSectionIdentifiers") == "PV");
+                    bool hasPC = dtCPEAL.AsEnumerable().Any(row => row.Field<string>("SubSectionIdentifiers") == "PC");
+
+                    if (hasPV)
+                    {
+                        obj.pv.professionalVerificationForm = dtCPEAL.AsEnumerable()
+                            .Where(row => row.Field<string>("SubSectionIdentifiers") == "PV" &&
+                                          row.Field<string>("FileName").StartsWith("ProfessionalVerificationForm"))
+                            .Select(row => new ProfessionalVerificationForm
+                            {
+                                FormSubSectionAttachmentID = Convert.ToInt32(row["FormSubSectionAttachmentID"]),
+                                FormID = Convert.ToInt32(row["FormID"]),
+                                FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
+                                SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
+                                FileName = Convert.ToString(row["FileName"]),
+                                FileExtn = Convert.ToString(row["FileExtn"]),
+                                CanView = Convert.ToBoolean(row["CanView"])
+                            }).FirstOrDefault();
+
+                        obj.pv.childDevelopmentPermit = dtCPEAL.AsEnumerable()
+                            .Where(row => row.Field<string>("SubSectionIdentifiers") == "PV" &&
+                                          row.Field<string>("FileName").StartsWith("ChildDevelopmentPermit"))
+                            .Select(row => new ChildDevelopmentPermit
+                            {
+                                FormSubSectionAttachmentID = Convert.ToInt32(row["FormSubSectionAttachmentID"]),
+                                FormID = Convert.ToInt32(row["FormID"]),
+                                FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
+                                SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
+                                FileName = Convert.ToString(row["FileName"]),
+                                FileExtn = Convert.ToString(row["FileExtn"]),
+                                CanView = Convert.ToBoolean(row["CanView"])
+                            }).FirstOrDefault();
+                        respone.attachements = obj;
+                    }
+                    else
+                    {
+                        obj.pv.professionalVerificationForm = null;
+                        obj.pv.childDevelopmentPermit = null;
+                    }
+
+                    if (hasPC)
+                    {
+                        obj.pc.courseSyllabi = dtCPEAL.AsEnumerable()
+                            .Where(row => row.Field<string>("SubSectionIdentifiers") == "PC" &&
+                                          row.Field<string>("FileName").StartsWith("CourseSyllabi"))
+                            .Select(row => new CourseSyllabi
+                            {
+                                FormSubSectionAttachmentID = Convert.ToInt32(row["FormSubSectionAttachmentID"]),
+                                FormID = Convert.ToInt32(row["FormID"]),
+                                FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
+                                SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
+                                FileName = Convert.ToString(row["FileName"]),
+                                FileExtn = Convert.ToString(row["FileExtn"]),
+                                CanView = Convert.ToBoolean(row["CanView"])
+                            }).FirstOrDefault();
+
+                        obj.pc.transcripts = dtCPEAL.AsEnumerable()
+                            .Where(row => row.Field<string>("SubSectionIdentifiers") == "PC" &&
+                                          row.Field<string>("FileName").StartsWith("Transcripts"))
+                            .Select(row => new Transcripts
+                            {
+                                FormSubSectionAttachmentID = Convert.ToInt32(row["FormSubSectionAttachmentID"]),
+                                FormID = Convert.ToInt32(row["FormID"]),
+                                FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
+                                SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
+                                FileName = Convert.ToString(row["FileName"]),
+                                FileExtn = Convert.ToString(row["FileExtn"]),
+                                CanView = Convert.ToBoolean(row["CanView"])
+                            }).ToList();
+                        respone.attachements = obj;
+                    }
+                    else
+                    {
+                        obj.pc.courseSyllabi = null;
+                        obj.pc.transcripts = new List<Transcripts> { };
+                    }
+
+                    respone.IsSuccess = true;
+                    respone.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj = new Attachments
+                    {
+                        pv = new PV
+                        {
+                            professionalVerificationForm = null,
+                            childDevelopmentPermit = null
+                        },
+                        pc = new PC
+                        {
+                            courseSyllabi = null,
+                            transcripts = new List<Transcripts> { }
+                        },
+                    };
+                    respone.attachements = obj;
+                    respone.IsSuccess = true;
+                    respone.Message = "No Data Available";
+                }
+            }
+            catch (Exception ex)
+            {
+                respone.IsSuccess = false;
+                respone.Message = "Data Retrieval Failed, Please contact site admin";
+                respone.StackTrace = ex.Message;
+            }
+            return respone;
+        }
+
+        public byte[] GetClinicalPracticeEquivalencyContent(string userFolderPath, string fileName,string subSectionIdentifiers)
+        {
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            string userPath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, "Form"));
+            string filepath = Path.Combine(userPath, Path.Combine(subSectionIdentifiers, fileName));
+            //string filepath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, fileName));
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
         }
         private string GetMailBodyTemplateByProgramID(int programID)
         {
