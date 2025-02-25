@@ -1098,7 +1098,7 @@ namespace ThoughtFocus.Service.Implementation
                 if (dsRec.Tables[0].Rows.Count > 0 && dsRec.Tables[1].Rows.Count > 0)
                 {
                     int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
-                    if (!(formStateID == 11 && applicationTypeID == 2 ))
+                    if (formStateID != 11)
                     {
                         // applicant mail
                         string logoText = "cid:myImageID";
@@ -3692,7 +3692,7 @@ namespace ThoughtFocus.Service.Implementation
                     if (dsRec.Tables[0].Rows.Count > 0 && dsRec.Tables[1].Rows.Count > 0)
                     {
                         int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
-                        if (!(input.FormStateID == 11 && applicationTypeID == 2 ))
+                        if (input.FormStateID != 11)
                         {
                             // applicant mail
                             string logoText = "cid:myImageID";
