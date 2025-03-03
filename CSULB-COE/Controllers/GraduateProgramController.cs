@@ -189,6 +189,24 @@ namespace CSULB_COE.Controllers
             }
         }
 
+        [HttpPost("UpdateFinalDecisionComment")]
+        public BaseResponse UpdateFinalDecisionComment(FinalDecisionComment FinalDecisionComment)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateFinalDecisionComment(FinalDecisionComment);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         [HttpPost("UpsertFormInterviewDateFacultyAttachment")]
         public BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input)

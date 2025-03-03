@@ -396,6 +396,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"] == DBNull.Value ? null : row["WaitlistNumber"]),
                                                    WaitlistComments = Convert.ToString(row["WaitlistComments"] == DBNull.Value ? null : row["WaitlistComments"]),
                                                    FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecision"]),
+                                                   FinalDecisionComments = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecisionComments"]),
+                                                   FinalDecisionDate = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecisionDate"]),
                                                    CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"])
 
 
@@ -504,7 +506,7 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-
+        
         public BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input)
         {
             BaseResponse obj = new BaseResponse();
@@ -519,6 +521,26 @@ namespace ThoughtFocus.Service.Implementation
                                         };
 
             int identity = _helper.InsertTable("[dbo].[UpdateFormMessageBoardSchema]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "Message Board Information Saved";
+
+            return obj;
+        }
+
+        public BaseResponse UpdateFinalDecisionComment(FinalDecisionComment input)
+        {
+            BaseResponse obj = new BaseResponse();
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt, 50) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt, 50) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt, 50) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@FDComment", SqlDbType.NVarChar, -1) { Value = input.FDComment }
+                                        };
+
+            int identity = _helper.InsertTable("[dbo].[UpdateFinalDecisionComment]", parameters);
             obj.IsSuccess = true;
             obj.Message = "Message Board Information Saved";
 
