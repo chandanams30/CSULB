@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.Domain.Request.FieldWork;
+using static ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata;
 
 namespace ThoughtFocus.Domain.Response.Application
 {
@@ -62,5 +64,65 @@ namespace ThoughtFocus.Domain.Response.Application
         public int CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
 
+    }
+    public class ClinicalPracticeEquivalencyAttachmentList : BaseResponse
+    {
+        public Attachments attachements {  get; set; } 
+       
+    }
+    public class Attachments
+    {
+        public PV pv { get; set; }
+        public PC pc { get; set; }
+    }
+    public class PV
+    {
+        public ProfessionalVerificationForm professionalVerificationForm { get; set; }
+        public ChildDevelopmentPermit childDevelopmentPermit { get; set; }
+    }
+    public class ProfessionalVerificationForm
+    {
+        public int FormSubSectionAttachmentID { get; set; }
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public bool CanView { get; set; }
+    }
+    public class ChildDevelopmentPermit
+    {
+        public int FormSubSectionAttachmentID { get; set; }
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public bool CanView { get; set; }
+    }
+    public class PC
+    {
+        public CourseSyllabi courseSyllabi { get; set; }
+        public List<Transcripts> transcripts { get; set; }
+    }
+    public class CourseSyllabi
+    {
+        public int FormSubSectionAttachmentID { get; set; }
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public bool CanView { get; set; }
+    }
+    public class Transcripts
+    {
+        public int FormSubSectionAttachmentID { get; set; }
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public bool CanView { get; set; }
     }
 }

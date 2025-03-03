@@ -46,6 +46,9 @@ namespace ThoughtFocus.Service.Interfaces
         public BaseResponse DeleteSubSectionAttachments(DeleteSubSectionAttachmentRequest input);
         FormExperienceAttachmentResponse UpsertFormExperienceAttachment(FormExperienceAttachmentRequest input);
         FormAttachments DownloadFormExperienceAttachment(string GUID);
+        BaseResponse SaveClinicalPracticeEquivalencyAttachment(SaveClinicalPracticeEquivalencyAttachmentRequest input);
+        FormSubsectionAttachmentDownloadResponse GetClinicalPracticeEquivalencyAttachment(ClinicalPracticeEquivalencyAttachmentRequest input);
+        ClinicalPracticeEquivalencyAttachmentList GetClinicalPracticeEquivalencyAttachmentList(int UserID, int FormID);
 
     }
 }

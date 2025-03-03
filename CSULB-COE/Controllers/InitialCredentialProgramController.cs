@@ -745,6 +745,82 @@ namespace CSULB_COE.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPost("SaveClinicalPracticeEquivalencyAttachment")]
+        public BaseResponse SaveClinicalPracticeEquivalencyAttachment(SaveClinicalPracticeEquivalencyAttachmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                //#region to get the file content from local
+                //byte[] fileContent = null;
+                //string filepath = "D:\\ExcelDoc\\CTC_10232024162937.pdf";
+                ////string filepath = "D:\\ExcelDoc\\PK3_OtherChanges_20250220.pdf";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                //#endregion
+
+                response = _initialCredentialProgramService.SaveClinicalPracticeEquivalencyAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetClinicalPracticeEquivalencyAttachment")]
+        public IActionResult GetClinicalPracticeEquivalencyAttachment(ClinicalPracticeEquivalencyAttachmentRequest input)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                FormSubsectionAttachmentDownloadResponse obj = _initialCredentialProgramService.GetClinicalPracticeEquivalencyAttachment(input);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetClinicalPracticeEquivalencyAttachmentList")]
+        public ClinicalPracticeEquivalencyAttachmentList GetClinicalPracticeEquivalencyAttachmentList(int UserID,int FormID)
+        {
+            try
+            {
+                ClinicalPracticeEquivalencyAttachmentList response = _initialCredentialProgramService.GetClinicalPracticeEquivalencyAttachmentList(UserID,FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ClinicalPracticeEquivalencyAttachmentList response = new ClinicalPracticeEquivalencyAttachmentList();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
 
     }
 }
