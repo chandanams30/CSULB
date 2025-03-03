@@ -43,6 +43,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string WaitlistComments {  get; set; }
         public string FinalDecision { get; set; }
         public string CertifyDescription { get; set; }
+        public string FinalDecisionComments { get; set; }
+        public string FinalDecisionDate { get; set; }
 
 
     }
