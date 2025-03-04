@@ -396,8 +396,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    WaitlistNumber = Convert.ToInt32(row["WaitlistNumber"] == DBNull.Value ? null : row["WaitlistNumber"]),
                                                    WaitlistComments = Convert.ToString(row["WaitlistComments"] == DBNull.Value ? null : row["WaitlistComments"]),
                                                    FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecision"]),
-                                                   FinalDecisionComments = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecisionComments"]),
-                                                   FinalDecisionDate = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecisionDate"]),
+                                                   FinalDecisionComments = Convert.ToString(row["FinalDecisionComments"] == DBNull.Value ? null : row["FinalDecisionComments"]),
+                                                   FinalDecisionDate = Convert.ToString(row["FinalDecisionDate"] == DBNull.Value ? null : row["FinalDecisionDate"]),
                                                    CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"])
 
 
