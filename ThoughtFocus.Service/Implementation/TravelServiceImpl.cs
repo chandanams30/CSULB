@@ -183,10 +183,10 @@ namespace ThoughtFocus.Service.Implementation
                                                StartingLocation = Convert.ToString(row["StartingLocation"]),
                                                DestinationAddress = Convert.ToString(row["DestinationAddress"]),
                                                BusinessPurpose = Convert.ToString(row["BusinessPurpose"]),
-                                               Miles = Convert.ToDecimal(row["Miles"]),
+                                               Miles = row["Miles"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Miles"]),
                                                ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
-                                               Rate = Convert.ToDecimal(row["Rate"])
+                                               Rate = Convert.ToDecimal(row["Rate"] == DBNull.Value ? null : row["Rate"])
 
                                            }).ToList();
 
@@ -233,7 +233,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   Miles = Convert.ToDecimal(row["Miles"]),
                                                   ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                   ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
-                                                  Rate = Convert.ToDecimal(row["Rate"])
+                                                  Rate = Convert.ToDecimal(row["Rate"]==DBNull.Value?null: row["Rate"])
 
                                               }).FirstOrDefault();
 

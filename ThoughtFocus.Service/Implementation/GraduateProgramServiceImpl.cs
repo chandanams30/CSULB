@@ -1789,7 +1789,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"applicantFirstName\":\"Alexandria\",\"applicantLastName\":\"Chilver\",\"credentialSubjectArea\":\"\",\"campusID\":\"002520269\",\"recommenderFirstName\":\"Sachin A R Bhat\",\"recommenderLastName\":\"\",\"institution\":\"test\",\"position_title\":\"title\",\"telephoneContact\":\"(666) 666 - 6666\",\"email\":\"sachin.bhat@thoughtfocus.com\"},\"applicantRelatedAnswers\":{\"answer1\":\"eg\",\"answer2\":\"g\",\"answer3\":\"rg\",\"answer4\":\"eg\",\"answer5\":[{\"qualities\":\"Intellectual Capacity\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Ability To Work With Others\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Maturity\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Potential for Teaching\",\"value\":\"Average Middle 1/3\"},{\"qualities\":\"Professional Conduct / Deposition\",\"value\":\"Average Middle 1/3\"}],\"answer6\":\"Recommend\"},\"signatureOfRecommender\":{\"name\":\"sachin\",\"date\":\"02/19/2025\"},\"comments\":\"\"}";
+            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"applicantFirstName\":\"Andre\",\"applicantLastName\":\"De Garmo\",\"campusID\":\"008239346\",\"recommenderFirstName\":\"chandana\",\"recommenderLastName\":\"\",\"institution\":\"CSULB\",\"position_title\":\"title\",\"telephoneContact\":\"(555) 555 - 5555\",\"email\":\"chandana.shankaregowda@thoughtfocus.com\"},\"applicantRelatedAnswers\":{\"answer1\":\"test1\",\"answer2\":\"test2\",\"answer3\":\"test3\",\"answer4\":[{\"Category\":\"1.\\tApplicant’s potential for academic performance (e.g., former academic, work ethic, diligence, capacity to learn\",\"value\":\"Outstanding\"},{\"Category\":\"2.\\tApplicant’s interpersonal skills (e.g., communication, ability to work with others, good listener, positive contributions to group-to-group interactions\",\"value\":\"Above Average\"},{\"Category\":\"3.\\tDisposition (e.g., receptive to constructive suggestions, accepts responsibility for their actions, responds to diverse perspectives)\",\"value\":\"Above Average\"},{\"Category\":\"4.\\tProfessional Conduct (e.g., responds appropriately, always on time).\",\"value\":\"Outstanding\"},{\"Category\":\"5.\\tApplicant’s potential for teaching (e.g., knowledge and skills, creativity, problem-solving skills, attention to detail).\",\"value\":\"Above Average\"}],\"answer5\":[{\"Category\":\"5. Recommendation for admission to the PK-3 ECE Specialist Instruction Credential Program at California State University, Long Beach:\",\"value\":\"Recommend\"}]},\"signatureOfRecommender\":{\"name\":\"chandana\",\"date\":\"\"},\"comments\":\"test\"}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
@@ -1902,11 +1902,8 @@ namespace ThoughtFocus.Service.Implementation
             byte[] pdfFileContent = null;
             string recommendationTemplateBody = string.Empty;
             JObject schema = JObject.Parse(jsonString);
-            if (programIdentifier.ToUpper()=="MSCP"|| programIdentifier.ToUpper() == "SSCP"|| programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "PK-3CP")
+            if (programIdentifier.ToUpper() == "MSCP"|| programIdentifier.ToUpper() == "SSCP"|| programIdentifier.ToUpper() == "UDCP")
             {
-                //TemplateStore<SSCP_MSCP_UDCP_Model> store = new TemplateStore<SSCP_MSCP_UDCP_Model>();
-                //SSCP_MSCP_UDCP_Model obj = new SSCP_MSCP_UDCP_Model();
-                //obj = store.GetDeserializedTemplate(jsonString);
 
                 string applicantFirstName = string.Empty;
                 string applicantLastName = string.Empty;
@@ -2013,6 +2010,127 @@ namespace ThoughtFocus.Service.Implementation
                                                                      .Replace("[[PotentialForTeaching]]", potentialForTeaching)
                                                                      .Replace("[[ProfessionalConductDisposition]]", professionalConductDeposition)
                                                                      .Replace("[[RecommendationForLongBeach]]", recommendationForLongBeach)
+                                                                     .Replace("[[SignatureOfRecommender]]", signature)
+                                                                     .Replace("[[Date]]", date)
+                                                                     .Replace("[[Comments]]", comment);
+                // get the filecontent
+                pdfFileContent = GetPDFFileContent(recommendationTemplateBody);
+
+            }
+            else if (programIdentifier.ToUpper() == "PK-3CP")
+            {
+
+                string applicantFirstName = string.Empty;
+                string applicantLastName = string.Empty;
+                string credentialSubjectArea = string.Empty;
+                string campusID = string.Empty;
+                string recommenderFirstName = string.Empty;
+                string recommenderLastName = string.Empty;
+                string institution = string.Empty;
+                string position_title = string.Empty;
+                string telephoneContact = string.Empty;
+                string email = string.Empty;
+
+                string answer1 = string.Empty;
+                string answer2 = string.Empty;
+                string answer3 = string.Empty;
+                string ECESpecialist = string.Empty;
+                string potential = string.Empty;
+                string disposition = string.Empty;
+                string professionalConduct = string.Empty;
+                string teaching = string.Empty;
+                string interpersonalSkills = string.Empty;
+                string signature = string.Empty;
+                string date = string.Empty;
+                string comment = string.Empty;
+
+
+                JObject personalInfo = (JObject)schema["personalInfo"];
+                JObject answers = (JObject)schema["applicantRelatedAnswers"];
+                JObject signatureOfRecommender = (JObject)schema["signatureOfRecommender"];
+                JArray answer4 = (JArray)answers["answer4"];
+                JArray answer5 = (JArray)answers["answer5"];
+                //JArray recommendationsForLB = (JArray)schema["recommendationForLongBeach"];
+
+                // section for personal info 
+                applicantFirstName = Convert.ToString(personalInfo.GetValue("applicantFirstName"));
+                applicantLastName = Convert.ToString(personalInfo.GetValue("applicantLastName"));
+                credentialSubjectArea = Convert.ToString(personalInfo.GetValue("credentialSubjectArea"));
+                campusID = Convert.ToString(personalInfo.GetValue("campusID"));
+                recommenderFirstName = Convert.ToString(personalInfo.GetValue("recommenderFirstName"));
+                recommenderLastName = Convert.ToString(personalInfo.GetValue("recommenderLastName"));
+                institution = Convert.ToString(personalInfo.GetValue("institution"));
+                position_title = Convert.ToString(personalInfo.GetValue("position_title"));
+                telephoneContact = Convert.ToString(personalInfo.GetValue("telephoneContact"));
+                email = Convert.ToString(personalInfo.GetValue("email"));
+                // section for answers 1 to 3
+                answer1 = Convert.ToString(answers.GetValue("answer1"));
+                answer2 = Convert.ToString(answers.GetValue("answer2"));
+                answer3 = Convert.ToString(answers.GetValue("answer3"));
+                comment = Convert.ToString(schema.GetValue("comments"));
+                signature = Convert.ToString(signatureOfRecommender.GetValue("name"));
+                date = Convert.ToString(signatureOfRecommender.GetValue("date"));
+
+                // section for answer 4
+                foreach (JObject content in answer4.Children<JObject>())
+                {
+                    if (content["Category"].ToString() == "1.\tApplicant’s potential for academic performance (e.g., former academic, work ethic, diligence, capacity to learn")
+                    {
+                        potential = Convert.ToString(content.GetValue("value"));
+
+                    }
+                    if (content["Category"].ToString() == "2.\tApplicant’s interpersonal skills (e.g., communication, ability to work with others, good listener, positive contributions to group-to-group interactions")
+                    {
+                        interpersonalSkills = Convert.ToString(content.GetValue("value"));
+
+                    }
+                    if (content["Category"].ToString() == "3.\tDisposition (e.g., receptive to constructive suggestions, accepts responsibility for their actions, responds to diverse perspectives)")
+                    {
+                        disposition = Convert.ToString(content.GetValue("value"));
+
+                    }
+                    if (content["Category"].ToString() == "4.\tProfessional Conduct (e.g., responds appropriately, always on time).")
+                    {
+                        professionalConduct = Convert.ToString(content.GetValue("value"));
+
+                    }
+                    if (content["Category"].ToString() == "5.\tApplicant’s potential for teaching (e.g., knowledge and skills, creativity, problem-solving skills, attention to detail).")
+                    {
+                        teaching = Convert.ToString(content.GetValue("value"));
+
+                    }
+                }
+                // section for answer 5
+                foreach (JObject content in answer5.Children<JObject>())
+                {
+                    if (content["Category"].ToString() == "5. Recommendation for admission to the PK-3 ECE Specialist Instruction Credential Program at California State University, Long Beach:")
+                    {
+                        ECESpecialist = Convert.ToString(content.GetValue("value"));
+
+                    }
+                }
+
+                   recommendationTemplateBody = GetDocumentBodyTemplate(programIdentifier);
+                // replace the values in the template 
+                recommendationTemplateBody = recommendationTemplateBody.Replace("[[ApplicantLastName]]", applicantLastName)
+                                                                     .Replace("[[ApplicantFirstName]]", applicantFirstName)
+                                                                     .Replace("[[CredentialSubjectArea]]", credentialSubjectArea)
+                                                                     .Replace("[[CampusID]]", campusID)
+                                                                     .Replace("[[RecommenderLastName]]", recommenderLastName)
+                                                                     .Replace("[[RecommenderFirstName]]", recommenderFirstName)
+                                                                     .Replace("[[Institution]]", institution)
+                                                                     .Replace("[[PositionTitle]]", position_title)
+                                                                     .Replace("[[ContactNumber]]", telephoneContact)
+                                                                     .Replace("[[EmailID]]", email)
+                                                                     .Replace("[[Answer1]]", answer1)
+                                                                     .Replace("[[Answer2]]", answer2)
+                                                                     .Replace("[[Answer3]]", answer3)
+                                                                     .Replace("[[Potential]]", potential)
+                                                                     .Replace("[[InterpersonalSkills]]", interpersonalSkills)
+                                                                     .Replace("[[Disposition]]", disposition)
+                                                                     .Replace("[[ProfessionalConduct]]", professionalConduct)
+                                                                     .Replace("[[Teaching]]", teaching)
+                                                                     .Replace("[[ECESpecialist]]", ECESpecialist)
                                                                      .Replace("[[SignatureOfRecommender]]", signature)
                                                                      .Replace("[[Date]]", date)
                                                                      .Replace("[[Comments]]", comment);

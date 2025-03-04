@@ -24,6 +24,7 @@ namespace CSULB_COE.Controllers
     //[Authorize]
     public class FieldWorkController : ControllerBase
     {
+
         public ILogger<FieldWorkController> _logger;
         public IFieldWorkService _fieldWorkService;
         private readonly IConfiguration _configuration;

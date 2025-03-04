@@ -15,7 +15,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class TravelController : ControllerBase
     {
         public ILogger<TravelController> _logger;
