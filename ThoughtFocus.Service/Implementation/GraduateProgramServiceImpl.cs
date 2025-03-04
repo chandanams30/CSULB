@@ -1017,7 +1017,7 @@ namespace ThoughtFocus.Service.Implementation
                     ccMail= Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
                     programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                     subject = "Application Submitted";
-                    if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
+                    if(programID == 1 || programID == 2 || programID == 3 || programID == 4 || programID == 6)
                         body = GetMailBodyTemplate("Student_FormSubmit_Confirmation_ICP.html");
                     else
                         body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
@@ -1209,7 +1209,7 @@ namespace ThoughtFocus.Service.Implementation
                         RecommenderMailTemplateAttachement = Convert.ToBoolean(dsRec.Tables[0].Rows[0]["RecommenderMailTemplateAttachement"]);
                         string beforeBody = string.Empty;
                         string afterBody = string.Empty;
-                        if (programID == 1 || programID == 2 || programID == 4 || programID == 6 || programID == 28 || programID == 29)
+                        if (programID == 1 || programID == 2 || programID == 3 || programID == 4 || programID == 6 || programID == 28 || programID == 29)
                         {
                             beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
                             afterBody = "</body></html>";
@@ -1553,7 +1553,7 @@ namespace ThoughtFocus.Service.Implementation
                         programID = Convert.ToInt32(dsRec.Tables[0].Rows[0]["ProgramID"]);
                         string beforeBody = string.Empty;
                         string afterBody = string.Empty;
-                        if (programID == 1 || programID == 2 || programID == 4 || programID == 6 || programID == 28 || programID == 29)
+                        if (programID == 1 || programID == 2 || programID == 3 || programID == 4 || programID == 6 || programID == 28 || programID == 29)
                         {
                             beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
                             afterBody = "</body></html>";
