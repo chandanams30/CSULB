@@ -183,7 +183,7 @@ namespace ThoughtFocus.Service.Implementation
                                                StartingLocation = Convert.ToString(row["StartingLocation"]),
                                                DestinationAddress = Convert.ToString(row["DestinationAddress"]),
                                                BusinessPurpose = Convert.ToString(row["BusinessPurpose"]),
-                                               Miles = Convert.ToDecimal(row["Miles"]),
+                                               Miles = Convert.ToDecimal(row["Miles"] == DBNull.Value ? null : row["Miles"]),
                                                ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
                                                Rate = Convert.ToDecimal(row["Rate"] == DBNull.Value ? null : row["Rate"])
@@ -233,11 +233,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   Miles = Convert.ToDecimal(row["Miles"]),
                                                   ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                   ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
-                                                  Rate = Convert.ToDecimal(row["Rate"])
+                                                  Rate = Convert.ToDecimal(row["Rate"] == DBNull.Value ? null : row["Rate"])
 
                                               }).FirstOrDefault();
-
-
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
