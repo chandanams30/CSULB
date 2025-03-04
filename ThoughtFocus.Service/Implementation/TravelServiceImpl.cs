@@ -186,7 +186,7 @@ namespace ThoughtFocus.Service.Implementation
                                                Miles = row["Miles"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Miles"]),
                                                ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
-                                               Rate = Convert.ToDecimal(row["Rate"])
+                                               Rate = Convert.ToDecimal(row["Rate"] == DBNull.Value ? null : row["Rate"])
 
                                            }).ToList();
 
