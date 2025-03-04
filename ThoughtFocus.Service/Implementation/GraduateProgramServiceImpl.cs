@@ -542,7 +542,7 @@ namespace ThoughtFocus.Service.Implementation
 
             int identity = _helper.InsertTable("[dbo].[UpdateFinalDecisionComment]", parameters);
             obj.IsSuccess = true;
-            obj.Message = "Message Board Information Saved";
+            obj.Message = "Information Saved Successfully";
 
             return obj;
         }
