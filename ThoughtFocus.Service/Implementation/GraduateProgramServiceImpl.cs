@@ -4425,6 +4425,75 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public FormAttachmentDeatilsResponse GetFormAttachmentDeatils(int userID, int programID, int formID)
+        {
+            FormAttachmentDeatilsResponse obj = new FormAttachmentDeatilsResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = userID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID }
+                                       };
+
+            DataTable dtAttachmentDetails = _helper.GetDataTable("[dbo].[GetFormAttachmentDeatils]", parameters);
+            try
+            {
+                if (dtAttachmentDetails.Rows.Count > 0)
+                {
+                    obj.formAttachmentDeatils = dtAttachmentDetails.AsEnumerable().Select(row =>
+                                              new FormAttachmentDeatils
+                                              {
+                                                  formID = Convert.ToInt32(row["FormID"]),
+                                                  formAttachmentID= Convert.ToInt32(row["FormAttachmentID"] == DBNull.Value ? null : row["FormAttachmentID"]),
+                                                  documentID = Convert.ToInt32(row["DocumentID"]),
+                                                  programID = Convert.ToInt32(row["ProgramID"]),
+                                                  attachmentTitle = Convert.ToString(row["AttachmentTitle"]),
+                                                  fileName = Convert.ToString(row["FileName"] == DBNull.Value ? null : row["FileName"]),
+                                                  fileExtn = Convert.ToString(row["FileExtn"] == DBNull.Value ? null : row["FileExtn"]),
+                                                  IsOptional = Convert.ToBoolean(row["IsOptional"])
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpsertInterviewDate(FormUpsertAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar,-1) { Value = input.FormSchema },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[UpsertFormInterviewDate]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated Interview Date with Faculty successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the Interview Date with Faculty";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
     }
 
 
