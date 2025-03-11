@@ -13,6 +13,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int DocumentID { get; set; }
         public string FileName { get; set; }
         public byte[] FileContent { get; set; }
+        public string FormSchema {  get; set; }
     }
 
     public class DeleteFormAttachmentRequest
