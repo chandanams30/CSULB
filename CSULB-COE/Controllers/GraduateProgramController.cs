@@ -208,7 +208,7 @@ namespace CSULB_COE.Controllers
             }
         }
 
-        [HttpPost("UpsertFormAttachment")]
+        [HttpPost("UpsertFormInterviewDateFacultyAttachment")]
         public BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input)
         {
             try
@@ -228,7 +228,13 @@ namespace CSULB_COE.Controllers
                 //fs.Dispose();
                 //binaryReader.Close();
                 #endregion
-                BaseResponse response = _graduateProgramService.UpsertFormAttachment(input);
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.UpsertInterviewDate(input);
+                if((input.FileName != string.Empty) && (input.FileContent != null))
+                {
+                    response = _graduateProgramService.UpsertFormAttachment(input);
+                    response.Message = "Updated Interview Date with Faculty successfully";
+                }
                 return response;
             }
             catch (Exception ex)
@@ -1280,6 +1286,24 @@ namespace CSULB_COE.Controllers
                 BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFormAttachmentDeatils")]
+        public FormAttachmentDeatilsResponse GetFormAttachmentDeatils(int userID, int programID, int formID)
+        {
+            try
+            {
+                FormAttachmentDeatilsResponse response = _graduateProgramService.GetFormAttachmentDeatils(userID, programID, formID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormAttachmentDeatilsResponse response = new FormAttachmentDeatilsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

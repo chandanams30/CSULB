@@ -71,5 +71,7 @@ namespace ThoughtFocus.Service.Interfaces
         EvaluatorMailBodyResponse GetEvaluatorMailBody(int applicationId, int programID, string identifier);
         BaseResponse UpdateEvaluatorMailBody(EvaluatorBody input);
         BaseResponse UpdateFinalDecisionComment(FinalDecisionComment input);
+        FormAttachmentDeatilsResponse GetFormAttachmentDeatils(int userID, int programID, int formID);
+        BaseResponse UpsertInterviewDate(FormUpsertAttachmentRequest input);
     }
 }
