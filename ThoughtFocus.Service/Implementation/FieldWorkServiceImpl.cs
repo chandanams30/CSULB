@@ -1774,31 +1774,38 @@ namespace ThoughtFocus.Service.Implementation
                             //get evaluation mail body
                             SqlParameter[] parameters1 ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
-                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 2 },
                                             new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
                                        };
                             DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
-                            body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
-                            string beforeBody = string.Empty;
-                            string afterBody = string.Empty;
-                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
-                            afterBody = "</body></html>";
-                            body = $"{beforeBody}{body}{afterBody}";
-                            //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
-                            body = body.Replace("[[logoPath]]", logoText)
-                                .Replace("[[applicantname]]", applicantName)
-                                .Replace("[[link]]", link);
-
-                            string subject = "CSULB MSCP Clinical Practice Evaluation Form";
-                            _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
-                            isMailSent = true;
-                            SqlParameter[] parmeter1 =
+                            if (dtEval.Rows.Count > 0)
                             {
-                                new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
-                            };
-                            DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
-                            string id = evalDetails.Rows[0]["EvaluationID"].ToString();
-                            UpdateEvaluationMailSent(input, isMailSent, id);
+                                if (dtEval.Rows[0]["EvaluatorMailBody"] != DBNull.Value)
+                                {
+                                    body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
+
+                                    string beforeBody = string.Empty;
+                                    string afterBody = string.Empty;
+                                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                                    afterBody = "</body></html>";
+                                    body = $"{beforeBody}{body}{afterBody}";
+                                    //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
+                                    body = body.Replace("[[logoPath]]", logoText)
+                                        .Replace("[[applicantname]]", applicantName)
+                                        .Replace("[[link]]", link);
+
+                                    string subject = "CSULB MSCP Clinical Practice Evaluation Form";
+                                    _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                                    isMailSent = true;
+                                    SqlParameter[] parmeter1 =
+                                    {
+                                        new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
+                                    };
+                                    DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
+                                    string id = evalDetails.Rows[0]["EvaluationID"].ToString();
+                                    UpdateEvaluationMailSent(input, isMailSent, id);
+                                }
+                            }
                         }
                         response.Message = "Evaluation added and mail sent successfully";
                         response.IsSuccess = true;
@@ -1881,6 +1888,7 @@ namespace ThoughtFocus.Service.Implementation
             string afterBody = string.Empty;
             string studentEmail = string.Empty;
             UpsertEvaluationRequest upsertEvaluationRequest = new UpsertEvaluationRequest();
+            //input.EvaluationJSON = "{\"personalInfo\":{\"date\":\"03/01/2025\",\"gradeLevelTaught\":\"Grade \",\"schoolDistrict\":\"School\",\"schoolName\":\"Name\",\"disposition\":[{\"Criteria\":\"Promptness: Timeliness in first contact; Punctuality in attendance\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Responsibility: Consistency in schedule and work\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Honoring school setting: Compliance with school policies; Displays legal and ethical conduct; and, observing confidentiality at all times\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Representing the university: Respectful in professional language, behavior, and appearance. No use of social media in the schooling context at any time.\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Communication Skills: University-level language in email, phone contact, and in person\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Working with Diverse Populations: Respect and demonstrates insightfulness for all students, various backgrounds, abilities, and orientations\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Collaboration: Willing contribution to classroom environment and learning opportunities\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Knowledge: Application of course content and best practices; reflection on learning\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"OVERALL FINAL EVAULATION\",\"value\":\"Met (Performance Expectations)\"}]},\"comments\":\"additional\",\"teacherName\":\"Chandana1\"}";
 
             SqlParameter[] parameters =
                                        {
