@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.Admin;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Service.Interfaces;
@@ -312,6 +313,116 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
+        [HttpGet("GetFutureSemesterLists")]
+        //public UpcomingSemesterListResponse GetFutureSemesterLists()
+        public IActionResult GetFutureSemesterLists()
+        {
+            try
+            {
+                UpcomingSemesterListResponse response = _adminService.GetFutureSemesterList();
+                //return response;
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                UpcomingSemesterListResponse response = new UpcomingSemesterListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                // return response;
+                return BadRequest(" Bad Request");
+            }
+        }
+        [HttpGet("GetApplicationProgramsList")]
+        public IActionResult GetApplicationProgramsList(int applicationTypeID, string termCode)
+        {
+            try
+            {
+                ApplicationProgramListResponse response = _adminService.GetAllApplicationProgramsList(applicationTypeID, termCode);
+                //return response;
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                ApplicationProgramListResponse response = new ApplicationProgramListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                 //return response;
+                return BadRequest(" Bad Request");
+            }
+        }
+        [HttpGet("GetApplicationDates")]
+        public IActionResult GetApplicationDates(string termCode)
+        {
+            try
+            {
+                ApplicationDatesResponse response = _adminService.GetApplicationDates(termCode);
+                //return response;
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                ApplicationDatesResponse response = new ApplicationDatesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                //return response;
+                return BadRequest(" Bad Request");
+            }
+        }
+        [HttpPost("UpdateMultipleProgramApplicationDates")]
+        public BaseResponse UpdateMultipleProgramApplicationDates(UpdateProgramApplicationDates input)
+        {
+            try
+            {
+                BaseResponse response = _adminService.UpdateProgramApplicationDates(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update program application dates , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("RemoveReviewerFromForms")]
+
+        public BaseResponse RemoveReviewerFromForms(ReviewerRequest input)
+        {
+
+            try
+
+            {
+                BaseResponse response = new BaseResponse();
+                response = _adminService.RemoveReviewerFromForms(input);
+                return response;
+            }
+
+            catch (Exception ex)
+
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+
+            }
+
+        }
+
 
     }
 }
