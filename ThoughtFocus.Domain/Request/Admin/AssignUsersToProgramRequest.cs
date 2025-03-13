@@ -17,6 +17,14 @@ namespace ThoughtFocus.Domain.Request.Admin
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string CSULBID { get; set; }
-        public string Email { get; set; }
+        public string Email { get; set; }   
+    }
+
+    public class AddReviewerRequest
+    {
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public List<UserPrograms> UserPrograms { get; set; }
+
     }
 }
