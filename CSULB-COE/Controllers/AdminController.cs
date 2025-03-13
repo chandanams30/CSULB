@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.Admin;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Service.Interfaces;
@@ -395,6 +396,33 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("RemoveReviewerFromForms")]
+
+        public BaseResponse RemoveReviewerFromForms(ReviewerRequest input)
+        {
+
+            try
+
+            {
+                BaseResponse response = new BaseResponse();
+                response = _adminService.RemoveReviewerFromForms(input);
+                return response;
+            }
+
+            catch (Exception ex)
+
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+
+            }
+
+        }
+
 
     }
 }

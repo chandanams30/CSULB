@@ -11,6 +11,7 @@ using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.Admin;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Service.Interfaces;
@@ -715,6 +716,26 @@ namespace ThoughtFocus.Service.Implementation
                 response.Message = ex.Message;
                 response.IsSuccess = false;
             }
+            return response;
+        }
+
+        public BaseResponse RemoveReviewerFromForms(ReviewerRequest input)
+        {
+            DataTable UserPrograms = _utils.ToDataTable(input.UserPrograms);
+            BaseResponse response = new BaseResponse();
+
+            for (int i = 0; i < UserPrograms.Rows.Count; i++)
+            {
+                SqlParameter[] parameters =
+                                  {
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@ReviewerID", SqlDbType.BigInt) { Value = UserPrograms.Rows[i]["UserID"] }
+                                        };
+                int ID = _helper.InsertTable("[dbo].[RemoveReviewer]", parameters);
+            }
+            response.Message = "Reviewer Removed Successfully";
+            response.IsSuccess = true;
             return response;
         }
 

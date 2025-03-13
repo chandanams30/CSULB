@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Request.Admin;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 
@@ -30,6 +31,7 @@ namespace ThoughtFocus.Service.Interfaces
         ApplicationProgramListResponse GetAllApplicationProgramsList(int applicationTypeID, string termCode);
         BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDates input);
         ApplicationDatesResponse GetApplicationDates(string termCode);
+        BaseResponse RemoveReviewerFromForms(ReviewerRequest input);
 
 
     }
