@@ -11,6 +11,7 @@ using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.Admin;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Service.Interfaces;
@@ -552,5 +553,128 @@ namespace ThoughtFocus.Service.Implementation
             return response;
 
         }
+
+        public ApplicationProgramListResponse GetAllApplicationProgramsList(int applicationTypeID, string termCode)
+        {
+            ApplicationProgramListResponse obj = new ApplicationProgramListResponse();
+
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationTypeID },
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = termCode },
+
+                                       };
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetProgramsByApplication]", parameters);
+
+            try
+            {
+                if (dtApplicationPrograms.Tables.Count > 0)
+                {
+                    obj.ApplicationProgramList = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                                 new ApplicationProgramsList
+                                                 {
+                                                     ProgramID = Convert.ToInt32(row["ID"]),
+                                                     ProgramName = Convert.ToString(row["Name"]),
+                                                 }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public ApplicationDatesResponse GetApplicationDates(string termCode)
+        {
+            ApplicationDatesResponse obj = new ApplicationDatesResponse();
+
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = termCode }
+
+                                       };
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationDates]", parameters);
+
+            try
+            {
+                if (dtApplicationPrograms.Tables.Count > 0)
+                {
+                    obj = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                                 new ApplicationDatesResponse
+                                                 {
+                                                     ApplicationOpenDate = Convert.ToDateTime(row["ApplicationOpenDate"]),
+                                                     ApplicationCloseDate = Convert.ToDateTime(row["ApplicationCloseDate"]),
+                                                     ApplicationDeadlineDate = Convert.ToDateTime(row["ApplicationDeadlineDate"]),
+                                                 }).FirstOrDefault();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDates input)
+        {
+            BaseResponse response = new BaseResponse();
+
+            foreach (var programID in input.ProgramID)
+            {
+                SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ProgramID", SqlDbType.Int) { Value = programID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
+                                          new SqlParameter("@ApplicationOpens", SqlDbType.DateTime) {Value = input.ApplicationOpens},
+                                          new SqlParameter("@ApplicationDeadline", SqlDbType.DateTime) {Value = input.ApplicationDeadline},
+                                          new SqlParameter("@ApplicationCloseDate", SqlDbType.DateTime) {Value = input.ApplicationCloseDate},
+                                          new SqlParameter("@Status", SqlDbType.Bit) {Value = input.Status}
+                                        };
+                int ID = _helper.InsertTable("[dbo].[SaveProgramApplicationDates]", parameters);
+
+            }
+            try
+            {
+                response.Message = "Program application dates saved successfully";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                response.Message = ex.Message;
+                response.IsSuccess = false;
+            }
+            return response;
+        }
+
+        public BaseResponse RemoveReviewerFromForms(ReviewerRequest input)
+        {
+            DataTable UserPrograms = _utils.ToDataTable(input.UserPrograms);
+            BaseResponse response = new BaseResponse();
+
+            for (int i = 0; i < UserPrograms.Rows.Count; i++)
+            {
+                SqlParameter[] parameters =
+                                  {
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@ReviewerID", SqlDbType.BigInt) { Value = UserPrograms.Rows[i]["UserID"] }
+                                        };
+                int ID = _helper.InsertTable("[dbo].[RemoveReviewer]", parameters);
+            }
+            response.Message = "Reviewer Removed Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+
     }
 }

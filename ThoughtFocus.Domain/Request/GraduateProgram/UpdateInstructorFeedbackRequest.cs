@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.Domain.Request.Admin;
 
 namespace ThoughtFocus.Domain.Request.GraduateProgram
 {
@@ -48,6 +49,13 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public int ReviewerID { get; set; }
+    }
+    public class ReviewerRequest
+    {
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public List<UserPrograms> UserPrograms { get; set; }
+
     }
 
     public class GetInstructorInterviewerListRequest
