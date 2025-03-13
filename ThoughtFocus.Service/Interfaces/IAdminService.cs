@@ -22,7 +22,6 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse AddUser(AddUserRequest input);
         BaseResponse UpdateUser(UpdateUserRequest input);
         BaseResponse AssignUsersToProgram(AssignUsersToProgramRequest input);
-        BaseResponse RemoveReviewerFromForm(AddReviewerRequest input);
 
         BaseResponse UploadMessageBoardAttachment(UploadMessageBoardAttachmentRequest input);
         BaseResponse UpsertCommunityDistrict(UpsertCommunityDistrictRequest input);
