@@ -435,6 +435,28 @@ namespace ThoughtFocus.Service.Implementation
 
         }
 
+        public BaseResponse RemoveReviewerFromForm(AddReviewerRequest input)
+        {
+            DataTable UserPrograms = _utils.ToDataTable(input.UserPrograms);
+            BaseResponse response = new BaseResponse();
+
+            for (int i= 0;i< UserPrograms.Rows.Count;i++)
+            {
+                SqlParameter[] parameters =
+                                  {
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@ReviewerID", SqlDbType.BigInt) { Value = UserPrograms.Rows[i]["UserID"] }
+                                        };
+                int ID = _helper.InsertTable("[dbo].[RemoveReviewer]", parameters);
+            }
+            response.Message = "Reviewer Removed Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+
+
         public BaseResponse UploadMessageBoardAttachment(UploadMessageBoardAttachmentRequest input)
         {
             BaseResponse response = new BaseResponse();

@@ -10,4 +10,11 @@ namespace ThoughtFocus.Domain.Response
         public string Message { get; set; }
         public string StackTrace { get; set; }
     }
+
+    public class Response
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public string StackTrace { get; set; }
+    }
 }
