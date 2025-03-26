@@ -444,12 +444,12 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("AssignFormToReviewers")]
-        public BaseResponse AssignFormToReviewers(int programID)
+        public BaseResponse AssignFormToReviewers(int programID, string termCode)
         {
             try
             {
                 BaseResponse response = new BaseResponse();
-                response = _graduateProgramService.AssignFormToReviewers(programID);
+                response = _graduateProgramService.AssignFormToReviewers(programID, termCode);
                 return response;
             }
             catch (Exception ex)
