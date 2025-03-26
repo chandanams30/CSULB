@@ -35,7 +35,7 @@ namespace ThoughtFocus.Service.Interfaces
         AuthorizeRecommenderResponse GetDetailsForRecommendation(string recommenderIdentifier);
         BaseResponse SendReminderToRecommender(int recommendationID);
         BaseResponse UpdateReviwerReview(FormReviewerReviewRequest input);
-        BaseResponse AssignFormToReviewers(int programID);
+        BaseResponse AssignFormToReviewers(int programID, string termCode);
         byte[] GetMergedDocument(int formID);
         BaseResponse UpdateInstructorFeedback(UpdateInstructorFeedbackRequest input);
         BaseResponse UpdateInterviewerFeedback(UpdateInterviewerFeedbackRequest input);

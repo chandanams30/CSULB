@@ -3062,11 +3062,13 @@ namespace ThoughtFocus.Service.Implementation
             return sb.ToString();
         }
 
-        public BaseResponse AssignFormToReviewers(int programID)
+        public BaseResponse AssignFormToReviewers(int programID, string termCode )
         {
             BaseResponse obj = new BaseResponse();
             SqlParameter[] parameters =
-                                   { new SqlParameter("@ProgramId", SqlDbType.Int) { Value = programID } };
+                                   { new SqlParameter("@ProgramId", SqlDbType.Int) { Value = programID } ,
+                                    new SqlParameter("@TermCode", SqlDbType.NVarChar) { Value = termCode } 
+        };
 
             int id = _helper.InsertTable("[dbo].[AssignFormToReviewers]", parameters);
             obj.IsSuccess = true;
