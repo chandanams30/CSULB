@@ -674,6 +674,46 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
+        public UpcomingSemesterListResponse GetFutureSemesterList()
+        {
+            UpcomingSemesterListResponse obj = new UpcomingSemesterListResponse();
+
+
+            SqlParameter[] parameters = { };
+
+            DataTable dtSemesters = _helper.GetDataTable("[dbo].[GetFutureSemesterList]", parameters);
+            try
+            {
+                if (dtSemesters.Rows.Count > 0)
+                {
+
+
+                    obj.SemesterTerms = dtSemesters.AsEnumerable().Select(row =>
+                                              new Domain.Response.Admin.SemesterTerm
+                                              {
+                                                  TermName = Convert.ToString(row["Name"]),
+                                                  TermCode = Convert.ToString(row["TermCode"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
 
 
     }
