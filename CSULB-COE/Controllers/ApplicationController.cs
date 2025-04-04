@@ -143,6 +143,10 @@ namespace CSULB_COE.Controllers
                             response.IsSuccess = false;
                         }
                     }
+                    else if (apiProperties.error != null)
+                    {
+                            response.IsSuccess = true;
+                    }
                     else
                     {
                         sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
