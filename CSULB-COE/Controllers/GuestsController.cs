@@ -1330,57 +1330,57 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        //[HttpGet("ValidateEmail")]
-        //public BaseResponse ValidateEmail(string emailAddress)
-        //{
-        //    BaseResponse response = new BaseResponse();
-        //    string validatedResult = string.Empty;
-        //    StringBuilder sbProps = new StringBuilder();
-        //    var zeroBounceAPI = new ZeroBounceV2.ZeroBounceAPI();
-        //    zeroBounceAPI.api_key = _configuration["ApplicationKeys:ZeroBounceAPIKey"];
-        //    zeroBounceAPI.EmailToValidate = emailAddress;
-        //    // zeroBounceAPI.ip_address = "IP Address Where Email Registered From";
+        [HttpGet("ValidateEmail")]
+        public BaseResponse ValidateEmail(string emailAddress)
+        {
+            BaseResponse response = new BaseResponse();
+            string validatedResult = string.Empty;
+            StringBuilder sbProps = new StringBuilder();
+            var zeroBounceAPI = new ZeroBounceV2.ZeroBounceAPI();
+            zeroBounceAPI.api_key = _configuration["ApplicationKeys:ZeroBounceAPIKey"];
+            zeroBounceAPI.EmailToValidate = emailAddress;
+            // zeroBounceAPI.ip_address = "IP Address Where Email Registered From";
 
-        //    zeroBounceAPI.ReadTimeOut = 100000; // "Any integer value in milliseconds;
-        //    zeroBounceAPI.RequestTimeOut = 100000; // "Any integer value in milliseconds;
+            zeroBounceAPI.ReadTimeOut = 100000; // "Any integer value in milliseconds;
+            zeroBounceAPI.RequestTimeOut = 100000; // "Any integer value in milliseconds;
 
-        //    var apiProperties = zeroBounceAPI.ValidateEmail();
-        //    if (apiProperties != null)
-        //    {
-        //        PropertyInfo[] properties = apiProperties.GetType().GetProperties();
-        //        foreach (PropertyInfo property in properties)
-        //        {
-        //            //check if the the status is catch-all then return valid as status
-        //            if (property.Name == "status" && apiProperties.status == "catch-all")
-        //            {
-        //                if ((!string.IsNullOrEmpty(apiProperties.firstName)) && (!string.IsNullOrEmpty(apiProperties.lastName)))
-        //                {
-        //                    sbProps.Append(property.Name + ": " + "valid" + "\n");
-        //                    response.IsSuccess = true;
-        //                }
-        //                else
-        //                {
-        //                    sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
-        //                    response.IsSuccess = false;
-        //                }
-        //            }
-        //            else if (apiProperties.error != null)
-        //            {
-        //                response.IsSuccess = true;
-        //            }
-        //            else
-        //            {
-        //                sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
-        //                if (property.Name == "status" && apiProperties.status == "valid")
-        //                {
-        //                    response.IsSuccess = true;
-        //                }
-        //            }
-        //        }
-        //    }
+            var apiProperties = zeroBounceAPI.ValidateEmail();
+            if (apiProperties != null)
+            {
+                PropertyInfo[] properties = apiProperties.GetType().GetProperties();
+                foreach (PropertyInfo property in properties)
+                {
+                    //check if the the status is catch-all then return valid as status
+                    if (property.Name == "status" && apiProperties.status == "catch-all")
+                    {
+                        if ((!string.IsNullOrEmpty(apiProperties.firstName)) && (!string.IsNullOrEmpty(apiProperties.lastName)))
+                        {
+                            sbProps.Append(property.Name + ": " + "valid" + "\n");
+                            response.IsSuccess = true;
+                        }
+                        else
+                        {
+                            sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
+                            response.IsSuccess = false;
+                        }
+                    }
+                    else if (apiProperties.error != null)
+                    {
+                        response.IsSuccess = true;
+                    }
+                    else
+                    {
+                        sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
+                        if (property.Name == "status" && apiProperties.status == "valid")
+                        {
+                            response.IsSuccess = true;
+                        }
+                    }
+                }
+            }
 
-        //    return response;
-        //}
+            return response;
+        }
 
         [HttpPost("UpsertFormExperienceAttachment")]
         public FormExperienceAttachmentResponse UpsertFormExperienceAttachment(FormExperienceAttachmentRequest input)
