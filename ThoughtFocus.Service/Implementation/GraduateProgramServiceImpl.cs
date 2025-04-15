@@ -1100,7 +1100,7 @@ namespace ThoughtFocus.Service.Implementation
                     int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
                     if (formStateID != 11)
                     {
-                        if (!(formStateID == 10 && applicationTypeID == 2))
+                        if (formStateID == 10 && applicationTypeID == 3)
                         {
                             // applicant mail
                             string logoText = "cid:myImageID";
