@@ -1707,8 +1707,14 @@ namespace ThoughtFocus.Service.Implementation
 
                     if (attachment.FileName != string.Empty)
                     {
-                        AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(attachment.FileName);
-                        //fileName = fileDetails.FileName;
+                        fileName = attachment.FileName;
+                        if (!fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            fileName += ".pdf";
+                        }
+
+                        AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(fileName);
+                        // fileName = fileDetails.FileName;
                         fileExtension = fileDetails.FileExtension;
                     }
 
@@ -1821,8 +1827,14 @@ namespace ThoughtFocus.Service.Implementation
 
                     if (attachment.FileName != string.Empty)
                     {
-                        AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(attachment.FileName);
-                        //fileName = fileDetails.FileName;
+                        fileName = attachment.FileName;
+                        if (!fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            fileName += ".pdf";
+                        }
+
+                        AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(fileName);
+                        // fileName = fileDetails.FileName;
                         fileExtension = fileDetails.FileExtension;
                     }
 
