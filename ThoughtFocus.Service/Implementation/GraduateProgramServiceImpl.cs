@@ -1665,7 +1665,7 @@ namespace ThoughtFocus.Service.Implementation
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
             byte[] fileContentJSONToPDF = null;
-            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"job_title\":\"\",\"recommenderName\":\"testww\",\"studentName\":\"Isabela Flores\",\"occupation\":\"Occupation\",\"organization\":\"\",\"email\":\"chandana.shankaregowda@thoughtfocus.com\",\"phone\":\"\"},\"relationship\":{\"howLongApplicantKnown\":\"\",\"inWhatCapacityApplicantKnown\":\"\"},\"referrenceRatings\":[{\"quality\":\"Communication Skills, Oral:\",\"scale\":\"\"},{\"quality\":\"Communication Skills, Written:\",\"scale\":\"\"},{\"quality\":\"Technology Skills:\",\"scale\":\"\"},{\"quality\":\"Initiative:\",\"scale\":\"\"},{\"quality\":\"Maturity:\",\"scale\":\"\"},{\"quality\":\"Motivation for this program of study:\",\"scale\":\"\"},{\"quality\":\"Creativity:\",\"scale\":\"\"},{\"quality\":\"Ability to work with others:\",\"scale\":\"\"},{\"quality\":\"Intellectual potential:\",\"scale\":\"\"},{\"quality\":\"Present academic performance:\",\"scale\":\"\"},{\"quality\":\"Potential for graduate work:\",\"scale\":\"\"}],\"overAllRecommendationAdmission\":\"\"}";
+            //input.LetterOfRecommendationJSON = "{\r\n  \"personalInfo\": {\r\n    \"job_title\": \"test\",\r\n    \"recommenderName\": \"Nandini\",\r\n    \"studentName\": \"Kaylee Brubaker\",\r\n    \"occupation\": \"t\",\r\n    \"organization\": \"t\",\r\n    \"email\": \"nandinim.prakash@gmail.com\",\r\n    \"phone\": \"(555) 555 - 5555\"\r\n  },\r\n  \"relationship\": {\r\n    \"howLongApplicantKnown\": \"1-2 Years\",\r\n    \"inWhatCapacityApplicantKnown\": \"Employee/Supervisor\"\r\n  },\r\n  \"referrenceRatings\": [\r\n    {\r\n      \"quality\": \"Communication Skills, Oral:\",\r\n      \"scale\": \"1\"\r\n    },\r\n    {\r\n      \"quality\": \"Communication Skills, Written:\",\r\n      \"scale\": \"3\"\r\n    },\r\n    {\r\n      \"quality\": \"Technology Skills:\",\r\n      \"scale\": \"2\"\r\n    },\r\n    {\r\n      \"quality\": \"Initiative:\",\r\n      \"scale\": \"2\"\r\n    },\r\n    {\r\n      \"quality\": \"Maturity:\",\r\n      \"scale\": \"1\"\r\n    },\r\n    {\r\n      \"quality\": \"Motivation for this program of study:\",\r\n      \"scale\": \"2\"\r\n    },\r\n    {\r\n      \"quality\": \"Creativity:\",\r\n      \"scale\": \"1\"\r\n    },\r\n    {\r\n      \"quality\": \"Ability to work with others:\",\r\n      \"scale\": \"2\"\r\n    },\r\n    {\r\n      \"quality\": \"Intellectual potential:\",\r\n      \"scale\": \"4\"\r\n    },\r\n    {\r\n      \"quality\": \"Present academic performance:\",\r\n      \"scale\": \"4\"\r\n    },\r\n    {\r\n      \"quality\": \"Potential for graduate work:\",\r\n      \"scale\": \"3\"\r\n    }\r\n  ],\r\n  \"overAllRecommendationAdmission\": \"Without Reservation\"\r\n}";
             //input.LetterOfRecommendationJSON = "{\r\n  personalInfo: {\r\n    job_title: \"xxx\",\r\n    recommenderName: \"chandana\",\r\n    studentName: \"xello\",\r\n    occupation: \"ggg\",\r\n    organization: \"ttt\",\r\n    email: \"ttt@gmail.com\",\r\n    phone: \"34456456546\",\r\n  },\r\n  relationship: {\r\n    howLongApplicantKnown: \"1-2 Years\",\r\n    inWhatCapacityApplicantKnown: \"1-2 Years\",\r\n  },\r\n  referrenceRatings: [\r\n    {\r\n      quality: \"Communication Skills, Oral:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Communication Skills, Written:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Technology Skills:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Initiative:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Maturity:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Motivation for this program of study:\",\r\n      scale: \"1\",\r\n    },\r\n    {\r\n      quality: \"Creativity:\",\r\n      scale: \"2\",\r\n    },\r\n    {\r\n      quality: \"Ability to work with others:\",\r\n      scale: \"3\",\r\n    },\r\n    {\r\n      quality: \"Intellectual potential:\",\r\n      scale: \"4\",\r\n    },\r\n    {\r\n      quality: \"Present academic performance:\",\r\n      scale: \"5\",\r\n    },\r\n    {\r\n      quality: \"Potential for graduate work:\",\r\n      scale: \"1\",\r\n    },\r\n  ],\r\n  overAllRecommendationAdmission: \"Highest\",\r\nquestion1:\"hello\",\r\nquestion2:\"world\",\r\n}";
             if ((input.LetterOfRecommendationJSON != string.Empty) && (input.LetterOfRecommendationJSON != null))
             {
@@ -1691,16 +1691,43 @@ namespace ThoughtFocus.Service.Implementation
                 string letterOfRecommendationJSON = string.Empty;
 
                 // pull the saved file name format SP Below
-                FormAttachmentFileNames fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                FormAttachmentFileNames fileNames = new FormAttachmentFileNames();
                 if ((input.ProgramFormIdentifier == "GACP") && (input.LetterOfRecommendationJSON != string.Empty) && (input.LetterOfRecommendationJSON != null))
                 {
                     if (attachment.DocumentID == 3)
                     {
                         letterOfRecommendationJSON = input.LetterOfRecommendationJSON;
                         attachment.FileContent = fileContentJSONToPDF;
-                        attachment.FileName = fileNames.FileName + ".pdf";
+                        //attachment.FileName = fileNames.FileName + ".pdf";
                     }
                 }
+                if (attachment.FileContent != null && attachment.FileContent.Length > 0)
+                {
+                    fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                    attachment.FileName = fileNames.FileName + ".pdf";
+                }
+                else
+                {
+                    fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                    string[] folderSplit = fileNames.SavedFileName.ToString().Split('_');
+                    string folderName = folderSplit[0].ToString();
+                    fileNames.SavedFileName = folderName + '_' + attachment.FileName;
+               
+                    fileNames.FileName = attachment.FileName;
+                }
+                //if(attachment.DocumentID ==18)
+                //{
+                //    string filepath = "D:\\TestFiles\\Test doc.pdf";
+                //    byte[] fileContent = null;
+                //    System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //    System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //    long byteLength = new System.IO.FileInfo(filepath).Length;
+                //    fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //    attachment.FileContent = fileContent;
+                //    fs.Close();
+                //    fs.Dispose();
+                //    binaryReader.Close();
+                //}
                 if (!string.IsNullOrEmpty(fileNames.FileName) && attachment.FileContent != null && !string.IsNullOrEmpty(attachment.FileName))
                 {
                     if (!sendMail) { sendMail = true; }
@@ -1742,32 +1769,37 @@ namespace ThoughtFocus.Service.Implementation
                     // save the file in physicalpath
                     // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
                     //string[] folderSplit = fileNames.SavedFileName.ToString().Split('~');
-                    userFolderName = fileNames.UserFolder.ToString();
-                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
-                    if (Directory.Exists(dirUserFolderPath))
+                    if (attachment.FileContent != null && attachment.FileContent.Length > 0)
                     {
-                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
-                        if (Directory.Exists(dirForm))
+                        userFolderName = fileNames.UserFolder.ToString();
+                        string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                  
+                        if (Directory.Exists(dirUserFolderPath))
                         {
-                            // copy the file here 
-                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                            string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                            if (Directory.Exists(dirForm))
+                            {
+                                // copy the file here 
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                            }
+                            else
+                            {
+                                Directory.CreateDirectory(dirForm);
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                            }
                         }
+
                         else
                         {
-                            Directory.CreateDirectory(dirForm);
+                            string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                            DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                            DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                            DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                            dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                            dirFieldWorkFolder.SetAccessControl(dSecurity);
+
                             File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
                         }
-                    }
-                    else
-                    {
-                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
-                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
-                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
-                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
-                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-                        dirFieldWorkFolder.SetAccessControl(dSecurity);
-
-                        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
                     }
                     // pull the applicant details based on the recommenderIdentifier 
                     // call getApplicantByRecommenderIdentifier
@@ -1813,14 +1845,28 @@ namespace ThoughtFocus.Service.Implementation
                 string savedFileName = string.Empty;
                 string letterOfRecommendationJSON = string.Empty;
                 // pull the saved file name format SP Below
-                FormAttachmentFileNames fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                FormAttachmentFileNames fileNames = new FormAttachmentFileNames();
                 if (attachment.DocumentID == 3)
                 {
                     letterOfRecommendationJSON = input.LetterOfRecommendationJSON;
                     attachment.FileContent =fileContentJSONToPDF;
+                    //attachment.FileName = fileNames.FileName + ".pdf";
+                }
+                if (attachment.FileContent != null && attachment.FileContent.Length > 0)
+                {
+                    fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
                     attachment.FileName = fileNames.FileName + ".pdf";
                 }
-           
+                else
+                {
+                    fileNames = GetFormRecommendAttachmentFileName(input.RecommenderIdentifier, attachment.DocumentID);
+                    string[] folderSplit = fileNames.SavedFileName.ToString().Split('_');
+                    string folderName = folderSplit[0].ToString();
+                    fileNames.SavedFileName = folderName + '_' + attachment.FileName;
+
+                    fileNames.FileName = attachment.FileName;
+                }
+
                 if (!string.IsNullOrEmpty(fileNames.FileName) && attachment.FileContent != null && !string.IsNullOrEmpty(attachment.FileName))
                 {
                     if (!sendMail) { sendMail = true; }
@@ -1862,32 +1908,35 @@ namespace ThoughtFocus.Service.Implementation
                     // save the file in physicalpath
                     // check if the userFolder exists and if it exists then check if if the FieldWork Folder exists
                     //string[] folderSplit = fileNames.SavedFileName.ToString().Split('~');
-                    userFolderName = fileNames.UserFolder.ToString();
-                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
-                    if (Directory.Exists(dirUserFolderPath))
+                    if (attachment.FileContent != null && attachment.FileContent.Length > 0)
                     {
-                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
-                        if (Directory.Exists(dirForm))
+                        userFolderName = fileNames.UserFolder.ToString();
+                        string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                        if (Directory.Exists(dirUserFolderPath))
                         {
-                            // copy the file here 
-                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                            string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                            if (Directory.Exists(dirForm))
+                            {
+                                // copy the file here 
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                            }
+                            else
+                            {
+                                Directory.CreateDirectory(dirForm);
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
+                            }
                         }
                         else
                         {
-                            Directory.CreateDirectory(dirForm);
+                            string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                            DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                            DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                            DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                            dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                            dirFieldWorkFolder.SetAccessControl(dSecurity);
+
                             File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
                         }
-                    }
-                    else
-                    {
-                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
-                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
-                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
-                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
-                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-                        dirFieldWorkFolder.SetAccessControl(dSecurity);
-
-                        File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), attachment.FileContent);
                     }
                     // pull the applicant details based on the recommenderIdentifier 
                     // call getApplicantByRecommenderIdentifier
