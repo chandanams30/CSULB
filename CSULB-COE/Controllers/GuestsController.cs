@@ -193,13 +193,12 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("UpsertFormAttachment")]
+        [HttpPost("UpsertFormInterviewDateFacultyAttachment")]
         public BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input)
         {
             try
             {
                 #region commented area to pull the file content 
-                //string filepath = "D:\\CSULB\\Document\\test.pdf";
                 //string filepath = "D:\\CSULB\\GitHub\\Documents\\MYDOCS.png";
                 //string filepath = "D:\\CSULB\\GitHub\\Documents\\pic2.jpg";
                 //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
@@ -214,7 +213,13 @@ namespace CSULB_COE.Controllers
                 //fs.Dispose();
                 //binaryReader.Close();
                 #endregion
-                BaseResponse response = _graduateProgramService.UpsertFormAttachment(input);
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.UpsertInterviewDate(input);
+                if ((input.FileName != string.Empty) && (input.FileContent != null))
+                {
+                    response = _graduateProgramService.UpsertFormAttachment(input);
+                    response.Message = "Updated Interview Date with Faculty successfully";
+                }
                 return response;
             }
             catch (Exception ex)
