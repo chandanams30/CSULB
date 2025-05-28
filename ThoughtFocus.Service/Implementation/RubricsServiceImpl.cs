@@ -291,15 +291,23 @@ namespace ThoughtFocus.Service.Implementation
             DataTable dtRubrics = _helper.GetDataTable("[Rubrics].[InsertFilledRubrics]", parameters);
             if (dtRubrics.Rows.Count > 0)
             {
-                if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "SUCCESS")
+                if (input.Status == 7)
                 {
-                    response.Message = "Rubrics Submitted Successfully";
+                    response.Message = "Rubrics Deleted Successfully";
                     response.IsSuccess = true;
                 }
-                else if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "FAILURE")
+                else
                 {
-                    response.Message = "Failed to Submit Rubrics";
-                    response.IsSuccess = true;
+                    if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "SUCCESS")
+                    {
+                        response.Message = "Rubrics Submitted Successfully";
+                        response.IsSuccess = true;
+                    }
+                    else if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "FAILURE")
+                    {
+                        response.Message = "Failed to Submit Rubrics";
+                        response.IsSuccess = true;
+                    }
                 }
             }
             return response;
