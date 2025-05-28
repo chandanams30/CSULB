@@ -191,5 +191,23 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("DeleteRubricsTemplate")]
+        public BaseResponse DeleteRubricsTemplate(DeleteRubricsTemplateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _rubricsService.DeleteRubricsTemplate(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

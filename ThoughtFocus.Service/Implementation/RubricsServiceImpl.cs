@@ -424,6 +424,30 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public BaseResponse DeleteRubricsTemplate(DeleteRubricsTemplateRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+
+                                          new SqlParameter("@TemplateID", SqlDbType.BigInt) { Value = input.ID }
+                                        };
+            DataTable dtRubrics = _helper.GetDataTable("[Rubrics].[DeleteRubricsTemplate]", parameters);
+            if (dtRubrics.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Rubrics Template Deleted Successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtRubrics.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to Delete Rubrics Template";
+                    response.IsSuccess = true;
+                }
+            }
+            return response;
+        }
 
     }
 }

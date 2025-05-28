@@ -16,6 +16,7 @@ namespace ThoughtFocus.Domain.Response.Admin
         public string EMAIL { get; set; }
         public string CSULBID { get; set; }
         public string UserRoles { get; set; }
+        public string ProgramName { get; set; }
     }
     public class UserDataOptionListResponse : BaseResponse
     {

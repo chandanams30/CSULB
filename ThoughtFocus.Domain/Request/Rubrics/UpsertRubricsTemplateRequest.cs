@@ -45,4 +45,8 @@ namespace ThoughtFocus.Domain.Request.Rubrics
         public int UserID { get; set; }
         public int CreatedBy { get; set; }
     }
+    public class DeleteRubricsTemplateRequest
+    {
+        public int ID { get; set; }
+    }
 }

@@ -26,6 +26,7 @@ using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Domain.Response.Guests;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
+using System.Reflection;
 
 namespace CSULB_COE.Controllers
 {
@@ -199,13 +200,12 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("UpsertFormAttachment")]
+        [HttpPost("UpsertFormInterviewDateFacultyAttachment")]
         public BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input)
         {
             try
             {
                 #region commented area to pull the file content 
-                //string filepath = "D:\\CSULB\\Document\\test.pdf";
                 //string filepath = "D:\\CSULB\\GitHub\\Documents\\MYDOCS.png";
                 //string filepath = "D:\\CSULB\\GitHub\\Documents\\pic2.jpg";
                 //string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
@@ -220,7 +220,13 @@ namespace CSULB_COE.Controllers
                 //fs.Dispose();
                 //binaryReader.Close();
                 #endregion
-                BaseResponse response = _graduateProgramService.UpsertFormAttachment(input);
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.UpsertInterviewDate(input);
+                if ((input.FileName != string.Empty) && (input.FileContent != null))
+                {
+                    response = _graduateProgramService.UpsertFormAttachment(input);
+                    response.Message = "Updated Interview Date with Faculty successfully";
+                }
                 return response;
             }
             catch (Exception ex)
@@ -1111,6 +1117,328 @@ namespace CSULB_COE.Controllers
                 string fileName = string.Empty;
 
                 ThoughtFocus.Domain.Request.GraduateProgram.FormAttachments obj = _milestonesService.DownloadMilestoneFormAttachments(FileName);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetClinicalPracticeEquivalencyAttachmentList")]
+        public ClinicalPracticeEquivalencyAttachmentList GetClinicalPracticeEquivalencyAttachmentList(int UserID, int FormID)
+        {
+            try
+            {
+                ClinicalPracticeEquivalencyAttachmentList response = _initialCredentialProgramService.GetClinicalPracticeEquivalencyAttachmentList(UserID, FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ClinicalPracticeEquivalencyAttachmentList response = new ClinicalPracticeEquivalencyAttachmentList();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFormAttachmentDeatils")]
+        public FormAttachmentDeatilsResponse GetFormAttachmentDeatils(int userID, int programID, int formID)
+        {
+            try
+            {
+                FormAttachmentDeatilsResponse response = _graduateProgramService.GetFormAttachmentDeatils(userID, programID, formID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormAttachmentDeatilsResponse response = new FormAttachmentDeatilsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("SaveClinicalPracticeEquivalencyAttachment")]
+        public BaseResponse SaveClinicalPracticeEquivalencyAttachment(SaveClinicalPracticeEquivalencyAttachmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                //#region to get the file content from local
+                //byte[] fileContent = null;
+                //string filepath = "D:\\ExcelDoc\\CTC_10232024162937.pdf";
+                ////string filepath = "D:\\ExcelDoc\\PK3_OtherChanges_20250220.pdf";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                //#endregion
+
+                response = _initialCredentialProgramService.SaveClinicalPracticeEquivalencyAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetClinicalPracticeEquivalencyAttachment")]
+        public IActionResult GetClinicalPracticeEquivalencyAttachment(ClinicalPracticeEquivalencyAttachmentRequest input)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                FormSubsectionAttachmentDownloadResponse obj = _initialCredentialProgramService.GetClinicalPracticeEquivalencyAttachment(input);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetLetterOfRecommendationsByFormID")]
+        public LetterOfRecommendationsByFormIDResponse GetLetterOfRecommendationsByFormID(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                LetterOfRecommendationsByFormIDResponse response = _initialCredentialProgramService.GetLetterOfRecommendationsByFormID(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                LetterOfRecommendationsByFormIDResponse response = new LetterOfRecommendationsByFormIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetInstructorList")]
+        public InstructorListResponse GetInstructorList(GetInstructorInterviewerListRequest input)
+        {
+            try
+            {
+                InstructorListResponse response = new InstructorListResponse();
+                response = _graduateProgramService.GetInstructorList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                InstructorListResponse response = new InstructorListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertLetterOfRecommendations")]
+        public BaseResponse UpsertLetterOfRecommendations(UpsertLetterOfRecommendationsRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _initialCredentialProgramService.UpsertLetterOfRecommendations(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("DownloadAttachment")]
+        public IActionResult DownloadAttachment(DownloadAttachmentRequest input)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.DownloadAttachment(input);
+                fileName = obj.Filename;
+                inputStream = obj.FileContent;
+                string[] fileSplit = obj.Filename.Split('.');
+                string fileextension = obj.Filename.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("AddInstructorToForm")]
+        public BaseResponse AddInstructorToForm(AddInstructorRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.AddInstructorToForm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFormStudentMessageBoard")]
+        public BaseResponse UpdateFormStudentMessageBoard(StudentMessageBoardRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _graduateProgramService.UpdateFormStudentMessageBoard(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("ValidateEmail")]
+        public BaseResponse ValidateEmail(string emailAddress)
+        {
+            BaseResponse response = new BaseResponse();
+            string validatedResult = string.Empty;
+            StringBuilder sbProps = new StringBuilder();
+            var zeroBounceAPI = new ZeroBounceV2.ZeroBounceAPI();
+            zeroBounceAPI.api_key = _configuration["ApplicationKeys:ZeroBounceAPIKey"];
+            zeroBounceAPI.EmailToValidate = emailAddress;
+            // zeroBounceAPI.ip_address = "IP Address Where Email Registered From";
+
+            zeroBounceAPI.ReadTimeOut = 100000; // "Any integer value in milliseconds;
+            zeroBounceAPI.RequestTimeOut = 100000; // "Any integer value in milliseconds;
+
+            var apiProperties = zeroBounceAPI.ValidateEmail();
+            if (apiProperties != null)
+            {
+                PropertyInfo[] properties = apiProperties.GetType().GetProperties();
+                foreach (PropertyInfo property in properties)
+                {
+                    //check if the the status is catch-all then return valid as status
+                    if (property.Name == "status" && apiProperties.status == "catch-all")
+                    {
+                        if ((!string.IsNullOrEmpty(apiProperties.firstName)) && (!string.IsNullOrEmpty(apiProperties.lastName)))
+                        {
+                            sbProps.Append(property.Name + ": " + "valid" + "\n");
+                            response.IsSuccess = true;
+                        }
+                        else
+                        {
+                            sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
+                            response.IsSuccess = false;
+                        }
+                    }
+                    else if (apiProperties.error != null)
+                    {
+                        response.IsSuccess = true;
+                    }
+                    else
+                    {
+                        sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
+                        if (property.Name == "status" && apiProperties.status == "valid")
+                        {
+                            response.IsSuccess = true;
+                        }
+                    }
+                }
+            }
+
+            return response;
+        }
+
+        [HttpPost("UpsertFormExperienceAttachment")]
+        public FormExperienceAttachmentResponse UpsertFormExperienceAttachment(FormExperienceAttachmentRequest input)
+        {
+            try
+            {
+                #region commented area to pull the file content 
+                //string filepath = "D:\\ExcelDoc\\CTC_10232024162937.pdf";
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\timelog from S4.pdf";
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\logo.jpeg";
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\MyDOC.docx";
+                //byte[] fileContent = null;
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //input.FileContent = fileContent;
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                #endregion
+                FormExperienceAttachmentResponse response = _initialCredentialProgramService.UpsertFormExperienceAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormExperienceAttachmentResponse response = new FormExperienceAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("DownloadFormExperienceAttachment")]
+        public IActionResult DownloadFormExperienceAttachment(string GUID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+
+                ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments obj = _initialCredentialProgramService.DownloadFormExperienceAttachment(GUID);
                 fileName = obj.Filename;
                 inputStream = obj.FileContent;
                 string[] fileSplit = obj.Filename.Split('.');

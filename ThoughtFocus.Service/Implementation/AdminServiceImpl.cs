@@ -332,6 +332,7 @@ namespace ThoughtFocus.Service.Implementation
                                                   EMAIL = Convert.ToString(row["EMAIL"]),
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
                                                   UserRoles = Convert.ToString(row["UserRoles"])
+                                                  //ProgramName = Convert.ToString(row["ProgramName"] == DBNull.Value ? null : row["ProgramName"])
                                               }).ToList();
 
 
