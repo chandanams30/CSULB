@@ -164,30 +164,52 @@ namespace ThoughtFocus.Service.Implementation
 
             DataTable dtFieldWorkList = _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
             var courseList = _configuration["ApplicationKeys:FieldWorkValidCourses"].Split(',').Select(id => id.Trim());
+            var summer2025ValidCourses = _configuration["ApplicationKeys:FieldWorkValidCourses_Summer2025"].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToList();
+
             try
             {
                 if (dtFieldWorkList.Rows.Count > 0)
                 {
-                    obj = dtFieldWorkList.AsEnumerable().Where(row => courseList.Any(course => string.Equals(Convert.ToString(row["CourseName"]), course, StringComparison.OrdinalIgnoreCase))).Select(row =>
-                                              new FieldWorkResponse
-                                              {
-                                                  FieldWorkId = Convert.ToInt32(row["ID"]),
-                                                  StudentName = Convert.ToString(row["StudentName"]),
-                                                  FirstName = Convert.ToString(row["FirstName"]),
-                                                  LastName = Convert.ToString(row["LastName"]),
-                                                  CSULBID = Convert.ToString(row["CSULBID"]),
-                                                  CourseTitle = Convert.ToString(row["CourseTitle"]),
-                                                  CSULBCourseID = Convert.ToString(row["Course"]),
-                                                  College = Convert.ToString(row["College"]),
-                                                  Section = Convert.ToString(row["Section"]),
-                                                  Term = Convert.ToString(row["Term"]),
-                                                  FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
-                                                  PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"]),
-                                                  LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
-                                                  ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
-                                                  CourseName = Convert.ToString(row["CourseName"])
+                    obj = dtFieldWorkList.AsEnumerable().Where(row =>
+                    {
+                        string courseName = Convert.ToString(row["CourseName"]);
+                        string term = Convert.ToString(row["Term"]);
+                        string CSULBCourseID = Convert.ToString(row["Course"]);
 
-                                              }).ToList();
+                        bool isInAllCourses = courseList.Any(c =>
+                            string.Equals(courseName, c, StringComparison.OrdinalIgnoreCase));
+
+                        bool isInSummer2025ValidCourses = summer2025ValidCourses.Any(c =>
+                            string.Equals(CSULBCourseID, c, StringComparison.OrdinalIgnoreCase));
+
+                        if (term.Equals("Summer 2025", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // For Summer 2025, allow if course is either in allCourses or summer2025ValidCourses
+                            return isInAllCourses || isInSummer2025ValidCourses;
+                        }
+
+                        // For other terms, only allow if in allCourses
+                        return isInAllCourses;
+                    })
+                    .Select(row => new FieldWorkResponse
+                    {
+                        FieldWorkId = Convert.ToInt32(row["ID"]),
+                        StudentName = Convert.ToString(row["StudentName"]),
+                        FirstName = Convert.ToString(row["FirstName"]),
+                        LastName = Convert.ToString(row["LastName"]),
+                        CSULBID = Convert.ToString(row["CSULBID"]),
+                        CourseTitle = Convert.ToString(row["CourseTitle"]),
+                        CSULBCourseID = Convert.ToString(row["Course"]),
+                        College = Convert.ToString(row["College"]),
+                        Section = Convert.ToString(row["Section"]),
+                        Term = Convert.ToString(row["Term"]),
+                        FieldWorkPrerequisiteStatus = Convert.ToInt32(row["FieldWorkPrerequisiteStatus"]),
+                        PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"]),
+                        LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
+                        ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
+                        CourseName = Convert.ToString(row["CourseName"])
+                    }).ToList();
+
 
                     objList.FieldWorkResponse = obj;
                     objList.IsSuccess = true;
