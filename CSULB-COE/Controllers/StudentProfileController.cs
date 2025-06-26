@@ -4,8 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
@@ -192,6 +196,111 @@ namespace CSULB_COE.Controllers
                 _logger.LogError(ex, ex.Message);
                 return response;
             }
+        }
+        [HttpPost("UpsertProfileAttachment")]
+        public UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input)
+        {
+            try
+            {
+                UpsertProfileAttachmentResponse response = new UpsertProfileAttachmentResponse();
+
+                //#region to get the file content from local
+                //byte[] fileContent = null;
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                //string filepath = "D:\\ExcelDoc\\Screenshot 2024-10-15 123100.png";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                //#endregion
+
+                response = _studentProfileService.UpsertProfileAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                UpsertProfileAttachmentResponse response = new UpsertProfileAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("DownloadProfileAttachment")]
+        public IActionResult DownloadProfileAttachment(Guid UniqueID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                DownloadProfileAttachmentResponse obj = _studentProfileService.DownloadProfileAttachment(UniqueID);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetProfileAttachmentDetails")]
+        public ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID)
+        {
+            try
+            {
+                ProfileAttachmentDetailsResponse response = _studentProfileService.GetProfileAttachmentDetails(CSULBID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProfileAttachmentDetailsResponse response = new ProfileAttachmentDetailsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        private string GetFileType(string fileExt)
+        {
+            string contentType = string.Empty;
+            switch (fileExt.ToUpper())
+            {
+                case "PDF":
+                    contentType = "application/pdf";
+                    break;
+                case "DOCX":
+                    contentType = "Application/msword";
+                    break;
+                case "DOC":
+                    contentType = "Application/msword";
+                    break;
+                case "XLSX":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "XLS":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "JPG":
+                    contentType = "image/jpeg";
+                    break;
+                case "JPEG":
+                    contentType = "image/jpeg";
+                    break;
+
+            }
+            return contentType;
         }
 
     }

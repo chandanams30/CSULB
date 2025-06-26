@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.StudentProfile;
 
 namespace ThoughtFocus.Service.Interfaces
@@ -19,5 +20,8 @@ namespace ThoughtFocus.Service.Interfaces
         ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode);
         StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID);
         BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input);
+        UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input);
+        DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID);
+        ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID);
     }
 }

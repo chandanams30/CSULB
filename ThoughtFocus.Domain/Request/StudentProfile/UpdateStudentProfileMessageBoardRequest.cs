@@ -26,5 +26,13 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public bool IsAgreed { get; set; }
         public DateTime AgreedDate { get; set; }
     }
+    public class UpsertProfileDocumentRequest
+    {
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public byte[] FileContent { get; set; }
+        public string CSULBID { get; set; }
+        //public string ProfileAttachmentComments { get; set; }
+    }
 
 }
