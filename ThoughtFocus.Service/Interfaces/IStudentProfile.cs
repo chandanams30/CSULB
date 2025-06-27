@@ -23,5 +23,6 @@ namespace ThoughtFocus.Service.Interfaces
         UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input);
         DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID);
         ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID);
+        BaseResponse DeleteProfileAttachment(Guid UniqueID);
     }
 }

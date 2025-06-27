@@ -542,7 +542,7 @@ namespace ThoughtFocus.Service.Implementation
                                      {
                                           new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = UniqueID }
                                      };
-            DataTable dtAttachments = _helper.GetDataTable("[Application].[GetProfileAttachment]", parameters);
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetProfileAttachment]", parameters);
             obj = dtAttachments.AsEnumerable().Select(row =>
                                           new DownloadProfileAttachmentResponse
                                           {
@@ -567,7 +567,7 @@ namespace ThoughtFocus.Service.Implementation
                                     {
                                           new SqlParameter("@CSULBID", SqlDbType.VarChar,20) { Value = CSULBID }
                                      };
-            DataTable dtProfileAttachmentDetails = _helper.GetDataTable("[dbo].[GetProfileDocuments]", parameters);
+            DataTable dtProfileAttachmentDetails = _helper.GetDataTable("[dbo].[GetProfileAttachmentDetails]", parameters);
             try
             {
                 if (dtProfileAttachmentDetails.Rows.Count > 0)
@@ -604,6 +604,38 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        public BaseResponse DeleteProfileAttachment(Guid UniqueID)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                           new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = UniqueID }
+                                     };
+            try
+            {
+                DataTable dtAttachment = _helper.GetDataTable("[dbo].[DeleteProfileAttachment]", parameters);
+                if (dtAttachment.Rows.Count > 0)
+                {
+                    if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "SUCCESS")
+                    {
+                        response.Message = "Attachment Deleted Successfully";
+                        response.IsSuccess = true;
+                    }
+                    else if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "FAILURE")
+                    {
+                        response.Message = "Failed to Delete Attachment";
+                        response.IsSuccess = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Data Retrieval Failed , Please contact site admin ";
+                response.StackTrace = ex.Message;
+            }
+            return response;
         }
         private AttachmentFileDetails GetAttachedFileSplitValues(string filename)
         {

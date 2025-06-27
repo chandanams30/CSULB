@@ -272,6 +272,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("DeleteProfileAttachment")]
+        public BaseResponse DeleteProfileAttachment(Guid UniqueID)
+        {
+            try
+            {
+                BaseResponse response = _studentProfileService.DeleteProfileAttachment(UniqueID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         private string GetFileType(string fileExt)
         {
             string contentType = string.Empty;
