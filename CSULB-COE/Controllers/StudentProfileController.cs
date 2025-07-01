@@ -273,11 +273,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpPost("DeleteProfileAttachment")]
-        public BaseResponse DeleteProfileAttachment(Guid UniqueID)
+        public BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input)
         {
             try
             {
-                BaseResponse response = _studentProfileService.DeleteProfileAttachment(UniqueID);
+                BaseResponse response = _studentProfileService.DeleteProfileAttachment(input);
                 return response;
             }
             catch (Exception ex)

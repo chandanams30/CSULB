@@ -605,12 +605,12 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public BaseResponse DeleteProfileAttachment(Guid UniqueID)
+        public BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input)
         {
             BaseResponse response = new BaseResponse();
             SqlParameter[] parameters =
                                     {
-                                           new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = UniqueID }
+                                           new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = input.UniqueID }
                                      };
             try
             {
