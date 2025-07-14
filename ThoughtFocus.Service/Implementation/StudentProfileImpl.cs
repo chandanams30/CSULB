@@ -464,6 +464,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FileName", SqlDbType.NVarChar, 200) { Value = fileName },
                                           new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
                                           new SqlParameter("@CSULBID", SqlDbType.NVarChar, 20) { Value = input.CSULBID},
+                                          new SqlParameter("@CreatedBy", SqlDbType.BigInt) { Value = input.CreatedBy }
                                           //new SqlParameter("@ProfileAttachmentComments", SqlDbType.NVarChar, -1) { Value = input.ProfileAttachmentComments}
                                         };
                 DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertProfileAttachment]", parameters);
@@ -583,7 +584,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   CreatedBy = Convert.ToInt32(row["CreatedBy"] == DBNull.Value ? null : row["CreatedBy"]),
                                                   CreatedDate = Convert.ToDateTime(row["CreatedDate"] == DBNull.Value ? null : row["CreatedDate"]),
                                                   CanView = Convert.ToString(row["CanView"]),
-                                                  UniqueID = Guid.Parse(row["UniqueID"].ToString())
+                                                  UniqueID = Guid.Parse(row["UniqueID"].ToString()),
+                                                  CreatedByUsername = Convert.ToString(row["CreatedByUsername"])
                                               }).ToList();
 
 

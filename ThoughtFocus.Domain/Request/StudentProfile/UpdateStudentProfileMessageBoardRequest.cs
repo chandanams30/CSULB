@@ -32,6 +32,7 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public string FileName { get; set; }
         public byte[] FileContent { get; set; }
         public string CSULBID { get; set; }
+        public int CreatedBy { get; set; }
         //public string ProfileAttachmentComments { get; set; }
     }
     public class DeleteProfileAttachmentRequest

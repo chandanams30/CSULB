@@ -39,5 +39,6 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public int CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string CanView { get; set; }
+        public string CreatedByUsername { get; set; }
     }
 }
