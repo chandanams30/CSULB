@@ -907,7 +907,50 @@ namespace CSULB_COE.Controllers
             {
                 BaseResponse response = new BaseResponse();
                 response.IsSuccess = false;
-                response.Message = "Failed to Save Activity Log, please try after sometime";
+                response.Message = "Failed to update the drop down, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertInternCourseForTerm")]
+        public BaseResponse UpsertInternCourseForTerm(UpsertInternCourseForTermRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _fieldWorkService.UpsertInternCourseForTerm(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to add the course, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetFieldWorkValidCourses")]
+        public FieldWorkValidCourse GetFieldWorkValidCourses()
+        {
+            try
+            {
+                FieldWorkValidCourse response = new FieldWorkValidCourse();
+                response.Courses = _configuration["ApplicationKeys:FieldWorkValidCourses"]
+                      .Split(',')
+                      .Select(id => id.Trim())
+                      .ToList();
+                response.Message = "Data retrieved successfully";
+                response.IsSuccess = true;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkValidCourse response = new FieldWorkValidCourse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

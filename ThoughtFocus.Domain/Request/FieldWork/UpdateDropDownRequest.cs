@@ -14,4 +14,12 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string ControlValue { get; set; }
         public int UserID { get; set; }
     }
+    public class UpsertInternCourseForTermRequest
+    {
+        public string CSULBID { get; set; }
+        public string Course { get; set; }
+        public string TermCode { get; set; }
+        public string SecID {  get; set; }
+        public string CourseNumber { get; set; }
+    }
 }

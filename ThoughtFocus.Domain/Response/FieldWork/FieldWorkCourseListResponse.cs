@@ -13,4 +13,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public int Value { get; set; }
         public string Label { get; set; }
     }
+    public class FieldWorkValidCourse :BaseResponse
+    {
+        public List<string> Courses { get; set; }
+    }
 }

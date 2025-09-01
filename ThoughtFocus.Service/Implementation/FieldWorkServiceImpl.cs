@@ -2704,7 +2704,33 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
-
+        public BaseResponse UpsertInternCourseForTerm(UpsertInternCourseForTermRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar,-1) { Value = input.CSULBID },
+                                          new SqlParameter("@Course", SqlDbType.VarChar,250) { Value = input.Course },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
+                                          new SqlParameter("@SecID", SqlDbType.VarChar,50) { Value =input.SecID },
+                                          new SqlParameter ("@CourseNumber", SqlDbType.VarChar,50) { Value= input.CourseNumber }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[FieldWork].[UpsertInternCourseForTerm]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
         {
             AdhocMailLogResponse obj = new AdhocMailLogResponse();
