@@ -279,7 +279,7 @@ namespace ThoughtFocus.Service.Implementation
 
                 try
                 {
-                    EmailMessageModel emailModel = GetMessageBody(input.FieldWorkID);
+                    EmailMessageModel emailModel = GetMessageBody(input.FieldWorkID,input.FieldWorkAttachmentId,input.Semester);
 
                     // check the prerequisite status and send mail to student 
                     if (!String.IsNullOrEmpty(emailModel.Body))
@@ -380,7 +380,7 @@ namespace ThoughtFocus.Service.Implementation
             return model;
         }
 
-        private EmailMessageModel GetMessageBody(int fieldWorkattachmentID)
+        private EmailMessageModel GetMessageBody(int fieldWorkID,int fieldWorkattachmentID,string semester)
         {
             string body = string.Empty;
             string ApplicantName = string.Empty;
@@ -390,7 +390,8 @@ namespace ThoughtFocus.Service.Implementation
 
             SqlParameter[] parameters =
                                        {
-                                          new SqlParameter("@FieldWorkID", SqlDbType.Int, 50) { Value = fieldWorkattachmentID }
+                                          new SqlParameter("@FieldWorkID", SqlDbType.Int, 50) { Value = fieldWorkID },
+                                          new SqlParameter("@FieldWorkAttachmentID", SqlDbType.Int, 50) { Value = fieldWorkattachmentID }
                                         };
 
             DataTable dtEmailData = _helper.GetDataTable("[dbo].[GetPrerequisitesApprovalEmailConfirmation]", parameters);
@@ -405,7 +406,14 @@ namespace ThoughtFocus.Service.Implementation
                 ApplicantName = Convert.ToString(dtEmailData.Rows[0]["ApplicantName"]);
                 CSULBID = Convert.ToString(dtEmailData.Rows[0]["CSULBID"]);
                 Semester = Convert.ToString(dtEmailData.Rows[0]["Name"]);
-                body = body.Replace("[[ApplicantName]]", ApplicantName).Replace("[[CSULBID]]", CSULBID).Replace("[[Semester]]", Semester).Replace("[[Date]]", DateTime.Now.ToString("MMM-dd-yyyy")).Replace("[[logopath]]", logopath);
+                if(fieldWorkID == 0)
+                {
+                    body = body.Replace("[[ApplicantName]]", ApplicantName).Replace("[[CSULBID]]", CSULBID).Replace("[[Semester]]", semester).Replace("[[Date]]", DateTime.Now.ToString("MMM-dd-yyyy")).Replace("[[logopath]]", logopath);
+                }
+                else
+                {
+                    body = body.Replace("[[ApplicantName]]", ApplicantName).Replace("[[CSULBID]]", CSULBID).Replace("[[Semester]]", Semester).Replace("[[Date]]", DateTime.Now.ToString("MMM-dd-yyyy")).Replace("[[logopath]]", logopath);
+                }
                 model.toEmail = Convert.ToString(dtEmailData.Rows[0]["Email"]);
                 model.CSULBID = CSULBID;
                 model.ApplicantName = ApplicantName;
@@ -2341,7 +2349,7 @@ namespace ThoughtFocus.Service.Implementation
                         try
                         {
                             int FieldWorkID = Convert.ToInt32(dtStudentsInfo.Rows[i]["FieldWorkID"]);
-                            EmailMessageModel emailModel = GetMessageBody(FieldWorkID);
+                            EmailMessageModel emailModel = GetMessageBody(FieldWorkID,0,"");
                             // check the prerequisite status and send mail to student 
                             if (!String.IsNullOrEmpty(emailModel.Body))
                             {
