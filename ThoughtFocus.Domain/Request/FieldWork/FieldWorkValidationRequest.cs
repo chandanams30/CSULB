@@ -13,5 +13,6 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public Nullable<DateTime> ValidTill { get; set; }
         public string? RejectedReason { get; set; }
         public string? Comments { get; set; }
+        public string Semester {  get; set; }
     }
 }
