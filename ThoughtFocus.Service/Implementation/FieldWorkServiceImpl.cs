@@ -155,11 +155,12 @@ namespace ThoughtFocus.Service.Implementation
         {
             FieldWorkListResponse objList = new FieldWorkListResponse();
             List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
-
+            var csulbIDs = _configuration["ApplicationKeys:CSULBIDForIntern2"];
 
             SqlParameter[] parameters =
                                         {
-                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId }
+                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
+                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs }
                                         };
 
             DataTable dtFieldWorkList = _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
