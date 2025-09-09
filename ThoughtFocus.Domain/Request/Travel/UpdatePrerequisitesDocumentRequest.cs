@@ -20,4 +20,9 @@ namespace ThoughtFocus.Domain.Request.Travel
 
 
     }
-}
+    public class ApproveBusinessMileageLog
+    {
+        public int BusinessMileageLogID { get; set; }
+        public Boolean IsApproved { get; set; }
+    }
+ }
