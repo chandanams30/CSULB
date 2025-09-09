@@ -17,5 +17,6 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdatePrerequisitesDocument(UpdatePrerequisitesDocumentRequest input,Boolean isValidation);
         TravelPrerequisiteAttachments DownloadPrerequisitesDocument(int TravelPrerequisiteID, int BusinessMileageSupervisorUserID);
         ReportDataResponse GetReportData(ReportDataRequest input);
+        BaseResponse ApproveBusinessMileageLog(ApproveBusinessMileageLog input);
     }
 }

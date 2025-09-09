@@ -233,8 +233,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   Miles = Convert.ToDecimal(row["Miles"]),
                                                   ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                   ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
-                                                  Rate = Convert.ToDecimal(row["Rate"]==DBNull.Value?null: row["Rate"])
-
+                                                  Rate = Convert.ToDecimal(row["Rate"]==DBNull.Value?null: row["Rate"]),
+                                                  ShowEdit = Convert.ToBoolean(row["showEdit"]),
+                                                  ShowApprove = Convert.ToBoolean(row["showApprove"])
                                               }).FirstOrDefault();
 
 
@@ -478,6 +479,30 @@ namespace ThoughtFocus.Service.Implementation
             obj.FileName = "Mileage-Report-" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             obj.FileContent = GetReportDataContent(input.BusinessMileageSupervisorID, dtLogs, dtDirections,dtPersonalInfo, reportingDates);
             return obj;
+        }
+        public BaseResponse ApproveBusinessMileageLog(ApproveBusinessMileageLog input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@BusinessMileageLogID", SqlDbType.BigInt) { Value = input.BusinessMileageLogID },
+                                          new SqlParameter("@IsApproved", SqlDbType.Bit) { Value = input.IsApproved }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[Travel].[ApproveBusinessMileageLog]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
         }
 
         private byte[] GetReportDataContent(int BusinessMileageSupervisorID, DataTable dtLogs,DataTable dtDirections,DataTable dtPersonalInfo,string reportingDates)

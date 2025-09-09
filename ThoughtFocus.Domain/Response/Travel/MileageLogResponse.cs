@@ -16,6 +16,8 @@ namespace ThoughtFocus.Domain.Response.Travel
         public int ModifiedBy { get; set; }
         public DateTime ModifiedDateTime { get; set; }
         public decimal Rate { get; set; }
+        public Boolean ShowEdit { get; set; }
+        public Boolean ShowApprove { get; set; }
 
     }
 }
