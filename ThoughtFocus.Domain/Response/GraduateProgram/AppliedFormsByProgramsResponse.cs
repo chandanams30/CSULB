@@ -47,7 +47,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public bool ShowBulkCheckBox { get; set; }
         public string ResumeUploadStatus { get; set; }
         public string SOPUploadStatus {  get; set; }
-        
+        public string PersonalStatementDoc { get; set; }
     }
 
 
