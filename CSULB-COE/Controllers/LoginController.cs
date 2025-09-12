@@ -109,6 +109,10 @@ namespace CSULB_COE.Controllers
                             FirstName = data.Value;
                         }
                     }
+                    _logger.LogInformation("Graph Result - " + graphResults);
+
+                    _logger.LogInformation("LOGIN USER INFORMATION - CSULBID: {emplid} , DisplayName: {DisplayName}, Email: {Email}, FirstName: {FirstName}, LastName: {LastName}",
+                     emplid, displayName, mail, FirstName, LastName);
                     response = _userLoginService.AuthenticateSSO(emplid,displayName,mail,LastName,FirstName);
                     if (response.IsSuccess == true)
                     {
@@ -202,5 +206,115 @@ namespace CSULB_COE.Controllers
             return ip.ToString();
 
         }
+
+        //[HttpPost("AuthenticateSSOToken")]
+        //public async Task<IActionResult> AuthenticateSSOToken1([FromBody] LoginSSORequest request)
+        //{
+        //    AuthenticateResponse response = new AuthenticateResponse();
+        //    try
+        //    {
+        //        _logger.LogInformation(request.Token.ToString(), request);
+        //        string accessToken = request.Token;
+        //        _client.DefaultRequestHeaders.Clear();
+        //        _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
+
+
+        //        bool isTestMode = true;
+        //        if (isTestMode)
+        //        {
+        //            string graphResults = string.Empty;
+
+        //            graphResults = @"{
+        //      ""employeeId"": ""123456"",
+        //      ""displayName"": ""John Doe"",
+        //      ""mail"": ""john.doe@domain.com"",
+        //      ""surname"": ""Doe"",
+        //      ""givenName"": ""John""
+        //      }";
+
+        //            // Deserialize response
+        //            dynamic dynObj = JsonConvert.DeserializeObject(graphResults);
+
+        //            string emplid = dynObj.employeeId != null ? dynObj.employeeId.ToString() : string.Empty;
+        //            string displayName = dynObj.displayName != null ? dynObj.displayName.ToString() : string.Empty;
+        //            string mail = dynObj.mail != null ? dynObj.mail.ToString() : string.Empty;
+        //            string LastName = dynObj.surname != null ? dynObj.surname.ToString() : string.Empty;
+        //            string FirstName = dynObj.givenName != null ? dynObj.givenName.ToString() : string.Empty;
+
+        //            _logger.LogInformation("LOGIN USER INFORMATION - CSULBID: {emplid} , DisplayName: {DisplayName}, Email: {Email}, FirstName: {FirstName}, LastName: {LastName}",
+        //          emplid, displayName, mail, FirstName, LastName);
+
+        //            return Ok(response);
+        //        }
+        //        else
+        //        {
+        //            var graphResponse = await _client.GetAsync("https://graph.microsoft.com/beta/me");
+
+        //            string emplid = string.Empty;
+        //            string displayName = string.Empty;
+        //            string mail = string.Empty;
+        //            string LastName = string.Empty;
+        //            string FirstName = string.Empty;
+        //            if (graphResponse.IsSuccessStatusCode)
+        //            {
+
+        //                var graphResults = graphResponse.Content.ReadAsStringAsync().Result;
+        //                var json = new NewtonsoftJsonSerializer();
+        //                dynamic dynObj = JsonConvert.DeserializeObject(graphResults);
+        //                foreach (var data in dynObj)
+        //                {
+        //                    if (data.Name == "employeeId")
+        //                    {
+        //                        emplid = data.Value;
+        //                    }
+        //                    if (data.Name == "displayName")
+        //                    {
+        //                        displayName = data.Value;
+        //                    }
+        //                    if (data.Name == "mail")
+        //                    {
+        //                        mail = data.Value;
+        //                    }
+        //                    if (data.Name == "surname")
+        //                    {
+        //                        LastName = data.Value;
+        //                    }
+        //                    if (data.Name == "givenName")
+        //                    {
+        //                        FirstName = data.Value;
+        //                    }
+        //                }
+        //                _logger.LogInformation("Graph Result - "+ graphResults);
+        //                _logger.LogInformation("LOGIN USER INFORMATION - CSULBID: {emplid} , DisplayName: {DisplayName}, Email: {Email}, FirstName: {FirstName}, LastName: {LastName}",
+        //                emplid, displayName, mail, FirstName, LastName);
+        //                response = _userLoginService.AuthenticateSSO(emplid, displayName, mail, LastName, FirstName);
+        //                if (response.IsSuccess == true)
+        //                {
+        //                    AuditLogRequest req = new AuditLogRequest();
+        //                    req.UserID = response.UserId;
+        //                    req.Type = "Login";
+        //                    req.IPAddress = GetClientIPAddress();
+        //                    req.AuthenticationType = "SSO";
+        //                    var auditResponse = _userLoginService.SaveAuditLog(req);
+
+        //                }
+        //                return Ok(response);
+        //            }
+        //            else
+        //            {
+
+        //                response.IsSuccess = false;
+        //                response.message = "Authentication Failed";
+        //                return BadRequest(response);
+        //            }
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, ex.Message);
+        //        return BadRequest();
+        //    }
+        //}
     }
 }
