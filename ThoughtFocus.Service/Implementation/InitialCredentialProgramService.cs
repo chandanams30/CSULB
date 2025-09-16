@@ -2514,12 +2514,26 @@ namespace ThoughtFocus.Service.Implementation
                                 FileExtn = Convert.ToString(row["FileExtn"]),
                                 CanView = Convert.ToBoolean(row["CanView"])
                             }).FirstOrDefault();
+                        obj.pv.additionalProfessionalVerificationDocumentation = dtCPEAL.AsEnumerable()
+                          .Where(row => row.Field<string>("SubSectionIdentifiers") == "PV" &&
+                                        row.Field<string>("FileName").StartsWith("AdditionalProfessionalVerificationDocumentation"))
+                          .Select(row => new AdditionalProfessionalVerificationDocumentation
+                          {
+                              FormSubSectionAttachmentID = Convert.ToInt32(row["FormSubSectionAttachmentID"]),
+                              FormID = Convert.ToInt32(row["FormID"]),
+                              FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
+                              SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
+                              FileName = Convert.ToString(row["FileName"]),
+                              FileExtn = Convert.ToString(row["FileExtn"]),
+                              CanView = Convert.ToBoolean(row["CanView"])
+                          }).ToList();
                         respone.attachements = obj;
                     }
                     else
                     {
                         obj.pv.professionalVerificationForm = null;
                         obj.pv.childDevelopmentPermit = null;
+                        obj.pv.additionalProfessionalVerificationDocumentation = new List<AdditionalProfessionalVerificationDocumentation> { };
                     }
 
                     if (hasPC)
@@ -2551,12 +2565,26 @@ namespace ThoughtFocus.Service.Implementation
                                 FileExtn = Convert.ToString(row["FileExtn"]),
                                 CanView = Convert.ToBoolean(row["CanView"])
                             }).ToList();
+                        obj.pc.additionalPracticumCourseWorkDocumentation = dtCPEAL.AsEnumerable()
+                            .Where(row => row.Field<string>("SubSectionIdentifiers") == "PC" &&
+                                          row.Field<string>("FileName").StartsWith("AdditionalPracticumCourseWorkDocumentation"))
+                            .Select(row => new AdditionalPracticumCourseWorkDocumentation
+                            {
+                                FormSubSectionAttachmentID = Convert.ToInt32(row["FormSubSectionAttachmentID"]),
+                                FormID = Convert.ToInt32(row["FormID"]),
+                                FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
+                                SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
+                                FileName = Convert.ToString(row["FileName"]),
+                                FileExtn = Convert.ToString(row["FileExtn"]),
+                                CanView = Convert.ToBoolean(row["CanView"])
+                            }).ToList();
                         respone.attachements = obj;
                     }
                     else
                     {
                         obj.pc.courseSyllabi = null;
                         obj.pc.transcripts = new List<Transcripts> { };
+                        obj.pc.additionalPracticumCourseWorkDocumentation = new List<AdditionalPracticumCourseWorkDocumentation> { };
                     }
 
                     respone.IsSuccess = true;
@@ -2569,12 +2597,14 @@ namespace ThoughtFocus.Service.Implementation
                         pv = new PV
                         {
                             professionalVerificationForm = null,
-                            childDevelopmentPermit = null
+                            childDevelopmentPermit = null,
+                            additionalProfessionalVerificationDocumentation = new List<AdditionalProfessionalVerificationDocumentation> { }
                         },
                         pc = new PC
                         {
                             courseSyllabi = null,
-                            transcripts = new List<Transcripts> { }
+                            transcripts = new List<Transcripts> { },
+                            additionalPracticumCourseWorkDocumentation = new List<AdditionalPracticumCourseWorkDocumentation> { }
                         },
                     };
                     respone.attachements = obj;
