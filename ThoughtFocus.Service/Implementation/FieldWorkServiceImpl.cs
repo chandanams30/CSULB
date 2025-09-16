@@ -155,17 +155,19 @@ namespace ThoughtFocus.Service.Implementation
         {
             FieldWorkListResponse objList = new FieldWorkListResponse();
             List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
-            var csulbIDs = _configuration["ApplicationKeys:CSULBIDForIntern2"];
+            var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
+            string csulbIDs = String.Empty;
+            csulbIDs = jsonObj["CSULBIDForIntern2"]?.ToString();
 
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
                                           new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs }
                                         };
+            var courseList = jsonObj["FieldWorkValidCourses"]?.ToString().Split(',').Select(id => id.Trim());
+            var summer2025ValidCourses = jsonObj["FieldWorkValidCourses_Summer2025"]?.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToList();
 
             DataTable dtFieldWorkList = _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
-            var courseList = _configuration["ApplicationKeys:FieldWorkValidCourses"].Split(',').Select(id => id.Trim());
-            var summer2025ValidCourses = _configuration["ApplicationKeys:FieldWorkValidCourses_Summer2025"].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToList();
 
             try
             {

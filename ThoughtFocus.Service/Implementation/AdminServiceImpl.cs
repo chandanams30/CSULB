@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -715,6 +716,61 @@ namespace ThoughtFocus.Service.Implementation
             }
             response.Message = "Reviewer Removed Successfully";
             response.IsSuccess = true;
+            return response;
+        }
+
+        public BaseResponse UpsertInternCourseConfig(string input)
+        {
+            _logger.LogInformation("UpsertInternCourseConfig-Input" + input);
+            BaseResponse response = new BaseResponse();
+            string filePath = Path.Combine("SupportFiles/MycedConfigurations/CSULBCEDConfig.json");
+            JObject jsonObj;
+            _logger.LogInformation("UpsertInternCourseConfig-filePath" + filePath);
+
+            if (File.Exists(filePath))
+            {
+                string existingJson = File.ReadAllText(filePath);
+                jsonObj = JObject.Parse(File.ReadAllText(filePath)); 
+
+                // Get current value and split into list
+                string currentValue = jsonObj["EnableIntern2"]?.ToString();
+                var existingIds = string.IsNullOrEmpty(currentValue)
+                    ? new List<string>()
+                    : currentValue.Split(',')
+                                  .Select(id => id.Trim())
+                                  .Where(id => !string.IsNullOrEmpty(id))
+                                  .ToList();
+                _logger.LogInformation("UpsertInternCourseConfig-existingIds" + existingIds);
+
+                // Split input into multiple IDs
+                var newIds = input.Split(',')
+                                  .Select(id => id.Trim())
+                                  .Where(id => !string.IsNullOrEmpty(id))
+                                  .ToList();
+                _logger.LogInformation("UpsertInternCourseConfig-newIds" + newIds);
+
+                // Add new IDs if not already present
+                foreach (var id in newIds)
+                {
+                    if (!existingIds.Contains(id))
+                    {
+                        existingIds.Add(id);
+                    }
+                }
+
+                jsonObj["EnableIntern2"] = string.Join(",", existingIds);
+
+                response.Message = "ID(s) Added Successfully";
+                response.IsSuccess = true;
+
+                File.WriteAllText(filePath, jsonObj.ToString());
+            }
+            else
+            {
+                response.Message = "Config file not found.";
+                response.IsSuccess = false;
+            }
+
             return response;
         }
 

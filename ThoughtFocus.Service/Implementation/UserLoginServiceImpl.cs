@@ -1,4 +1,12 @@
-﻿using System;
+﻿using CSULB_COE.Models;
+using CSULB_COE.ViewModels;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using PasswordGenerator;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -6,13 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using CSULB_COE.Models;
-using CSULB_COE.ViewModels;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using PasswordGenerator;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
@@ -106,7 +107,8 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dsUserValidationData.Tables.Count > 0)
                 {
-                    var superAdminCSULBIDs = _configuration["ApplicationKeys:SuperAdminCSULBID"].Split(',').Select(id => id.Trim());
+                    var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
+                    var superAdminCSULBIDs = jsonObj["SuperAdminCSULBID"]?.ToString().Split(',').Select(id => id.Trim());
 
                     // Get the CSULBID from the DataTable
                     var currentCSULBID = Convert.ToString(dsUserValidationData.Tables[0].Rows[0]["CSULBID"]);
