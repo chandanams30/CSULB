@@ -79,6 +79,7 @@ namespace ThoughtFocus.Domain.Response.Application
     {
         public ProfessionalVerificationForm professionalVerificationForm { get; set; }
         public ChildDevelopmentPermit childDevelopmentPermit { get; set; }
+        public List<AdditionalProfessionalVerificationDocumentation> additionalProfessionalVerificationDocumentation { get; set; }
     }
     public class ProfessionalVerificationForm
     {
@@ -100,10 +101,21 @@ namespace ThoughtFocus.Domain.Response.Application
         public string FileExtn { get; set; }
         public bool CanView { get; set; }
     }
+    public class AdditionalProfessionalVerificationDocumentation
+    {
+        public int FormSubSectionAttachmentID { get; set; }
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public bool CanView { get; set; }
+    }
     public class PC
     {
         public CourseSyllabi courseSyllabi { get; set; }
         public List<Transcripts> transcripts { get; set; }
+        public List<AdditionalPracticumCourseWorkDocumentation> additionalPracticumCourseWorkDocumentation {  get; set; }
     }
     public class CourseSyllabi
     {
@@ -116,6 +128,16 @@ namespace ThoughtFocus.Domain.Response.Application
         public bool CanView { get; set; }
     }
     public class Transcripts
+    {
+        public int FormSubSectionAttachmentID { get; set; }
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public bool CanView { get; set; }
+    }
+    public class AdditionalPracticumCourseWorkDocumentation
     {
         public int FormSubSectionAttachmentID { get; set; }
         public int FormID { get; set; }
