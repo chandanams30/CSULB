@@ -716,13 +716,11 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public BaseResponse UpsertInternCourseConfig(string input)
+        public BaseResponse UpsertInternCourseConfig(UpsertCSULBIDForIntern input)
         {
-            _logger.LogInformation("UpsertInternCourseConfig-Input" + input);
             BaseResponse response = new BaseResponse();
             string filePath = Path.Combine("SupportFiles/MycedConfigurations/CSULBCEDConfig.json");
             JObject jsonObj;
-            _logger.LogInformation("UpsertInternCourseConfig-filePath" + filePath);
 
             if (File.Exists(filePath))
             {
@@ -737,14 +735,12 @@ namespace ThoughtFocus.Service.Implementation
                                   .Select(id => id.Trim())
                                   .Where(id => !string.IsNullOrEmpty(id))
                                   .ToList();
-                _logger.LogInformation("UpsertInternCourseConfig-existingIds" + existingIds);
 
                 // Split input into multiple IDs
-                var newIds = input.Split(',')
+                var newIds = input.CSULBIDs.Split(',')
                                   .Select(id => id.Trim())
                                   .Where(id => !string.IsNullOrEmpty(id))
                                   .ToList();
-                _logger.LogInformation("UpsertInternCourseConfig-newIds" + newIds);
 
                 // Add new IDs if not already present
                 foreach (var id in newIds)

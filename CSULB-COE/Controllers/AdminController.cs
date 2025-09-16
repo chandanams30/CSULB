@@ -424,7 +424,7 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpPost("UpsertInternCourseConfig")]
-        public BaseResponse UpsertInternCourseConfig(string input)
+        public BaseResponse UpsertInternCourseConfig(UpsertCSULBIDForIntern input)
         {
             try
             {
