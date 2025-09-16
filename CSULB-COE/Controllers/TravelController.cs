@@ -110,11 +110,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetBusinessMileageLog")]
-        public MileageLogResponse GetBusinessMileageLog(int BusinessMileageLogID)
+        public MileageLogResponse GetBusinessMileageLog(int BusinessMileageLogID,int UserID)
         {
             try
             {
-                MileageLogResponse response = _travelService.GetBusinessMileageLog(BusinessMileageLogID);
+                MileageLogResponse response = _travelService.GetBusinessMileageLog(BusinessMileageLogID, UserID);
                 return response;
             }
             catch (Exception ex)

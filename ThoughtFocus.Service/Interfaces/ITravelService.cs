@@ -13,7 +13,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpsertBusinessMileageSupervisorList(UpsertFacultySupervisorRequest input);
         BaseResponse UpsertBusinessMileageLog(UpsertBusinessMileageLogRequest input);
         MileageLogListResponse GetBusinessMileageLogList(int BusinessMileageSupervisorID, int BusinessMileageSupervisorUserID);
-        MileageLogResponse GetBusinessMileageLog(int BusinessMileageLogID);
+        MileageLogResponse GetBusinessMileageLog(int BusinessMileageLogID, int UserID);
         BaseResponse UpdatePrerequisitesDocument(UpdatePrerequisitesDocumentRequest input,Boolean isValidation);
         TravelPrerequisiteAttachments DownloadPrerequisitesDocument(int TravelPrerequisiteID, int BusinessMileageSupervisorUserID);
         ReportDataResponse GetReportData(ReportDataRequest input);
