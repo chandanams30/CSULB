@@ -186,7 +186,8 @@ namespace ThoughtFocus.Service.Implementation
                                                Miles = Convert.ToDecimal(row["Miles"] == DBNull.Value ? null : row["Miles"]),
                                                ModifiedBy = Convert.ToInt32(row["ModifiedBy"]),
                                                ModifiedDateTime = Convert.ToDateTime(row["ModifiedDateTime"]),
-                                               Rate = Convert.ToDecimal(row["Rate"] == DBNull.Value ? null : row["Rate"])
+                                               Rate = Convert.ToDecimal(row["Rate"] == DBNull.Value ? null : row["Rate"]),
+                                               Status = Convert.ToString(row["Status"] == DBNull.Value ? null : row["Status"])
 
                                            }).ToList();
 
@@ -204,14 +205,15 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public MileageLogResponse GetBusinessMileageLog(int BusinessMileageLogID)
+        public MileageLogResponse GetBusinessMileageLog(int BusinessMileageLogID,int UserID)
         {
             MileageLogResponse obj = new MileageLogResponse();
 
 
             SqlParameter[] parameters =
                                         {
-                                          new SqlParameter("@BusinessMileageLogID", SqlDbType.Int,50) { Value = BusinessMileageLogID }
+                                          new SqlParameter("@BusinessMileageLogID", SqlDbType.Int,50) { Value = BusinessMileageLogID },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID}
                                         };
 
             DataTable dtMileageLog = _helper.GetDataTable("[Travel].[GetBusinessMileageLog]", parameters);

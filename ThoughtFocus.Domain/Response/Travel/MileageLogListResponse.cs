@@ -61,5 +61,6 @@ namespace ThoughtFocus.Domain.Response.Travel
         public int ModifiedBy { get; set; }
         public DateTime ModifiedDateTime { get; set; }
         public decimal Rate { get; set; }
+        public string Status { get; set; }
     }
 }
