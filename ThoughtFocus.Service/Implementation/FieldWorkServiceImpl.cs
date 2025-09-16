@@ -155,12 +155,17 @@ namespace ThoughtFocus.Service.Implementation
         {
             FieldWorkListResponse objList = new FieldWorkListResponse();
             List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
+            var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
+            string csulbIDs = String.Empty;
+            csulbIDs = jsonObj["CSULBIDForIntern2"]?.ToString();
 
 
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId }
                                         };
+            var courseList = jsonObj["FieldWorkValidCourses"]?.ToString().Split(',').Select(id => id.Trim());
+            var summer2025ValidCourses = jsonObj["FieldWorkValidCourses_Summer2025"]?.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToList();
 
             DataTable dtFieldWorkList = _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
             var courseList = _configuration["ApplicationKeys:FieldWorkValidCourses"].Split(',').Select(id => id.Trim());

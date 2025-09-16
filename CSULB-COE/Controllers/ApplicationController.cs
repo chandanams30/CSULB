@@ -1,19 +1,20 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using ThoughtFocus.Service.Interfaces;
-using Microsoft.Extensions.Logging;
-using ThoughtFocus.Domain.Response.Application;
-using Microsoft.AspNetCore.Authorization;
+using System.Reflection;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
-using System.Reflection;
-using System.Text;
-using Microsoft.Extensions.Configuration;
+using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
 {
@@ -116,7 +117,8 @@ namespace CSULB_COE.Controllers
             string validatedResult = string.Empty;
             StringBuilder sbProps = new StringBuilder();
             var zeroBounceAPI = new ZeroBounceV2.ZeroBounceAPI();
-            zeroBounceAPI.api_key = _configuration["ApplicationKeys:ZeroBounceAPIKey"];
+            var jsonObj = JObject.Parse(System.IO.File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
+            zeroBounceAPI.api_key = jsonObj["ZeroBounceAPIKey"]?.ToString();
             zeroBounceAPI.EmailToValidate = emailAddress;
             // zeroBounceAPI.ip_address = "IP Address Where Email Registered From";
 
