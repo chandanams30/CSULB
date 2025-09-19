@@ -157,7 +157,7 @@ namespace ThoughtFocus.Service.Implementation
             List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
             var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
             string csulbIDs = String.Empty;
-            csulbIDs = jsonObj["CSULBIDForIntern2"]?.ToString();
+            csulbIDs = jsonObj["EnableIntern2"]?.ToString();
 
             SqlParameter[] parameters =
                                         {

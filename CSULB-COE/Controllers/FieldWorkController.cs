@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -938,7 +939,9 @@ namespace CSULB_COE.Controllers
             try
             {
                 FieldWorkValidCourse response = new FieldWorkValidCourse();
-                response.Courses = _configuration["ApplicationKeys:FieldWorkValidCourses"]
+                var jsonObj = JObject.Parse(System.IO.File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
+                var courseList = jsonObj["FieldWorkValidCourses"]?.ToString();
+                response.Courses = courseList
                       .Split(',')
                       .Select(id => id.Trim())
                       .ToList();
