@@ -168,7 +168,6 @@ namespace ThoughtFocus.Service.Implementation
             var summer2025ValidCourses = jsonObj["FieldWorkValidCourses_Summer2025"]?.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToList();
 
             DataTable dtFieldWorkList = _helper.GetDataTable("[dbo].[GetFieldWorkData]", parameters);
-            var courseList = _configuration["ApplicationKeys:FieldWorkValidCourses"].Split(',').Select(id => id.Trim());
             try
             {
                 if (dtFieldWorkList.Rows.Count > 0)
