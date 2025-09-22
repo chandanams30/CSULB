@@ -2284,7 +2284,10 @@ namespace ThoughtFocus.Service.Implementation
         public AdhocMailLogResponse PrerequisiteExpired_Sendmail_To_Students(PrerequisiteExpiredRequest input)
         {
             AdhocMailLogResponse obj = new AdhocMailLogResponse();
-            DataTable dtPreqList = _helper.GetDataTable("[FieldWork].[GetExpiredPrerequisiteStudentList]", null);
+            SqlParameter[] parameters = {
+                                                new SqlParameter("@TermCode", SqlDbType.NVarChar, 255) { Value = (object)input.TermCode ?? DBNull.Value }
+                                        };
+            DataTable dtPreqList = _helper.GetDataTable("[FieldWork].[GetExpiredPrerequisiteStudentList]", parameters);
             StringBuilder sbLogData = new StringBuilder();
             sbLogData.Append("<ol>"); 
             int totalFailure = 0;
