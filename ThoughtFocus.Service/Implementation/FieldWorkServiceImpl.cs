@@ -162,7 +162,8 @@ namespace ThoughtFocus.Service.Implementation
 
             SqlParameter[] parameters =
                                         {
-                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId }
+                                          new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
+                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs }
                                         };
             var courseList = jsonObj["FieldWorkValidCourses"]?.ToString().Split(',').Select(id => id.Trim());
             var summer2025ValidCourses = jsonObj["FieldWorkValidCourses_Summer2025"]?.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToList();
