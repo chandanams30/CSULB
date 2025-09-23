@@ -2138,17 +2138,17 @@ namespace ThoughtFocus.Service.Implementation
                 // section for answer 4
                 foreach (JObject content in answer4.Children<JObject>())
                 {
-                    if (content["Category"].ToString() == "1.\tApplicant’s potential for academic performance (e.g., former academic, work ethic, diligence, capacity to learn")
+                    if (content["Category"].ToString() == "1.\tApplicant’s potential for academic performance (e.g., former academic, work ethic, diligence, capacity to learn).")
                     {
                         potential = Convert.ToString(content.GetValue("value"));
 
                     }
-                    if (content["Category"].ToString() == "2.\tApplicant’s interpersonal skills (e.g., communication, ability to work with others, good listener, positive contributions to group-to-group interactions")
+                    if (content["Category"].ToString() == "2.\tApplicant’s interpersonal skills (e.g., communication, ability to work with others, good listener, positive contributions to group-to-group interactions).")
                     {
                         interpersonalSkills = Convert.ToString(content.GetValue("value"));
 
                     }
-                    if (content["Category"].ToString() == "3.\tDisposition (e.g., receptive to constructive suggestions, accepts responsibility for their actions, responds to diverse perspectives)")
+                    if (content["Category"].ToString() == "3.\tDisposition (e.g., receptive to constructive suggestions, accepts responsibility for their actions, responds to diverse perspectives).")
                     {
                         disposition = Convert.ToString(content.GetValue("value"));
 
