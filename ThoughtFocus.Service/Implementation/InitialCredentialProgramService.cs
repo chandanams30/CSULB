@@ -1122,6 +1122,8 @@ namespace ThoughtFocus.Service.Implementation
                             templateName = "SMC_NotMet_For_MSCP_MailTemplate.html";
                         else if (programName == "Single Subject Credential Program (SSCP)" || programName == "Urban Dual Credential Program (UDCP)")
                             templateName = "SMC_NotMet_For_SSCP_UDCP_MailTemplate.html";
+                        else if (programName == "PK-3 Early Childhood Education Specialist Instruction Credential Program (PK-3CP)")
+                            templateName = "SMC_NotMet_For_PK3_MailTemplate.html";
                         Subject = "MyCED SMC Review Not Met";
                         break;
                     case "Will Meet":
