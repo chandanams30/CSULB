@@ -473,6 +473,19 @@ namespace ThoughtFocus.Service.Implementation
                         {
                             FinalDecision = Convert.ToString(row["FinalDecision"])
                         }).FirstOrDefault();
+                    obj.EDELFieldWorkAttachmentsInformation = dtFormData.Tables[10].AsEnumerable().Select(row =>
+                                       new EDELFieldWorkAttachmentsInformation
+                                       {
+                                           FormAttachmentID = (row["FormAttachmentID"] == DBNull.Value) ? 0 : Convert.ToInt32(row["FormAttachmentID"]),
+                                           DocumentID = Convert.ToInt32(row["DocumentID"]),
+                                           ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                           FormID = (row["FormID"] == DBNull.Value) ? 0 : Convert.ToInt32(row["FormID"]),
+                                           AttachmentTitle = Convert.ToString(row["AttachmentTitle"]),
+                                           FileName = Convert.ToString(row["FileName"]),
+                                           FileExtn = Convert.ToString(row["FileExtn"]),
+                                           IsOptional = Convert.ToBoolean(row["IsOptional"]),
+                                           Instruction = Convert.ToString(row["Instruction"])
+                                       }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -922,6 +935,22 @@ namespace ThoughtFocus.Service.Implementation
                     objAtt.FileName = attachment.FileName;
                     objAtt.FileContent = attachment.FileContent;
                     objAtt.DocumentID = attachment.DocumentID;
+                    BaseResponse attachRes = UpsertFormAttachment(objAtt);
+                }
+            }
+            //EDEL Field Work Attachment
+            if (input.edelFieldWorkAttachmentsInformation != null)
+            {
+                if (input.edelFieldWorkAttachmentsInformation.FileContent != null && input.edelFieldWorkAttachmentsInformation.FileContent.Length > 0 && !string.IsNullOrEmpty(input.edelFieldWorkAttachmentsInformation.FileName))
+                {
+                    FormUpsertAttachmentRequest objAtt = new FormUpsertAttachmentRequest();
+                    objAtt.UserID = input.UserID;
+                    objAtt.ProgramID = input.ProgramID;
+                    objAtt.FormID = input.FormID;
+                    objAtt.TermCode = input.TermCode;
+                    objAtt.FileName = input.edelFieldWorkAttachmentsInformation.FileName;
+                    objAtt.FileContent = input.edelFieldWorkAttachmentsInformation.FileContent;
+                    objAtt.DocumentID = input.edelFieldWorkAttachmentsInformation.DocumentID;
                     BaseResponse attachRes = UpsertFormAttachment(objAtt);
                 }
             }
