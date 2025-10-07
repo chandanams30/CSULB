@@ -13,6 +13,7 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public PersonalInfo PersonalInfo { get; set; }
         public List<FormAttachment> FormAttachments { get; set; }
         public List<Recommender> Recommenders { get; set; }
+        public FormAttachment edelFieldWorkAttachmentsInformation { get; set; }
 
 
     }
