@@ -124,37 +124,45 @@ namespace CSULB_COE.Controllers
 
             zeroBounceAPI.ReadTimeOut = 100000; // "Any integer value in milliseconds;
             zeroBounceAPI.RequestTimeOut = 100000; // "Any integer value in milliseconds;
-
+            var zeroBounceDomains = _configuration["ApplicationKeys:ZeroBounceBypassDomains"].Split(',').Select(id => id.Trim());
             var apiProperties = zeroBounceAPI.ValidateEmail();
+
             if (apiProperties != null)
             {
-                PropertyInfo[] properties = apiProperties.GetType().GetProperties();
-                foreach (PropertyInfo property in properties)
+                if (zeroBounceDomains.Contains(apiProperties.domain))
                 {
-                    //check if the the status is catch-all then return valid as status
-                    if (property.Name == "status" && apiProperties.status == "catch-all")
+                    response.IsSuccess = true;
+                }
+                else
+                {
+                    PropertyInfo[] properties = apiProperties.GetType().GetProperties();
+                    foreach (PropertyInfo property in properties)
                     {
-                        if ((!string.IsNullOrEmpty(apiProperties.firstName)) && (!string.IsNullOrEmpty(apiProperties.lastName)))
+                        //check if the the status is catch-all then return valid as status
+                        if (property.Name == "status" && apiProperties.status == "catch-all")
                         {
-                            sbProps.Append(property.Name + ": " + "valid" + "\n");
+                            if ((!string.IsNullOrEmpty(apiProperties.firstName)) && (!string.IsNullOrEmpty(apiProperties.lastName)))
+                            {
+                                sbProps.Append(property.Name + ": " + "valid" + "\n");
+                                response.IsSuccess = true;
+                            }
+                            else
+                            {
+                                sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
+                                response.IsSuccess = false;
+                            }
+                        }
+                        else if (apiProperties.error != null)
+                        {
                             response.IsSuccess = true;
                         }
                         else
                         {
                             sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
-                            response.IsSuccess = false;
-                        }
-                    }
-                    else if (apiProperties.error != null)
-                    {
-                            response.IsSuccess = true;
-                    }
-                    else
-                    {
-                        sbProps.Append(property.Name + ": " + property.GetValue(apiProperties) + "\n");
-                        if (property.Name == "status" && apiProperties.status == "valid")
-                        {
-                            response.IsSuccess = true;
+                            if (property.Name == "status" && apiProperties.status == "valid")
+                            {
+                                response.IsSuccess = true;
+                            }
                         }
                     }
                 }
