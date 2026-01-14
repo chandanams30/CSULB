@@ -61,8 +61,6 @@ namespace CSULB_COE
                     });
             });
             services.AddControllers().AddNewtonsoftJson();
-
-
             // adding db context 
             services.AddDbContext<CSULB_DBContext>(options =>
             {
@@ -102,6 +100,7 @@ namespace CSULB_COE
             services.AddScoped<ThoughtFocus.Repository.Interfaces.User.IUserDetailsRepository, ThoughtFocus.Repository.Implementation.User.UserDetailsImpl>();
             services.AddScoped<ThoughtFocus.Repository.Interfaces.User.IUserActivityRepository, ThoughtFocus.Repository.Implementation.User.UserActivityImpl>();
             services.AddTransient<IUserLoginService, UserLoginServiceImpl>();
+            services.AddHttpContextAccessor();
 
             // Application service 
             services.AddScoped<IApplicationService, ApplicationServiceImpl>();

@@ -30,4 +30,11 @@ namespace CSULB_COE.Models
         public int RoleId { get; set; }
         public string RoleName { get; set; }
     }
+
+    //public static class RoleConstants
+    //{
+    //    public const int ProgramAdmin = 4;
+    //    public const int Reviewer = 6;
+    //    public const int ProgramCoordinator = 11;
+    //}
 }

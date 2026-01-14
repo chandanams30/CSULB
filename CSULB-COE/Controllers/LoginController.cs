@@ -1,24 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-//using CSULB_COE.ViewModels;
+﻿//using CSULB_COE.ViewModels;
 using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
-using ThoughtFocus.Service.Interfaces;
-using Microsoft.Extensions.Logging;
-using ThoughtFocus.Domain.Request;
-using System.Globalization;
-using Owin;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.Graph;
 using Google.Apis.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
+using Newtonsoft.Json;
+using Owin;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Text.Json;
+using System.Threading.Tasks;
+using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
-using Microsoft.AspNetCore.Http.Features;
+using ThoughtFocus.Domain.Response.Admin;
+using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
 {
@@ -29,11 +32,14 @@ namespace CSULB_COE.Controllers
         private readonly IUserLoginService _userLoginService;
         public ILogger<LoginController> _logger;
         private readonly HttpClient _client;
-        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
         {
             _userLoginService = userLoginService;
             _logger = logger;
             _client = httpClientFactory.CreateClient();
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("Authenticate")]
@@ -80,6 +86,62 @@ namespace CSULB_COE.Controllers
                 string mail = string.Empty;
                 string LastName = string.Empty;
                 string FirstName = string.Empty;
+                //string jsonData = @"{
+                //""roles"": [""Program Admin"", ""Reviewer"", ""Program Coordinator""]}";
+                //var roleData = System.Text.Json.JsonSerializer.Deserialize<Roles>(jsonData);
+                //List<Roles> rolesList = new List<Roles>();
+                //List<string> roles = new List<string>();
+
+                //using (JsonDocument doc = JsonDocument.Parse(jsonData))
+                //{
+                //    if (doc.RootElement.TryGetProperty("roles", out JsonElement rolesElement))
+                //    {
+                //        foreach (var role in rolesElement.EnumerateArray())
+                //            roles.Add(role.GetString());
+                //    }
+                //}
+
+                //foreach (var roleName in roles)
+                //{
+                //    int roleId = GetRoleIdFromName(roleName);
+
+                //    rolesList.Add(new Roles
+                //    {
+                //        RoleId = roleId,
+                //        RoleName = roleName
+                //    });
+                //}
+                //response.Roles = rolesList;
+
+                //var group = _httpContextAccessor.HttpContext.Request.Headers["group"];
+                //var ADgroup = _httpContextAccessor.HttpContext.User.Claims
+                //.Where(c => c.Type == "groups")
+                //.Select(c => c.Value)
+                //.ToList();
+                //Console.WriteLine("Group" + group );
+                //Console.WriteLine("ADGroups" + ADgroup);
+                //_logger.LogInformation("Group" + group);
+                //_logger.LogInformation("ADGroups" + ADgroup);
+
+                // string userID = _httpContextAccessor.HttpContext.Request.Headers["userID"];
+                //Console.WriteLine("UserID" + userID);
+                //_logger.LogInformation("UserID" + userID);
+
+
+                var groupHeader = Request.Headers["group"].ToString();
+                var userID = Request.Headers["userID"].ToString();
+                var adGroups = User.Claims
+           .Where(c =>
+               c.Type == "groups" ||
+               c.Type == ClaimTypes.GroupSid ||
+               c.Type.Contains("groups"))
+           .Select(c => c.Value)
+           .ToList();
+                _logger.LogInformation("Group header: {Group}", groupHeader);
+                _logger.LogInformation("UserID header: {UserID}", userID);
+                _logger.LogInformation("AD Groups: {Groups}", string.Join(",", adGroups));
+
+
                 if (graphResponse.IsSuccessStatusCode)
                 {
                     
@@ -109,7 +171,30 @@ namespace CSULB_COE.Controllers
                             FirstName = data.Value;
                         }
                     }
-                    response = _userLoginService.AuthenticateSSO(emplid,displayName,mail,LastName,FirstName);
+                    response = _userLoginService.AuthenticateSSO(emplid, displayName, mail, LastName, FirstName);
+
+        //            string jsonData = @"{
+        //    ""roles"": ""Program Admin, Reviewer, Program Coordinator""
+        //}";
+        //            RoleData roleData = System.Text.Json.JsonSerializer.Deserialize<RoleData>(jsonData);
+        //            List<Roles> rolesList = new List<Roles>();
+
+        //            //for (int i = 0; i < roleData.Roles.Count; i++)
+        //            //{
+        //            //    roles.Add(roleData.Roles[i]);
+        //            //}
+        //            foreach (var roleName in roleData.Roles)
+        //            {
+        //                int roleId = GetRoleIdFromName(roleName);
+
+        //                rolesList.Add(new Roles
+        //                {
+        //                    RoleId = roleId,
+        //                    RoleName = roleName      
+        //                });
+        //            }
+        //            response.Roles = rolesList;
+
                     if (response.IsSuccess == true)
                     {
                         AuditLogRequest req = new AuditLogRequest();
@@ -138,6 +223,20 @@ namespace CSULB_COE.Controllers
                 return BadRequest();
             }
         }
+        public class RoleData
+        {
+            public List<string> Roles { get; set; }
+        }
+        //static int GetRoleIdFromName(string roleName)
+        //{
+        //    return roleName switch
+        //    {
+        //        "Program Admin" => RoleConstants.ProgramAdmin,
+        //        "Reviewer" => RoleConstants.Reviewer,
+        //        "Program Coordinator" => RoleConstants.ProgramCoordinator,
+        //        _ => 0 // default or unknown role
+        //    };
+        //}
 
         #region AuthenticateSSO old method 
         //[HttpPost("AuthenticateSSO")]

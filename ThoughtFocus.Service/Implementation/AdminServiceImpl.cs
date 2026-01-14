@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿//using CSULB_COE.Models;
+//using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -9,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+//using System.Text.Json;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.Admin;
@@ -26,17 +29,22 @@ namespace ThoughtFocus.Service.Implementation
         private readonly ISendMail _sendMail;
         public ILogger<AdminServiceImpl> _logger;
         private readonly ICommonUtils _utils;
+        //private readonly IHttpContextAccessor _httpContextAccessor;
+
         public AdminServiceImpl(ISqlDBUtility helper
                                          , IConfiguration configuration
                                          , ISendMail sendMail
                                          , ILogger<AdminServiceImpl> logger
                                          , ICommonUtils utils)
+                                         //, IHttpContextAccessor httpContextAccessor)
         {
             _helper = helper;
             _configuration = configuration;
             _sendMail = sendMail;
             _logger = logger;
             _utils = utils;
+           // _httpContextAccessor = httpContextAccessor;
+
         }
 
         public BaseResponse AddUser(AddUserRequest input)
@@ -134,6 +142,81 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
+    //    public UserDetailResponse GetUser(int UserID)
+    //    {
+    //        UserDetailResponse obj = new UserDetailResponse();
+
+    //        string jsonData = @"{""roles"": [""Program Admin"", ""Reviewer"", ""Program Coordinator""]}";
+    //        var roleData = System.Text.Json.JsonSerializer.Deserialize<Roles>(jsonData);
+    //        List<int> rolesList = new List<int>();
+    //        List<string> roles = new List<string>();
+
+    //        var group = _httpContextAccessor.HttpContext.Request.Headers["group"];
+    //        var ADgroup = _httpContextAccessor.HttpContext.User.Claims
+    //.Where(c => c.Type == "groups")
+    //.Select(c => c.Value)
+    //.ToList();
+
+    //        string csulbid =  _httpContextAccessor.HttpContext.Request.Headers["userID"];
+
+    //        using (JsonDocument doc = JsonDocument.Parse(jsonData))
+    //        {
+    //            if (doc.RootElement.TryGetProperty("roles", out JsonElement rolesElement))
+    //            {
+    //                foreach (var role in rolesElement.EnumerateArray())
+    //                    roles.Add(role.GetString());
+    //            }
+    //        }
+
+    //        foreach (var roleName in roles)
+    //        {
+    //            int roleId = GetRoleIdFromName(roleName);
+    //            rolesList.Add(roleId);
+    //        }
+    //        string RoleIDList = string.Join(",", rolesList);
+
+
+    //        SqlParameter[] parameters = {
+    //                                        new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+    //                                        new SqlParameter("@RoleIDList", SqlDbType.NVarChar,255) { Value = RoleIDList }
+
+    //                                    };
+
+    //        //DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser]", parameters);
+    //        DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser_AD]", parameters);
+
+    //        try
+    //        {
+    //            if (dtOptionsList.Rows.Count > 0)
+    //            {
+
+
+    //                obj.UserDetail = dtOptionsList.AsEnumerable().Select(row =>
+    //                                          new UserDetails
+    //                                          {
+    //                                              UserDetail = Convert.ToString(row["UserDetail"])
+    //                                          }).FirstOrDefault();
+
+
+    //                obj.IsSuccess = true;
+    //                obj.Message = "Data Retrieved Successfully";
+
+    //            }
+    //            else
+    //            {
+    //                obj.IsSuccess = false;
+    //                obj.Message = "No Data Present";
+    //            }
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            obj.IsSuccess = false;
+    //            obj.Message = "Data Retrieval Failed , Please contact site admin ";
+    //            obj.StackTrace = ex.Message;
+    //        }
+    //        return obj;
+    //    }
+
         public UserDetailResponse GetUser(int UserID)
         {
             UserDetailResponse obj = new UserDetailResponse();
@@ -173,6 +256,18 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+
+
+        //static int GetRoleIdFromName(string roleName)
+        //{
+        //    return roleName switch
+        //    {
+        //        "Program Admin" => RoleConstants.ProgramAdmin,
+        //        "Reviewer" => RoleConstants.Reviewer,
+        //        "Program Coordinator" => RoleConstants.ProgramCoordinator,
+        //        _ => 0 // default or unknown role
+        //    };
+        //}
         public CommunityDistrictListResponse GetCommunityDistrictList()
         {
             CommunityDistrictListResponse obj = new CommunityDistrictListResponse();
