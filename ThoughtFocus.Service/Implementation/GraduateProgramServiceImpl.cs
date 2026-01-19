@@ -998,6 +998,7 @@ namespace ThoughtFocus.Service.Implementation
         public BaseResponse UpdateFormState(FormStatusUpdateRequest input)
         {
             BaseResponse response = new BaseResponse();
+            var excludedPrograms = new List<int> { 27, 28 };
             SqlParameter[] parameters =
                                    {
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
@@ -1031,7 +1032,10 @@ namespace ThoughtFocus.Service.Implementation
             }
             else if (input.FormStateID == 10 || input.FormStateID == 11)
             {
-                sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode, input.FormStateID);
+                if (!excludedPrograms.Contains(input.ProgramID))
+                {
+                    sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode, input.FormStateID);
+                }
             }
             response.IsSuccess = true;
             response.Message = "Data updated successfully";
