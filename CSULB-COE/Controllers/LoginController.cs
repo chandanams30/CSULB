@@ -1,24 +1,28 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-//using CSULB_COE.ViewModels;
+﻿//using CSULB_COE.ViewModels;
+using Castle.Core.Internal;
 using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
-using ThoughtFocus.Service.Interfaces;
-using Microsoft.Extensions.Logging;
-using ThoughtFocus.Domain.Request;
-using System.Globalization;
-using Owin;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.Graph;
 using Google.Apis.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
+using Newtonsoft.Json;
+using Owin;
+using System;
+using System.Collections.Generic;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Principal;
+using System.Threading.Tasks;
+using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
-using Microsoft.AspNetCore.Http.Features;
+using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
 {
@@ -56,7 +60,67 @@ namespace CSULB_COE.Controllers
                     var auditResponse = _userLoginService.SaveAuditLog(req);
 
                 }
+
+                var groups = new List<string>();
+
+                string username = "yash.jayaram@csulb.edu";
+                _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
+
+                using (var entry = new DirectoryEntry()) // implicit credentials
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    searcher.Filter =
+                        $"(&(objectClass=user)(userPrincipalName={username}))";
+
+                    searcher.PropertiesToLoad.Add("memberOf");
+
+                    var result = searcher.FindOne();
+
+                    if (result == null)
+                    {
+                        _logger.LogWarning("AD user not found: {Username}", username);
+                    }
+                    else
+                    {
+                        if (!result.Properties.Contains("memberOf"))
+                        {
+                            _logger.LogInformation(
+                                "User {Username} has no direct group memberships",
+                                username
+                            );
+                        }
+                        foreach (var groupDn in result.Properties["memberOf"])
+                        {
+                            if (groupDn == null)
+                                continue;
+
+                            var dn = groupDn.ToString();
+                            if (string.IsNullOrWhiteSpace(dn))
+                                continue;
+
+                            var commaIndex = dn.IndexOf(',');
+                            if (commaIndex < 0)
+                                continue;
+
+                            var groupName = dn.Substring(3, commaIndex - 3);
+                            if (groupName.StartsWith("CED-TF-", StringComparison.OrdinalIgnoreCase))
+                            {
+                                groups.Add(groupName);
+                                _logger.LogInformation("Directory Search");
+                                _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                            }
+
+                        }
+                        _logger.LogInformation(
+                    "User {Username} MEMBER OF groups: {Groups}",
+                    username,
+                    string.Join(" | ", groups)
+                );
+                    }
+                }
+
                 return Ok(response);
+
             }
             catch (Exception ex)
             {
@@ -64,6 +128,7 @@ namespace CSULB_COE.Controllers
                 return BadRequest();
             }
         }
+
         [HttpPost("AuthenticateSSOToken")]
         public async Task<IActionResult> AuthenticateSSOToken([FromBody] LoginSSORequest request)
         {
@@ -109,7 +174,8 @@ namespace CSULB_COE.Controllers
                             FirstName = data.Value;
                         }
                     }
-                    response = _userLoginService.AuthenticateSSO(emplid,displayName,mail,LastName,FirstName);
+
+                response = _userLoginService.AuthenticateSSO(emplid,displayName,mail,LastName,FirstName);
                     if (response.IsSuccess == true)
                     {
                         AuditLogRequest req = new AuditLogRequest();
@@ -120,6 +186,64 @@ namespace CSULB_COE.Controllers
                         var auditResponse = _userLoginService.SaveAuditLog(req);
 
                     }
+                    var groups = new List<string>();
+
+                    string username = "yash.jayaram@csulb.edu";
+                    _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
+
+                    using (var entry = new DirectoryEntry()) // implicit credentials
+                    using (var searcher = new DirectorySearcher(entry))
+                    {
+                        searcher.Filter =
+                            $"(&(objectClass=user)(userPrincipalName={username}))";
+
+                        searcher.PropertiesToLoad.Add("memberOf");
+
+                        var result = searcher.FindOne();
+
+                        if (result == null)
+                        {
+                            _logger.LogWarning("AD user not found: {Username}", username);
+                        }
+                        else
+                        {
+                            if (!result.Properties.Contains("memberOf"))
+                            {
+                                _logger.LogInformation(
+                                    "User {Username} has no direct group memberships",
+                                    username
+                                );
+                            }
+                            foreach (var groupDn in result.Properties["memberOf"])
+                            {
+                                if (groupDn == null)
+                                    continue;
+
+                                var dn = groupDn.ToString();
+                                if (string.IsNullOrWhiteSpace(dn))
+                                    continue;
+
+                                var commaIndex = dn.IndexOf(',');
+                                if (commaIndex < 0)
+                                    continue;
+
+                                var groupName = dn.Substring(3, commaIndex - 3);
+                                if (groupName.StartsWith("CED-TF-", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    groups.Add(groupName);
+                                    _logger.LogInformation("Directory Search");
+                                    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                }
+
+                            }
+                            _logger.LogInformation(
+                        "User {Username} MEMBER OF groups: {Groups}",
+                        username,
+                        string.Join(" | ", groups)
+                    );
+                        }
+                    }
+
                     return Ok(response);
                 }
                 else
