@@ -1029,7 +1029,7 @@ namespace ThoughtFocus.Service.Implementation
                     }
                 }
             }
-            else if (input.FormStateID == 10 || input.FormStateID == 11 )
+            else if (!(input.FormStateID == 10 || input.FormStateID == 11))
             {
                 sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode, input.FormStateID);
             }
@@ -3810,7 +3810,7 @@ namespace ThoughtFocus.Service.Implementation
                     if (dsRec.Tables[0].Rows.Count > 0 && dsRec.Tables[1].Rows.Count > 0)
                     {
                         int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
-                        if (input.FormStateID != 11)
+                        if (input.FormStateID != 11 && input.FormStateID != 10)
                         {
                             if (!(input.FormStateID == 10 && applicationTypeID == 2))
                             {
