@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSULB_COE.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Request.Admin;
@@ -32,6 +33,7 @@ namespace ThoughtFocus.Service.Interfaces
         ApplicationDatesResponse GetApplicationDates(string termCode);
         BaseResponse RemoveReviewerFromForms(ReviewerRequest input);
         BaseResponse UpsertInternCourseConfig(UpsertCSULBIDForIntern input);
+        RoleADResponse GetIntegratedUserRolesByUserID(int UserID);
 
     }
 }

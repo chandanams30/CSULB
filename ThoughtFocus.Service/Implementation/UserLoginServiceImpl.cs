@@ -19,6 +19,7 @@ using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Repository.Interfaces;
 using ThoughtFocus.Repository.Interfaces.User;
 using ThoughtFocus.Service.Interfaces;
@@ -345,5 +346,125 @@ namespace ThoughtFocus.Service.Implementation
             obj.Message = "";
             return obj;
         }
+        public BaseResponse SaveRolesFromAD(AuthenticateRequestRoles request)
+        {
+            BaseResponse obj = new BaseResponse();
+            DataTable roleTable = new DataTable();
+            roleTable.Columns.Add("RoleID", typeof(long));
+            roleTable.Columns.Add("ApplicationTypeID", typeof(long));
+
+            foreach (var role in request.roleIDList)
+            {
+                roleTable.Rows.Add(role.RoleId, role.ApplicationTypeId);
+            }
+        
+            SqlParameter[] parameters =
+                                        {
+
+                                          new SqlParameter("@Username", SqlDbType.NVarChar, 100) { Value = request.Username },
+                                          new SqlParameter("@RoleIDList", SqlDbType.Structured) { TypeName = "dbo.UserRoleList",Value = roleTable },
+                                          new SqlParameter("@Password", SqlDbType.NVarChar, 100) { Value = request.Password }
+                                        };
+            int ID = _helper.InsertTable("[dbo].[SaveUserRolesFromAD]", parameters);
+            obj.IsSuccess = true;
+            obj.Message = "";
+            return obj;
+        }
+
+        public RoleADResponse GetIntegratedUserRoles(AuthenticateRequest request)
+        {
+            RoleADResponse obj = new RoleADResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@Username", SqlDbType.NVarChar, 100) { Value = request.Username },
+                                            new SqlParameter("@Password", SqlDbType.NVarChar, 100) { Value = request.Password }
+
+                                        };
+
+            DataTable dtRolesList = _helper.GetDataTable("[dbo].[GetIntegratedUserRoles]", parameters);
+            try
+            {
+                if (dtRolesList.Rows.Count > 0)
+                {
+
+
+                    obj.RolesList = dtRolesList.AsEnumerable().Select(row =>
+                                              new Roles
+                                              {
+                                                  RoleId = Convert.ToInt16(row["RoleID"]),
+                                                  RoleName = Convert.ToString(row["RoleName"])
+                                              }).ToList();
+                    obj.RoleATIDList = dtRolesList.AsEnumerable().Select(row =>
+                                              new RoleATID
+                                              {
+                                                  RoleId = Convert.ToInt16(row["RoleID"]),
+                                                  ApplicationTypeId = Convert.ToInt16(row["ApplicationTypeId"])
+                                              }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+       public int GetRoleIdFromGroup(string groupName)
+        {
+            
+                if (string.IsNullOrWhiteSpace(groupName))
+                    return 0;
+
+                // Expected format: CED-TF-RoleName-ApplicationType
+                var parts = groupName.Split('-');
+
+                if (parts.Length < 4)
+                    return 0;
+
+                string rolePart = parts[2].Trim(); // Extract role segment
+
+                return rolePart switch
+                {
+                    "ProgramAdmin" => RoleConstants.ProgramAdmin,
+                    "Reviewer" => RoleConstants.Reviewer,
+                    "ProgramCoordinator" => RoleConstants.ProgramCoordinator,
+                    _ => 0 // Unknown role
+                };
+            
+        }
+        public int GetApplicationTypeIdFromGroup(string groupName)
+        {
+            
+                if (string.IsNullOrWhiteSpace(groupName))
+                    return 0;
+
+                // Expected format: CED-TF-RoleName-ApplicationType
+                var parts = groupName.Split('-');
+
+                if (parts.Length < 4)
+                    return 0;
+
+                string appTypePart = parts[3].Trim(); // Extract application type segment
+
+                return appTypePart switch
+                {
+                    "Doctoral" => ApplicationTypeConstants.Doctoral,
+                    "ICP" => ApplicationTypeConstants.ICP,
+                    "Graduate" => ApplicationTypeConstants.Graduate,
+                    _ => 0 // Unknown application type
+                };
+          
+        }
+
+
     }
 }

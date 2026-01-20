@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using CSULB_COE.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -9,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.Admin;
@@ -16,6 +19,8 @@ using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Service.Interfaces;
+using CSULB_COE.ViewModels;
+
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -26,17 +31,20 @@ namespace ThoughtFocus.Service.Implementation
         private readonly ISendMail _sendMail;
         public ILogger<AdminServiceImpl> _logger;
         private readonly ICommonUtils _utils;
+
         public AdminServiceImpl(ISqlDBUtility helper
                                          , IConfiguration configuration
                                          , ISendMail sendMail
                                          , ILogger<AdminServiceImpl> logger
-                                         , ICommonUtils utils)
+                                         , ICommonUtils utils
+                                        )
         {
             _helper = helper;
             _configuration = configuration;
             _sendMail = sendMail;
             _logger = logger;
             _utils = utils;
+
         }
 
         public BaseResponse AddUser(AddUserRequest input)
@@ -134,14 +142,60 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
+        //public UserDetailResponse GetUser(int UserID)
+        //{
+        //    UserDetailResponse obj = new UserDetailResponse();
+
+        //    SqlParameter[] parameters = {
+        //                                    new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+        //                                };
+
+        //    DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser]", parameters);
+        //    try
+        //    {
+        //        if (dtOptionsList.Rows.Count > 0)
+        //        {
+
+
+        //            obj.UserDetail = dtOptionsList.AsEnumerable().Select(row =>
+        //                                      new UserDetails
+        //                                      {
+        //                                          UserDetail = Convert.ToString(row["UserDetail"])
+        //                                      }).FirstOrDefault();
+
+
+        //            obj.IsSuccess = true;
+        //            obj.Message = "Data Retrieved Successfully";
+
+        //        }
+        //        else
+        //        {
+        //            obj.IsSuccess = false;
+        //            obj.Message = "No Data Present";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        obj.IsSuccess = false;
+        //        obj.Message = "Data Retrieval Failed , Please contact site admin ";
+        //        obj.StackTrace = ex.Message;
+        //    }
+        //    return obj;
+        //}
+
+
         public UserDetailResponse GetUser(int UserID)
         {
             UserDetailResponse obj = new UserDetailResponse();
+            var getADRoles = GetIntegratedUserRolesByUserID(UserID);
+
             SqlParameter[] parameters = {
-                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID }
+                                            new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                            new SqlParameter("@RoleIDList", SqlDbType.NVarChar,255) { Value = getADRoles.RolesList }
                                         };
 
-            DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser]", parameters);
+            DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser_AD]", parameters);
+
             try
             {
                 if (dtOptionsList.Rows.Count > 0)
@@ -173,6 +227,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+
         public CommunityDistrictListResponse GetCommunityDistrictList()
         {
             CommunityDistrictListResponse obj = new CommunityDistrictListResponse();
@@ -769,6 +824,53 @@ namespace ThoughtFocus.Service.Implementation
 
             return response;
         }
+
+        public RoleADResponse GetIntegratedUserRolesByUserID(int UserID)
+        {
+            RoleADResponse obj = new RoleADResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@UserID", SqlDbType.NVarChar, 100) { Value = UserID }
+                                        };
+
+            DataTable dtRolesList = _helper.GetDataTable("[dbo].[GetIntegratedUserRolesByUserID]", parameters);
+            try
+            {
+                if (dtRolesList.Rows.Count > 0)
+                {
+
+
+                    obj.RolesList = dtRolesList.AsEnumerable().Select(row =>
+                                              new Roles
+                                              {
+                                                  RoleId = Convert.ToInt16(row["RoleID"]),
+                                                  RoleName = Convert.ToString(row["RoleName"])
+                                              }).ToList();
+                    obj.RoleATIDList = dtRolesList.AsEnumerable().Select(row =>
+                                              new RoleATID
+                                              {
+                                                  RoleId = Convert.ToInt16(row["RoleID"]),
+                                                  ApplicationTypeId = Convert.ToInt16(row["ApplicationTypeId"])
+                                              }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
 
 
     }

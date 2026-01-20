@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.Domain.Response;
 
 namespace CSULB_COE.Models
 {
@@ -18,7 +19,8 @@ namespace CSULB_COE.Models
         //public List<string> RoleName { get; set; }
 
         public List<Roles> Roles { get; set; }
-        
+        public List<RoleATID> RoleATIDList { get; set; }
+
         public string message { get; set; }
 
         public bool IsSuccess { get; set; }
@@ -30,4 +32,32 @@ namespace CSULB_COE.Models
         public int RoleId { get; set; }
         public string RoleName { get; set; }
     }
+
+    public class RoleATID
+    {
+        public int RoleId { get; set; }
+        public int ApplicationTypeId { get; set; }
+
+    }
+    public static class RoleConstants
+    {
+        public const int ProgramAdmin = 4;
+        public const int Reviewer = 6;
+        public const int ProgramCoordinator = 11;
+
+    }
+    public static class ApplicationTypeConstants
+    {
+        public const int Doctoral = 3;
+        public const int ICP = 1;
+        public const int Graduate = 2;
+    }
+    public class RoleADResponse : BaseResponse
+    {
+
+        public List<Roles> RolesList { get; set; }
+        public List<RoleATID> RoleATIDList { get; set; }
+
+    }
+
 }

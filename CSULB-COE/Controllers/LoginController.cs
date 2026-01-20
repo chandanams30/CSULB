@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Ocsp;
 using Owin;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Principal;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
@@ -45,11 +47,13 @@ namespace CSULB_COE.Controllers
         {
             //_logger.LogInformation("Start : Authenticating for {userName}",userName);
             ViewModels.AuthenticateRequest authModel = new ViewModels.AuthenticateRequest();
+            AuthenticateRequestRoles authenticateRequestRoles = new AuthenticateRequestRoles();
             authModel.Username = request.UserName;
             authModel.Password = request.Password;
             try
             {
                 var response = _userLoginService.Authenticate(authModel);
+
                 if (response.IsSuccess == true)
                 {
                     AuditLogRequest req = new AuditLogRequest();
@@ -117,8 +121,34 @@ namespace CSULB_COE.Controllers
                     string.Join(" | ", groups)
                 );
                     }
-                }
+                    List<RoleATID> rolesList = new List<RoleATID>();
+                    List<string> roles = new List<string>();
+                    ViewModels.AuthenticateRequest userInfo = new ViewModels.AuthenticateRequest();
 
+                    foreach (var groupName in groups)
+                    {
+                        int roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                        int applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
+                    
+                        // Skip invalid or non-matching groups
+                        if (roleId == 0 || applicationTypeId == 0)
+                            continue;
+                    
+                        rolesList.Add(new RoleATID
+                        {
+                            RoleId = roleId,
+                            ApplicationTypeId = applicationTypeId,
+                        });
+                    }
+                    authenticateRequestRoles.Username = request.UserName;
+                    authenticateRequestRoles.Password = request.Password;
+                    authenticateRequestRoles.roleIDList = rolesList;
+                    userInfo.Username = request.UserName;
+                    userInfo.Password = request.Password;
+                    var upsertADRoles = _userLoginService.SaveRolesFromAD(authenticateRequestRoles);
+                    var getADRoles = _userLoginService.GetIntegratedUserRoles(userInfo);
+                    response.Roles = getADRoles.RolesList;
+                }
                 return Ok(response);
 
             }

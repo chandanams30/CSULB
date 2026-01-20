@@ -14,5 +14,11 @@ namespace ThoughtFocus.Service.Interfaces
         AuthenticateResponse AuthenticateSSO(string CSULBID, string displayName, string mail, string lastName, string firstName);
         BaseResponse SaveUserRegistration(LoginUserRegistrationRequest request);
         BaseResponse SaveAuditLog(AuditLogRequest request);
+        BaseResponse SaveRolesFromAD(AuthenticateRequestRoles request);
+        RoleADResponse GetIntegratedUserRoles(AuthenticateRequest request);
+        int GetRoleIdFromGroup(string groupName);
+        int GetApplicationTypeIdFromGroup(string groupName);
+
+
     }
 }
