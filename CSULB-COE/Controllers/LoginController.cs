@@ -72,8 +72,8 @@ namespace CSULB_COE.Controllers
 
                 //var groups = new List<string>();
                 var groupsTest = new List<string>();
-                string username = "yash.jayaram@csulb.edu";
-                //string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                //string username = "yash.jayaram@csulb.edu";
+                string username = _configuration["ApplicationKeys:LoggedInUserName"];
                 _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
 
                 //using (var entry = new DirectoryEntry()) // implicit credentials
