@@ -4,25 +4,31 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PasswordGenerator;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlTypes;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Enumeration;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Repository.Interfaces;
 using ThoughtFocus.Repository.Interfaces.User;
 using ThoughtFocus.Service.Interfaces;
+
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -280,7 +286,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@Password", SqlDbType.NVarChar, 50) { Value = userPassword }
                                         };
             DataTable dtUserRegistration = _helper.GetDataTable("[dbo].[SaveUserRegistration]", parameters);
-            if (dtUserRegistration.Rows.Count > 0)
+            if (dtUserRegistration !=null && dtUserRegistration.Rows.Count > 0)
             {
                 int status = Convert.ToInt32(dtUserRegistration.Rows[0]["Status"]);
                 string message = Convert.ToString(dtUserRegistration.Rows[0]["Message"]);
@@ -350,40 +356,73 @@ namespace ThoughtFocus.Service.Implementation
         {
             BaseResponse obj = new BaseResponse();
             DataTable roleTable = new DataTable();
-            roleTable.Columns.Add("RoleID", typeof(long));
-            roleTable.Columns.Add("ApplicationTypeID", typeof(long));
 
-            foreach (var role in request.roleIDList)
-            {
-                roleTable.Rows.Add(role.RoleId, role.ApplicationTypeId);
-            }
-        
+
+            //roleTable.Columns.Add("RoleID", typeof(long));
+            //roleTable.Columns.Add("ApplicationTypeID", typeof(long));
+
+
+            //foreach (var role in request.roleIDList)
+            //{
+            //    roleTable.Rows.Add(role.RoleId, role.ApplicationTypeId);
+            //}
+            //string rolesJson = JsonConvert.SerializeObject(request.roleIDList);
+            //        string rolesJson = "[" + string.Join(",", request.roleIDList.Select(r =>
+            //$"{{\"RoleId\":{r.RoleId},\"ApplicationTypeId\":{r.ApplicationTypeId}}}")) + "]";
+            //        rolesJson.Replace("\"","");
+
+            string rolesJson = ConvertToJson(request.roleIDList);
+
             SqlParameter[] parameters =
-                                        {
+ {
+    new SqlParameter("@Email", SqlDbType.NVarChar, 255) { Value = request.Email?.Trim() ?? "" },
+    new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = request.RoleID },
+    new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = request.ApplicationTypeID },
+    new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = request.CSULBID?.Trim() ?? "" }
+};
+            var ID = _helper.InsertTable("[dbo].[SaveUserRolesFromAD]", parameters);
+            //using (var conn = new SqlConnection(connectionString))
+            //{
+            //    conn.Open();
+            //    using (var cmd = new SqlCommand("[dbo].[SaveUserRolesFromAD]", conn))
+            //    {
+            //        cmd.CommandType = CommandType.StoredProcedure;
 
-                                          new SqlParameter("@Username", SqlDbType.NVarChar, 100) { Value = request.Username },
-                                          new SqlParameter("@RoleIDList", SqlDbType.Structured) { TypeName = "dbo.UserRoleList",Value = roleTable },
-                                          new SqlParameter("@Password", SqlDbType.NVarChar, 100) { Value = request.Password }
-                                        };
-            int ID = _helper.InsertTable("[dbo].[SaveUserRolesFromAD]", parameters);
+            //        cmd.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 255) { Value = request.Email.Trim() });
+            //        cmd.Parameters.Add(new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = request.RoleID });
+            //        cmd.Parameters.Add(new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = request.ApplicationTypeID });
+            //        cmd.Parameters.Add(new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = request.CSULBID.Trim() });
+
+            //        int rowsAffected = cmd.ExecuteNonQuery();
+            //        Console.WriteLine($"Rows affected: {rowsAffected}");
+            //    }
+            //}
+
             obj.IsSuccess = true;
             obj.Message = "";
             return obj;
         }
+        public string ConvertToJson<T>(T obj)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(T));
+            using var ms = new MemoryStream();
+            serializer.WriteObject(ms, obj);
+            return Encoding.UTF8.GetString(ms.ToArray());
+        }
 
-        public RoleADResponse GetIntegratedUserRoles(AuthenticateRequest request)
+        public RoleADResponse GetIntegratedUserRoles(UserInfoRequest request)
         {
             RoleADResponse obj = new RoleADResponse();
             SqlParameter[] parameters = {
-                                            new SqlParameter("@Username", SqlDbType.NVarChar, 100) { Value = request.Username },
-                                            new SqlParameter("@Password", SqlDbType.NVarChar, 100) { Value = request.Password }
+                                            new SqlParameter("@Email", SqlDbType.NVarChar, 255) { Value = request.Email },
+                                            new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = request.CSULBID }
 
                                         };
 
             DataTable dtRolesList = _helper.GetDataTable("[dbo].[GetIntegratedUserRoles]", parameters);
             try
             {
-                if (dtRolesList.Rows.Count > 0)
+                if (dtRolesList !=null && dtRolesList.Rows.Count > 0)
                 {
 
 
@@ -418,7 +457,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-       public int GetRoleIdFromGroup(string groupName)
+       public long GetRoleIdFromGroup(string groupName)
         {
             
                 if (string.IsNullOrWhiteSpace(groupName))
@@ -441,7 +480,7 @@ namespace ThoughtFocus.Service.Implementation
                 };
             
         }
-        public int GetApplicationTypeIdFromGroup(string groupName)
+        public long GetApplicationTypeIdFromGroup(string groupName)
         {
             
                 if (string.IsNullOrWhiteSpace(groupName))

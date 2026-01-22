@@ -35,8 +35,8 @@ namespace CSULB_COE.Models
 
     public class RoleATID
     {
-        public int RoleId { get; set; }
-        public int ApplicationTypeId { get; set; }
+        public long RoleId { get; set; }
+        public long ApplicationTypeId { get; set; }
 
     }
     public static class RoleConstants

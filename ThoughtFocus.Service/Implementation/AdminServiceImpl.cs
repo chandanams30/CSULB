@@ -187,11 +187,10 @@ namespace ThoughtFocus.Service.Implementation
         public UserDetailResponse GetUser(int UserID)
         {
             UserDetailResponse obj = new UserDetailResponse();
-            var getADRoles = GetIntegratedUserRolesByUserID(UserID);
+            //var getADRoles = GetIntegratedUserRolesByUserID(UserID);
 
             SqlParameter[] parameters = {
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
-                                            new SqlParameter("@RoleIDList", SqlDbType.NVarChar,255) { Value = getADRoles.RolesList }
                                         };
 
             DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser_AD]", parameters);

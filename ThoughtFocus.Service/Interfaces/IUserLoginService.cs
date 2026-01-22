@@ -15,9 +15,9 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveUserRegistration(LoginUserRegistrationRequest request);
         BaseResponse SaveAuditLog(AuditLogRequest request);
         BaseResponse SaveRolesFromAD(AuthenticateRequestRoles request);
-        RoleADResponse GetIntegratedUserRoles(AuthenticateRequest request);
-        int GetRoleIdFromGroup(string groupName);
-        int GetApplicationTypeIdFromGroup(string groupName);
+        RoleADResponse GetIntegratedUserRoles(UserInfoRequest request);
+        long GetRoleIdFromGroup(string groupName);
+        long GetApplicationTypeIdFromGroup(string groupName);
 
 
     }
