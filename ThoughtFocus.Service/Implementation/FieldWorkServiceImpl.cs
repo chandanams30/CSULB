@@ -158,11 +158,18 @@ namespace ThoughtFocus.Service.Implementation
             var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
             string csulbIDs = String.Empty;
             csulbIDs = jsonObj["EnableIntern2"]?.ToString();
+            var SupervisorCSULBIDs = _configuration["ApplicationKeys:SupervisorCSULBIDs"];
+            var SupervisorCourses = _configuration["ApplicationKeys:SupervisorCourses"];
+
+
 
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
-                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs }
+                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs },
+                                          new SqlParameter("@SupervisorCSULBIDs", SqlDbType.NVarChar, -1) { Value = SupervisorCSULBIDs },
+                                          new SqlParameter("@SupervisorCourses", SqlDbType.NVarChar, -1) { Value = SupervisorCourses },
+
                                         };
             var courseList = jsonObj["FieldWorkValidCourses"]?.ToString().Split(',').Select(id => id.Trim());
             var summer2025ValidCourses = jsonObj["FieldWorkValidCourses_Summer2025"]?.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToList();
