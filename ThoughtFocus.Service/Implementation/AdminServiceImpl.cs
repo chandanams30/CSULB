@@ -193,7 +193,8 @@ namespace ThoughtFocus.Service.Implementation
                                             new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                         };
 
-            DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser_AD]", parameters);
+            DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser]", parameters);
+            //DataTable dtOptionsList = _helper.GetDataTable("[User].[GetUser_AD]", parameters);
 
             try
             {

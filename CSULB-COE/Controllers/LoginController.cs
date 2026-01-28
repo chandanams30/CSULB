@@ -47,6 +47,132 @@ namespace CSULB_COE.Controllers
             _configuration = configuration;
         }
 
+        //[HttpPost("Authenticate")]
+        //public IActionResult Login([FromBody] LoginRequest request)
+        //{
+        //    //_logger.LogInformation("Start : Authenticating for {userName}",userName);
+        //    ViewModels.AuthenticateRequest authModel = new ViewModels.AuthenticateRequest();
+        //    AuthenticateRequestRoles authenticateRequestRoles = new AuthenticateRequestRoles();
+        //    authModel.Username = request.UserName;
+        //    authModel.Password = request.Password;
+        //    try
+        //    {
+        //        var response = _userLoginService.Authenticate(authModel);
+
+        //        if (response.IsSuccess == true)
+        //        {
+        //            AuditLogRequest req = new AuditLogRequest();
+        //            req.UserID = response.UserId;
+        //            req.Type = "Login";
+        //            req.IPAddress = GetClientIPAddress();
+        //            req.AuthenticationType = "Basic";
+        //            var auditResponse = _userLoginService.SaveAuditLog(req);
+
+        //        }
+
+        //        //var groups = new List<string>();
+        //        var groupsTest = new List<string>();
+        //        //string username = "yash.jayaram@csulb.edu";
+        //        string username = _configuration["ApplicationKeys:LoggedInUserName"];
+        //        _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
+
+        //        //using (var entry = new DirectoryEntry()) // implicit credentials
+        //        //using (var searcher = new DirectorySearcher(entry))
+        //        //{
+        //        //    searcher.Filter =
+        //        //        $"(&(objectClass=user)(userPrincipalName={username}))";
+
+        //        //    searcher.PropertiesToLoad.Add("memberOf");
+
+        //        //    var result = searcher.FindOne();
+
+        //        //    if (result == null)
+        //        //    {
+        //        //        _logger.LogWarning("AD user not found: {Username}", username);
+        //        //    }
+        //        //    else
+        //        //    {
+        //        //        if (!result.Properties.Contains("memberOf"))
+        //        //        {
+        //        //            _logger.LogInformation(
+        //        //                "User {Username} has no direct group memberships",
+        //        //                username
+        //        //            );
+        //        //        }
+        //        //        foreach (var groupDn in result.Properties["memberOf"])
+        //        //        {
+        //        //            if (groupDn == null)
+        //        //                continue;
+
+        //        //            var dn = groupDn.ToString();
+        //        //            if (string.IsNullOrWhiteSpace(dn))
+        //        //                continue;
+
+        //        //            var commaIndex = dn.IndexOf(',');
+        //        //            if (commaIndex < 0)
+        //        //                continue;
+
+        //        //            var groupName = dn.Substring(3, commaIndex - 3);
+        //        //            if (groupName.StartsWith("CED-TF-", StringComparison.OrdinalIgnoreCase))
+        //        //            {
+        //        //                groups.Add(groupName);
+        //        //                _logger.LogInformation("Directory Search");
+        //        //                _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+        //        //            }
+
+        //        //        }
+        //        //        _logger.LogInformation(
+        //        //    "User {Username} MEMBER OF groups: {Groups}",
+        //        //    username,
+        //        //    string.Join(" | ", groups)
+        //        //);
+        //        //    }
+        //        //}
+        //        var groups = _configuration["ApplicationKeys:ADGroups"].ToString();
+        //        groupsTest = groups
+        //              .Split(',')
+        //              .Select(id => id.Trim())
+        //              .ToList();
+        //        List<RoleATID> rolesList = new List<RoleATID>();
+        //            List<string> roles = new List<string>();
+        //            ViewModels.UserInfoRequest userInfo = new ViewModels.UserInfoRequest();
+
+        //            foreach (var groupName in groupsTest)
+        //            {
+        //                long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+        //            long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
+
+        //                // Skip invalid or non-matching groups
+        //                if (roleId == 0 || applicationTypeId == 0)
+        //                    continue;
+
+        //                rolesList.Add(new RoleATID
+        //                {
+        //                    RoleId = roleId,
+        //                    ApplicationTypeId = applicationTypeId,
+        //                });
+        //            authenticateRequestRoles.Email = response.Email;
+        //            authenticateRequestRoles.CSULBID = response.CSULBID;
+        //            authenticateRequestRoles.RoleID = roleId;
+        //            authenticateRequestRoles.ApplicationTypeID = applicationTypeId;
+
+        //            var upsertADRoles = _userLoginService.SaveRolesFromAD(authenticateRequestRoles);
+        //        }
+
+        //        userInfo.Email = response.Email;
+        //        userInfo.CSULBID = response.CSULBID;
+        //        var getADRoles = _userLoginService.GetIntegratedUserRoles(userInfo);
+        //            response.Roles = getADRoles.RolesList;
+
+        //        return Ok(response);
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, ex.Message);
+        //        return BadRequest();
+        //    }
+        //}
         [HttpPost("Authenticate")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
@@ -69,101 +195,65 @@ namespace CSULB_COE.Controllers
                     var auditResponse = _userLoginService.SaveAuditLog(req);
 
                 }
-
-                //var groups = new List<string>();
-                var groupsTest = new List<string>();
-                //string username = "yash.jayaram@csulb.edu";
+                var groups = new List<string>();
                 string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                //string username = "yash.jayaram@csulb.edu";
+                //string username = response.Email;
                 _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
 
-                //using (var entry = new DirectoryEntry()) // implicit credentials
-                //using (var searcher = new DirectorySearcher(entry))
-                //{
-                //    searcher.Filter =
-                //        $"(&(objectClass=user)(userPrincipalName={username}))";
+                using (var entry = new DirectoryEntry()) // implicit credentials
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    searcher.Filter =
+                        $"(&(objectClass=user)(userPrincipalName={username}))";
 
-                //    searcher.PropertiesToLoad.Add("memberOf");
+                    searcher.PropertiesToLoad.Add("memberOf");
 
-                //    var result = searcher.FindOne();
+                    var result = searcher.FindOne();
 
-                //    if (result == null)
-                //    {
-                //        _logger.LogWarning("AD user not found: {Username}", username);
-                //    }
-                //    else
-                //    {
-                //        if (!result.Properties.Contains("memberOf"))
-                //        {
-                //            _logger.LogInformation(
-                //                "User {Username} has no direct group memberships",
-                //                username
-                //            );
-                //        }
-                //        foreach (var groupDn in result.Properties["memberOf"])
-                //        {
-                //            if (groupDn == null)
-                //                continue;
-
-                //            var dn = groupDn.ToString();
-                //            if (string.IsNullOrWhiteSpace(dn))
-                //                continue;
-
-                //            var commaIndex = dn.IndexOf(',');
-                //            if (commaIndex < 0)
-                //                continue;
-
-                //            var groupName = dn.Substring(3, commaIndex - 3);
-                //            if (groupName.StartsWith("CED-TF-", StringComparison.OrdinalIgnoreCase))
-                //            {
-                //                groups.Add(groupName);
-                //                _logger.LogInformation("Directory Search");
-                //                _logger.LogInformation("Assigned Group: {GroupName}", groupName);
-                //            }
-
-                //        }
-                //        _logger.LogInformation(
-                //    "User {Username} MEMBER OF groups: {Groups}",
-                //    username,
-                //    string.Join(" | ", groups)
-                //);
-                //    }
-                //}
-                var groups = _configuration["ApplicationKeys:ADGroups"].ToString();
-                groupsTest = groups
-                      .Split(',')
-                      .Select(id => id.Trim())
-                      .ToList();
-                List<RoleATID> rolesList = new List<RoleATID>();
-                    List<string> roles = new List<string>();
-                    ViewModels.UserInfoRequest userInfo = new ViewModels.UserInfoRequest();
-
-                    foreach (var groupName in groupsTest)
+                    if (result == null)
                     {
-                        long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
-                    long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
-                    
-                        // Skip invalid or non-matching groups
-                        if (roleId == 0 || applicationTypeId == 0)
-                            continue;
-                    
-                        rolesList.Add(new RoleATID
+                        _logger.LogWarning("AD user not found: {Username}", username);
+                    }
+                    else
+                    {
+                        if (!result.Properties.Contains("memberOf"))
                         {
-                            RoleId = roleId,
-                            ApplicationTypeId = applicationTypeId,
-                        });
-                    authenticateRequestRoles.Email = response.Email;
-                    authenticateRequestRoles.CSULBID = response.CSULBID;
-                    authenticateRequestRoles.RoleID = roleId;
-                    authenticateRequestRoles.ApplicationTypeID = applicationTypeId;
+                            _logger.LogInformation(
+                                "User {Username} has no direct group memberships",
+                                username
+                            );
+                        }
+                        foreach (var groupDn in result.Properties["memberOf"])
+                        {
+                            if (groupDn == null)
+                                continue;
 
-                    var upsertADRoles = _userLoginService.SaveRolesFromAD(authenticateRequestRoles);
+                            var dn = groupDn.ToString();
+                            if (string.IsNullOrWhiteSpace(dn))
+                                continue;
+
+                            var commaIndex = dn.IndexOf(',');
+                            if (commaIndex < 0)
+                                continue;
+
+                            var groupName = dn.Substring(3, commaIndex - 3);
+                            if (groupName.StartsWith(_configuration["ApplicationKeys:ADGroupsKey"], StringComparison.OrdinalIgnoreCase))
+                            {
+                                groups.Add(groupName);
+                                _logger.LogInformation("Directory Search");
+                                _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                            }
+
+                        }
+                        _logger.LogInformation(
+                    "User {Username} MEMBER OF groups: {Groups}",
+                    username,
+                    string.Join(" | ", groups)
+                );
+                    }
                 }
 
-                userInfo.Email = response.Email;
-                userInfo.CSULBID = response.CSULBID;
-                var getADRoles = _userLoginService.GetIntegratedUserRoles(userInfo);
-                    response.Roles = getADRoles.RolesList;
-                
                 return Ok(response);
 
             }
@@ -173,6 +263,7 @@ namespace CSULB_COE.Controllers
                 return BadRequest();
             }
         }
+
 
         [HttpPost("AuthenticateSSOToken")]
         public async Task<IActionResult> AuthenticateSSOToken([FromBody] LoginSSORequest request)
@@ -232,8 +323,8 @@ namespace CSULB_COE.Controllers
 
                     }
                     var groups = new List<string>();
-
-                    string username = "yash.jayaram@csulb.edu";
+                    string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                    //string username = mail;
                     _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
 
                     using (var entry = new DirectoryEntry()) // implicit credentials
@@ -273,7 +364,7 @@ namespace CSULB_COE.Controllers
                                     continue;
 
                                 var groupName = dn.Substring(3, commaIndex - 3);
-                                if (groupName.StartsWith("CED-TF-", StringComparison.OrdinalIgnoreCase))
+                                if (groupName.StartsWith(_configuration["ApplicationKeys:ADGroupsKey"], StringComparison.OrdinalIgnoreCase))
                                 {
                                     groups.Add(groupName);
                                     _logger.LogInformation("Directory Search");
