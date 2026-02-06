@@ -8,4 +8,10 @@ namespace ThoughtFocus.Domain.Request.Admin
     {
         public string CSULBIDs { get; set; }
     }
+    public class SupervisorForCourses
+    {
+        public string CSULBIDs { get; set; }
+        public string Subjects { get; set; }
+
+    }
 }

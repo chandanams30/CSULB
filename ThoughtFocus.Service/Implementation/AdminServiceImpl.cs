@@ -770,6 +770,154 @@ namespace ThoughtFocus.Service.Implementation
             return response;
         }
 
+        //public BaseResponse AddSupervisorForCourses(SupervisorForCourses input)
+        //{
+        //    BaseResponse response = new BaseResponse();
+        //    string filePath = Path.Combine("SupportFiles/MycedConfigurations/CSULBCEDConfig.json");
+        //    JObject jsonObj;
+
+        //    if (File.Exists(filePath))
+        //    {
+        //        string existingJson = File.ReadAllText(filePath);
+        //        jsonObj = JObject.Parse(File.ReadAllText(filePath));
+
+        //        // Get current value and split into list
+        //        string SupervisorCSULBIDs = jsonObj["SupervisorCSULBIDs"]?.ToString();
+        //        string SupervisorCourses = jsonObj["SupervisorCourses"]?.ToString();
+
+        //        var existingIds = string.IsNullOrEmpty(SupervisorCSULBIDs)
+        //            ? new List<string>()
+        //            : SupervisorCSULBIDs.Split(',')
+        //                          .Select(id => id.Trim())
+        //                          .Where(id => !string.IsNullOrEmpty(id))
+        //                          .ToList();
+
+        //        // Split input into multiple IDs
+        //        var newIds = input.CSULBIDs.Split(',')
+        //                          .Select(id => id.Trim())
+        //                          .Where(id => !string.IsNullOrEmpty(id))
+        //                          .ToList();
+
+        //        // Add new IDs if not already present
+        //        foreach (var id in newIds)
+        //        {
+        //            if (!existingIds.Contains(id))
+        //            {
+        //                existingIds.Add(id);
+        //            }
+        //        }
+
+        //        var existingCourseIds = string.IsNullOrEmpty(SupervisorCourses)
+        //            ? new List<string>()
+        //            : SupervisorCourses.Split(',')
+        //                          .Select(id => id.Trim())
+        //                          .Where(id => !string.IsNullOrEmpty(id))
+        //                          .ToList();
+
+        //        // Split input into multiple IDs
+        //        var newCourseIds = input.Subjects.Split(',')
+        //                          .Select(id => id.Trim())
+        //                          .Where(id => !string.IsNullOrEmpty(id))
+        //                          .ToList();
+
+        //        // Add new IDs if not already present
+        //        foreach (var id in newCourseIds)
+        //        {
+        //            if (!existingCourseIds.Contains(id))
+        //            {
+        //                existingCourseIds.Add(id);
+        //            }
+        //        }
+
+        //        jsonObj["SupervisorCSULBIDs"] = string.Join(",", existingIds);
+        //        jsonObj["SupervisorCourses"] = string.Join(",", existingCourseIds);
+
+        //        response.Message = "ID(s) Added Successfully";
+        //        response.IsSuccess = true;
+
+        //        File.WriteAllText(filePath, jsonObj.ToString());
+        //    }
+        //    else
+        //    {
+        //        response.Message = "Config file not found.";
+        //        response.IsSuccess = false;
+        //    }
+
+        //    return response;
+        //}
+
+        public BaseResponse AddSupervisorForCourses(SupervisorForCourses input)
+        {
+            BaseResponse response = new BaseResponse();
+            string filePath = Path.Combine("SupportFiles/MycedConfigurations/CSULBCEDConfig.json");
+
+            if (!File.Exists(filePath))
+            {
+                response.Message = "Config file not found.";
+                response.IsSuccess = false;
+                return response;
+            }
+
+            JObject jsonObj = JObject.Parse(File.ReadAllText(filePath));
+
+            // Ensure Supervisors array exists
+            JArray supervisorsArray = jsonObj["Supervisors"] as JArray ?? new JArray();
+
+            // Split input
+            var inputCSULBIDs = input.CSULBIDs.Split(',')
+                                .Select(x => x.Trim())
+                                .Where(x => !string.IsNullOrEmpty(x))
+                                .ToList();
+
+            var inputSubjects = input.Subjects.Split(',')
+                                .Select(x => x.Trim())
+                                .Where(x => !string.IsNullOrEmpty(x))
+                                .Distinct()
+                                .ToList();
+
+            foreach (var csulbId in inputCSULBIDs)
+            {
+                // Check if supervisor already exists
+                var existingSupervisor = supervisorsArray
+                    .FirstOrDefault(x => x["CSULBID"]?.ToString() == csulbId) as JObject;
+
+                if (existingSupervisor == null)
+                {
+                    // Add new supervisor
+                    supervisorsArray.Add(new JObject
+                    {
+                        ["CSULBID"] = csulbId,
+                        ["Subjects"] = new JArray(inputSubjects)
+                    });
+                }
+                else
+                {
+                    // Merge subjects
+                    var existingSubjects = existingSupervisor["Subjects"]?
+                        .Select(s => s.ToString())
+                        .ToList() ?? new List<string>();
+
+                    foreach (var subject in inputSubjects)
+                    {
+                        if (!existingSubjects.Contains(subject))
+                        {
+                            existingSubjects.Add(subject);
+                        }
+                    }
+
+                    existingSupervisor["Subjects"] = new JArray(existingSubjects);
+                }
+            }
+
+            jsonObj["Supervisors"] = supervisorsArray;
+
+            File.WriteAllText(filePath, jsonObj.ToString());
+
+            response.Message = "Supervisor(s) and course(s) added successfully";
+            response.IsSuccess = true;
+
+            return response;
+        }
 
     }
 }

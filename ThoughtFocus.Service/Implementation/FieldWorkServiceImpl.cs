@@ -24,9 +24,11 @@ using ThoughtFocus.Domain.Enumeration;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
+using ThoughtFocus.Domain.Response.Users;
 using ThoughtFocus.Service.Interfaces;
 using static ThoughtFocus.Domain.Request.GraduateProgram.DispositionMSCPFiledata;
 using static ThoughtFocus.Domain.Response.FieldWork.FieldWorkActivityLogListResponse;
@@ -39,12 +41,16 @@ namespace ThoughtFocus.Service.Implementation
         private readonly IConfiguration _configuration;
         private readonly ISendMail _sendMail;
         public ILogger<FieldWorkServiceImpl> _logger;
-        public FieldWorkServiceImpl(ISqlDBUtility helper, IConfiguration configuration, ISendMail sendMail, ILogger<FieldWorkServiceImpl> logger)
+        private IAdminService _adminService;
+
+        public FieldWorkServiceImpl(ISqlDBUtility helper, IConfiguration configuration, ISendMail sendMail, ILogger<FieldWorkServiceImpl> logger, IAdminService adminService)
         {
             _helper = helper;
             _configuration = configuration;
             _sendMail = sendMail;
             _logger = logger;
+            _adminService = adminService;
+
         }
         public FieldWorkDataResponse GetFieldWorkDetailsById(int userId, int fieldWorkId)
         {
@@ -158,17 +164,32 @@ namespace ThoughtFocus.Service.Implementation
             var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
             string csulbIDs = String.Empty;
             csulbIDs = jsonObj["EnableIntern2"]?.ToString();
-            //var SupervisorCSULBIDs = _configuration["ApplicationKeys:SupervisorCSULBIDs"];
-           // var SupervisorCourses = _configuration["ApplicationKeys:SupervisorCourses"];
+            var supervisorsArray = jsonObj["Supervisors"] as JArray;
 
+            UserDetailResponse userResponse = _adminService.GetUser(userId);
+            string csulbId = null;
 
+            if (userResponse?.IsSuccess == true &&
+            !string.IsNullOrWhiteSpace(userResponse.UserDetail?.UserDetail))
+            {
+                csulbId = JObject
+                    .Parse(userResponse.UserDetail.UserDetail)
+                    .Value<string>("CSULBID");
+            }
+
+            var supervisor = supervisorsArray?
+                .FirstOrDefault(x => x["CSULBID"]?.ToString() == csulbId);
+
+            string supervisorSubjects = supervisor?["Subjects"] != null
+                ? string.Join(",", supervisor["Subjects"].Select(s => s.ToString()))
+                : null;
 
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
-                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs }
-                                          //new SqlParameter("@SupervisorCSULBIDs", SqlDbType.NVarChar, -1) { Value = SupervisorCSULBIDs },
-                                          //new SqlParameter("@SupervisorCourses", SqlDbType.NVarChar, -1) { Value = SupervisorCourses },
+                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs },
+                                          new SqlParameter("@SupervisorCSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbId },
+                                          new SqlParameter("@SupervisorCourses", SqlDbType.NVarChar, -1) { Value = supervisorSubjects }
 
                                         };
             var courseList = jsonObj["FieldWorkValidCourses"]?.ToString().Split(',').Select(id => id.Trim());
@@ -2860,9 +2881,39 @@ namespace ThoughtFocus.Service.Implementation
             }
             return body;
         }
+
+        public FieldWorkSubjectList GetDistinctCourseSubjects()
+        {
+            FieldWorkSubjectList obj = new FieldWorkSubjectList();
+            DataTable dtSujects = _helper.GetDataTable("[FieldWork].[GetDistinctCourseSubjects]");
+            try
+            {
+                if (dtSujects.Rows.Count > 0)
+                {
+                    obj.SubjectList = dtSujects.AsEnumerable().Select(row =>
+                                              new FieldWorkSubjects
+                                              {
+                                                  Subject = Convert.ToString(row["Subject"]),
+                                              }).ToList();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
     }
-
-
 
     public class EmailMessageModel
     {

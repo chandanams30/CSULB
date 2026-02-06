@@ -1000,5 +1000,24 @@ namespace CSULB_COE.Controllers
             }
             return contentType;
         }
+
+        [HttpGet("GetDistinctCourseSubjects")]
+        public FieldWorkSubjectList GetDistinctCourseSubjects()
+        {
+            try
+            {
+                FieldWorkSubjectList response = _fieldWorkService.GetDistinctCourseSubjects();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FieldWorkSubjectList response = new FieldWorkSubjectList();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

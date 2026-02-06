@@ -13,4 +13,12 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string Value { get; set; }
         public string Label { get; set; }
     }
+    public class FieldWorkSubjectList : BaseResponse
+    {
+        public List<FieldWorkSubjects> SubjectList { get; set; }
+    }
+    public class FieldWorkSubjects
+    {
+        public string Subject { get; set; }
+    }
 }
