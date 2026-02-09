@@ -1150,7 +1150,7 @@ namespace ThoughtFocus.Service.Implementation
                 if (dsRec.Tables[0].Rows.Count > 0 && dsRec.Tables[1].Rows.Count > 0)
                 {
                     int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
-                    if (applicationTypeID == 2)
+                    if (applicationTypeID == 2 && formStateID == 10)
                     {
                         //if (formStateID == 10 && applicationTypeID == 3)
                         //{
