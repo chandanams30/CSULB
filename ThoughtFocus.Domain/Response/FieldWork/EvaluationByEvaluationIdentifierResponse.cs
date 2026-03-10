@@ -22,6 +22,9 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string StudentEmail { get;set; }
         public string CourseTitle { get; set; }
         public string TermName { get; set; }
-      
+        public string ApplicationType { get; set; }
+        public string CourseNameandNumber { get; set; }
+
+
     }
 }
