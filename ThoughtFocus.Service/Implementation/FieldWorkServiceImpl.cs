@@ -1766,6 +1766,8 @@ namespace ThoughtFocus.Service.Implementation
             string body = string.Empty;
             string link = string.Empty;
             bool isMailSent = false;
+            int programID = 0;
+            string subject = string.Empty;
             try
             {
                 if (evaluationDetails.Tables[1].Rows.Count > 0)
@@ -1786,10 +1788,20 @@ namespace ThoughtFocus.Service.Implementation
                             evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["EvaluationIdentifier"]);
                             applicantName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["StudentName"]);
                             link = evaluationURL + evaluationIdentifier;
+                            if(input.ApplicationType == "FieldWork-MSCP")
+                            {
+                                programID = 2;
+                                subject = "CSULB MSCP Clinical Practice Evaluation Form";
+                            }
+                            else
+                            {
+                                programID = 3;
+                                subject = "CSULB PK3 Clinical Practice Evaluation Form";
+                            }
                             //get evaluation mail body
                             SqlParameter[] parameters1 ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
-                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 2 },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
                                             new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
                                        };
                             DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
@@ -1808,8 +1820,6 @@ namespace ThoughtFocus.Service.Implementation
                                     body = body.Replace("[[logoPath]]", logoText)
                                         .Replace("[[applicantname]]", applicantName)
                                         .Replace("[[link]]", link);
-
-                                    string subject = "CSULB MSCP Clinical Practice Evaluation Form";
                                     _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
                                     isMailSent = true;
                                     SqlParameter[] parmeter1 =
@@ -1874,7 +1884,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
                                                   StudentEmail = Convert.ToString(row["StudentEmail"]),
                                                   CourseTitle = Convert.ToString(row["CourseTitle"]),
-                                                  TermName = Convert.ToString(row["TermName"])
+                                                  TermName = Convert.ToString(row["TermName"]),
+                                                  ApplicationType = Convert.ToString(row["ApplicationType"]),
+                                                  CourseNameandNumber = Convert.ToString(row["CourseNameandNumber"])
                                               }).FirstOrDefault();
 
 
@@ -1902,6 +1914,7 @@ namespace ThoughtFocus.Service.Implementation
             string beforeBody = string.Empty;
             string afterBody = string.Empty;
             string studentEmail = string.Empty;
+            int programID = 0;
             UpsertEvaluationRequest upsertEvaluationRequest = new UpsertEvaluationRequest();
             //input.EvaluationJSON = "{\"personalInfo\":{\"date\":\"03/01/2025\",\"gradeLevelTaught\":\"Grade \",\"schoolDistrict\":\"School\",\"schoolName\":\"Name\",\"disposition\":[{\"Criteria\":\"Promptness: Timeliness in first contact; Punctuality in attendance\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Responsibility: Consistency in schedule and work\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Honoring school setting: Compliance with school policies; Displays legal and ethical conduct; and, observing confidentiality at all times\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Representing the university: Respectful in professional language, behavior, and appearance. No use of social media in the schooling context at any time.\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Communication Skills: University-level language in email, phone contact, and in person\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Working with Diverse Populations: Respect and demonstrates insightfulness for all students, various backgrounds, abilities, and orientations\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Collaboration: Willing contribution to classroom environment and learning opportunities\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"Knowledge: Application of course content and best practices; reflection on learning\",\"value\":\"Met (Performance Expectations)\"},{\"Criteria\":\"OVERALL FINAL EVAULATION\",\"value\":\"Met (Performance Expectations)\"}]},\"comments\":\"additional\",\"teacherName\":\"Chandana1\"}";
 
@@ -1929,10 +1942,20 @@ namespace ThoughtFocus.Service.Implementation
             upsertEvaluationRequest.ProgramID = input.ProgramID;
             upsertEvaluationRequest.TermCode = input.TermCode;
             upsertEvaluationRequest.FieldWorkID = input.FieldWorkID;
+            if(input.ApplicationType == "FieldWork-MSCP")
+            {
+                programID = 2;
+                subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
+            }
+            else
+            {
+                programID = 3;
+                subject = "CSULB PK3 Clinical Practice Evaluation Submitted";
+            }
 
             SqlParameter[] parameters1 ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt, 10) { Value = 1 },
-                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = 2 },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programID },
                                             new SqlParameter("@Identifier", SqlDbType.NVarChar) { Value = "Student Confirmation Mail" },
 
                                        };
@@ -1947,7 +1970,6 @@ namespace ThoughtFocus.Service.Implementation
                     body = $"{beforeBody}{body}{afterBody}";
                     body = body.Replace("[[logoPath]]", logoText)
                             .Replace("[[applicantname]]", applicantName);
-                    subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
                     _sendMail.SendEmail(studentEmail, evaluatorEmail, "COMMON", subject, body, "");
                     isMailSent = true;
                     UpdateEvaluationMailSent(upsertEvaluationRequest, isMailSent, Convert.ToString(input.EvaluationID));

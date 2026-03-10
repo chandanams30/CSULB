@@ -33,6 +33,8 @@ using iTextSharp.text.html.simpleparser;
 using iTextSharp.text.pdf;
 using iTextSharp.text;
 using Microsoft.Office.Interop.Word;
+using ThoughtFocus.Domain.FormModels;
+using System.Drawing;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1757,9 +1759,15 @@ namespace ThoughtFocus.Service.Implementation
                 fileContentJSONToPDF = GetPDFFromJSONForSSCP(input.LetterOfRecommendationJSON);
                 obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             }
-            else if (input.ApplicationType == "ICP-MSCP" || input.ApplicationType == "Fieldwork-FW")
+            else if (input.ApplicationType == "ICP-MSCP" || input.ApplicationType == "FieldWork-MSCP")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForMSCP(input.LetterOfRecommendationJSON);
+                obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
+            }
+            else if (input.ApplicationType == "FieldWork-PK3")
+            {
+                //input.LetterOfRecommendationJSON = "{\r\n\r\n\t\"context\": {\r\n\r\n\t\t\"courseNameAndNumber\": \"EDEC_400\",\r\n\r\n\t\t\"studentName\": \"Alexandria Chilver\",\r\n\r\n\t\t\"schoolName1\": \"california state university\",\r\n\r\n\t\t\"qualityOfWork\": \"5\",\r\n\r\n\t\t\"professionalDispositions\": [\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"criteria\": \"Preparation of materials and appropriate instruction\",\r\n\r\n\t\t\t\t\"value\": \"5 - Excellent\"\r\n\r\n\t\t\t},\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"criteria\": \"Appropriate behavior toward children\",\r\n\r\n\t\t\t\t\"value\": \"4 - Excellent\"\r\n\r\n\t\t\t},\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"criteria\": \"Professional dress and demeanor\",\r\n\r\n\t\t\t\t\"value\": \"3 - Acceptable\"\r\n\r\n\t\t\t},\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"criteria\": \"Courteous interactions with faculty, other students, staff and children\",\r\n\r\n\t\t\t\t\"value\": \"2 - Unacceptable\"\r\n\r\n\t\t\t},\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"criteria\": \"Regular, on-time attendance\",\r\n\r\n\t\t\t\t\"value\": \"1 - Unacceptable\"\r\n\r\n\t\t\t}\r\n\r\n\t\t],\r\n\r\n\t\t\"commentsOrConcerns\": \"comments added for test purpose 123 and abcd.\",\r\n\r\n\t\t\"teacherName\": \"sanju\",\r\n\r\n\t\t\"schoolName2\": \"california state university\",\r\n\r\n\t\t\"gradeLevel\": \"high\",\r\n\r\n\t\t\"signature\": \"sanju signature\",\r\n\r\n\t\t\"position\": \"dean\",\r\n\r\n\t\t\"date\": \"02/03/2026\",\r\n\r\n\t\t\"dateAndHours\": [\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"date\": \"02/11/2026\",\r\n\r\n\t\t\t\t\"hours\": 12\r\n\r\n\t\t\t},\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"date\": \"02/12/2026\",\r\n\r\n\t\t\t\t\"hours\": 13\r\n\r\n\t\t\t},\r\n\r\n\t\t\t{\r\n\r\n\t\t\t\t\"date\": \"02/19/2026\",\r\n\r\n\t\t\t\t\"hours\": 12.9\r\n\r\n\t\t\t}\r\n\r\n\t\t],\r\n\r\n\t\t\"totalHours\": \"37.9\"\r\n\r\n\t}\r\n\r\n}\r\n  ";
+                fileContentJSONToPDF = GetPDFFromJSONForPK3(input.LetterOfRecommendationJSON);
                 obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             }
             obj.FileContent = fileContentJSONToPDF;
@@ -2278,6 +2286,109 @@ namespace ThoughtFocus.Service.Implementation
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
 
             return pdfFileContent;
+        }
+        private byte[] GetPDFFromJSONForPK3(string jsonString)
+        {
+            byte[] pdfFileContent = null;
+            string evaluationTemplateBody = string.Empty;
+            string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+            jsonString = jsonString.Replace("+", " ");
+            JObject schema = JObject.Parse(jsonString);
+            string courseNameAndNumber = string.Empty;
+            string studentName = string.Empty;
+            string schoolName1 = string.Empty;
+            string qualityOfWork = string.Empty;
+            string preparationMaterials = string.Empty;
+            string appropriateBehavior = string.Empty;
+            string professional = string.Empty;
+            string courteousInteractions = string.Empty;
+            string regularAttendance = string.Empty;
+            string commentsOrConcerns = string.Empty;
+            string teacherName = string.Empty;
+            string schoolName2 = string.Empty;
+            string gradeLevel = string.Empty;
+            string signature = string.Empty;
+            string position = string.Empty;
+            string date = string.Empty;
+            string totalHours = string.Empty;
+
+            JObject context = (JObject)schema["context"];
+            JArray professionalDispositions = (JArray)context["professionalDispositions"];
+            JArray dateAndHours = (JArray)context["dateAndHours"];
+
+            courseNameAndNumber = Convert.ToString(context["courseNameAndNumber"]);
+            studentName = Convert.ToString(context.GetValue("studentName"));
+            qualityOfWork = Convert.ToString(context["qualityOfWork"]);
+            schoolName1 = Convert.ToString(context.GetValue("schoolName1"));
+            commentsOrConcerns = Convert.ToString(context["commentsOrConcerns"]);
+            teacherName = Convert.ToString(context["teacherName"]);
+            schoolName2 = Convert.ToString(context.GetValue("schoolName2"));
+            gradeLevel = Convert.ToString(context.GetValue("gradeLevel"));
+            signature = Convert.ToString(context["signature"]);
+            position = Convert.ToString(context.GetValue("position"));
+            date = Convert.ToString(context["date"]);
+            totalHours = Convert.ToString(context.GetValue("totalHours"));
+            var dateHoursSb = new StringBuilder();
+
+            foreach (JObject content in professionalDispositions.Children<JObject>())
+            {
+                if (content["criteria"].ToString() == "Preparation of materials and appropriate instruction")
+                {
+                    preparationMaterials = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["criteria"].ToString() == "Appropriate behavior toward children")
+                {
+                    appropriateBehavior = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["criteria"].ToString() == "Professional dress and demeanor")
+                {
+                    professional = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["criteria"].ToString() == "Courteous interactions with faculty, other students, staff and children")
+                {
+                    courteousInteractions = Convert.ToString(content.GetValue("value"));
+                }
+                if (content["criteria"].ToString() == "Regular, on-time attendance")
+                {
+                    regularAttendance = Convert.ToString(content.GetValue("value"));
+                }
+            }
+
+            foreach (JObject item in dateAndHours)
+            {
+                string dateValue = Convert.ToString(item["date"]);
+                string hourValue = Convert.ToString(item["hours"]);
+
+                dateHoursSb.Append($@"<tr>
+                                          <td>{dateValue}</td>
+                                          <td>{hourValue}</td>
+                                      </tr>");
+            }
+            evaluationTemplateBody = GetDocumentBodyTemplate("PK3EvaluationFormTemplate.html");
+            // replace the values in the template 
+            evaluationTemplateBody = evaluationTemplateBody.Replace("[[logoPath]]", logoPath)
+                                                                     .Replace("[[courseNameAndNumber]]", courseNameAndNumber)
+                                                                     .Replace("[[studentName]]", studentName)
+                                                                     .Replace("[[schoolName1]]", schoolName1)
+                                                                     .Replace("[[qualityOfWork]]", qualityOfWork)
+                                                                     .Replace("[[preparationMaterials]]", preparationMaterials)
+                                                                     .Replace("[[appropriateBehavior]]", appropriateBehavior)
+                                                                     .Replace("[[Professional]]", professional)
+                                                                     .Replace("[[courteousInteractions]]", courteousInteractions)
+                                                                     .Replace("[[regularAttendance]]", regularAttendance)
+                                                                     .Replace("[[commentsOrConcerns]]", commentsOrConcerns)
+                                                                     .Replace("[[teacherName]]", teacherName)
+                                                                     .Replace("[[schoolName2]]", schoolName2)
+                                                                     .Replace("[[gradeLevel]]", gradeLevel)
+                                                                     .Replace("[[signature]]", signature)
+                                                                     .Replace("[[position]]", position)
+                                                                     .Replace("[[date]]", date)
+                                                                     .Replace("[[totalHours]]", totalHours)
+                                                                     .Replace("[[dateHoursRows]]",dateHoursSb.ToString());
+            // get the filecontent
+            pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
+            return pdfFileContent;
+
         }
         public BaseResponse SaveClinicalPracticeEquivalencyAttachment(SaveClinicalPracticeEquivalencyAttachmentRequest input)
         {
