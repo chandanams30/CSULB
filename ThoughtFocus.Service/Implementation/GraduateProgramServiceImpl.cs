@@ -1210,7 +1210,6 @@ namespace ThoughtFocus.Service.Implementation
                                        .Replace("[[finalDecision]]", finalDecision);
                             byte[] inputStr = null;
                             _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
-                        }
                     }
                 }
             }
