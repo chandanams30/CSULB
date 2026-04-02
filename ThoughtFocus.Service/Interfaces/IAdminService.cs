@@ -33,7 +33,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse RemoveReviewerFromForms(ReviewerRequest input);
         BaseResponse UpsertInternCourseConfig(UpsertCSULBIDForIntern input);
         BaseResponse AddSupervisorForCourses(SupervisorForCourses input);
-
+        CompleteYourApplicationResponse getCompleteYourApplicationText(int applicationId, int programID);
+        BaseResponse UpdateCompleteYourApplicationText(CompleteYourApplicationText input);
 
     }
 }

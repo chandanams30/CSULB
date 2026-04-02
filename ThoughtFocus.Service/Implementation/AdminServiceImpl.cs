@@ -15,6 +15,7 @@ using ThoughtFocus.Domain.Request.Admin;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
 
 namespace ThoughtFocus.Service.Implementation
@@ -614,7 +615,7 @@ namespace ThoughtFocus.Service.Implementation
                 if (dtApplicationPrograms.Tables.Count > 0)
                 {
                     obj.ApplicationProgramList = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
-                                                 new ApplicationProgramsList
+                                                 new ThoughtFocus.Domain.Response.Admin.ApplicationProgramsList
                                                  {
                                                      ProgramID = Convert.ToInt32(row["ID"]),
                                                      ProgramName = Convert.ToString(row["Name"]),
@@ -918,6 +919,69 @@ namespace ThoughtFocus.Service.Implementation
 
             return response;
         }
+        public CompleteYourApplicationResponse getCompleteYourApplicationText(int applicationId, int programID)
+        {
+            CompleteYourApplicationResponse obj = new CompleteYourApplicationResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID }
+                                       };
+
+            DataTable dt = _helper.GetDataTable("[dbo].[GetCompletingYourApplication]", parameters);
+            try
+            {
+                if (dt.Rows.Count > 0)
+                {
+                    obj.CompleteYourApplicationText = dt.AsEnumerable().Select(row =>
+                                              new CompleteYourApplicationText
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  completeYourApplicationText = Convert.ToString(row["CompletingYourApplication"])
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse UpdateCompleteYourApplicationText(CompleteYourApplicationText input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
+                                          new SqlParameter("@CompletingYourApplication", SqlDbType.NVarChar, -1) { Value = input.completeYourApplicationText }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateCompletingYourApplication]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated Completing Your Application text successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the Completing Your Application text";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+
 
     }
 }
