@@ -31,6 +31,8 @@ namespace ThoughtFocus.Service.Interfaces
         ApplicationDatesResponse GetApplicationDates(string termCode);
         BaseResponse RemoveReviewerFromForms(ReviewerRequest input);
         BaseResponse UpsertInternCourseConfig(UpsertCSULBIDForIntern input);
+        CompleteYourApplicationResponse getCompleteYourApplicationText(int applicationId, int programID);
+        BaseResponse UpdateCompleteYourApplicationText(CompleteYourApplicationText input);
 
     }
 }

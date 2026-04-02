@@ -11,6 +11,7 @@ using ThoughtFocus.Domain.Request.Admin;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
 
 namespace CSULB_COE.Controllers
@@ -429,6 +430,42 @@ namespace CSULB_COE.Controllers
             try
             {
                 BaseResponse response = _adminService.UpsertInternCourseConfig(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetCompleteYourApplicationText")]
+        public CompleteYourApplicationResponse GetCompleteYourApplicationText(int applicationId, int programID)
+        {
+            try
+            {
+                CompleteYourApplicationResponse response = _adminService.getCompleteYourApplicationText(applicationId, programID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                CompleteYourApplicationResponse response = new CompleteYourApplicationResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateCompleteYourApplicationText")]
+        public BaseResponse UpdateCompleteYourApplicationText(CompleteYourApplicationText input)
+        {
+            try
+            {
+                BaseResponse response = _adminService.UpdateCompleteYourApplicationText(input);
                 return response;
             }
             catch (Exception ex)
