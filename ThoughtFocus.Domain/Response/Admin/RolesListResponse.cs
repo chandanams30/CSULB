@@ -39,4 +39,13 @@ namespace ThoughtFocus.Domain.Response.Admin
         public DateTime ApplicationDeadlineDate { get; set; }
 
     }
+    public class CompleteYourApplicationResponse : BaseResponse
+    {
+        public CompleteYourApplicationText CompleteYourApplicationText { get; set; }
+    }
+    public class CompleteYourApplicationText
+    {
+        public int ID { get; set; }
+        public string completeYourApplicationText { get; set; }
+    }
 }

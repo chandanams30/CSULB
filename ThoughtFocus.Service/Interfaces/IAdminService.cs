@@ -30,7 +30,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateProgramApplicationDates(UpdateProgramApplicationDates input);
         ApplicationDatesResponse GetApplicationDates(string termCode);
         BaseResponse RemoveReviewerFromForms(ReviewerRequest input);
-
+        CompleteYourApplicationResponse getCompleteYourApplicationText(int applicationId, int programID);
+        BaseResponse UpdateCompleteYourApplicationText(CompleteYourApplicationText input);
 
     }
 }
