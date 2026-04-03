@@ -1060,7 +1060,7 @@ namespace ThoughtFocus.Service.Implementation
             string programName = string.Empty;
             //string Subject = string.Empty;
             string body = string.Empty;
-            string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
+            string logopath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
             string logoText = "cid:myImageID";
             //string signatureText = "cid:mySignatureImageID";
             string date= DateTime.Now.ToString("MM-dd-yyyy");
@@ -1638,7 +1638,7 @@ namespace ThoughtFocus.Service.Implementation
                             body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
                             string beforeBody = string.Empty;
                             string afterBody = string.Empty;
-                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                             //body = GetMailBodyTemplateByProgramID(input.ProgramID);
@@ -1732,7 +1732,7 @@ namespace ThoughtFocus.Service.Implementation
                 if (dtDL.Tables[0].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
                 {
                     body = Convert.ToString(dtDL.Tables[0].Rows[0]["EvaluatorMailBody"]);
-                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                     afterBody = "</body></html>";
                     body = $"{beforeBody}{body}{afterBody}";
                     body = body.Replace("[[logoPath]]", logoText)
