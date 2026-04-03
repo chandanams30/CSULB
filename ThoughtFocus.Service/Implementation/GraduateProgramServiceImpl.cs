@@ -1202,7 +1202,7 @@ namespace ThoughtFocus.Service.Implementation
                                     body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
                                 }
                             }
-                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                             body = body.Replace("[[logoPath]]", logoText)
@@ -1266,13 +1266,13 @@ namespace ThoughtFocus.Service.Implementation
                         string afterBody = string.Empty;
                         if (programID == 1 || programID == 2 || programID == 3 || programID == 4 || programID == 6 || programID == 27 || programID == 28)
                         {
-                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                         }
                         else
                         {
-                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                         }
@@ -1610,13 +1610,13 @@ namespace ThoughtFocus.Service.Implementation
                         string afterBody = string.Empty;
                         if (programID == 1 || programID == 2 || programID == 3 || programID == 4 || programID == 6 || programID == 27 || programID == 28)
                         {
-                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                         }
                         else
                         {
-                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                            beforeBody = "<html><head><style>body{width:  210mm;height: 297mm;margin-left: auto;margin-right: auto;}#link { color: #0563C1; }</style></head><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                         }
@@ -3856,7 +3856,7 @@ namespace ThoughtFocus.Service.Implementation
                                         body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
                                     }
                                 }
-                                beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                                beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                                 afterBody = "</body></html>";
                                 body = $"{beforeBody}{body}{afterBody}";
 

@@ -362,7 +362,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             ApproveRejectMailer model = new ApproveRejectMailer();
             string body = string.Empty;
-            string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
+            string logopath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
             string logoText = "cid:myImageID";
             if (approvalStatus == true)
             {
@@ -433,7 +433,7 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     body = reader.ReadToEnd();
                 }
-                string logopath = Path.GetFullPath("SupportFiles/Img/logo.png");
+                string logopath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
                 ApplicantName = Convert.ToString(dtEmailData.Rows[0]["ApplicantName"]);
                 CSULBID = Convert.ToString(dtEmailData.Rows[0]["CSULBID"]);
                 Semester = Convert.ToString(dtEmailData.Rows[0]["Name"]);
@@ -1861,7 +1861,7 @@ namespace ThoughtFocus.Service.Implementation
 
                                     string beforeBody = string.Empty;
                                     string afterBody = string.Empty;
-                                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                                     afterBody = "</body></html>";
                                     body = $"{beforeBody}{body}{afterBody}";
                                     //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
@@ -2013,7 +2013,7 @@ namespace ThoughtFocus.Service.Implementation
                 if (dtDL.Tables[0].Rows[0]["EvaluatorMailBody"] != DBNull.Value)
                 {
                     body = Convert.ToString(dtDL.Tables[0].Rows[0]["EvaluatorMailBody"]);
-                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] width=\"200\" height=\"61\" /></div>";
+                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                     afterBody = "</body></html>";
                     body = $"{beforeBody}{body}{afterBody}";
                     body = body.Replace("[[logoPath]]", logoText)
