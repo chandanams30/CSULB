@@ -4215,7 +4215,7 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     if (applicationId == 1 && identifier == "Evaluation")
                     {
-                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 2 || row.Field<long>("ID") == 4).Select(row =>
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 2 || row.Field<long>("ID") == 3 || row.Field<long>("ID") == 4).Select(row =>
                                               new ApplicationProgramsList
                                               {
                                                   ProgramID = Convert.ToInt32(row["ID"]),
