@@ -1968,7 +1968,7 @@ namespace ThoughtFocus.Service.Implementation
         {
                 byte[] pdfFileContent = null;
                 string evaluationTemplateBody = string.Empty;
-                string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+                string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
                 jsonString = jsonString.Replace("+", " ");
                 JObject schema = JObject.Parse(jsonString);
 
@@ -2188,7 +2188,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             byte[] pdfFileContent = null;
             string evaluationTemplateBody = string.Empty;
-            string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+            string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
             jsonString = jsonString.Replace("+", " ");
             JObject schema = JObject.Parse(jsonString);
 
@@ -2291,7 +2291,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             byte[] pdfFileContent = null;
             string evaluationTemplateBody = string.Empty;
-            string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpg");
+            string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
             jsonString = jsonString.Replace("+", " ");
             JObject schema = JObject.Parse(jsonString);
             string courseNameAndNumber = string.Empty;
