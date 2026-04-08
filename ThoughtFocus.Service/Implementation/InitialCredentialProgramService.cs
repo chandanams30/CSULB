@@ -1754,7 +1754,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             FormAttachments obj = new FormAttachments();
             byte[] fileContentJSONToPDF = new byte[0];
-            if (input.ApplicationType == "ICP-SSCP")
+            if (input.ApplicationType == "ICP-SSCP" || input.ApplicationType == "FieldWork-SSCP")
             {
                 fileContentJSONToPDF = GetPDFFromJSONForSSCP(input.LetterOfRecommendationJSON);
                 obj.Filename = "Final Clinical Practice Evaluation" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";

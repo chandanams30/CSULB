@@ -1793,10 +1793,15 @@ namespace ThoughtFocus.Service.Implementation
                                 programID = 2;
                                 subject = "CSULB MSCP Clinical Practice Evaluation Form";
                             }
-                            else
+                            else if(input.ApplicationType == "FieldWork-PK3")
                             {
                                 programID = 3;
                                 subject = "CSULB PK3 Clinical Practice Evaluation Form";
+                            }
+                            else if (input.ApplicationType == "FieldWork-SSCP")
+                            {
+                                programID = 4;
+                                subject = "CSULB SSCP Clinical Practice Evaluation Form";
                             }
                             //get evaluation mail body
                             SqlParameter[] parameters1 ={
@@ -1947,10 +1952,15 @@ namespace ThoughtFocus.Service.Implementation
                 programID = 2;
                 subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
             }
-            else
+            else if (input.ApplicationType == "FieldWork-PK3")
             {
                 programID = 3;
                 subject = "CSULB PK3 Clinical Practice Evaluation Submitted";
+            }
+            else if (input.ApplicationType == "FieldWork-SSCP")
+            {
+                programID = 4;
+                subject = "CSULB SSCP Clinical Practice Evaluation Submitted";
             }
 
             SqlParameter[] parameters1 ={
