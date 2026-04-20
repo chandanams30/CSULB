@@ -1129,11 +1129,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetRecommenderMailBody")]
-        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId,int programID)
+        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId,int programID, string identifier)
         {
             try
             {
-                RecommenderMailBodyResponse response = _graduateProgramService.GetRecommenderMailBody(applicationId,programID);
+                RecommenderMailBodyResponse response = _graduateProgramService.GetRecommenderMailBody(applicationId,programID,identifier);
                 return response;
             }
             catch (Exception ex)

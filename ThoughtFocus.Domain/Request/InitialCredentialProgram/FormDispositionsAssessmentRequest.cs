@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nancy.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -96,5 +97,11 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public string SubSectionIdentifiers { get; set; }
         public int FormSubSectionAttachmentID { get; set; }
 
+    }
+    public class AdmissionRequirementsBody
+    {
+        public int ID { get; set; }
+        public string EmailBody { get; set; }
+        public string Identifier { get; set; }
     }
 }

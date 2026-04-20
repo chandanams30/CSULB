@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 
 namespace ThoughtFocus.Domain.Response.GraduateProgram
 {
@@ -21,6 +22,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public int ID { get; set; }
         public string RecommenderMailBody { get; set; }
+        public string Identifier { get; set; }
     }
     public class EvaluatorMailBodyResponse : BaseResponse
     {
@@ -30,5 +32,15 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public int ID { get; set; }
         public string EvaluatorMailBody { get; set; }
+    }
+    public class AdmissionRequirementsBodyResponse : BaseResponse
+    {
+        public AdmissionRequirementBody admissionRequirementResponse { get; set; }
+    }
+    public class AdmissionRequirementBody
+    {
+        public int ID { get; set; }
+        public string EmailBody { get; set; }
+        public string Subject { get; set; }
     }
 }

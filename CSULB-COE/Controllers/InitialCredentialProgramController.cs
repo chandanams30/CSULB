@@ -820,7 +820,42 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-
+        [HttpPost("UpdateAdmissionRequirementsMailBody")]
+        public BaseResponse UpdateAdmissionRequirementsMailBody(AdmissionRequirementsBody input)
+        {
+            try
+            {
+                BaseResponse response = _initialCredentialProgramService.UpdateAdmissionRequirementsMailBody(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetAdmissionRequirementsMailBody")]
+        public AdmissionRequirementsBodyResponse GetAdmissionRequirementsMailBody(int programID,string sectionName,string categoryName, string identifier,string name)
+        {
+            try
+            {
+                AdmissionRequirementsBodyResponse response = _initialCredentialProgramService.GetAdmissionRequirementsMailBody(programID,sectionName,categoryName,identifier,name);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AdmissionRequirementsBodyResponse response = new AdmissionRequirementsBodyResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
     }
 }
