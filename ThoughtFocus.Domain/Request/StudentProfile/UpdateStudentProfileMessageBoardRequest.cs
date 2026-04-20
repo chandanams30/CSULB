@@ -35,6 +35,20 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public int CreatedBy { get; set; }
         //public string ProfileAttachmentComments { get; set; }
     }
+    public class SaveStudentProfilePersonalInfoDataRequest
+    {
+        public string CSULBID { get; set; }
+        public string BachelorDegreeMajorSP { get; set; }
+        public string Credential { get; set; }
+        public string Certificate { get; set; }
+
+    }
+    public class SaveStudentProfilePersonalInfoDoc
+    {
+        public int CSULBID { get; set; }
+        public int FormID { get; set; }
+        public int ProgramID { get; set; }
+    }
     public class DeleteProfileAttachmentRequest
     {
         public Guid UniqueID { get; set; }

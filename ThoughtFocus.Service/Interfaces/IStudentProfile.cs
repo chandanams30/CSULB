@@ -24,5 +24,7 @@ namespace ThoughtFocus.Service.Interfaces
         DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID);
         ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID);
         BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input);
+        BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input);
+
     }
 }
