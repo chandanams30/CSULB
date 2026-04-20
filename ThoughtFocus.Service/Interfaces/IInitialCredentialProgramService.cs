@@ -49,6 +49,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveClinicalPracticeEquivalencyAttachment(SaveClinicalPracticeEquivalencyAttachmentRequest input);
         FormSubsectionAttachmentDownloadResponse GetClinicalPracticeEquivalencyAttachment(ClinicalPracticeEquivalencyAttachmentRequest input);
         ClinicalPracticeEquivalencyAttachmentList GetClinicalPracticeEquivalencyAttachmentList(int UserID, int FormID);
+        BaseResponse UpdateAdmissionRequirementsMailBody(AdmissionRequirementsBody input);
+        AdmissionRequirementsBodyResponse GetAdmissionRequirementsMailBody(int programID, string sectionName, string categoryName, string identifier, string name);
 
     }
 }

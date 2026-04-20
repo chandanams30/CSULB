@@ -266,7 +266,29 @@ namespace ThoughtFocus.Service.Implementation
                         string toUser = emailModel.toEmail; // pull  this from SP 
                                                             // get the below body section from HTML
                                                             // string body = "This is the body section needs to be re-visited.";
-                        string body = GetMailBodyTemplate("FinalApprovedTemplate.html");
+                                                            //string body = GetMailBodyTemplate("FinalApprovedTemplate.html");
+                        string body = string.Empty;
+                        SqlParameter[] parameters1 ={
+                                 new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                 new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
+                                 new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
+                                 new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
+                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "BothPrerequisiteApproved" }
+                            };
+                        DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
+                        if (dtMailBody.Rows.Count > 0)
+                        {
+                            if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
+                            {
+                                body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
+
+                                string beforeBody = string.Empty;
+                                string afterBody = string.Empty;
+                                beforeBody = "<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                                afterBody = "</body>\r\n</html>";
+                                body = $"{beforeBody}{body}{afterBody}";
+                            }
+                        }
                         string logoText = "cid:myImageID";
                         body = body.Replace("[[logoPath]]", logoText).Replace("[[ApplicantName]]", emailModel.ApplicantName);
                         string subject = "MyCED prerequisites review completed";
@@ -311,24 +333,45 @@ namespace ThoughtFocus.Service.Implementation
             string body = string.Empty;
             string logopath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
             string logoText = "cid:myImageID";
+            string name = string.Empty;
             if (approvalStatus == true)
             {
                 model.Subject = "MyCED prerequisites review approved";
+                name = "PrerequisiteApproved";
                 // get the body from email template
-                body = GetMailBodyTemplate("ApprovedMailTemplate.html");
-                body = body.Replace("[[ApplicantName]]", displayName).Replace("[[DocumentName]]", documentName).Replace("[[logoPath]]", logoText);
-                //body = "<html><body><p>Your document "+documentName+" has been approved</p><p>Thank you,</br>CSULB College of Education  </p></body></html>";
-                model.Body = body;
+                //body = GetMailBodyTemplate("ApprovedMailTemplate.html");
             }
             else if (approvalStatus == false)
             {
                 model.Subject = "MyCED prerequisites review not approved";
+                name = "PrerequisiteNotApproved";
                 // get the body from email template
-                body = GetMailBodyTemplate("NotApprovedMailTemplate.html");
-                body = body.Replace("[[ApplicantName]]", displayName).Replace("[[DocumentName]]", documentName).Replace("[[logoPath]]", logoText).Replace("[[Reason]]", rejectReason).Replace("[[Comment]]", comments);
-                //body = "<html><body> <p>Your document "+ documentName +" has not been approved</p><p>Reason  : "+rejectReason+"</p><p>Comment : "+comments+"</p><p>Please upload a new document</p><p>Thank you,</br>CSULB College of Education  </p></body></html>";
-                model.Body = body;
+                //body = GetMailBodyTemplate("NotApprovedMailTemplate.html");
             }
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                            new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
+                                            new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
+                                            new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
+                                            new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = name }
+                                       };
+            DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters);
+            if (dtMailBody.Rows.Count > 0)
+            {
+                if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
+                {
+                    body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
+
+                    string beforeBody = string.Empty;
+                    string afterBody = string.Empty;
+                    beforeBody = "<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                    afterBody = "</body>\r\n</html>";
+                    body = $"{beforeBody}{body}{afterBody}";
+                }
+            }
+            body = body.Replace("[[ApplicantName]]", displayName).Replace("[[DocumentName]]", documentName).Replace("[[logoPath]]", logoText);
+            //body = "<html><body><p>Your document "+documentName+" has been approved</p><p>Thank you,</br>CSULB College of Education  </p></body></html>";
+            model.Body = body;
             return model;
         }
         private StudentsDetails GetStudentDetailsFromFieldWorkId(int fieldWorkId, int fieldWorkAttachmentId)
@@ -2348,8 +2391,30 @@ namespace ThoughtFocus.Service.Implementation
                             if (!String.IsNullOrEmpty(emailModel.Body))
                             {
                                 string toUser = emailModel.toEmail;
-                                string body = GetMailBodyTemplate("FinalApprovedTemplate.html");
-                                string logoText = "cid:myImageID";
+                            //string body = GetMailBodyTemplate("FinalApprovedTemplate.html");
+                            SqlParameter[] parameters1 ={
+                                 new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                 new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
+                                 new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
+                                 new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
+                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "BothPrerequisiteApproved" }
+                            };
+                            DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
+                            string body = string.Empty;
+                            if (dtMailBody.Rows.Count > 0)
+                            {
+                                if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
+                                {
+                                    body = Convert.ToString(dtMailBody.Rows[0]["EMailBody"]);
+
+                                    string beforeBody = string.Empty;
+                                    string afterBody = string.Empty;
+                                    beforeBody = "<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                                    afterBody = "</body>\r\n</html>";
+                                    body = $"{beforeBody}{body}{afterBody}";
+                                }
+                            }
+                            string logoText = "cid:myImageID";
                                 body = body.Replace("[[logoPath]]", logoText).Replace("[[ApplicantName]]", emailModel.ApplicantName);
                                 string subject = "MyCED prerequisites review completed";
                                 _sendMail.SendEmail(toUser, "", "COMMON", subject, body, emailModel.Body);

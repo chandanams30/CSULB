@@ -35,6 +35,7 @@ using iTextSharp.text;
 using Microsoft.Office.Interop.Word;
 using ThoughtFocus.Domain.FormModels;
 using System.Drawing;
+using ThoughtFocus.Domain.Response.Program.TemplateResponse;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1058,6 +1059,7 @@ namespace ThoughtFocus.Service.Implementation
             string applicantName = string.Empty;
             string applicantEmail = string.Empty;
             string programName = string.Empty;
+            int programID = 0;
             //string Subject = string.Empty;
             string body = string.Empty;
             string logopath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
@@ -1074,7 +1076,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             if (input.Status != string.Empty)
             {
-                EmailResult emailResult = GetMailTemplate(templateName, input, programName, logoText, applicantName, date);
+                EmailResult emailResult = GetMailTemplate(templateName, input, programName, logoText, applicantName, date,programID);
                 try
                 {
                     _sendMail.SendEmail(applicantEmail, "", "COMMON", emailResult.Subject, emailResult.Body, "");
@@ -1091,68 +1093,89 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-        private EmailResult GetMailTemplate(string templateName, UpdateFormSubSectionApproveralRequest input,string programName,string logoText,string applicantName,string date)
+        private EmailResult GetMailTemplate(string templateName, UpdateFormSubSectionApproveralRequest input,string programName,string logoText,string applicantName,string date,int programID)
         {
             string Subject = string.Empty;
             EmailResult obj=new EmailResult();
-            if (input.SubSectionIdentifiers == "BSR")
+            //if (input.SubSectionIdentifiers == "BSR")
+            //{
+            //    switch (input.Status)
+            //    {
+            //        case "Met":
+            //            templateName = "BSRMetMailTemplate.html";
+            //            Subject = "MyCED BSR Review Met";
+            //            break;
+            //        case "Not Met":
+            //            templateName = "BSRNotMetMailTemplate.html";
+            //            Subject = "MyCED BSR Review Not Met";
+            //            break;
+            //    }
+            //}
+            //else if (input.SubSectionIdentifiers == "SMC")
+            //{
+            //    switch (input.Status)
+            //    {
+            //        case "Met":
+            //            templateName = "SMC_Met_MailTemplate.html";
+            //            Subject = "MyCED SMC Review Met";
+            //            break;
+            //        case "Not Met":
+            //            if (programName == "Education Specialist Credential Program (ESCP)")
+            //                templateName = "SMC_NotMet_For_ESCP_MailTemplate.html";
+            //            else if (programName == "Multiple Subject Credential Program (MSCP)")
+            //                templateName = "SMC_NotMet_For_MSCP_MailTemplate.html";
+            //            else if (programName == "Single Subject Credential Program (SSCP)" || programName == "Urban Dual Credential Program (UDCP)")
+            //                templateName = "SMC_NotMet_For_SSCP_UDCP_MailTemplate.html";
+            //            else if (programName == "PK-3 Early Childhood Education Specialist Instruction Credential Program (PK-3CP)")
+            //                templateName = "SMC_NotMet_For_PK3_MailTemplate.html";
+            //            Subject = "MyCED SMC Review Not Met";
+            //            break;
+            //        case "Will Meet":
+            //            templateName = "SMC_WillMeet_MailTemplate.html";
+            //            Subject = "Subject Matter Competency - Will Meet";
+            //            break;
+            //    }
+            //}
+            //else if (input.SubSectionIdentifiers == "GPA")
+            //{
+            //    switch (input.Status)
+            //    {
+            //        case "Met":
+            //            templateName = "GPA_Met_MailTemplate.html";
+            //            Subject = "MyCED GPA Review Met";
+            //            break;
+            //        case "Not Met":
+            //            if (programName == "Single Subject Credential Program (SSCP)")
+            //                templateName = "GPA_Not_Met_For_SSCP_MailTemplate.html";
+            //            else
+            //                templateName = "GPA_NotMet_MailTemplate.html";
+            //            Subject = "MyCED GPA Review Not Met";
+            //            break;
+            //    }
+            //}
+            //obj.Subject = Subject;
+            //obj.Body = GetMailBodyTemplate(templateName);
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = input.SubSectionIdentifiers},
+                                            new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = input.Status },
+                                            new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = ""},
+                                            new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "" }
+                                       };
+            DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters);
+            if (dtMailBody.Rows.Count > 0)
             {
-                switch (input.Status)
+                if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
                 {
-                    case "Met":
-                        templateName = "BSRMetMailTemplate.html";
-                        Subject = "MyCED BSR Review Met";
-                        break;
-                    case "Not Met":
-                        templateName = "BSRNotMetMailTemplate.html";
-                        Subject = "MyCED BSR Review Not Met";
-                        break;
+                    obj.Body = Convert.ToString(dtMailBody.Rows[0]["EMailBody"]);
+
+                    string beforeBody = string.Empty;
+                    string afterBody = string.Empty;
+                    beforeBody = "<html>\r\n<head>\r\n</head>\r\n<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\"/></div>\r\n<div style=\"width: 100%; border-bottom: 2px solid black; font-family: Arial; margin-top: 10px;\">STUDENT SUCCESS AND ADVISING CENTER</div>\r\n<div>";
+                    afterBody = "</div>\r\n\r\n</body>\r\n</html>";
+                    obj.Body = $"{beforeBody}{obj.Body}{afterBody}";
                 }
             }
-            else if (input.SubSectionIdentifiers == "SMC")
-            {
-                switch (input.Status)
-                {
-                    case "Met":
-                        templateName = "SMC_Met_MailTemplate.html";
-                        Subject = "MyCED SMC Review Met";
-                        break;
-                    case "Not Met":
-                        if (programName == "Education Specialist Credential Program (ESCP)")
-                            templateName = "SMC_NotMet_For_ESCP_MailTemplate.html";
-                        else if (programName == "Multiple Subject Credential Program (MSCP)")
-                            templateName = "SMC_NotMet_For_MSCP_MailTemplate.html";
-                        else if (programName == "Single Subject Credential Program (SSCP)" || programName == "Urban Dual Credential Program (UDCP)")
-                            templateName = "SMC_NotMet_For_SSCP_UDCP_MailTemplate.html";
-                        else if (programName == "PK-3 Early Childhood Education Specialist Instruction Credential Program (PK-3CP)")
-                            templateName = "SMC_NotMet_For_PK3_MailTemplate.html";
-                        Subject = "MyCED SMC Review Not Met";
-                        break;
-                    case "Will Meet":
-                        templateName = "SMC_WillMeet_MailTemplate.html";
-                        Subject = "Subject Matter Competency - Will Meet";
-                        break;
-                }
-            }
-            else if (input.SubSectionIdentifiers == "GPA")
-            {
-                switch (input.Status)
-                {
-                    case "Met":
-                        templateName = "GPA_Met_MailTemplate.html";
-                        Subject = "MyCED GPA Review Met";
-                        break;
-                    case "Not Met":
-                        if (programName == "Single Subject Credential Program (SSCP)")
-                            templateName = "GPA_Not_Met_For_SSCP_MailTemplate.html";
-                        else
-                            templateName = "GPA_NotMet_MailTemplate.html";
-                        Subject = "MyCED GPA Review Not Met";
-                        break;
-                }
-            }
-            obj.Subject = Subject;
-            obj.Body = GetMailBodyTemplate(templateName);
             obj.Body = obj.Body.Replace("[[logoPath]]", logoText)
                                .Replace("[[applicantName]]", applicantName)
                                .Replace("[[subSectionIdentifer]]", input.SubSectionIdentifiers)
@@ -2749,6 +2772,84 @@ namespace ThoughtFocus.Service.Implementation
             fs.Dispose();
             binaryReader.Close();
             return fileContent;
+        }
+        public BaseResponse UpdateAdmissionRequirementsMailBody(AdmissionRequirementsBody input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
+                                          new SqlParameter("@EmailBody", SqlDbType.NVarChar, -1) { Value = input.EmailBody },
+                                          new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = input.Identifier }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateAdmissionRequirementsMailBody]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated recommender mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the recommender mail body";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public AdmissionRequirementsBodyResponse GetAdmissionRequirementsMailBody(int programID, string sectionName, string categoryName, string identifier, string name)
+        {
+            AdmissionRequirementsBodyResponse obj = new AdmissionRequirementsBodyResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = sectionName },
+                                            new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = categoryName },
+                                            new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = identifier },
+                                            new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = name }
+                                       };
+
+            DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters);
+            try
+            {
+                if (dtMailBody.Rows.Count > 0)
+                {
+                    if (identifier == "FieldWork Mail")
+                    {
+                        obj.admissionRequirementResponse = dtMailBody.AsEnumerable().Select(row =>
+                                                  new AdmissionRequirementBody
+                                                  {
+                                                      ID = Convert.ToInt32(row["ID"]),
+                                                      EmailBody = Convert.ToString(row["EmailBody"])
+                                                  }).FirstOrDefault();
+                    }
+                    else
+                    {
+                        obj.admissionRequirementResponse = dtMailBody.AsEnumerable().Select(row =>
+                                                  new AdmissionRequirementBody
+                                                  {
+                                                      ID = Convert.ToInt32(row["ID"]),
+                                                      EmailBody = Convert.ToString(row["EmailBody"]),
+                                                      Subject = Convert.ToString(row["Subject"])
+                                                  }).FirstOrDefault();
+                    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
         }
         private string GetMailBodyTemplateByProgramID(int programID)
         {
