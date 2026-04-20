@@ -19,5 +19,11 @@ namespace ThoughtFocus.Service.Interfaces
         ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode);
         StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID);
         BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input);
+        UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input);
+        DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID);
+        ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID);
+        BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input);
+        BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input);
+
     }
 }
