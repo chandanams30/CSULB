@@ -1063,16 +1063,37 @@ namespace ThoughtFocus.Service.Implementation
                     string subject = string.Empty;
                     string body = string.Empty;
                     string programName = string.Empty;
+                    int applicationTypeID = 0;
                     
                     applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                     toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
                     ccMail= Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
                     programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
+                    applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
                     subject = "Application Submitted";
-                    if(programID == 1 || programID == 2 || programID == 3 || programID == 4 || programID == 6)
-                        body = GetMailBodyTemplate("Student_FormSubmit_Confirmation_ICP.html");
-                    else
-                        body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
+                    //if(programID == 1 || programID == 2 || programID == 3 || programID == 4 || programID == 6)
+                    //    body = GetMailBodyTemplate("Student_FormSubmit_Confirmation_ICP.html");
+                    //else
+                    //    body = GetMailBodyTemplate("Student_FormSubmit_Confirmation.html");
+                    SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationTypeID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Application Submitted"}
+                                       };
+                    DataTable dtRec = _helper.GetDataTable("[dbo].[GetRecommenderMailBody]", parameters1);
+                    if (dtRec.Rows.Count > 0)
+                    {
+                        if (dtRec.Rows[0]["ApplicationSubmittedMailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtRec.Rows[0]["ApplicationSubmittedMailBody"]);
+
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                            afterBody = "</body></html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                    }
                     body = body.Replace("[[logoPath]]", logoText) 
                                .Replace("[[ApplicantName]]", applicantsName)
                                .Replace("[[programName]]", programName);
@@ -2493,18 +2514,30 @@ namespace ThoughtFocus.Service.Implementation
                 string subject = string.Empty;
                 string body = string.Empty;
                 string logoText = "cid:myImageID";
-                applicantsName= Convert.ToString(dtResponse.Rows[0]["ApplicantName"]);
+                int programID = 0;
+                int applicationTypeID = 0;
+                applicantsName = Convert.ToString(dtResponse.Rows[0]["ApplicantName"]);
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
                 ccMail= Convert.ToString(dtResponse.Rows[0]["RecommenderEmail"]);
                 subject = "Recommendation Submitted";
-                if (programIdentifier.ToUpper() == "MSCP" || programIdentifier.ToUpper() == "SSCP" || programIdentifier.ToUpper() == "UDCP" || programIdentifier.ToUpper() == "ESCP" || programIdentifier.ToUpper() == "PK-3CP")
+                SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationTypeID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Student Confirmation Mail"}
+                                       };
+                DataTable dtRec = _helper.GetDataTable("[dbo].[GetRecommenderMailBody]", parameters1);
+                if (dtRec.Rows.Count > 0)
                 {
-                    body = GetMailBodyTemplate("Student_Recommendation_Confirmation_ICP.html");
-                }
-                //else
-                else if (programIdentifier.ToUpper() == "GACP" || programIdentifier.ToUpper() == "DOCT")
-                {
-                    body = GetMailBodyTemplate("Student_Recommendation_Confirmation.html");
+                    if (dtRec.Rows[0]["RecommenderConfirmationMailBody"] != DBNull.Value)
+                    {
+                        body = Convert.ToString(dtRec.Rows[0]["RecommenderConfirmationMailBody"]);
+
+                        string beforeBody = string.Empty;
+                        string afterBody = string.Empty;
+                        beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                        afterBody = "</body></html>";
+                        body = $"{beforeBody}{body}{afterBody}";
+                    }
                 }
                 body = body.Replace("[[logoPath]]", logoText)
                            .Replace("[[ApplicantName]]", applicantsName);
@@ -4176,12 +4209,13 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId, int programID)
+        public RecommenderMailBodyResponse GetRecommenderMailBody(int applicationId, int programID,string identifier)
         {
             RecommenderMailBodyResponse obj = new RecommenderMailBodyResponse();
             SqlParameter[] parameters ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationId },
-                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID }
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = identifier }
                                        };
 
             DataTable dtRecom = _helper.GetDataTable("[dbo].[GetRecommenderMailBody]", parameters);
@@ -4219,7 +4253,8 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
-                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.RecommenderMailBody }
+                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.RecommenderMailBody },
+                                          new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = input.Identifier }
                                         };
             DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateRecommenderMailBody]", parameters);
             if (dtResponse.Rows.Count > 0)
