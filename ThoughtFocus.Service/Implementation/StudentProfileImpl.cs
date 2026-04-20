@@ -451,5 +451,36 @@ namespace ThoughtFocus.Service.Implementation
 
             return cipherText;
         }
+        public byte[] GetProfileAttachmentFileContent(string userFolderPath, string fileName)
+        {
+            var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+            string userPath = Path.Combine(fileRepoPath, Path.Combine(userFolderPath, "Form"));
+            string filepath = Path.Combine(userPath, fileName);
+            byte[] fileContent = null;
+            System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            long byteLength = new System.IO.FileInfo(filepath).Length;
+            fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            fs.Close();
+            fs.Dispose();
+            binaryReader.Close();
+            return fileContent;
+        }
+        public BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar,9) { Value = input.CSULBID  },
+                                          new SqlParameter("@BachelorDegreeMajorSP", SqlDbType.NVarChar,255) { Value = input.BachelorDegreeMajorSP  },
+                                          new SqlParameter("@Credential", SqlDbType.NVarChar,255) { Value = input.Credential },
+                                          new SqlParameter("@Certificate", SqlDbType.NVarChar,255) { Value = input.Certificate },
+                                        };
+
+            int id = _helper.InsertTable("[dbo].[SaveStudentProfilePersonalInfo]", parameters);
+            response.Message = "Student profile data saved successfully";
+            response.IsSuccess = true;
+            return response;
+        }
     }
 }
