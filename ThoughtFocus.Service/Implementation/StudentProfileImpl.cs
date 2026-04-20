@@ -832,5 +832,21 @@ namespace ThoughtFocus.Service.Implementation
             binaryReader.Close();
             return fileContent;
         }
+        public BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar,9) { Value = input.CSULBID  },
+                                          new SqlParameter("@BachelorDegreeMajorSP", SqlDbType.NVarChar,255) { Value = input.BachelorDegreeMajorSP  },
+                                          new SqlParameter("@Credential", SqlDbType.NVarChar,255) { Value = input.Credential },
+                                          new SqlParameter("@Certificate", SqlDbType.NVarChar,255) { Value = input.Certificate },
+                                        };
+
+            int id = _helper.InsertTable("[dbo].[SaveStudentProfilePersonalInfo]", parameters);
+            response.Message = "Student profile data saved successfully";
+            response.IsSuccess = true;
+            return response;
+        }
     }
 }
