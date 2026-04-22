@@ -26,6 +26,9 @@ using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response.SearchApplication;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
+using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
+
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -51,8 +54,13 @@ namespace ThoughtFocus.Service.Implementation
         public StudentProfileResponse GetStudentProfileData(string CsuldId)
         {
             StudentProfileResponse obj = new StudentProfileResponse();
+            string csulbIDsStaff = String.Empty;
+            var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
+            csulbIDsStaff = jsonObj["CSULBIDStaffSP"]?.ToString();
+
             SqlParameter[] parameters = {
-                                          new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId }
+                                          new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId },
+                                          new SqlParameter("@CSULBIDStaffSP", SqlDbType.NVarChar, -1) { Value = csulbIDsStaff }
                                         };
 
             DataTable dtStudentProfile = _helper.GetDataTable("[dbo].[GetStudentProfile]", parameters);
@@ -99,7 +107,11 @@ namespace ThoughtFocus.Service.Implementation
                         AcademicIntegrityStatement = Convert.ToString(row["AcademicIntegrityStatement"] == DBNull.Value ? null : row["AcademicIntegrityStatement"]),
                         SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"]),
                         IsAgreed = Convert.ToBoolean(row["IsAgreed"] == DBNull.Value ? null : row["IsAgreed"]),
-                        AgreedDate = row["AgreedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AgreedDate"]) : null
+                        AgreedDate = row["AgreedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AgreedDate"]) : null,
+                        BachelorDegreeMajorSP = Convert.ToString(row["BachelorDegreeMajorSP"]),
+                        ConsolidatedAddress = Convert.ToString(row["ConsolidatedAddress"]),
+                        isStaff = Convert.ToBoolean(row["isStaff"])
+
                     }).FirstOrDefault();
                     if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
                     {
