@@ -50,6 +50,9 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public DateTime SubmittedDate { get; set; }
         public bool IsAgreed { get; set; }
         public DateTime ? AgreedDate { get; set; }
+        public string BachelorDegreeMajorSP { get; set; }
+        public string ConsolidatedAddress { get; set; }
+        public bool isStaff { get; set; }
 
     }
     public class StudentProfileSearchResponse : BaseResponse
