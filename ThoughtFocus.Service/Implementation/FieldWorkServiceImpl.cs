@@ -422,7 +422,7 @@ namespace ThoughtFocus.Service.Implementation
                     body = $"{beforeBody}{body}{afterBody}";
                 }
             }
-            body = body.Replace("[[ApplicantName]]", displayName).Replace("[[DocumentName]]", documentName).Replace("[[logoPath]]", logoText);
+            body = body.Replace("[[ApplicantName]]", displayName).Replace("[[DocumentName]]", documentName).Replace("[[logoPath]]", logoText).Replace("[[Reason]]", rejectReason).Replace("[[Comment]]", comments);
             //body = "<html><body><p>Your document "+documentName+" has been approved</p><p>Thank you,</br>CSULB College of Education  </p></body></html>";
             model.Body = body;
             return model;
@@ -1460,9 +1460,32 @@ namespace ThoughtFocus.Service.Implementation
                     //please uncomment after testing
                     //string toUser = "asif.khan@thoughtfocus.com";
                     string toUser = obj.CommunitySiteUserEmail;
-                    string link = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
-                    string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
+                    string URL = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
+                    string body = string.Empty;
+                    //string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
                     string logoText = "cid:myImageID";
+                    SqlParameter[] parameters1 ={
+                                 new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                 new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
+                                 new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
+                                 new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
+                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PartnerUser" }
+                            };
+                    DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
+                    if (dtMailBody.Rows.Count > 0)
+                    {
+                        if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
+
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html>\r\n<head>\r\n<style>\r\n\r\n#link {\r\ncolor: #0563C1;\r\n}\r\n.custom-link {\r\ncolor: #0563C1;\r\n}\r\n</style>\r\n</head>\r\n<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\"/></div>";
+                            afterBody = "</body>\r\n</html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                    }
+                    string link = @"<a href ='" + URL + "' target='_blank' class='custom-link'>Click here</a>";
                     body = body.Replace("[[logoPath]]", logoText)
                               .Replace("[[link]]", link);
                     string subject = "Approve student hours for CSULB Clinical Practice";
@@ -1479,7 +1502,7 @@ namespace ThoughtFocus.Service.Implementation
             else
             {
                 obj.IsSuccess = false;
-                obj.Message = "No Data .";
+                obj.Message = "No Data.";
             }
 
 
@@ -2225,8 +2248,31 @@ namespace ThoughtFocus.Service.Implementation
                     //please uncomment after testing
                     //string toUser = "asif.khan@thoughtfocus.com";
                     string toUser = obj.CommunitySiteUserEmail;
-                    string link = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
-                    string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
+                    string URL = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
+                    string body = string.Empty;
+                    //string body = GetMailBodyTemplate("PartnerUserMailTemplate.html");
+                    SqlParameter[] parameters1 ={
+                                 new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                 new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
+                                 new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
+                                 new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
+                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PartnerUser" }
+                            };
+                    DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
+                    if (dtMailBody.Rows.Count > 0)
+                    {
+                        if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
+
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html>\r\n<head>\r\n<style>\r\n\r\n#link {\r\ncolor: #0563C1;\r\n}\r\n.custom-link {\r\ncolor: #0563C1;\r\n}\r\n</style>\r\n</head>\r\n<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\"/></div>";
+                            afterBody = "</body>\r\n</html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                    }
+                    string link = @"<a href ='" + URL + "' target='_blank' class='custom-link'>Click here</a>";
                     string logoText = "cid:myImageID";
                     body = body.Replace("[[logoPath]]", logoText)
                               .Replace("[[link]]", link);
@@ -2409,7 +2455,29 @@ namespace ThoughtFocus.Service.Implementation
                     string CSULBID = Convert.ToString(row["CSULBID"]);
                     try
                     {
-                        string body = GetMailBodyTemplate("Prerequisite_Expired_Mail.html");
+                        //string body = GetMailBodyTemplate("Prerequisite_Expired_Mail.html");
+                        string body = string.Empty;
+                        SqlParameter[] parameters1 ={
+                                 new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                 new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
+                                 new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
+                                 new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
+                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PrerequisiteExpired" }
+                            };
+                        DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
+                        if (dtMailBody.Rows.Count > 0)
+                        {
+                            if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
+                            {
+                                body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
+
+                                string beforeBody = string.Empty;
+                                string afterBody = string.Empty;
+                                beforeBody = "<html>\r\n<head>\r\n </head>\r\n<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                                afterBody = "</body>\r\n</html>";
+                                body = $"{beforeBody}{body}{afterBody}";
+                            }
+                        }
                         body = body.Replace("[[logoPath]]", logoText)
                                   .Replace("[[ApplicantName]]", applicantName);
                         _sendMail.SendEmail(applicantEmail, "", "COMMON", subject, body, "");
@@ -2479,7 +2547,7 @@ namespace ThoughtFocus.Service.Implementation
                             {
                                 if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
                                 {
-                                    body = Convert.ToString(dtMailBody.Rows[0]["EMailBody"]);
+                                    body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
 
                                     string beforeBody = string.Empty;
                                     string afterBody = string.Empty;
