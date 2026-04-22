@@ -1083,9 +1083,9 @@ namespace ThoughtFocus.Service.Implementation
                     DataTable dtRec = _helper.GetDataTable("[dbo].[GetRecommenderMailBody]", parameters1);
                     if (dtRec.Rows.Count > 0)
                     {
-                        if (dtRec.Rows[0]["ApplicationSubmittedMailBody"] != DBNull.Value)
+                        if (dtRec.Rows[0]["RecommenderMailBody"] != DBNull.Value)
                         {
-                            body = Convert.ToString(dtRec.Rows[0]["ApplicationSubmittedMailBody"]);
+                            body = Convert.ToString(dtRec.Rows[0]["RecommenderMailBody"]);
 
                             string beforeBody = string.Empty;
                             string afterBody = string.Empty;
@@ -1881,7 +1881,7 @@ namespace ThoughtFocus.Service.Implementation
             BaseResponse response = new BaseResponse();
             var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
             bool sendMail = false;
-            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"applicantFirstName\":\"Andre\",\"applicantLastName\":\"De Garmo\",\"campusID\":\"008239346\",\"recommenderFirstName\":\"chandana\",\"recommenderLastName\":\"\",\"institution\":\"CSULB\",\"position_title\":\"title\",\"telephoneContact\":\"(555) 555 - 5555\",\"email\":\"chandana.shankaregowda@thoughtfocus.com\"},\"applicantRelatedAnswers\":{\"answer1\":\"test1\",\"answer2\":\"test2\",\"answer3\":\"test3\",\"answer4\":[{\"Category\":\"1.\\tApplicant’s potential for academic performance (e.g., former academic, work ethic, diligence, capacity to learn\",\"value\":\"Outstanding\"},{\"Category\":\"2.\\tApplicant’s interpersonal skills (e.g., communication, ability to work with others, good listener, positive contributions to group-to-group interactions\",\"value\":\"Above Average\"},{\"Category\":\"3.\\tDisposition (e.g., receptive to constructive suggestions, accepts responsibility for their actions, responds to diverse perspectives)\",\"value\":\"Above Average\"},{\"Category\":\"4.\\tProfessional Conduct (e.g., responds appropriately, always on time).\",\"value\":\"Outstanding\"},{\"Category\":\"5.\\tApplicant’s potential for teaching (e.g., knowledge and skills, creativity, problem-solving skills, attention to detail).\",\"value\":\"Above Average\"}],\"answer5\":[{\"Category\":\"5. Recommendation for admission to the PK-3 ECE Specialist Instruction Credential Program at California State University, Long Beach:\",\"value\":\"Recommend\"}]},\"signatureOfRecommender\":{\"name\":\"chandana\",\"date\":\"\"},\"comments\":\"test\"}";
+            //input.LetterOfRecommendationJSON = "{\"personalInfo\":{\"position_title\":\"\",\"recommenderFirstName\":\"chandana\",\"recommenderLastName\":\"\",\"studentName\":\"Amanda Amaro\",\"campusID\":\"008081825\",\"email\":\"Amanda.Amaro01@student.csulb.edu\"},\"signatureOfRecommender\":{\"name\":\"\",\"date\":\"04/01/2026\"},\"academicCompetency\":{\"comments\":\"\",\"scale\":\"Area Needs Improvement\"},\"professionalism\":{\"comments\":\"\",\"scale\":\"Average (Satisfactory)\"},\"dispositionsPersonalityCharacter\":{\"comments\":\"\",\"scale\":\"Average (Satisfactory)\"},\"specialEducation\":{\"comments\":\"\",\"scale\":\"Area Needs Improvement\"},\"studentOverAllRank\":\"Top 5% One of the best\"}";
             // convert JSON to PDF - delete the existing letter of recommendation and create new 
             byte[] fileContentJSONToPDF = GetPDFFromJSON(input.LetterOfRecommendationJSON,input.ProgramFormIdentifier);
             //byte[] fileContentJSONToPDF = GetFileContent("Recommender_Template.pdf");
@@ -2519,6 +2519,8 @@ namespace ThoughtFocus.Service.Implementation
                 applicantsName = Convert.ToString(dtResponse.Rows[0]["ApplicantName"]);
                 toMail = Convert.ToString(dtResponse.Rows[0]["cusulbEmail"]);
                 ccMail= Convert.ToString(dtResponse.Rows[0]["RecommenderEmail"]);
+                applicationTypeID = Convert.ToInt32(dtResponse.Rows[0]["ApplicationTypeID"]);
+                programID = Convert.ToInt32(dtResponse.Rows[0]["ProgramID"]);
                 subject = "Recommendation Submitted";
                 SqlParameter[] parameters1 ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = applicationTypeID },
@@ -2528,9 +2530,9 @@ namespace ThoughtFocus.Service.Implementation
                 DataTable dtRec = _helper.GetDataTable("[dbo].[GetRecommenderMailBody]", parameters1);
                 if (dtRec.Rows.Count > 0)
                 {
-                    if (dtRec.Rows[0]["RecommenderConfirmationMailBody"] != DBNull.Value)
+                    if (dtRec.Rows[0]["RecommenderMailBody"] != DBNull.Value)
                     {
-                        body = Convert.ToString(dtRec.Rows[0]["RecommenderConfirmationMailBody"]);
+                        body = Convert.ToString(dtRec.Rows[0]["RecommenderMailBody"]);
 
                         string beforeBody = string.Empty;
                         string afterBody = string.Empty;

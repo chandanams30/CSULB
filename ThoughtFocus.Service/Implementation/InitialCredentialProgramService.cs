@@ -1073,6 +1073,7 @@ namespace ThoughtFocus.Service.Implementation
                 applicantEmail = applicantInfo.Rows[0]["ApplicantEmail"].ToString();
                 //applicantEmail = "chandana.shankaregowda@thoughtfocus.com";
                 programName = applicantInfo.Rows[0]["ProgramName"].ToString();
+                programID = Convert.ToInt32(applicantInfo.Rows[0]["ProgramID"]);
             }
             if (input.Status != string.Empty)
             {
@@ -1167,11 +1168,11 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
                 {
-                    obj.Body = Convert.ToString(dtMailBody.Rows[0]["EMailBody"]);
-
+                    obj.Body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
+                    obj.Subject = Convert.ToString(dtMailBody.Rows[0]["Subject"]);
                     string beforeBody = string.Empty;
                     string afterBody = string.Empty;
-                    beforeBody = "<html>\r\n<head>\r\n</head>\r\n<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\"/></div>\r\n<div style=\"width: 100%; border-bottom: 2px solid black; font-family: Arial; margin-top: 10px;\">STUDENT SUCCESS AND ADVISING CENTER</div>\r\n<div>";
+                    beforeBody = "<html>\r\n<head>\r\n</head>\r\n<body>\r\n<img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" />\r\n<div style=\"width: 100%; border-bottom: 2px solid black; font-family: Arial; margin-top: 10px;\">STUDENT SUCCESS AND ADVISING CENTER</div>\r\n<div>";
                     afterBody = "</div>\r\n\r\n</body>\r\n</html>";
                     obj.Body = $"{beforeBody}{obj.Body}{afterBody}";
                 }
