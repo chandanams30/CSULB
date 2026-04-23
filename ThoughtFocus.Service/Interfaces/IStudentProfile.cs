@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.StudentProfile;
@@ -9,7 +10,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IStudentProfile
     {
-        StudentProfileResponse GetStudentProfileData(string CsuldId);
+        StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID);
         StudentProfileSearchResponse GetStudentProfileSearchData(string searchString);
         StudentProfileMessageBoardResponse GetStudentProfileMessageBoard(string CsulbId, string MessageBoardIdentifier);
         BaseResponse UpdateStudentProfileMessageBoard(UpdateStudentProfileMessageBoardRequest input);

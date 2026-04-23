@@ -41,7 +41,7 @@ namespace ThoughtFocus.Service.Implementation
             _sendMail = sendMail;
             _logger = logger;
         }
-        public StudentProfileResponse GetStudentProfileData(string CsuldId)
+        public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
         {
             StudentProfileResponse obj = new StudentProfileResponse();
             string csulbIDsStaff = String.Empty;
@@ -50,6 +50,7 @@ namespace ThoughtFocus.Service.Implementation
 
             SqlParameter[] parameters = {
                                           new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId },
+                                          new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
                                           new SqlParameter("@CSULBIDStaffSP", SqlDbType.NVarChar, -1) { Value = csulbIDsStaff }
                                         };
 
@@ -100,6 +101,7 @@ namespace ThoughtFocus.Service.Implementation
                         AgreedDate = row["AgreedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AgreedDate"]) : null,
                         BachelorDegreeMajorSP = Convert.ToString(row["BachelorDegreeMajorSP"]),
                         ConsolidatedAddress = Convert.ToString(row["ConsolidatedAddress"]),
+                        UserID = Convert.ToInt32(row["UserID"]),
                         isStaff = Convert.ToBoolean(row["isStaff"])
 
                     }).FirstOrDefault();
@@ -417,6 +419,228 @@ namespace ThoughtFocus.Service.Implementation
             int id = _helper.InsertTable("[dbo].[SaveStudentAggrement]", parameters);
             response.Message = "Student Aggrement saved successfully";
             response.IsSuccess = true;
+            return response;
+        }
+        public UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input)
+        {
+            UpsertProfileAttachmentResponse response = new UpsertProfileAttachmentResponse();
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string fileExtensionWord = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+                string subSectionName = string.Empty;
+                bool isNotPDFExtension = false;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+                if (input.FileName != string.Empty)
+                {
+                    AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                    fileExtension = fileDetails.FileExtension;
+                    fileName = "ProfileDocument" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss");
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // isNotPDFExtension = true;
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                    //if (fileExtension.ToUpper() == "DOC" || fileExtension.ToUpper() == "DOCX")
+                    //{
+                    //    isNotPDFExtension = true;
+                    //    bool isFileSaved = SaveWordFileInTempFolder(input.FileContent, fileName, fileExtension, workingFolderPath);
+                    //    fileExtensionWord = fileExtension;
+                    //    fileExtension = "pdf";
+                    //}
+
+
+                }
+
+                SqlParameter[] parameters =
+                                         {
+                                          new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = input.UniqueID },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 200) { Value = fileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar, 20) { Value = input.CSULBID},
+                                          new SqlParameter("@CreatedBy", SqlDbType.BigInt) { Value = input.CreatedBy }
+                                          //new SqlParameter("@ProfileAttachmentComments", SqlDbType.NVarChar, -1) { Value = input.ProfileAttachmentComments}
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertProfileAttachment]", parameters);
+                if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+                {
+                    string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                    userFolderName = folderSplit[0].ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileName + "." + fileExtensionWord), Path.Combine(dirForm, fileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileName + "." + fileExtensionWord), Path.Combine(dirForm, fileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+                        if (isNotPDFExtension)
+                        {
+                            byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileName + "." + fileExtensionWord), Path.Combine(dirForm, fileName + "." + fileExtension));
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                    response.FileName = Convert.ToString(dtFormAttachment.Rows[0]["FileName"]);
+                    response.FileExtn = Convert.ToString(dtFormAttachment.Rows[0]["FileExtn"]);
+                    response.UniqueID = (Guid)(dtFormAttachment.Rows[0]["UniqueID"]);
+                    response.ProfileDocumentID = Convert.ToInt32(dtFormAttachment.Rows[0]["ProfileDocumentID"]);
+                    response.UserID = Convert.ToInt32(dtFormAttachment.Rows[0]["UserID"]);
+                    response.IsSuccess = true;
+                    response.Message = "Attachment Uploaded Successfully"; 
+                }
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+                return response;
+            }
+        }
+        public DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID)
+        {
+            DownloadProfileAttachmentResponse obj = new DownloadProfileAttachmentResponse();
+
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = UniqueID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetProfileAttachment]", parameters);
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new DownloadProfileAttachmentResponse
+                                          {
+                                              ProfileDocumentID = Convert.ToInt32(row["ProfileDocumentID"]),
+                                              UserID = Convert.ToInt32(row["UserID"]),
+                                              UniqueID = Guid.Parse(row["UniqueID"].ToString()),
+                                              FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FolderName = Convert.ToString(row["FolderName"]),
+                                              CreatedBy = Convert.ToInt32(row["CreatedBy"]),
+                                              CreatedDate = Convert.ToDateTime(row["CreatedDate"] == DBNull.Value ? null : row["CreatedDate"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetProfileAttachmentFileContent(_utils.GetAttachmentsFolderName(row["FolderName"].ToString()), _utils.GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+            obj.IsSuccess = true;
+            obj.Message = "Attachment retrieved Successfully";
+
+            return obj;
+        }
+        public ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID)
+        {
+            ProfileAttachmentDetailsResponse obj = new ProfileAttachmentDetailsResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar,20) { Value = CSULBID }
+                                     };
+            DataTable dtProfileAttachmentDetails = _helper.GetDataTable("[dbo].[GetProfileAttachmentDetails]", parameters);
+            try
+            {
+                if (dtProfileAttachmentDetails.Rows.Count > 0)
+                {
+                    obj.ProfileAttachmentDetails = dtProfileAttachmentDetails.AsEnumerable().Select(row =>
+                                              new ProfileAttachmentDetails
+                                              {
+                                                  ProfileDocumentID = Convert.ToInt32(row["ProfileDocumentID"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  FileName = Convert.ToString(row["FileName"] == DBNull.Value ? null : row["FileName"]),
+                                                  FileExtn = Convert.ToString(row["FileExtn"] == DBNull.Value ? null : row["FileExtn"]),
+                                                  FolderName = Convert.ToString(row["FolderName"] == DBNull.Value ? null : row["FolderName"]),
+                                                  CreatedBy = Convert.ToInt32(row["CreatedBy"] == DBNull.Value ? null : row["CreatedBy"]),
+                                                  CreatedDate = Convert.ToDateTime(row["CreatedDate"] == DBNull.Value ? null : row["CreatedDate"]),
+                                                  CanView = Convert.ToString(row["CanView"]),
+                                                  UniqueID = Guid.Parse(row["UniqueID"].ToString()),
+                                                  CreatedByUsername = Convert.ToString(row["CreatedByUsername"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                           new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = input.UniqueID }
+                                     };
+            try
+            {
+                DataTable dtAttachment = _helper.GetDataTable("[dbo].[DeleteProfileAttachment]", parameters);
+                if (dtAttachment.Rows.Count > 0)
+                {
+                    if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "SUCCESS")
+                    {
+                        response.Message = "Attachment Deleted Successfully";
+                        response.IsSuccess = true;
+                    }
+                    else if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "FAILURE")
+                    {
+                        response.Message = "Failed to Delete Attachment";
+                        response.IsSuccess = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Data Retrieval Failed , Please contact site admin ";
+                response.StackTrace = ex.Message;
+            }
             return response;
         }
         private string EncryptSSNNumber(string clearText)

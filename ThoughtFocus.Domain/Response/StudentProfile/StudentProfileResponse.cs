@@ -53,6 +53,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string BachelorDegreeMajorSP { get; set; }
         public string ConsolidatedAddress { get; set; }
         public bool isStaff { get; set; }
+        public int UserID { get; set; }
+
 
     }
     public class StudentProfileSearchResponse : BaseResponse
