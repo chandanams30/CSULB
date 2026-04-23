@@ -51,7 +51,7 @@ namespace ThoughtFocus.Service.Implementation
             _logger = logger;
             _utils = utils;
         }
-        public StudentProfileResponse GetStudentProfileData(string CsuldId)
+        public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
         {
             StudentProfileResponse obj = new StudentProfileResponse();
             string csulbIDsStaff = String.Empty;
@@ -60,6 +60,7 @@ namespace ThoughtFocus.Service.Implementation
 
             SqlParameter[] parameters = {
                                           new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId },
+                                          new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
                                           new SqlParameter("@CSULBIDStaffSP", SqlDbType.NVarChar, -1) { Value = csulbIDsStaff }
                                         };
 
@@ -110,6 +111,7 @@ namespace ThoughtFocus.Service.Implementation
                         AgreedDate = row["AgreedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AgreedDate"]) : null,
                         BachelorDegreeMajorSP = Convert.ToString(row["BachelorDegreeMajorSP"]),
                         ConsolidatedAddress = Convert.ToString(row["ConsolidatedAddress"]),
+                        UserID = Convert.ToInt32(row["UserID"]),
                         isStaff = Convert.ToBoolean(row["isStaff"])
 
                     }).FirstOrDefault();
@@ -605,11 +607,7 @@ namespace ThoughtFocus.Service.Implementation
                     obj.Message = "Data Retrieved Successfully";
 
                 }
-                else
-                {
-                    obj.IsSuccess = false;
-                    obj.Message = "No Data Present";
-                }
+                obj.IsSuccess = true;
             }
             catch (Exception ex)
             {
