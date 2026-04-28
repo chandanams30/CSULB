@@ -10,6 +10,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public FormSubSectionResponseSMC FormSubSectionResponseSMC { get; set; }
         public FormSubSectionResponseGPA FormSubSectionResponseGPA { get; set; }
         public List<FormSectionAttachmentListSMC> FormSectionAttachmentListSMC { get; set; }
+        public AdmitDecision admitDecision { get; set; }
 
     }
 
@@ -149,7 +150,12 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string SubSectionIdentifiersGPA { get; set; }
         public string SubSectionFormGPA { get; set; }
         public bool showUpdateFormSubSectionGPA { get; set; }
-  }
+    }
+    public class AdmitDecision
+    {
+        public DateTime FinalDecisionDate { get; set; }
+        public string FinalDecision { get; set; }
+    }
 
 
 
