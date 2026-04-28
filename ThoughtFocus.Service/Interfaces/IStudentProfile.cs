@@ -22,6 +22,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input);
         BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input);
         BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input);
+        PrerequisitesResponse GetPrerequisiteDetails(string csulbid);
+        UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input);
 
     }
 }

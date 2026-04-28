@@ -213,6 +213,58 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetFormPrerequisites")]
+        public PrerequisitesResponse GetPrerequisiteDetails(string csulbid)
+        {
+            try
+            {
+                PrerequisitesResponse response = _studentProfileService.GetPrerequisiteDetails(csulbid);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                PrerequisitesResponse response = new PrerequisitesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertProfileAttachment")]
+        public UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input)
+        {
+            try
+            {
+                UpsertProfileAttachmentResponse response = new UpsertProfileAttachmentResponse();
 
+                //#region to get the file content from local
+                //byte[] fileContent = null;
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                //string filepath = "D:\\ExcelDoc\\Screenshot 2024-10-15 123100.png";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                //#endregion
+
+                response = _studentProfileService.UpsertProfileAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                UpsertProfileAttachmentResponse response = new UpsertProfileAttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

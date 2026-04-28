@@ -21,6 +21,10 @@ using ThoughtFocus.Service.Interfaces;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
 using FormSubSectionResponse = ThoughtFocus.Domain.Response.StudentProfile.FormSubSectionResponse;
+using iTextSharp.text.pdf;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using iTextSharp.text;
 
 
 namespace ThoughtFocus.Service.Implementation
@@ -32,15 +36,18 @@ namespace ThoughtFocus.Service.Implementation
         private readonly ISendMail _sendMail;
         public ILogger<SearchApplicationImpl> _logger;
 
+        private readonly ICommonUtils _utils;
         public StudentProfileImpl(ISqlDBUtility helper
                                          , IConfiguration configuration
                                          , ISendMail sendMail
-                                         , ILogger<SearchApplicationImpl> logger)
+                                         , ILogger<SearchApplicationImpl> logger
+                                         , ICommonUtils utils)
         {
             _helper = helper;
             _configuration = configuration;
             _sendMail = sendMail;
             _logger = logger;
+            _utils = utils;
         }
         public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
         {
@@ -550,6 +557,124 @@ namespace ThoughtFocus.Service.Implementation
                 return response;
             }
         }
+        private byte[] word2PDF(object Source, object Target)
+        {
+            Microsoft.Office.Interop.Word.ApplicationClass MSdoc;
+            Byte[] InputStream = null;
+            //Use for the parameter whose type are not known or say Missing
+            object Unknown = Type.Missing;
+            //Creating the instance of Word Application
+            MSdoc = new Microsoft.Office.Interop.Word.ApplicationClass();
+
+            try
+            {
+                MSdoc.Visible = false;
+                MSdoc.Documents.Open(ref Source, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown,
+                     ref Unknown, ref Unknown, ref Unknown, ref Unknown, ref Unknown);
+                MSdoc.Application.Visible = false;
+                MSdoc.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+
+                object format = Microsoft.Office.Interop.Word.WdSaveFormat.wdFormatPDF;
+
+                MSdoc.ActiveDocument.SaveAs(ref Target, ref format,
+                        ref Unknown, ref Unknown, ref Unknown,
+                        ref Unknown, ref Unknown, ref Unknown,
+                        ref Unknown, ref Unknown, ref Unknown,
+                        ref Unknown, ref Unknown, ref Unknown,
+                       ref Unknown, ref Unknown);
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show(e.Message);
+            }
+            finally
+            {
+                if (MSdoc != null)
+                {
+                    MSdoc.Documents.Close(ref Unknown, ref Unknown, ref Unknown);
+                    //WordDoc.Application.Quit(ref Unknown, ref Unknown, ref Unknown);
+                }
+                // for closing the application
+                MSdoc.Quit(ref Unknown, ref Unknown, ref Unknown);
+                // read the file stream 
+                System.IO.FileStream fsPDF = new System.IO.FileStream(Target.ToString(), System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                System.IO.BinaryReader binaryReaderPDF = new System.IO.BinaryReader(fsPDF);
+                long byteLengthPDF = new System.IO.FileInfo(Target.ToString()).Length;
+                InputStream = binaryReaderPDF.ReadBytes((Int32)byteLengthPDF);
+                fsPDF.Close();
+                fsPDF.Dispose();
+                binaryReaderPDF.Close();
+                // delete the source word file 
+                File.Delete(Source.ToString());
+
+            }
+            return InputStream;
+        }
+        private AttachmentFileDetails GetAttachedFileSplitValues(string filename)
+        {
+            AttachmentFileDetails fileObject = new AttachmentFileDetails();
+            string uploadedFileName = filename;
+            string[] splitter = uploadedFileName.Split('.');
+            StringBuilder fileNameAppender = new StringBuilder();
+            string fileExtension = uploadedFileName.Split('.').Last();
+            int length = splitter.Length;
+            for (int i = 0; i < splitter.Length; i++)
+            {
+                if (i == length - 2 && length > 2)
+                    fileNameAppender.Append(splitter[i]);
+                else if (length == 2)
+                {
+                    fileNameAppender.Append(splitter[i]);
+                    break;
+                }
+                else
+                {
+                    if (i != length - 1)
+                        fileNameAppender.Append(splitter[i] + ".");
+                }
+            }
+            fileObject.FileName = fileNameAppender.ToString();
+            fileObject.FileExtension = fileExtension;
+            return fileObject;
+        }
+        private byte[] GetImageFilecontent(byte[] fileContent)
+        {
+            byte[] inputStream = null;
+            string documentName = string.Empty;
+            using (MemoryStream stream = new System.IO.MemoryStream())
+            {
+                //Initialize the PDF document object.
+                using (Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 10f))
+                {
+                    PdfWriter.GetInstance(pdfDoc, stream).SetFullCompression();
+                    pdfDoc.Open();
+
+                    //Add the Image file to the PDF document object.
+                    iTextSharp.text.Image pic = iTextSharp.text.Image.GetInstance(fileContent);
+
+                    //Scaling the image
+                    if (pic.Height > pic.Width)
+                    {
+                        float percentage = 0.0f;
+                        percentage = 700 / pic.Height;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    else
+                    {
+                        float percentage = 0.0f;
+                        percentage = 540 / pic.Width;
+                        pic.ScalePercent(percentage * 100);
+                    }
+                    pdfDoc.Add(pic);
+                    pdfDoc.Close();
+                    inputStream = stream.ToArray();
+                }
+            }
+            return inputStream;
+        }
         public DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID)
         {
             DownloadProfileAttachmentResponse obj = new DownloadProfileAttachmentResponse();
@@ -728,6 +853,48 @@ namespace ThoughtFocus.Service.Implementation
             response.Message = "Student profile data saved successfully";
             response.IsSuccess = true;
             return response;
+        }
+        public PrerequisitesResponse GetPrerequisiteDetails(string csulbid)
+        {
+            PrerequisitesResponse obj = new PrerequisitesResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 15) { Value = csulbid }
+                                        };
+
+            DataTable dsAttachments = _helper.GetDataTable("[Application].[GetPrerequisiteDetails]", parameters);
+            try
+            {
+                if (dsAttachments.Rows.Count > 0)
+                {
+                    obj.FormPrerequisites = dsAttachments.AsEnumerable().Select(row =>
+                                              new PrerequisiteDetails
+                                              {
+                                                  fieldWorkAttachmentID = Convert.ToInt32(row["fieldWorkAttachmentID"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  DocumentID = Convert.ToInt32(row["DocumentID"]),
+                                                  DocumentName = Convert.ToString(row["DocumentName"]),
+                                                  FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                                  FileExtn = Convert.ToString(row["FileExtn"]),
+                                                  ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
+                                                  DocumentStatus = Convert.ToString(row["DocumentStatus"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
         }
     }
 }
