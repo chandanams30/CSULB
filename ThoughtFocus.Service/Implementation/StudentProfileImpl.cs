@@ -147,6 +147,12 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
                                           //  showUpdateFormSubSection = Convert.ToBoolean(row["showUpdateFormSubSectionGPA"])
 
                                       }).FirstOrDefault();
+                    obj.admitDecision = dtStudentProfile.Tables[4].AsEnumerable().Select(row =>
+                                               new AdmitDecision
+                                               {
+                                                   FinalDecisionDate = Convert.ToDateTime(row["FinalDecisionDate"]),
+                                                   FinalDecision = Convert.ToString(row["FinalDecision"])
+                                               }).FirstOrDefault();
 
             if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
             {
