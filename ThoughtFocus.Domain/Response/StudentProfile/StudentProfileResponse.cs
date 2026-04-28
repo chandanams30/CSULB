@@ -7,6 +7,9 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     public class StudentProfileResponse : BaseResponse
     {
         public StudentProfile studentProfile { get; set; }
+        public FormSubSectionResponseSMC FormSubSectionResponseSMC { get; set; }
+        public FormSubSectionResponseGPA FormSubSectionResponseGPA { get; set; }
+        public List<FormSectionAttachmentListSMC> FormSectionAttachmentListSMC { get; set; }
 
     }
 
@@ -128,6 +131,37 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string programName { get; set; }
         public string semester { get; set; }
         public string TermCode { get; set; }
+    }
+
+    public class FormSubSectionResponseSMC
+    {
+        public int FormSubSectionID { get; set; }
+        public int FormID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string SubSectionForm { get; set; }
+        public bool showUpdateFormSubSection { get; set; }
+    }
+
+    public class FormSubSectionResponseGPA
+    {
+        public int FormSubSectionIDGPA { get; set; }
+        public int FormIDGPA { get; set; }
+        public string SubSectionIdentifiersGPA { get; set; }
+        public string SubSectionFormGPA { get; set; }
+        public bool showUpdateFormSubSectionGPA { get; set; }
+  }
+
+
+
+ public class FormSectionAttachmentListSMC
+    {
+        public int FormSubSectionAttachmentID { get; set; }
+        public int FormID { get; set; }
+        public int FormSubSectionID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public bool CanView { get; set; }
     }
 
 }
