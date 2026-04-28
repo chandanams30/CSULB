@@ -7,6 +7,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     public class StudentProfileResponse : BaseResponse
     {
         public StudentProfile studentProfile { get; set; }
+        public FormSubSectionResponse FormSubSectionResponse { get; set; }
+
     }
 
     public class StudentProfile
@@ -56,6 +58,14 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public int UserID { get; set; }
 
 
+    }
+    public class FormSubSectionResponse 
+    {
+        public int FormSubSectionID { get; set; }
+        public int FormID { get; set; }
+        public string SubSectionIdentifiers { get; set; }
+        public string SubSectionForm { get; set; }
+        public bool showUpdateFormSubSection { get; set; }
     }
     public class StudentProfileSearchResponse : BaseResponse
     {
