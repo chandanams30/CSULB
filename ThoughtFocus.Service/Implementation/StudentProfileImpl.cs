@@ -869,5 +869,47 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
+        public PrerequisitesResponse GetPrerequisiteDetails(string csulbid)
+        {
+            PrerequisitesResponse obj = new PrerequisitesResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 15) { Value = csulbid }
+                                        };
+
+            DataTable dsAttachments = _helper.GetDataTable("[Application].[GetPrerequisiteDetails]", parameters);
+            try
+            {
+                if (dsAttachments.Rows.Count > 0)
+                {
+                    obj.FormPrerequisites = dsAttachments.AsEnumerable().Select(row =>
+                                              new PrerequisiteDetails
+                                              {
+                                                  fieldWorkAttachmentID = Convert.ToInt32(row["fieldWorkAttachmentID"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  DocumentID = Convert.ToInt32(row["DocumentID"]),
+                                                  DocumentName = Convert.ToString(row["DocumentName"]),
+                                                  FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                                  FileExtn = Convert.ToString(row["FileExtn"]),
+                                                  ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
+                                                  DocumentStatus = Convert.ToString(row["DocumentStatus"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
     }
 }

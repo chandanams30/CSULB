@@ -41,4 +41,19 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string CanView { get; set; }
         public string CreatedByUsername { get; set; }
     }
+    public class PrerequisitesResponse : BaseResponse
+    {
+        public List<PrerequisiteDetails> FormPrerequisites { get; set; }
+    }
+    public class PrerequisiteDetails
+    {
+        public int fieldWorkAttachmentID { get; set; }
+        public int UserID { get; set; }
+        public int DocumentID { get; set; }
+        public string DocumentName { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public DateTime? ValidatedDate { get; set; }
+        public string DocumentStatus { get; set; }
+    }
 }
