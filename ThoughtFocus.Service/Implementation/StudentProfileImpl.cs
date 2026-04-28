@@ -28,7 +28,6 @@ using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
-using FormSubSectionResponse = ThoughtFocus.Domain.Response.StudentProfile.FormSubSectionResponse;
 
 
 namespace ThoughtFocus.Service.Implementation
@@ -116,16 +115,6 @@ namespace ThoughtFocus.Service.Implementation
                         isStaff = Convert.ToBoolean(row["isStaff"])
 
                     }).FirstOrDefault();
-                    obj.FormSubSectionResponse = dtStudentProfile.AsEnumerable().Select(row =>
-                                              new FormSubSectionResponse
-                                              {
-                                                  FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
-                                                  FormID = Convert.ToInt32(row["FormID"]),
-                                                  SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
-                                                  SubSectionForm = Convert.ToString(row["SubSectionForm"]),
-                                                  showUpdateFormSubSection = Convert.ToBoolean(row["showUpdateFormSubSection"])
-
-                                              }).FirstOrDefault();
                     if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
                     {
                         //IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
