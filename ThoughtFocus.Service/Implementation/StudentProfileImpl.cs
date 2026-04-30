@@ -491,7 +491,7 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
                 {
                     AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
                     fileExtension = fileDetails.FileExtension;
-                    fileName = "ProfileDocument" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss");
+                    fileName = input.FileName;
                     if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
                     {
                         // isNotPDFExtension = true;
@@ -890,7 +890,8 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
                                        {
                                           new SqlParameter("@CSULBID", SqlDbType.VarChar,9) { Value = input.CSULBID  },
                                           new SqlParameter("@BachelorDegreeMajorSP", SqlDbType.NVarChar,255) { Value = input.BachelorDegreeMajorSP  },
-                                          new SqlParameter("@Credential", SqlDbType.NVarChar,255) { Value = input.Credential },
+                                          new SqlParameter("@CredentialProgram", SqlDbType.NVarChar,255) { Value = input.CredentialProgram },
+                                          new SqlParameter("@CredentialPathway", SqlDbType.NVarChar,255) { Value = input.CredentialPathway },
                                           new SqlParameter("@Certificate", SqlDbType.NVarChar,255) { Value = input.Certificate },
                                         };
 

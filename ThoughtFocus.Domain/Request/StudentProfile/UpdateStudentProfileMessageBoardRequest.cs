@@ -39,7 +39,8 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
     {
         public string CSULBID { get; set; }
         public string BachelorDegreeMajorSP { get; set; }
-        public string Credential { get; set; }
+        public string CredentialProgram { get; set; }
+        public string CredentialPathway { get; set; }
         public string Certificate { get; set; }
 
     }
