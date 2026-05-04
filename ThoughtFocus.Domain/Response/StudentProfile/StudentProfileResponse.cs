@@ -59,7 +59,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string ConsolidatedAddress { get; set; }
         public bool isStaff { get; set; }
         public int UserID { get; set; }
-
+        public string CredentialPathway { get; set; }
+        public string CredentialProgram { get; set; }
 
     }
     public class StudentProfileSearchResponse : BaseResponse
@@ -141,6 +142,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string SubSectionIdentifiers { get; set; }
         public string SubSectionForm { get; set; }
         public bool showUpdateFormSubSection { get; set; }
+        public string TermCode { get; set; }
+
     }
 
     public class FormSubSectionResponseGPA
@@ -155,11 +158,12 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     {
         public DateTime FinalDecisionDate { get; set; }
         public string FinalDecision { get; set; }
+        public int LatestApplicationTypeID { get; set; }
+        public int LatestProgramID { get; set; }
+
     }
 
-
-
- public class FormSectionAttachmentListSMC
+    public class FormSectionAttachmentListSMC
     {
         public int FormSubSectionAttachmentID { get; set; }
         public int FormID { get; set; }

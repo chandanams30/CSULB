@@ -112,49 +112,114 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
                 BachelorDegreeMajorSP = Convert.ToString(row["BachelorDegreeMajorSP"]),
                 ConsolidatedAddress = Convert.ToString(row["ConsolidatedAddress"]),
                 UserID = Convert.ToInt32(row["UserID"]),
-                isStaff = Convert.ToBoolean(row["isStaff"])
+                isStaff = Convert.ToBoolean(row["isStaff"]),
+                CredentialProgram = Convert.ToString(row["CredentialProgram"]),
+                CredentialPathway = Convert.ToString(row["CredentialPathway"]),
 
             }).FirstOrDefault();
-            obj.FormSubSectionResponseSMC = dtStudentProfile.Tables[1].AsEnumerable().Select(row =>
-                                      new FormSubSectionResponseSMC
-                                      {
-                                          FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
-                                          FormID = Convert.ToInt32(row["FormID"]),
-                                          SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
-                                          SubSectionForm = Convert.ToString(row["SubSectionForm"])
-                                          //  showUpdateFormSubSection = Convert.ToBoolean(row["showUpdateFormSubSection"])
+               
 
-                                      }).FirstOrDefault();
-            obj.FormSectionAttachmentListSMC = dtStudentProfile.Tables[2].AsEnumerable().Select(row =>
-                                     new FormSectionAttachmentListSMC
-                                     {
-                                         FormSubSectionAttachmentID = Convert.ToInt32(row["FormSubSectionAttachmentID"]),
-                                         FormID = Convert.ToInt32(row["FormID"]),
-                                         FormSubSectionID = Convert.ToInt32(row["FormSubSectionID"]),
-                                         SubSectionIdentifiers = Convert.ToString(row["SubSectionIdentifiers"]),
-                                         FileName = Convert.ToString(row["FileName"]),
-                                         FileExtn = Convert.ToString(row["FileExtn"])
-                                         //CanView = Convert.ToBoolean(row["CanView"])
+                    obj.FormSubSectionResponseSMC = dtStudentProfile.Tables.Count > 1 && dtStudentProfile.Tables[1] != null
+    ? dtStudentProfile.Tables[1].AsEnumerable().Select(row =>
+        new FormSubSectionResponseSMC
+        {
+            FormSubSectionID = row["FormSubSectionID"] != DBNull.Value
+                ? Convert.ToInt32(row["FormSubSectionID"])
+                : 0,
 
-                                     }).ToList();
-            obj.FormSubSectionResponseGPA = dtStudentProfile.Tables[3].AsEnumerable().Select(row =>
-                                      new FormSubSectionResponseGPA
-                                      {
-                                          FormSubSectionIDGPA = Convert.ToInt32(row["FormSubSectionIDGPA"]),
-                                          FormIDGPA = Convert.ToInt32(row["FormIDGPA"]),
-                                          SubSectionIdentifiersGPA = Convert.ToString(row["SubSectionIdentifiersGPA"]),
-                                          SubSectionFormGPA = Convert.ToString(row["SubSectionFormGPA"])
-                                          //  showUpdateFormSubSection = Convert.ToBoolean(row["showUpdateFormSubSectionGPA"])
+            FormID = row["FormID"] != DBNull.Value
+                ? Convert.ToInt32(row["FormID"])
+                : 0,
 
-                                      }).FirstOrDefault();
-                    obj.admitDecision = dtStudentProfile.Tables[4].AsEnumerable().Select(row =>
-                                               new AdmitDecision
-                                               {
-                                                   FinalDecisionDate = Convert.ToDateTime(row["FinalDecisionDate"]),
-                                                   FinalDecision = Convert.ToString(row["FinalDecision"])
-                                               }).FirstOrDefault();
+            SubSectionIdentifiers = row["SubSectionIdentifiers"] != DBNull.Value
+                ? Convert.ToString(row["SubSectionIdentifiers"])
+                : string.Empty,
 
-            if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
+            SubSectionForm = row["SubSectionForm"] != DBNull.Value
+                ? Convert.ToString(row["SubSectionForm"])
+                : string.Empty,
+
+                TermCode = row["LatestTermCode"] != DBNull.Value
+                ? Convert.ToString(row["LatestTermCode"])
+                : string.Empty,
+        }).FirstOrDefault()
+    : null;
+
+                    obj.FormSectionAttachmentListSMC = dtStudentProfile.Tables.Count > 2 && dtStudentProfile.Tables[2] != null
+                        ? dtStudentProfile.Tables[2].AsEnumerable().Select(row =>
+                            new FormSectionAttachmentListSMC
+                            {
+                                FormSubSectionAttachmentID = row["FormSubSectionAttachmentID"] != DBNull.Value
+                                    ? Convert.ToInt32(row["FormSubSectionAttachmentID"])
+                                    : 0,
+
+                                FormID = row["FormID"] != DBNull.Value
+                                    ? Convert.ToInt32(row["FormID"])
+                                    : 0,
+
+                                FormSubSectionID = row["FormSubSectionID"] != DBNull.Value
+                                    ? Convert.ToInt32(row["FormSubSectionID"])
+                                    : 0,
+
+                                SubSectionIdentifiers = row["SubSectionIdentifiers"] != DBNull.Value
+                                    ? Convert.ToString(row["SubSectionIdentifiers"])
+                                    : string.Empty,
+
+                                FileName = row["FileName"] != DBNull.Value
+                                    ? Convert.ToString(row["FileName"])
+                                    : string.Empty,
+
+                                FileExtn = row["FileExtn"] != DBNull.Value
+                                    ? Convert.ToString(row["FileExtn"])
+                                    : string.Empty
+                            }).ToList()
+                        : new List<FormSectionAttachmentListSMC>();
+
+                    obj.FormSubSectionResponseGPA = dtStudentProfile.Tables.Count > 3 && dtStudentProfile.Tables[3] != null
+                        ? dtStudentProfile.Tables[3].AsEnumerable().Select(row =>
+                            new FormSubSectionResponseGPA
+                            {
+                                FormSubSectionIDGPA = row["FormSubSectionIDGPA"] != DBNull.Value
+                                    ? Convert.ToInt32(row["FormSubSectionIDGPA"])
+                                    : 0,
+
+                                FormIDGPA = row["FormIDGPA"] != DBNull.Value
+                                    ? Convert.ToInt32(row["FormIDGPA"])
+                                    : 0,
+
+                                SubSectionIdentifiersGPA = row["SubSectionIdentifiersGPA"] != DBNull.Value
+                                    ? Convert.ToString(row["SubSectionIdentifiersGPA"])
+                                    : string.Empty,
+
+                                SubSectionFormGPA = row["SubSectionFormGPA"] != DBNull.Value
+                                    ? Convert.ToString(row["SubSectionFormGPA"])
+                                    : string.Empty
+                            }).FirstOrDefault()
+                        : null;
+
+                    obj.admitDecision = dtStudentProfile.Tables.Count > 4 && dtStudentProfile.Tables[4] != null
+                        ? dtStudentProfile.Tables[4].AsEnumerable().Select(row =>
+                            new AdmitDecision
+                            {
+                                FinalDecisionDate = row["FinalDecisionDate"] != DBNull.Value
+                                    ? Convert.ToDateTime(row["FinalDecisionDate"])
+                                    : DateTime.MinValue,
+
+                                FinalDecision = row["FinalDecision"] != DBNull.Value
+                                    ? Convert.ToString(row["FinalDecision"])
+                                    : string.Empty,
+
+                                LatestApplicationTypeID = row["LatestApplicationTypeID"] != DBNull.Value
+                                    ? Convert.ToInt32(row["LatestApplicationTypeID"])
+                                    : 0,
+
+                                LatestProgramID = row["LatestProgramID"] != DBNull.Value
+                                    ? Convert.ToInt32(row["LatestProgramID"])
+                                    : 0
+                            }).FirstOrDefault()
+                        : null;
+
+                    if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
             {
                 //IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
                 obj.studentProfile.SSNNumber = DecryptSSNNumber(obj.studentProfile.SSNNumber);
