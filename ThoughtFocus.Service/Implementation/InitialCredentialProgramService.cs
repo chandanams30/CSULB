@@ -497,7 +497,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers } 
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers },
+                                          new SqlParameter("@Identifier", SqlDbType.VarChar, 20) { Value = input.Identifier }
                                         };
 
             DataTable dtSubSection = _helper.GetDataTable("[Application].[GetFormSubSectionAttachmentList]", parameters);
