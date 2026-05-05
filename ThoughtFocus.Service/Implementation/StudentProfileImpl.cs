@@ -220,6 +220,15 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
                                     : 0
                             }).FirstOrDefault()
                         : null;
+                    obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 5 && dtStudentProfile.Tables[5] != null
+                        ? dtStudentProfile.Tables[5].AsEnumerable().Select(row =>
+                            new StudentProfileRoleHandler
+                            {
+                                StudentProfileControls = row["StudentProfileRoleHandler"] != DBNull.Value
+                                    ? Convert.ToString(row["StudentProfileRoleHandler"])
+                                    : string.Empty,
+                            }).FirstOrDefault()
+                        : null;
 
                     if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
             {
