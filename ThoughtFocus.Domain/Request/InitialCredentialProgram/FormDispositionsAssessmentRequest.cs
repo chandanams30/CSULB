@@ -31,6 +31,7 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public string SubSectionIdentifiers { get; set; }
+        public string Identifier { get; set; }
     }
 
     public class UpsertFormSubSectionRequest
