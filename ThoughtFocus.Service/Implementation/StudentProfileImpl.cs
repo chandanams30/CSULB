@@ -220,8 +220,19 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
                                     : 0
                             }).FirstOrDefault()
                         : null;
-                    obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 5 && dtStudentProfile.Tables[5] != null
+                    obj.programApplicationSMCDocumentList = dtStudentProfile.Tables.Count > 5 && dtStudentProfile.Tables[5] != null
                         ? dtStudentProfile.Tables[5].AsEnumerable().Select(row =>
+                        new SMCDocumentList
+                        {
+                            Value = row["Value"] != DBNull.Value
+                                    ? Convert.ToString(row["Value"])
+                                    : string.Empty,
+                            TermCode = row["TermCode"] != DBNull.Value
+                                    ? Convert.ToString(row["TermCode"])
+                                    : string.Empty,
+                        }).ToList() : null;
+                    obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 6 && dtStudentProfile.Tables[6] != null
+                        ? dtStudentProfile.Tables[6].AsEnumerable().Select(row =>
                             new StudentProfileRoleHandler
                             {
                                 StudentProfileControls = row["StudentProfileRoleHandler"] != DBNull.Value
