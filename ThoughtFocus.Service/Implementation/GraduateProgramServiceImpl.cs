@@ -399,7 +399,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    FinalDecision = Convert.ToString(row["FinalDecision"] == DBNull.Value ? null : row["FinalDecision"]),
                                                    FinalDecisionComments = Convert.ToString(row["FinalDecisionComments"] == DBNull.Value ? null : row["FinalDecisionComments"]),
                                                    FinalDecisionDate = Convert.ToString(row["FinalDecisionDate"] == DBNull.Value ? null : row["FinalDecisionDate"]),
-                                                   CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"])
+                                                   CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"]),
+                                                   UniversityApplicationStatus = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["UniversityApplicationStatus"])
 
 
                                                }).FirstOrDefault();

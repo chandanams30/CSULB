@@ -47,6 +47,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string CertifyDescription { get; set; }
         public string FinalDecisionComments { get; set; }
         public string FinalDecisionDate { get; set; }
+        public string UniversityApplicationStatus { get; set; }
 
 
     }
