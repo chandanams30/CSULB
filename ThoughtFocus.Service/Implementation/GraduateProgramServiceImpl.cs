@@ -228,7 +228,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   AlternateEmail = Convert.ToString(row["AlternateEmail"]),
                                                   ResumeUploadStatus = Convert.ToString(row["ResumeUploadStatus"]),
                                                   SOPUploadStatus = Convert.ToString(row["SOPUploadStatus"]),
-                                                  PersonalStatementDoc = Convert.ToString(row["PersonalStatementDoc"])
+                                                  PersonalStatementDoc = Convert.ToString(row["PersonalStatementDoc"]),
+                                                  UniversityApplicationDetails = Convert.ToString(row["UniversityApplicationDetails"])
                                               }).ToList();
                     }
                     if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
@@ -400,9 +401,9 @@ namespace ThoughtFocus.Service.Implementation
                                                    FinalDecisionComments = Convert.ToString(row["FinalDecisionComments"] == DBNull.Value ? null : row["FinalDecisionComments"]),
                                                    FinalDecisionDate = Convert.ToString(row["FinalDecisionDate"] == DBNull.Value ? null : row["FinalDecisionDate"]),
                                                    CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"]),
-                                                   UniversityApplicationStatus = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["UniversityApplicationStatus"])
-
-
+                                                   UniversityApplicationStatus = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["UniversityApplicationStatus"]),
+                                                   GPA = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["GPA"]),
+                                                   StatusDate = Convert.ToDateTime(row["StatusDate"] == DBNull.Value ? null : row["StatusDate"])
                                                }).FirstOrDefault();
 
                     obj.FormStateHandler = dtFormData.Tables[1].AsEnumerable().Select(row =>

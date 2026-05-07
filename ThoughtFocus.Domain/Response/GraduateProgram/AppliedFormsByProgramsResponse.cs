@@ -48,6 +48,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string ResumeUploadStatus { get; set; }
         public string SOPUploadStatus {  get; set; }
         public string PersonalStatementDoc { get; set; }
+        public string UniversityApplicationDetails { get; set; }
     }
 
 
