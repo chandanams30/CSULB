@@ -47,7 +47,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string FinalDecisionComments { get; set; }
         public string FinalDecisionDate { get; set; }
         public string UniversityApplicationStatus { get; set; }
-
+        public string GPA {  get; set; }
+        public DateTime StatusDate { get; set; }
 
     }
     public class FormStateHandler
