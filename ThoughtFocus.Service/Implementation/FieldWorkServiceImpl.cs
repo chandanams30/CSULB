@@ -495,7 +495,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
                                           new SqlParameter("@ValidTill", SqlDbType.DateTime) { Value = input.ValidTill },
                                           new SqlParameter("@Comments", SqlDbType.VarChar, -1) { Value = input.Comments },
-                                          new SqlParameter("@UploadedDate", SqlDbType.DateTime) { Value = input.UploadedDate}
+                                          new SqlParameter("@UploadedDate", SqlDbType.DateTime) { Value = input.UploadedDate},
+                                          new SqlParameter("@DocumentNumber", SqlDbType.BigInt) { Value = input.DocumentNumber}
                                         };
             DataTable dtFWDoc = _helper.GetDataTable("[dbo].[UpdateFieldWorkRequiredDocuments]", parameters);
             if (dtFWDoc.Rows.Count > 0 && input.FileName != string.Empty)

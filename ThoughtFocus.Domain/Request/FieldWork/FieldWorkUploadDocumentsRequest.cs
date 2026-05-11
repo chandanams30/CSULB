@@ -14,5 +14,6 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public DateTime ValidTill { get; set; }
         public string Comments { get; set; }
         public DateTime UploadedDate { get; set; }
+        public int DocumentNumber { get; set; }
     }
 }
