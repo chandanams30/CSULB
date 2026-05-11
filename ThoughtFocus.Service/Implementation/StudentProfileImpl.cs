@@ -229,15 +229,21 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
                                     ? Convert.ToString(row["TermCode"])
                                     : string.Empty,
                         }).ToList() : null;
-                    obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 6 && dtStudentProfile.Tables[6] != null
-                        ? dtStudentProfile.Tables[6].AsEnumerable().Select(row =>
-                            new StudentProfileRoleHandler
-                            {
-                                StudentProfileControls = row["StudentProfileRoleHandler"] != DBNull.Value
-                                    ? Convert.ToString(row["StudentProfileRoleHandler"])
-                                    : string.Empty,
-                            }).FirstOrDefault()
-                        : null;
+                   
+                    obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 6
+                   && dtStudentProfile.Tables[6] != null
+                   && dtStudentProfile.Tables[6].Rows.Count > 0
+                   ? new StudentProfileRoleHandler
+                   {
+                       StudentProfileControls =
+                           dtStudentProfile.Tables[6].Rows[0]["StudentProfileRoleHandler"] != DBNull.Value
+                           ? Newtonsoft.Json.JsonConvert.DeserializeObject(
+                               Convert.ToString(
+                                   dtStudentProfile.Tables[6].Rows[0]["StudentProfileRoleHandler"]))
+                           : new { }
+
+                   }
+                   : null;
 
                     if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
             {
