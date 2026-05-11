@@ -848,7 +848,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   DocumentStatus = Convert.ToString(row["DocumentStatus"]),
                                                   DocumentInfo = Convert.ToString(row["DocumentInfo"]),
                                                   CanUpload = Convert.ToBoolean(row["CanUpload"]),
-                                                  CanValidate = Convert.ToBoolean(row["CanValidate"])
+                                                  CanValidate = Convert.ToBoolean(row["CanValidate"]),
+                                                  DocumentNumber = Convert.ToInt32(row["DocumentNumber"] == DBNull.Value ? null : row["DocumentNumber"])
                                               }).ToList();
 
 
