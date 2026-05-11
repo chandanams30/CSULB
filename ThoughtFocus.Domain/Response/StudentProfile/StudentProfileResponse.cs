@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+
 
 namespace ThoughtFocus.Domain.Response.StudentProfile
 {
@@ -184,6 +187,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
 
     public class StudentProfileRoleHandler
     {
-        public string StudentProfileControls { get; set; }
+        public object StudentProfileControls { get; set; }
+
     }
 }
