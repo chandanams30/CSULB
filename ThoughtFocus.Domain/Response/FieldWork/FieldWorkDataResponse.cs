@@ -42,6 +42,7 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string DocumentInfo { get; set; }
         public bool CanUpload { get; set; }
         public bool CanValidate { get; set; }
+        public int DocumentNumber { get; set; }
     }
     public class FieldWorkSummaryTabHours
     {
