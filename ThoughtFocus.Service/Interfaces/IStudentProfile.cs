@@ -10,7 +10,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IStudentProfile
     {
-        StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID);
+        StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID, int formID);
         StudentProfileSearchResponse GetStudentProfileSearchData(string searchString);
         StudentProfileMessageBoardResponse GetStudentProfileMessageBoard(string CsulbId, string MessageBoardIdentifier);
         BaseResponse UpdateStudentProfileMessageBoard(UpdateStudentProfileMessageBoardRequest input);
@@ -18,7 +18,7 @@ namespace ThoughtFocus.Service.Interfaces
         List<ApplicationList> GetApplications(int userId, string identifier);
         SemesterTermListResponse GetSemesterList(int applicationId);
         ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode);
-        StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID);
+        StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID,string identifier);
         BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input);
         BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input);
         BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input);

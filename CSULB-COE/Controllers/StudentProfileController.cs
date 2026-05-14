@@ -30,11 +30,11 @@ namespace CSULB_COE.Controllers
         }
         //feches student profile data
         [HttpGet("GetStudentProfileData")]
-        public StudentProfileResponse GetStudentProfileData(string CsulbId,int UserID)
+        public StudentProfileResponse GetStudentProfileData(string CsulbId,int UserID, int formID)
         {
             try
             {
-                StudentProfileResponse response = _studentProfileService.GetStudentProfileData(CsulbId, UserID);
+                StudentProfileResponse response = _studentProfileService.GetStudentProfileData(CsulbId, UserID,formID);
                 return response;
             }
             catch (Exception ex)
@@ -176,11 +176,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetStudentAppliedFormsByPrograms")]
-        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms( int programID, string termCode,string CSULBID )
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms( int programID, string termCode,string CSULBID,string identifier)
         {
             try
             {
-                StudentAppliedFormsByProgramsResponse response = _studentProfileService.GetStudentAppliedFormsByPrograms( programID, termCode,CSULBID);
+                StudentAppliedFormsByProgramsResponse response = _studentProfileService.GetStudentAppliedFormsByPrograms( programID, termCode,CSULBID, identifier);
                 return response;
             }
             catch (Exception ex)

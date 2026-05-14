@@ -51,7 +51,7 @@ namespace ThoughtFocus.Service.Implementation
         }
        
 
-public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
+public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,int formID)
 {
     StudentProfileResponse obj = new StudentProfileResponse();
     string csulbIDsStaff = String.Empty;
@@ -61,7 +61,8 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID)
     SqlParameter[] parameters = {
                                           new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId },
                                           new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
-                                          new SqlParameter("@CSULBIDStaffSP", SqlDbType.NVarChar, -1) { Value = csulbIDsStaff }
+                                          new SqlParameter("@CSULBIDStaffSP", SqlDbType.NVarChar, -1) { Value = csulbIDsStaff },
+                                          new SqlParameter("@FormID", SqlDbType.NVarChar, -1) { Value = formID }
                                         };
 
     DataSet dtStudentProfile = _helper.GetDataSet("[dbo].[GetStudentProfile]", parameters);
@@ -279,8 +280,16 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
                                                   ID = Convert.ToInt32(row["ID"]),
                                                   FirstName = Convert.ToString(row["FirstName"]),
                                                   LastName = Convert.ToString(row["LastName"]),
-                                                  EMAIL = Convert.ToString(row["CSULBEmail"]),
+                                                  EMAIL = Convert.ToString(row["EMAIL"]),
                                                   CSULBID = Convert.ToString(row["CSULBID"]),
+                                                  Type = Convert.ToString(row["Type"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  TermCode = row["TermCode"] == DBNull.Value ? "" : Convert.ToString(row["TermCode"]),
+                                                  ProgramID = row["ProgramID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["ProgramID"]),
+                                                  ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
+                                                  ProgramName = Convert.ToString(row["ProgramName"]),
+                                                  Term = Convert.ToString(row["Term"]),
+                                                  Status = Convert.ToString(row["Status"])
 
                                               }).ToList();
                 obj.IsSuccess = true;
@@ -482,7 +491,7 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
             }
             return obj;
         }
-        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID)
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID,string identifier)
         {
             StudentAppliedFormsByProgramsResponse obj = new StudentAppliedFormsByProgramsResponse();
             
@@ -491,7 +500,8 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
                                         {
                                           new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
                                           new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = termCode },
-                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar, 25) { Value = CSULBID }
+                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar, 25) { Value = CSULBID },
+                                          new SqlParameter("@Identifier", SqlDbType.NVarChar, 25) { Value = identifier }
                                         };
 
             DataTable dsStudentAppliedFormsByProgram = _helper.GetDataTable("[dbo].[StudentProfileSearch]", parameters);

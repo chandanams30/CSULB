@@ -80,6 +80,14 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string LastName { get; set; }
         public string EMAIL { get; set; }
         public string CSULBID { get; set; }
+        public string Type { get; set; }
+        public int UserID { get; set; }
+        public string TermCode { get; set; }
+        public int? ProgramID { get; set; }
+        public int ApplicationTypeID { get; set; }
+        public string ProgramName { get; set; }
+        public string Term { get; set; }
+        public string Status { get; set; }
     }
     public class StudentProfileMessageBoardResponse :BaseResponse
     {
