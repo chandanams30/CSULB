@@ -1171,10 +1171,10 @@ namespace ThoughtFocus.Service.Implementation
                 if (dsRec.Tables[0].Rows.Count > 0 && dsRec.Tables[1].Rows.Count > 0)
                 {
                     int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
-                    if (applicationTypeID == 2 && formStateID == 10)
+                    if (applicationTypeID == 1 || applicationTypeID == 2)
                     {
-                        //if (formStateID == 10 && applicationTypeID == 3)
-                        //{
+                        if (formStateID == 10)
+                        {
                             // applicant mail
                             string logoText = "cid:myImageID";
                             string applicantsName = string.Empty;
@@ -1232,7 +1232,7 @@ namespace ThoughtFocus.Service.Implementation
                                        .Replace("[[finalDecision]]", finalDecision);
                             byte[] inputStr = null;
                             _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
-                        //}
+                        }
                     }
                 }
             }
