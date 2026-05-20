@@ -15,7 +15,6 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public FormSubSectionResponseGPA FormSubSectionResponseGPA { get; set; }
         public List<FormSectionAttachmentListSMC> FormSectionAttachmentListSMC { get; set; }
         public AdmitDecision admitDecision { get; set; }
-        public List<SMCDocumentList> programApplicationSMCDocumentList {  get; set; }
         public StudentProfileRoleHandler StudentProfileRoleHandler { get; set; }
 
     }
@@ -186,11 +185,6 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string FileName { get; set; }
         public string FileExtn { get; set; }
         public bool CanView { get; set; }
-    }
-    public class SMCDocumentList
-    {
-        public string Value { get; set; }
-        public string TermCode { get; set; }
     }
 
     public class StudentProfileRoleHandler

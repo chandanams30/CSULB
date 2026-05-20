@@ -221,28 +221,17 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,i
                                     : 0
                             }).FirstOrDefault()
                         : null;
-                    obj.programApplicationSMCDocumentList = dtStudentProfile.Tables.Count > 5 && dtStudentProfile.Tables[5] != null
-                        ? dtStudentProfile.Tables[5].AsEnumerable().Select(row =>
-                        new SMCDocumentList
-                        {
-                            Value = row["Value"] != DBNull.Value
-                                    ? Convert.ToString(row["Value"])
-                                    : string.Empty,
-                            TermCode = row["TermCode"] != DBNull.Value
-                                    ? Convert.ToString(row["TermCode"])
-                                    : string.Empty,
-                        }).ToList() : null;
                    
-                    obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 6
-                   && dtStudentProfile.Tables[6] != null
-                   && dtStudentProfile.Tables[6].Rows.Count > 0
+                    obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 5
+                   && dtStudentProfile.Tables[5] != null
+                   && dtStudentProfile.Tables[5].Rows.Count > 0
                    ? new StudentProfileRoleHandler
                    {
                        StudentProfileControls =
-                           dtStudentProfile.Tables[6].Rows[0]["StudentProfileRoleHandler"] != DBNull.Value
+                           dtStudentProfile.Tables[5].Rows[0]["StudentProfileRoleHandler"] != DBNull.Value
                            ? Newtonsoft.Json.JsonConvert.DeserializeObject(
                                Convert.ToString(
-                                   dtStudentProfile.Tables[6].Rows[0]["StudentProfileRoleHandler"]))
+                                   dtStudentProfile.Tables[5].Rows[0]["StudentProfileRoleHandler"]))
                            : new { }
 
                    }
@@ -1000,48 +989,6 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
             response.Message = "Student profile data saved successfully";
             response.IsSuccess = true;
             return response;
-        }
-        public PrerequisitesResponse GetPrerequisiteDetails(string csulbid)
-        {
-            PrerequisitesResponse obj = new PrerequisitesResponse();
-
-
-            SqlParameter[] parameters =
-                                        {
-                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 15) { Value = csulbid }
-                                        };
-
-            DataTable dsAttachments = _helper.GetDataTable("[Application].[GetPrerequisiteDetails]", parameters);
-            try
-            {
-                if (dsAttachments.Rows.Count > 0)
-                {
-                    obj.FormPrerequisites = dsAttachments.AsEnumerable().Select(row =>
-                                              new PrerequisiteDetails
-                                              {
-                                                  fieldWorkAttachmentID = Convert.ToInt32(row["fieldWorkAttachmentID"]),
-                                                  UserID = Convert.ToInt32(row["UserID"]),
-                                                  DocumentID = Convert.ToInt32(row["DocumentID"]),
-                                                  DocumentName = Convert.ToString(row["DocumentName"]),
-                                                  FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
-                                                  FileExtn = Convert.ToString(row["FileExtn"]),
-                                                  ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
-                                                  DocumentStatus = Convert.ToString(row["DocumentStatus"])
-                                              }).ToList();
-
-
-                    obj.IsSuccess = true;
-                    obj.Message = "Data Retrieved Successfully";
-
-                }
-            }
-            catch (Exception ex)
-            {
-                obj.IsSuccess = false;
-                obj.Message = "Data Retrieval Failed , Please contact site admin ";
-                obj.StackTrace = ex.Message;
-            }
-            return obj;
         }
     }
 }

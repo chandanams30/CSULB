@@ -340,24 +340,6 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpGet("GetFormPrerequisites")]
-        public PrerequisitesResponse GetPrerequisiteDetails(string csulbid)
-        {
-            try
-            {
-                PrerequisitesResponse response = _studentProfileService.GetPrerequisiteDetails(csulbid);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                PrerequisitesResponse response = new PrerequisitesResponse();
-                response.IsSuccess = false;
-                response.Message = "Failed to retrieve data , please try after sometime";
-                response.StackTrace = ex.Message;
-                _logger.LogError(ex, ex.Message);
-                return response;
-            }
-        }
 
     }
 }
