@@ -1172,6 +1172,7 @@ namespace ThoughtFocus.Service.Implementation
                 if (dsRec.Tables[0].Rows.Count > 0 && dsRec.Tables[1].Rows.Count > 0)
                 {
                     int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
+                    string csulbid= Convert.ToString(dsRec.Tables[1].Rows[0]["CSULBID"]);
                     if (applicationTypeID == 1 || applicationTypeID == 2)
                     {
                         if (formStateID == 10)
@@ -1188,27 +1189,15 @@ namespace ThoughtFocus.Service.Implementation
                             string decisionType = string.Empty;
                             string beforeBody = string.Empty;
                             string afterBody = string.Empty;
+                            string date = DateTime.Now.ToString("MM-dd-yyyy");
+                            decisionType = "Offered";
 
                             applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                             toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
                             ccMail = Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
                             programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                             finalDecision = Convert.ToString(dsRec.Tables[0].Rows[0]["FinalDecision"]);
-                            if (formStateID == 10)
-                            {
-                                subject = "Application Offered";
-                                decisionType = "Offered";
-                                //if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
-                                //    //body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
-                                //else
-                                //    body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
-                            }
-                            else
-                            {
-                                subject = "Application Not Offered";
-                                decisionType = "Not Offered";
-                                //body = GetMailBodyTemplate("Student_FormNotOffer_Confirmation.html");
-                            }
+                           
                             SqlParameter[] parameters2 ={
                                             new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = "" },
                                             new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = finalDecision },
@@ -1224,13 +1213,68 @@ namespace ThoughtFocus.Service.Implementation
                                     body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
                                 }
                             }
-                            beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                            if (applicationTypeID == 1)
+                            {
+                                string beforeContent = string.Empty;
+                                (subject,beforeContent) = programID switch
+                                {
+                                    1 => (
+                                        "CSULB Education Specialist Credential Program Admissions",
+                                        "<h3>Education Specialist Credential Program</h3>"
+                                    ),
+
+                                    2 => (
+                                        "CSULB Multiple Subject Credential Program Admissions",
+                                        "<h3>Multiple Subject Credential Program</h3>"
+                                    ),
+
+                                    3 => (
+                                        "CSULB PK3 Early Childhood Education Specialist Credential Program Admissions",
+                                        "<h3>PK3 Early Childhood Education Specialist Credential Program</h3>"
+                                    ),
+
+                                    4 => (
+                                        "CSULB Single Subject Credential Program Admissions",
+                                        "<h3>Single Subject Credential Program</h3>"
+                                    ),
+
+                                    6 => (
+                                        "CSULB Urban Dual Credential Program Admissions",
+                                        "<h3>Urban Dual Credential Program</h3>"
+                                    ),
+
+                                    _ => (
+                                        "CSULB Program Admissions",
+                                        "<h3>CSULB Program Admissions</h3>"
+                                    )
+                                };
+
+                                beforeBody = $@"<html><body><img alt=""logo"" src=[[logoPath]] style=""width:300px; height:auto;"" /><div style=""width: 100%; border-bottom: 2px solid black; font-family: Arial; margin-top: 10px;"">{beforeContent}</div>";
+                                //if(programID == 1 || programID == 2 || programID == 4 || programID == 6)
+                                //    //body = GetMailBodyTemplate("Student_FormOffer_Confirmation_ICP.html");
+                                //else
+                                //    body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
+                            }
+                            else if (applicationTypeID == 2)
+                            {
+                                subject = "Application Offered";
+                                beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                            }
+                            //else(formStateID == 11)
+                            //{
+                            //   subject = "Application Not Offered";
+                            //   decisionType = "Not Offered";
+                            //   beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                            //}
+                            //beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                             body = body.Replace("[[logoPath]]", logoText)
                                        .Replace("[[ApplicantName]]", applicantsName)
                                        .Replace("[[programName]]", programName)
-                                       .Replace("[[finalDecision]]", finalDecision);
+                                       .Replace("[[finalDecision]]", finalDecision)
+                                       .Replace("[[CSULBID]]", csulbid)
+                                       .Replace("[[date]]", date);
                             byte[] inputStr = null;
                             _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
                         }
