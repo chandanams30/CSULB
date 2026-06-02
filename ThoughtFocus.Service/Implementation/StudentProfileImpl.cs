@@ -976,5 +976,80 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
             response.IsSuccess = true;
             return response;
         }
+        public ProgramPlannerCourseListResponse GetProgramPlannerCourseList(string CSULBID, int ProgramID, string TermCode)
+        {
+            ProgramPlannerCourseListResponse obj = new ProgramPlannerCourseListResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@StudentID", SqlDbType.VarChar,20) { Value = CSULBID },
+                                          new SqlParameter("@ProgramID", SqlDbType.Int) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,20) { Value = TermCode }
+                                     };
+            DataTable dtProgramPlannerCourseList = _helper.GetDataTable("[dbo].[GetProgramPlannerCourses]", parameters);
+            try
+            {
+                if (dtProgramPlannerCourseList.Rows.Count > 0)
+                {
+                    obj.ProgramPlannerCourseList = dtProgramPlannerCourseList.AsEnumerable().Select(row =>
+                                              new ProgramPlannerCourseList
+                                              {
+                                                  MasterID = row["MasterID"] == DBNull.Value ? 0 : Convert.ToInt32(row["MasterID"]),
+                                                  DetailID = row["DetailID"] == DBNull.Value ? 0 : Convert.ToInt32(row["DetailID"]),
+                                                  CourseName = Convert.ToString(row["CourseName"] == DBNull.Value ? null : row["CourseName"]),
+                                                  TermCode = Convert.ToString(row["TermCode"] == DBNull.Value ? null : row["TermCode"]),
+                                                  Term = Convert.ToString(row["Term"] == DBNull.Value ? null : row["Term"]),
+                                                  Year = Convert.ToString(row["Year"] == DBNull.Value ? null : row["Year"]),
+                                                  Notes = Convert.ToString(row["Notes"] == DBNull.Value ? null : row["Notes"]),
+                                                  CSULBID = Convert.ToString(row["StudentID"] == DBNull.Value ? null : row["StudentID"]),
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                obj.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public BaseResponse UpsertCourseDetails(string JSONString)
+        {
+            BaseResponse obj = new BaseResponse();
+            try
+            { 
+                SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@Json", SqlDbType.NVarChar, -1) { Value = JSONString }
+                                   };
+                DataTable SPCDID = _helper.GetDataTable("[dbo].[SaveStudentProfileCourseDetails]", parameters);
+
+                if (SPCDID.Rows.Count > 0)
+                {
+                    obj.IsSuccess = true;
+                    obj.Message = "Data updated Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "Failed to save data";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data update Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+                _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
+            }
+
+            return obj;
+        }
     }
 }

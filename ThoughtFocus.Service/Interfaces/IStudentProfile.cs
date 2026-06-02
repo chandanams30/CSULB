@@ -22,7 +22,11 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveStudentAggrement(SaveStudentAggrementRequest input);
         BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input);
         BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input);
+        ProgramPlannerCourseListResponse GetProgramPlannerCourseList(string CSULBID, int ProgramID, string TermCode);
+        BaseResponse UpsertCourseDetails(string JSONString);
         UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input);
+        DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID);
+        ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID);
 
     }
 }

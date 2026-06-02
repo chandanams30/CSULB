@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.StudentProfile;
@@ -248,5 +249,120 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("DownloadProfileAttachment")]
+        public IActionResult DownloadProfileAttachment(Guid UniqueID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                DownloadProfileAttachmentResponse obj = _studentProfileService.DownloadProfileAttachment(UniqueID);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetProfileAttachmentDetails")]
+        public ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID)
+        {
+            try
+            {
+                ProfileAttachmentDetailsResponse response = _studentProfileService.GetProfileAttachmentDetails(CSULBID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProfileAttachmentDetailsResponse response = new ProfileAttachmentDetailsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("DeleteProfileAttachment")]
+        public BaseResponse DeleteProfileAttachment(DeleteProfileAttachmentRequest input)
+        {
+            try
+            {
+                BaseResponse response = _studentProfileService.DeleteProfileAttachment(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        private string GetFileType(string fileExt)
+        {
+            string contentType = string.Empty;
+            switch (fileExt.ToUpper())
+            {
+                case "PDF":
+                    contentType = "application/pdf";
+                    break;
+                case "DOCX":
+                    contentType = "Application/msword";
+                    break;
+                case "DOC":
+                    contentType = "Application/msword";
+                    break;
+                case "XLSX":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "XLS":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "JPG":
+                    contentType = "image/jpeg";
+                    break;
+                case "JPEG":
+                    contentType = "image/jpeg";
+                    break;
+
+            }
+            return contentType;
+        }
+        [HttpGet("GetProgramPlannerCourseList")]
+        public ProgramPlannerCourseListResponse GetProgramPlannerCourseList(string CSULBID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                ProgramPlannerCourseListResponse response = _studentProfileService.GetProgramPlannerCourseList(CSULBID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProgramPlannerCourseListResponse response = new ProgramPlannerCourseListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("UpsertProgramPlannerCourseDetails")]
+        public BaseResponse UpsertYREG(string JSONString)
+        {
+            //JSONString = "{\r\n  \"JSONString\": [{\"SPCDID\":1,\"SPCMID\":1,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Fall\",\"Year\":\"2026\",\"Notes\":\"Test notes\",\"CreatedBy\":1},{\"SPCDID\":7,\"SPCMID\":2,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Fall\",\"Year\":\"2026\",\"Notes\":\"Test Notes section78656\",\"CreatedBy\":1},{\"SPCDID\":3,\"SPCMID\":3,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"will take this class12\",\"CreatedBy\":1},{\"SPCDID\":4,\"SPCMID\":4,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"test class1\",\"CreatedBy\":1},{\"SPCDID\":5,\"SPCMID\":11,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"test class 11\",\"CreatedBy\":1}]\r\n}";
+            BaseResponse response = _studentProfileService.UpsertCourseDetails(JSONString);
+            return response;
+        }
+
     }
 }
