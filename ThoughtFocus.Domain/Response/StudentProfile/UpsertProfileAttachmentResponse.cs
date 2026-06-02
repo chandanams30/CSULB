@@ -56,4 +56,21 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public DateTime? ValidatedDate { get; set; }
         public string DocumentStatus { get; set; }
     }
+    public class ProgramPlannerCourseListResponse:BaseResponse
+    {
+        public List<ProgramPlannerCourseList> ProgramPlannerCourseList { get; set; }
+    }
+
+    public class ProgramPlannerCourseList
+    {
+
+        public int MasterID { get; set; }
+        public int DetailID { get; set; }
+        public string CourseName { get; set; }
+        public string TermCode { get; set; }
+        public string Term { get; set; }
+        public string Year { get; set; }
+        public string Notes { get; set; }
+        public string CSULBID { get; set; }
+    }
 }

@@ -150,7 +150,43 @@ namespace ThoughtFocus.DataAccess.DBHelper
             }
             return result;
         }
+        public int UpsertData(string procedureName, params SqlParameter[] commandParameters)
+        {
+            int id = 0;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.Connection = conn;
+                    cmd.CommandText = procedureName;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Clear();
+                    if (commandParameters != null)
+                    {
+                        cmd.Parameters.AddRange(commandParameters);
+                    }
+                    var outputParam = new SqlParameter("@Id", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    cmd.Parameters.Add(outputParam);
+                    cmd.ExecuteNonQuery();
+                    // result = Convert.ToInt32(cmd.Parameters["@new_identity"].Value);
+                    id = (int)outputParam.Value;
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message.ToString();
+                //_logger.LogError(ex, msg);
+                id = -1;
+                throw;
+            }
+            return id;
+        }
 
-       
+
     }
 }

@@ -12,5 +12,6 @@ namespace ThoughtFocus.DataAccess.DBHelper
         DataSet GetDataSet(string procedureName, params SqlParameter[] commandParameters);
         int InsertTable(string procedureName, params SqlParameter[] commandParameters);
         string ExecuteSPWithOutputVariable(string procedureName, params SqlParameter[] commandParameters);
+        int UpsertData(string procedureName, params SqlParameter[] commandParameters);
     }
 }

@@ -340,6 +340,32 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetProgramPlannerCourseList")]
+        public ProgramPlannerCourseListResponse GetProgramPlannerCourseList(string CSULBID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                ProgramPlannerCourseListResponse response = _studentProfileService.GetProgramPlannerCourseList(CSULBID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ProgramPlannerCourseListResponse response = new ProgramPlannerCourseListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("UpsertProgramPlannerCourseDetails")]
+        public BaseResponse UpsertYREG(string JSONString)
+        {
+            //JSONString = "{\r\n  \"JSONString\": [{\"SPCDID\":1,\"SPCMID\":1,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Fall\",\"Year\":\"2026\",\"Notes\":\"Test notes\",\"CreatedBy\":1},{\"SPCDID\":7,\"SPCMID\":2,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Fall\",\"Year\":\"2026\",\"Notes\":\"Test Notes section78656\",\"CreatedBy\":1},{\"SPCDID\":3,\"SPCMID\":3,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"will take this class12\",\"CreatedBy\":1},{\"SPCDID\":4,\"SPCMID\":4,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"test class1\",\"CreatedBy\":1},{\"SPCDID\":5,\"SPCMID\":11,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"test class 11\",\"CreatedBy\":1}]\r\n}";
+            BaseResponse response = _studentProfileService.UpsertCourseDetails(JSONString);
+            return response;
+        }
 
     }
 }
