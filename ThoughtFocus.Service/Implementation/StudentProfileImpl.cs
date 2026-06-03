@@ -1000,24 +1000,47 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
                                           new SqlParameter("@ProgramID", SqlDbType.Int) { Value = ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar,20) { Value = TermCode }
                                      };
-            DataTable dtProgramPlannerCourseList = _helper.GetDataTable("[dbo].[GetProgramPlannerCourses]", parameters);
+            DataSet dtProgramPlannerCourseList = _helper.GetDataSet("[dbo].[GetProgramPlannerCourses]", parameters);
             try
             {
-                if (dtProgramPlannerCourseList.Rows.Count > 0)
+                if (dtProgramPlannerCourseList.Tables.Count > 0)
                 {
-                    obj.ProgramPlannerCourseList = dtProgramPlannerCourseList.AsEnumerable().Select(row =>
-                                              new ProgramPlannerCourseList
-                                              {
-                                                  MasterID = row["MasterID"] == DBNull.Value ? 0 : Convert.ToInt32(row["MasterID"]),
-                                                  DetailID = row["DetailID"] == DBNull.Value ? 0 : Convert.ToInt32(row["DetailID"]),
-                                                  CourseName = Convert.ToString(row["CourseName"] == DBNull.Value ? null : row["CourseName"]),
-                                                  TermCode = Convert.ToString(row["TermCode"] == DBNull.Value ? null : row["TermCode"]),
-                                                  Term = Convert.ToString(row["Term"] == DBNull.Value ? null : row["Term"]),
-                                                  Year = Convert.ToString(row["Year"] == DBNull.Value ? null : row["Year"]),
-                                                  Notes = Convert.ToString(row["Notes"] == DBNull.Value ? null : row["Notes"]),
-                                                  CSULBID = Convert.ToString(row["StudentID"] == DBNull.Value ? null : row["StudentID"]),
-                                              }).ToList();
+                    obj.ProgramPlannerCourseList =
+                    dtProgramPlannerCourseList.Tables.Count > 0
+                    ? dtProgramPlannerCourseList.Tables[0]
+                        .AsEnumerable()
+                        .Select(row => new ProgramPlannerCourseList
+                        {
+                            MasterID = row["MasterID"] == DBNull.Value ? 0 : Convert.ToInt32(row["MasterID"]),
+                            DetailID = row["DetailID"] == DBNull.Value ? 0 : Convert.ToInt32(row["DetailID"]),
+                            CourseName = row["CourseName"] == DBNull.Value ? null : Convert.ToString(row["CourseName"]),
+                            TermCode = row["TermCode"] == DBNull.Value ? null : Convert.ToString(row["TermCode"]),
+                            Term = row["Term"] == DBNull.Value ? null : Convert.ToString(row["Term"]),
+                            Year = row["Year"] == DBNull.Value ? null : Convert.ToString(row["Year"]),
+                            Notes = row["Notes"] == DBNull.Value ? null : Convert.ToString(row["Notes"]),
+                            CSULBID = row["StudentID"] == DBNull.Value ? null : Convert.ToString(row["StudentID"])
+                        })
+                        .ToList()
+                    : new List<ProgramPlannerCourseList>();
 
+
+                    obj.StateHandler =
+                        dtProgramPlannerCourseList.Tables.Count > 1 &&
+                        dtProgramPlannerCourseList.Tables[1].Rows.Count > 0 &&
+                        dtProgramPlannerCourseList.Tables[1].Columns.Contains("StateID")
+                        ? dtProgramPlannerCourseList.Tables[1]
+                            .AsEnumerable()
+                            .Select(row => new ProgramPlannerStateHandler
+                            {
+                                StateID = row["StateID"] == DBNull.Value
+                                            ? 0
+                                            : Convert.ToInt32(row["StateID"])
+                            })
+                            .FirstOrDefault()
+                        : new ProgramPlannerStateHandler
+                        {
+                            StateID = 0
+                        };
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
