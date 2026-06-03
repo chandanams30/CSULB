@@ -116,6 +116,7 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,i
                 isStaff = Convert.ToBoolean(row["isStaff"]),
                 CredentialProgram = Convert.ToString(row["CredentialProgram"]),
                 CredentialPathway = Convert.ToString(row["CredentialPathway"]),
+                TermCode = Convert.ToString(row["TermCode"])
 
             }).FirstOrDefault();
                

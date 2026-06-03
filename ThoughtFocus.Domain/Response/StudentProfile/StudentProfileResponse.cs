@@ -66,6 +66,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public int UserID { get; set; }
         public string CredentialPathway { get; set; }
         public string CredentialProgram { get; set; }
+        public string TermCode { get; set; }
 
     }
     public class StudentProfileSearchResponse : BaseResponse
