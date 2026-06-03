@@ -1191,7 +1191,8 @@ namespace ThoughtFocus.Service.Implementation
                             string decisionType = string.Empty;
                             string beforeBody = string.Empty;
                             string afterBody = string.Empty;
-                            string date = DateTime.Now.ToString("MM-dd-yyyy");
+                            string programSelected = string.Empty;
+                            string date = DateTime.Now.ToString("MMMM d, yyyy");
                             decisionType = "Offered";
 
                             applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
@@ -1199,7 +1200,8 @@ namespace ThoughtFocus.Service.Implementation
                             ccMail = Convert.ToString(dsRec.Tables[0].Rows[0]["altEmail"]);
                             programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                             finalDecision = Convert.ToString(dsRec.Tables[0].Rows[0]["FinalDecision"]);
-                           
+                            programSelected = Convert.ToString(dsRec.Tables[0].Rows[0]["ProgramSelected"]);
+
                             SqlParameter[] parameters2 ={
                                             new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = "" },
                                             new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = finalDecision },
@@ -1276,7 +1278,8 @@ namespace ThoughtFocus.Service.Implementation
                                        .Replace("[[programName]]", programName)
                                        .Replace("[[finalDecision]]", finalDecision)
                                        .Replace("[[CSULBID]]", csulbid)
-                                       .Replace("[[date]]", date);
+                                       .Replace("[[date]]", date)
+                                       .Replace("[[ProgramSelected]]", programSelected);
                             byte[] inputStr = null;
                             _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
                         }
