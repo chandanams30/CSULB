@@ -59,6 +59,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     public class ProgramPlannerCourseListResponse:BaseResponse
     {
         public List<ProgramPlannerCourseList> ProgramPlannerCourseList { get; set; }
+        public ProgramPlannerStateHandler StateHandler { get; set; }
+
     }
 
     public class ProgramPlannerCourseList
@@ -73,4 +75,9 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string Notes { get; set; }
         public string CSULBID { get; set; }
     }
-}
+    public class ProgramPlannerStateHandler
+    {
+        public int StateID { get; set; }
+    }
+
+    }
