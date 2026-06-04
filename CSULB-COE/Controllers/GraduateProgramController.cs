@@ -37,6 +37,7 @@ namespace CSULB_COE.Controllers
             _configuration = configuration;
             _studentProfileService = studentProfileService;
         }
+        //Add Comment
         [HttpGet("GetApplicationPrograms")]
         public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)
         {
