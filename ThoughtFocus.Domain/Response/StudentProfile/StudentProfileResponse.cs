@@ -88,6 +88,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string ProgramName { get; set; }
         public string Term { get; set; }
         public string Status { get; set; }
+        public int? ProgramPlannerState { get; set; }
     }
     public class StudentProfileMessageBoardResponse :BaseResponse
     {

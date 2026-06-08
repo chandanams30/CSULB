@@ -279,8 +279,8 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
                                                   ApplicationTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
                                                   ProgramName = Convert.ToString(row["ProgramName"]),
                                                   Term = Convert.ToString(row["Term"]),
-                                                  Status = Convert.ToString(row["Status"])
-
+                                                  Status = Convert.ToString(row["Status"]),
+                                                  ProgramPlannerState = row["ProgramPlannerState"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["ProgramPlannerState"])
                                               }).ToList();
                 obj.IsSuccess = true;
                 obj.Message = "Data retrieved succesfully ";
