@@ -54,5 +54,9 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
     {
         public Guid UniqueID { get; set; }
     }
+    public class ProgramPlannerInput
+    {
+        public object ProgramPlannerCourseJSON { get; set; }
+    }
 
 }

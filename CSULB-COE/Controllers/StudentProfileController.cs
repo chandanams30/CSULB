@@ -360,10 +360,10 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpPost("UpsertProgramPlannerCourseDetails")]
-        public BaseResponse UpsertYREG(string JSONString)
+        public BaseResponse UpsertYREG(ProgramPlannerInput input)
         {
-            //JSONString = "{\r\n  \"JSONString\": [{\"SPCDID\":1,\"SPCMID\":1,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Fall\",\"Year\":\"2026\",\"Notes\":\"Test notes\",\"CreatedBy\":1},{\"SPCDID\":7,\"SPCMID\":2,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Fall\",\"Year\":\"2026\",\"Notes\":\"Test Notes section78656\",\"CreatedBy\":1},{\"SPCDID\":3,\"SPCMID\":3,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"will take this class12\",\"CreatedBy\":1},{\"SPCDID\":4,\"SPCMID\":4,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"test class1\",\"CreatedBy\":1},{\"SPCDID\":5,\"SPCMID\":11,\"StudentID\":\"028110119\",\"TermCode\":\"2262\",\"Term\":\"Spring\",\"Year\":\"2026\",\"Notes\":\"test class 11\",\"CreatedBy\":1}]\r\n}";
-            BaseResponse response = _studentProfileService.UpsertCourseDetails(JSONString);
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(input.ProgramPlannerCourseJSON);
+            BaseResponse response = _studentProfileService.UpsertCourseDetails(json);
             return response;
         }
 
