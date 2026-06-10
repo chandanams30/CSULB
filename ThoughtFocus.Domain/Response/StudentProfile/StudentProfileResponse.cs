@@ -16,6 +16,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public List<FormSectionAttachmentListSMC> FormSectionAttachmentListSMC { get; set; }
         public AdmitDecision admitDecision { get; set; }
         public StudentProfileRoleHandler StudentProfileRoleHandler { get; set; }
+        public StudentProfileStateHandler StudentProfileStateHandler { get;set ;}
 
     }
 
@@ -194,4 +195,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public object StudentProfileControls { get; set; }
 
     }
+     public class StudentProfileStateHandler
+     {
+        public string StateHandler { get; set; }
+     }
 }

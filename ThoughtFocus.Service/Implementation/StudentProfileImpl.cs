@@ -235,12 +235,18 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,i
 
                    }
                    : null;
+                    obj.StudentProfileStateHandler = dtStudentProfile.Tables[6].AsEnumerable().Select(row =>
+                                                       new StudentProfileStateHandler
+                                                       {
+                                                           StateHandler = Convert.ToString(row["StateHandler"])
+
+                                                       }).FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(obj.studentProfile.SSNNumber) && obj.studentProfile.SSNNumber != null)
-            {
-                //IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
-                obj.studentProfile.SSNNumber = DecryptSSNNumber(obj.studentProfile.SSNNumber);
-            }
+                    {
+                        //IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
+                        obj.studentProfile.SSNNumber = DecryptSSNNumber(obj.studentProfile.SSNNumber);
+                    }
             obj.IsSuccess = true;
             obj.Message = "Data retrieved succesfully ";
         }
