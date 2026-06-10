@@ -1459,6 +1459,77 @@ namespace CSULB_COE.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("GetFormAttachment")]
+        public FormDocumentResponse GetFormAttachment(int userId, int formID, int programID)
+        {
+            try
+            {
+                FormDocumentResponse response = _graduateProgramService.GetFormAttachment(userId, formID, programID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                FormDocumentResponse response = new FormDocumentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpsertFormDocument")]
+        public BaseResponse UpsertFormDocument(FormDocumentRequest input)
+        {
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpsertFormDocument(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateFormDocumentValidation")]
+        public BaseResponse UpdateFormDocumentValidation(FormDocumentValidationRequest input)
+        {
+            #region testing with manual file , actual file will come as byte array 
+            //-------------just for testing - comment it after testing
+            //string filepath = "D:\\CSULB\\GitHub\\Documents\\TBTEST.pdf";
+            //string filepath = "D:\\CSULB\\Document\\TBCTC_Approval.pdf";
+            //byte[] fileContent = null;
+            //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+            //long byteLength = new System.IO.FileInfo(filepath).Length;
+            //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+            //input.FileContent = fileContent;
+            //fs.Close();
+            //fs.Dispose();
+            //binaryReader.Close();
+            //string fc = fileContent.ToString();
+            //----end comment----------------------------------------
+            #endregion
+
+            try
+            {
+                BaseResponse response = _graduateProgramService.UpdateFormDocumentValidation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
 
         //[HttpPost("UpdateRecommendation")]
         //public BaseResponse UpdateRecommendation(UpdateRecommendation input)

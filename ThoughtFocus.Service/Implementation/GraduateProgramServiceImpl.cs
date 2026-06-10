@@ -27,6 +27,7 @@ using ThoughtFocus.Domain.TemplateModels;
 using ThoughtFocus.Service.Interfaces;
 using ThoughtFocus.Domain.Request.FieldWork;
 using iTextSharp.text.pdf.codec.wmf;
+using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -4658,6 +4659,228 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+        }
+        public FormDocumentResponse GetFormAttachment(int userId, int formID, int programID)
+        {
+            FormDocumentResponse obj = new FormDocumentResponse();
+
+
+            SqlParameter[] parameters =
+                                        {
+                                          new SqlParameter("@UserId", SqlDbType.BigInt) { Value = userId },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID }
+                                        };
+
+            DataTable dsAttachments = _helper.GetDataTable("[Application].[GetFormDocuments]", parameters);
+            try
+            {
+                if (dsAttachments.Rows.Count > 0)
+                {
+                    obj.formdocumentDeatils = dsAttachments.AsEnumerable().Select(row =>
+                                              new FormDocumentDeatils
+                                              {
+                                                  formAttachmentID = Convert.ToInt32(row["FormAttachmentID"] == DBNull.Value ? null : row["FormAttachmentID"]),
+                                                  DocumentID = Convert.ToInt32(row["DocumentID"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  FormID = Convert.ToInt32(row["FormID"]),
+                                                  IsOptional = Convert.ToBoolean(row["IsOptional"]),
+                                                  AttachmentTitle = Convert.ToString(row["AttachmentTitle"]),
+                                                  FileName = Convert.ToString(row["FileName"]),
+                                                  FileExtn= Convert.ToString(row["FileExtn"]),
+                                                  IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
+                                                  ApprovedBy = Convert.ToString(row["ApprovedBy"] == DBNull.Value ? null : row["ApprovedBy"]),
+                                                  ValidatedDate = Convert.ToDateTime(row["ValidatedDate"] == DBNull.Value ? null : row["ValidatedDate"]),
+                                                  ValidTill = Convert.ToDateTime(row["ValidTill"] == DBNull.Value ? null : row["ValidTill"]),
+                                                  RejectReason = Convert.ToString(row["RejectedReason"]),
+                                                  Comments = Convert.ToString(row["Comments"]),
+                                                  DocumentStatus = Convert.ToString(row["DocumentStatus"]),
+                                                  DocumentInfo = Convert.ToString(row["DocumentInfo"]),
+                                                  CanUpload = Convert.ToBoolean(row["CanUpload"]),
+                                                  CanValidate = Convert.ToBoolean(row["CanValidate"])
+                                              }).ToList();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpsertFormDocument(FormDocumentRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string fileExtensionWord = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+                bool isNotPDFExtension = false;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+
+                // pull the saved file name format SP Below
+                FormAttachmentFileNames fileNames = GetFormAttachmentFileName(input.FormID, input.DocumentID);
+                if (input.FileName != string.Empty)
+                {
+                    AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                    //fileName = fileDetails.FileName;
+                    fileExtension = fileDetails.FileExtension;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // isNotPDFExtension = true;
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                    if (fileExtension.ToUpper() == "DOC" || fileExtension.ToUpper() == "DOCX")
+                    {
+                        isNotPDFExtension = true;
+                        bool isFileSaved = SaveWordFileInTempFolder(input.FileContent, fileNames.FileName, fileExtension, workingFolderPath);
+                        fileExtensionWord = fileExtension;
+                        fileExtension = "pdf";
+                    }
+
+                }
+
+                SqlParameter[] parameters =
+                                         {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@DocumentID", SqlDbType.BigInt) { Value = input.DocumentID },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 250) { Value = fileNames.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = fileExtension },
+                                          new SqlParameter("@SavedFileName", SqlDbType.VarChar, 100) { Value = fileNames.SavedFileName },
+                                          new SqlParameter("@ValidTill", SqlDbType.DateTime) {Value=input.ValidTill},
+                                          new SqlParameter("@Comments", SqlDbType.NVarChar,-1) {Value=input.Comments},
+                                          new SqlParameter("@UploadedDate", SqlDbType.DateTime) {Value=input.UploadedDate}
+                                        };
+                DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertFormDocument]", parameters);
+                if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+                {
+                    string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                    userFolderName = folderSplit[0].ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            // copy the file here 
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            if (isNotPDFExtension)
+                            {
+                                byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+                        if (isNotPDFExtension)
+                        {
+                            byte[] inputStr = word2PDF(Path.Combine(workingFolderPath, fileNames.FileName + "." + fileExtensionWord), Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension));
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileNames.SavedFileName + "." + fileExtension), input.FileContent);
+                        }
+                    }
+                    // now delete the old file based on the file name return from DB call above 
+                }
+
+                response.IsSuccess = true;
+                response.Message = "Form attachment Uploaded Successfully";
+
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+
+                return response;
+            }
+        }
+        public BaseResponse UpdateFormDocumentValidation(FormDocumentValidationRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            try
+            {
+                response.IsSuccess = true;
+                string responseString = string.Empty;
+                if (input.ApprovalStatus == true)
+                {
+                    // set the validtill value and empty the rejectreason value
+                    input.RejectedReason = null;
+                }
+                else
+                {
+                    // set the rejectreason value  and empty the validtill value
+                    input.ValidTill = null;
+                }
+                DateTime validatedDate = DateTime.Now;
+
+
+                SqlParameter[] parameters =
+                                            {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt, 50) { Value = input.FormID },
+                                          new SqlParameter("@IsApproved", SqlDbType.Bit, 50) { Value = input.ApprovalStatus },
+                                          new SqlParameter("@ApprovedBy", SqlDbType.BigInt, 50) { Value = input.ApproverUserId },
+                                          new SqlParameter("@ValidatedDate", SqlDbType.DateTime, 50) { Value = validatedDate },
+                                          new SqlParameter("@ValidTill", SqlDbType.DateTime, 50) { Value = (object)input.ValidTill??DBNull.Value },
+                                          new SqlParameter("@RejectReason", SqlDbType.NVarChar, 255) { Value = (object)input.RejectedReason??DBNull.Value },
+                                          new SqlParameter("@Comments", SqlDbType.NVarChar,-1) { Value = (object)input.Comments??DBNull.Value }
+                                        };
+
+                int identity = _helper.InsertTable("[dbo].[UpdateFormDocumentValidation]", parameters);
+
+                response.Message = "Form Attachment review status updated successfully.";
+            }
+            catch (Exception ex)
+            {
+                if (response.IsSuccess == true)
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Form Attachment validation failed";
+                }
+            }
+
+            return response;
         }
         public BaseResponse UpsertInterviewDate(FormUpsertAttachmentRequest input)
         {
