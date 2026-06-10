@@ -73,5 +73,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateFinalDecisionComment(FinalDecisionComment input);
         FormAttachmentDeatilsResponse GetFormAttachmentDeatils(int userID, int programID, int formID);
         BaseResponse UpsertInterviewDate(FormUpsertAttachmentRequest input);
+        FormDocumentResponse GetFormAttachment(int userId, int formID, int programID);
+        BaseResponse UpsertFormDocument(FormDocumentRequest input);
+        BaseResponse UpdateFormDocumentValidation(FormDocumentValidationRequest input);
     }
 }
