@@ -51,77 +51,77 @@ namespace ThoughtFocus.Service.Implementation
             _logger = logger;
             _utils = utils;
         }
-       
 
-public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,int formID)
-{
-    StudentProfileResponse obj = new StudentProfileResponse();
-    string csulbIDsStaff = String.Empty;
-    var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
-    csulbIDsStaff = jsonObj["CSULBIDStaffSP"]?.ToString();
 
-    SqlParameter[] parameters = {
+        public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID, int formID)
+        {
+            StudentProfileResponse obj = new StudentProfileResponse();
+            string csulbIDsStaff = String.Empty;
+            var jsonObj = JObject.Parse(File.ReadAllText(@"SupportFiles/MycedConfigurations/CSULBCEDConfig.json"));
+            csulbIDsStaff = jsonObj["CSULBIDStaffSP"]?.ToString();
+
+            SqlParameter[] parameters = {
                                           new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId },
                                           new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
                                           new SqlParameter("@CSULBIDStaffSP", SqlDbType.NVarChar, -1) { Value = csulbIDsStaff },
                                           new SqlParameter("@FormID", SqlDbType.NVarChar, -1) { Value = formID }
                                         };
 
-    DataSet dtStudentProfile = _helper.GetDataSet("[dbo].[GetStudentProfile]", parameters);
-    try
-    {
-        if (dtStudentProfile.Tables.Count > 0)
-        {
-            obj.studentProfile = dtStudentProfile.Tables[0].AsEnumerable().Select(row => new StudentProfile
+            DataSet dtStudentProfile = _helper.GetDataSet("[dbo].[GetStudentProfile]", parameters);
+            try
             {
-                CSULBID = Convert.ToString(row["CSULBID"]),
-                FirstName = Convert.ToString(row["FirstName"]),
-                MiddleName = Convert.ToString(row["MiddleName"]),
-                LastName = Convert.ToString(row["LastName"]),
-                PreferredName = Convert.ToString(row["PreferredName"]),
-                AlternateName = Convert.ToString(row["AlternateName"]),
-                MailingAddress1 = Convert.ToString(row["MailingAddress1"]),
-                MailingAddress2 = Convert.ToString(row["MailingAddress2"]),
-                MailingAddress3 = Convert.ToString(row["MailingAddress3"]),
-                MailingAddress4 = Convert.ToString(row["MailingAddress4"]),
-                MailingCity = Convert.ToString(row["MailingCity"]),
-                MailingState = Convert.ToString(row["MailingState"]),
-                MailingPostal = Convert.ToString(row["MailingPostal"]),
-                Phone = Regex.Replace(Convert.ToString(row["Phone"]).Replace("/", "").Replace("-", ""), @"(\d{3})(\d{3})(\d{0,4})", "($1)-$2-$3"),
-                csulbemail = Convert.ToString(row["CSULBEmail"]),
-                AlternateEmail = Convert.ToString(row["AlternateEmail"]),
-                AcademicPlan = Convert.ToString(row["AcademicPlan"]),
-                AcademicSubPlan = Convert.ToString(row["AcademicSubPlan"]),
-                AdditionalPlan = Convert.ToString(row["AdditionalPlan"]),
-                ProgramStatusDesc = Convert.ToString(row["ProgramStatusDesc"]),
-                GraduationFillingStatusDesc = Convert.ToString(row["GraduationFilingStatusDescr"]),
-                CurrentCsulbGpa = Convert.ToString(row["CurrentCSULBGPA"]),
-                CumulativeGpa = Convert.ToString(row["CumulativeGPA"]),
-                MajorGpa = Convert.ToString(row["MajorGPA"]),
-                AcademicStanding = Convert.ToString(row["AcademicStanding"]),
-                BachelorDegreeMajor = Convert.ToString(row["BachelorDegreeMajor"]),
-                AdmitTerm = Convert.ToString(row["AdmitTerm"]),
-                ActiveTerm = Convert.ToString(row["ActiveTerm"]),
-                GraduationFillingTerm = Convert.ToString(row["GraduationFillingTerm"]),
-                EducationalLeaveTerm = Convert.ToString(row["EducationalLeaveTerm"]),
-                Credential = Convert.ToString(row["Credential"]),
-                Certificate = Convert.ToString(row["Certificate"]),
-                DateOfBirth = Convert.ToDateTime(row["DateOfBirth"] == DBNull.Value ? null : row["DateOfBirth"]),
-                SSNNumber = Convert.ToString(row["SSNNumber"] == DBNull.Value ? null : row["SSNNumber"]),
-                AcademicIntegrityStatement = Convert.ToString(row["AcademicIntegrityStatement"] == DBNull.Value ? null : row["AcademicIntegrityStatement"]),
-                SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"]),
-                IsAgreed = Convert.ToBoolean(row["IsAgreed"] == DBNull.Value ? null : row["IsAgreed"]),
-                AgreedDate = row["AgreedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AgreedDate"]) : null,
-                BachelorDegreeMajorSP = Convert.ToString(row["BachelorDegreeMajorSP"]),
-                ConsolidatedAddress = Convert.ToString(row["ConsolidatedAddress"]),
-                UserID = Convert.ToInt32(row["UserID"]),
-                isStaff = Convert.ToBoolean(row["isStaff"]),
-                CredentialProgram = Convert.ToString(row["CredentialProgram"]),
-                CredentialPathway = Convert.ToString(row["CredentialPathway"]),
-                TermCode = Convert.ToString(row["TermCode"])
+                if (dtStudentProfile.Tables.Count > 0)
+                {
+                    obj.studentProfile = dtStudentProfile.Tables[0].AsEnumerable().Select(row => new StudentProfile
+                    {
+                        CSULBID = Convert.ToString(row["CSULBID"]),
+                        FirstName = Convert.ToString(row["FirstName"]),
+                        MiddleName = Convert.ToString(row["MiddleName"]),
+                        LastName = Convert.ToString(row["LastName"]),
+                        PreferredName = Convert.ToString(row["PreferredName"]),
+                        AlternateName = Convert.ToString(row["AlternateName"]),
+                        MailingAddress1 = Convert.ToString(row["MailingAddress1"]),
+                        MailingAddress2 = Convert.ToString(row["MailingAddress2"]),
+                        MailingAddress3 = Convert.ToString(row["MailingAddress3"]),
+                        MailingAddress4 = Convert.ToString(row["MailingAddress4"]),
+                        MailingCity = Convert.ToString(row["MailingCity"]),
+                        MailingState = Convert.ToString(row["MailingState"]),
+                        MailingPostal = Convert.ToString(row["MailingPostal"]),
+                        Phone = Regex.Replace(Convert.ToString(row["Phone"]).Replace("/", "").Replace("-", ""), @"(\d{3})(\d{3})(\d{0,4})", "($1)-$2-$3"),
+                        csulbemail = Convert.ToString(row["CSULBEmail"]),
+                        AlternateEmail = Convert.ToString(row["AlternateEmail"]),
+                        AcademicPlan = Convert.ToString(row["AcademicPlan"]),
+                        AcademicSubPlan = Convert.ToString(row["AcademicSubPlan"]),
+                        AdditionalPlan = Convert.ToString(row["AdditionalPlan"]),
+                        ProgramStatusDesc = Convert.ToString(row["ProgramStatusDesc"]),
+                        GraduationFillingStatusDesc = Convert.ToString(row["GraduationFilingStatusDescr"]),
+                        CurrentCsulbGpa = Convert.ToString(row["CurrentCSULBGPA"]),
+                        CumulativeGpa = Convert.ToString(row["CumulativeGPA"]),
+                        MajorGpa = Convert.ToString(row["MajorGPA"]),
+                        AcademicStanding = Convert.ToString(row["AcademicStanding"]),
+                        BachelorDegreeMajor = Convert.ToString(row["BachelorDegreeMajor"]),
+                        AdmitTerm = Convert.ToString(row["AdmitTerm"]),
+                        ActiveTerm = Convert.ToString(row["ActiveTerm"]),
+                        GraduationFillingTerm = Convert.ToString(row["GraduationFillingTerm"]),
+                        EducationalLeaveTerm = Convert.ToString(row["EducationalLeaveTerm"]),
+                        Credential = Convert.ToString(row["Credential"]),
+                        Certificate = Convert.ToString(row["Certificate"]),
+                        DateOfBirth = Convert.ToDateTime(row["DateOfBirth"] == DBNull.Value ? null : row["DateOfBirth"]),
+                        SSNNumber = Convert.ToString(row["SSNNumber"] == DBNull.Value ? null : row["SSNNumber"]),
+                        AcademicIntegrityStatement = Convert.ToString(row["AcademicIntegrityStatement"] == DBNull.Value ? null : row["AcademicIntegrityStatement"]),
+                        SubmittedDate = Convert.ToDateTime(row["SubmittedDate"] == DBNull.Value ? null : row["SubmittedDate"]),
+                        IsAgreed = Convert.ToBoolean(row["IsAgreed"] == DBNull.Value ? null : row["IsAgreed"]),
+                        AgreedDate = row["AgreedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AgreedDate"]) : null,
+                        BachelorDegreeMajorSP = Convert.ToString(row["BachelorDegreeMajorSP"]),
+                        ConsolidatedAddress = Convert.ToString(row["ConsolidatedAddress"]),
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        isStaff = Convert.ToBoolean(row["isStaff"]),
+                        CredentialProgram = Convert.ToString(row["CredentialProgram"]),
+                        CredentialPathway = Convert.ToString(row["CredentialPathway"]),
+                        TermCode = Convert.ToString(row["TermCode"])
 
-            }).FirstOrDefault();
-               
+                    }).FirstOrDefault();
+
 
                     obj.FormSubSectionResponseSMC = dtStudentProfile.Tables.Count > 1 && dtStudentProfile.Tables[1] != null
     ? dtStudentProfile.Tables[1].AsEnumerable().Select(row =>
@@ -143,7 +143,7 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,i
                 ? Convert.ToString(row["SubSectionForm"])
                 : string.Empty,
 
-                TermCode = row["LatestTermCode"] != DBNull.Value
+            TermCode = row["LatestTermCode"] != DBNull.Value
                 ? Convert.ToString(row["LatestTermCode"])
                 : string.Empty,
         }).FirstOrDefault()
@@ -222,7 +222,7 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,i
                                     : 0
                             }).FirstOrDefault()
                         : null;
-                   
+
                     obj.StudentProfileRoleHandler = dtStudentProfile.Tables.Count > 5
                    && dtStudentProfile.Tables[5] != null
                    && dtStudentProfile.Tables[5].Rows.Count > 0
@@ -249,20 +249,20 @@ public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID,i
                         //IsApproved = Convert.ToBoolean(row["IsApproved"] == DBNull.Value ? null : row["IsApproved"]),
                         obj.studentProfile.SSNNumber = DecryptSSNNumber(obj.studentProfile.SSNNumber);
                     }
-            obj.IsSuccess = true;
-            obj.Message = "Data retrieved succesfully ";
-        }
-    }
-    catch (Exception ex)
-    {
-        obj.IsSuccess = false;
-        obj.Message = "Data Retrieval Failed , Please contact site admin ";
-        obj.StackTrace = ex.Message;
-    }
+                    obj.IsSuccess = true;
+                    obj.Message = "Data retrieved succesfully ";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
 
-    return obj;
-}
-public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
+            return obj;
+        }
+        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
         {
             StudentProfileSearchResponse obj = new StudentProfileSearchResponse();
             SqlParameter[] parameters =
@@ -369,7 +369,7 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
             response.IsSuccess = true;
             return response;
         }
-        public List<ApplicationList> GetApplications(int userId,string identifier)
+        public List<ApplicationList> GetApplications(int userId, string identifier)
         {
             // gets the list of applications
             List<ApplicationList> obj = new List<ApplicationList>();
@@ -489,10 +489,10 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
             }
             return obj;
         }
-        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID,string identifier)
+        public StudentAppliedFormsByProgramsResponse GetStudentAppliedFormsByPrograms(int programID, string termCode, string CSULBID, string identifier)
         {
             StudentAppliedFormsByProgramsResponse obj = new StudentAppliedFormsByProgramsResponse();
-            
+
 
             SqlParameter[] parameters =
                                         {
@@ -504,47 +504,47 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
 
             DataTable dsStudentAppliedFormsByProgram = _helper.GetDataTable("[dbo].[StudentProfileSearch]", parameters);
             try
-            { 
+            {
 
-                    if (dsStudentAppliedFormsByProgram.Rows.Count > 0)
+                if (dsStudentAppliedFormsByProgram.Rows.Count > 0)
+                {
+                    obj.StudentAppliedFormsByPrograms = dsStudentAppliedFormsByProgram.AsEnumerable().Select(row =>
+                                          new StudentAppliedFormsByPrograms
+                                          {
+                                              FormID = Convert.ToInt32(row["ID"]),
+                                              StudentFirstName = Convert.ToString(row["FirstName"]),
+                                              StudentLastName = Convert.ToString(row["LastName"]),
+                                              Email = Convert.ToString(row["EMAIL"]),
+                                              UserID = Convert.ToInt32(row["UserID"]),
+                                              ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                              ProgramName = Convert.ToString(row["ProgramName"]),
+                                              Semester = Convert.ToString(row["Term"]),
+                                              TermCode = Convert.ToString(row["TermCode"]),
+                                              CSULBID = Convert.ToString(row["CSULBID"]),
+                                              ApplicationTypeName = Convert.ToString(row["Type"]),
+                                              ApplicantTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
+                                              Status = Convert.ToString(row["Status"]),
+                                              DOB = Convert.ToDateTime(row["DOB"] == DBNull.Value ? null : row["DOB"]),
+                                              SSN = Convert.ToString(row["SSN"] == DBNull.Value ? null : row["SSN"])
+                                          }).ToList();
+                    foreach (var studentForm in obj.StudentAppliedFormsByPrograms)
                     {
-                        obj.StudentAppliedFormsByPrograms = dsStudentAppliedFormsByProgram.AsEnumerable().Select(row =>
-                                              new StudentAppliedFormsByPrograms
-                                              {
-                                                  FormID = Convert.ToInt32(row["ID"]),
-                                                  StudentFirstName = Convert.ToString(row["FirstName"]),
-                                                  StudentLastName = Convert.ToString(row["LastName"]),
-                                                  Email = Convert.ToString(row["EMAIL"]),
-                                                  UserID = Convert.ToInt32(row["UserID"]),
-                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
-                                                  ProgramName = Convert.ToString(row["ProgramName"]),
-                                                  Semester = Convert.ToString(row["Term"]),
-                                                  TermCode = Convert.ToString(row["TermCode"]),
-                                                  CSULBID = Convert.ToString(row["CSULBID"]),
-                                                  ApplicationTypeName = Convert.ToString(row["Type"]),
-                                                  ApplicantTypeID = Convert.ToInt32(row["ApplicationTypeID"]),
-                                                  Status = Convert.ToString(row["Status"]),
-                                                  DOB = Convert.ToDateTime(row["DOB"] == DBNull.Value ? null : row["DOB"]),
-                                                  SSN = Convert.ToString(row["SSN"] == DBNull.Value ? null : row["SSN"])
-                                              }).ToList();
-                        foreach (var studentForm in obj.StudentAppliedFormsByPrograms)
+                        if (!string.IsNullOrEmpty(studentForm.SSN) && studentForm.SSN != null)
                         {
-                            if (!string.IsNullOrEmpty(studentForm.SSN) && studentForm.SSN != null)
-                            {
-                                studentForm.SSN = DecryptSSNNumber(studentForm.SSN);
-                            }
+                            studentForm.SSN = DecryptSSNNumber(studentForm.SSN);
                         }
-                        int SSNtimeoutInSeconds = Convert.ToInt32(_configuration["ApplicationKeys:SSNTimeout"]);
-                        int SSNtimeoutInMilliseconds = SSNtimeoutInSeconds * 1000;
-                        obj.SSNSessionTimeOut = SSNtimeoutInMilliseconds;
-                        obj.IsSuccess = true;
-                        obj.Message = "Data Retrieved Successfully";
                     }
-                    else
-                    {
-                        obj.IsSuccess = false;
-                        obj.Message = "No Data Present";
-                    }
+                    int SSNtimeoutInSeconds = Convert.ToInt32(_configuration["ApplicationKeys:SSNTimeout"]);
+                    int SSNtimeoutInMilliseconds = SSNtimeoutInSeconds * 1000;
+                    obj.SSNSessionTimeOut = SSNtimeoutInMilliseconds;
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
             }
             catch (Exception ex)
             {
@@ -676,7 +676,7 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
                     response.ProfileDocumentID = Convert.ToInt32(dtFormAttachment.Rows[0]["ProfileDocumentID"]);
                     response.UserID = Convert.ToInt32(dtFormAttachment.Rows[0]["UserID"]);
                     response.IsSuccess = true;
-                    response.Message = "Attachment Uploaded Successfully"; 
+                    response.Message = "Attachment Uploaded Successfully";
                 }
                 return response;
             }
@@ -1067,7 +1067,7 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
         {
             BaseResponse obj = new BaseResponse();
             try
-            { 
+            {
                 SqlParameter[] parameters =
                                    {
                                           new SqlParameter("@Json", SqlDbType.NVarChar, -1) { Value = JSONString }
@@ -1095,5 +1095,47 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
 
             return obj;
         }
+
+        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID)
+        {
+            ProgramCheckListCourseResponse obj = new ProgramCheckListCourseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@StudentID", SqlDbType.VarChar,20) { Value = CSULBID },
+                                          new SqlParameter("@ProgramID", SqlDbType.Int) { Value = ProgramID }
+                                     };
+            DataSet dtProgramPlannerCourseList = _helper.GetDataSet("[dbo].[GetProgramChecklistCourses&Term]", parameters);
+            try
+            {
+                if (dtProgramPlannerCourseList != null & dtProgramPlannerCourseList.Tables.Count > 0)
+                {
+                    obj.ProgramCheckListCourse =
+                    dtProgramPlannerCourseList.Tables.Count > 0
+                    ? dtProgramPlannerCourseList.Tables[1]
+                        .AsEnumerable()
+                        .Select(row => new ProgramCheckListCourse
+                        {
+                            CourseName = row["CourseName"] == DBNull.Value ? null : Convert.ToString(row["CourseName"]),
+                            TermCode = row["TermCode"] == DBNull.Value ? null : Convert.ToString(row["TermCode"]),
+                            Grade = row["Grade"] == DBNull.Value ? null : Convert.ToString(row["Grade"]),
+                        })
+                        .ToList()
+                    : new List<ProgramCheckListCourse>();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                obj.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
     }
 }

@@ -79,5 +79,15 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     {
         public int StateID { get; set; }
     }
+    public class ProgramCheckListCourseResponse : BaseResponse
+    {
+        public List<ProgramCheckListCourse> ProgramCheckListCourse { get; set; }
 
     }
+    public class ProgramCheckListCourse
+    {
+        public string CourseName { get; set; }
+        public string TermCode { get; set; }
+        public string Grade { get; set; }
+    }
+}
