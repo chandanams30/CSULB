@@ -142,7 +142,7 @@ namespace CSULB_COE.Controllers
         }
         [HttpGet("GetSemesterTermList")]
         public SemesterTermListResponse GetSemesterTermList(int applicationId)
-        {
+        { 
             try
             {
                 SemesterTermListResponse response = _studentProfileService.GetSemesterList(applicationId);
@@ -364,5 +364,24 @@ namespace CSULB_COE.Controllers
             return response;
         }
 
+        [HttpGet("GetProgramChecklistCoursesTerm")]
+        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID)
+        {
+            try
+            {
+                ProgramCheckListCourseResponse response = _studentProfileService.GetProgramChecklistCoursesTerm(CSULBID, ProgramID);
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                ProgramCheckListCourseResponse response = new ProgramCheckListCourseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }
