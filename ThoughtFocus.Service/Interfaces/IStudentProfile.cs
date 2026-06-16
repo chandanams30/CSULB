@@ -28,6 +28,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input);
         ProgramPlannerCourseListResponse GetProgramPlannerCourseList(string CSULBID, int ProgramID, string TermCode);
         BaseResponse UpsertCourseDetails(string JSONString);
+        ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID);
+        BaseResponse UpsertProgramChecklistData(string JSONString);
 
     }
 }

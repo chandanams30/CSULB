@@ -58,5 +58,9 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
     {
         public object ProgramPlannerCourseJSON { get; set; }
     }
+    public class ProgramChecklistInput
+    {
+        public object programChecklistCourseJSON { get; set; }
+    }
 
 }

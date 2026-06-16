@@ -1062,7 +1062,148 @@ public StudentProfileSearchResponse GetStudentProfileSearchData(string searchStr
             }
             return obj;
         }
+        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID)
+        {
+            ProgramCheckListCourseResponse obj = new ProgramCheckListCourseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@StudentID", SqlDbType.VarChar,20) { Value = CSULBID },
+                                          new SqlParameter("@ProgramID", SqlDbType.Int) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
 
+                                     };
+            DataSet dtProgramPlannerCourseList = _helper.GetDataSet("[dbo].[GetProgramChecklistCourses&Term]", parameters);
+            try
+            {
+                if (dtProgramPlannerCourseList != null & dtProgramPlannerCourseList.Tables.Count > 0)
+                {
+                    obj.ProgramCheckListCourse =
+                    dtProgramPlannerCourseList.Tables.Count > 0
+                    ? dtProgramPlannerCourseList.Tables[0]
+                        .AsEnumerable()
+                        .Select(row => new ProgramCheckListCourse
+                        {
+                            CourseName = row["CourseName"] == DBNull.Value ? null : Convert.ToString(row["CourseName"]),
+                            TermCode = row["TermCode"] == DBNull.Value ? null : Convert.ToString(row["TermCode"]),
+                            Grade = row["Grade"] == DBNull.Value ? null : Convert.ToString(row["Grade"]),
+                            SPCMID = row["SPCMID"] == DBNull.Value ? 0 : Convert.ToInt32(row["SPCMID"]),
+                            CourseNotes = row["CourseNotes"] == DBNull.Value ? null : Convert.ToString(row["CourseNotes"]),
+                            fieldWorkEvaluation = Convert.ToString(row["EvaluationDetails"])
+
+                        })
+                        .ToList()
+                    : new List<ProgramCheckListCourse>();
+                    obj.programEvaluationDetails = dtProgramPlannerCourseList.Tables[1].AsEnumerable().Select(row =>
+                    new ProgramEvaluationDetails
+                    {
+                        LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"]),
+                        FileLink = Convert.ToString(row["FileLink"]),
+                        ApplicationType = Convert.ToString(row["ApplicationType"])
+                    }).ToList();
+
+                    obj.BILARequirementDetails = dtProgramPlannerCourseList.Tables[2]
+                    .AsEnumerable()
+                    .Select(row => new BILARequirementDetails
+                    {
+                        CSETSubset = Convert.ToString(row["CSETSubset"]),
+                        CultureRequirement = Convert.ToString(row["CultureRequirement"]),
+                        MethodologyRequirement = Convert.ToString(row["MethodologyRequirement"]),
+                        DatePassed = row["DatePassed"] == DBNull.Value
+                            ? DateTime.MinValue
+                            : Convert.ToDateTime(row["DatePassed"])
+                    })
+                    .FirstOrDefault();
+
+                    obj.CPR = dtProgramPlannerCourseList.Tables[2]
+                    .AsEnumerable()
+                    .Select(row => new CPRRequirementDetails
+                    {
+                        Notes = Convert.ToString(row["Notes"]),
+                        MetBy = Convert.ToString(row["MetBy"]),
+                        ExpiryDate = row["ExpiryDate"] == DBNull.Value
+                            ? DateTime.MinValue
+                            : Convert.ToDateTime(row["ExpiryDate"])
+                    })
+                    .FirstOrDefault();
+
+                    obj.candidateStatusDetails = dtProgramPlannerCourseList.Tables[2]
+                    .AsEnumerable()
+                    .Select(row => new CandidateStatusDetails
+                    {
+                        ProgramStatus = Convert.ToString(row["ProgramStatus"]),
+                        StudentTeachingStatus = Convert.ToString(row["StudentTeachingStatus"]),
+                        CertificationStatus = Convert.ToString(row["CertificationStatus"]),
+                        ConstitutionRequirementOption = Convert.ToString(row["ConstitutionRequirementOption"]),
+                        ConstitutionRequirementCourseExam = Convert.ToString(row["ConstitutionRequirementCourseExam"]),
+                        TPAFinalPassDate = row["TPAFinalPassDate"] == DBNull.Value
+                            ? DateTime.MinValue
+                            : Convert.ToDateTime(row["TPAFinalPassDate"])
+                    })
+                    .FirstOrDefault();
+
+                    obj.TPADetails = dtProgramPlannerCourseList.Tables[3]
+                    .AsEnumerable()
+                    .Select(row => new TPADetails
+                    {
+                        CycleID = Convert.ToString(row["CycleID"]),
+                        TPARecordID = Convert.ToString(row["TPARecordID"]),
+                        TPAType = Convert.ToString(row["TPAType"]),
+                        Score = Convert.ToString(row["Score"]),
+                        TaskName = Convert.ToString(row["TaskName"]),
+                        ReleaseDate = row["ReleaseDate"] == DBNull.Value
+                            ? (DateTime?)null
+                            : Convert.ToDateTime(row["ReleaseDate"])
+                    })
+                    .ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                obj.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+
+        }
+        public BaseResponse UpsertProgramChecklistData(string JSONString)
+        {
+            BaseResponse obj = new BaseResponse();
+            try
+            {
+                SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@Json", SqlDbType.NVarChar, -1) { Value = JSONString }
+                                   };
+                DataSet dt = _helper.GetDataSet("[dbo].[SaveStudentProfileCourseNotes]", parameters);
+
+                if (dt != null && dt.Tables.Count > 0)
+                {
+                    obj.IsSuccess = true;
+                    obj.Message = "Data updated Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No data returned from stored procedure";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data update Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+                _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
+            }
+
+            return obj;
+        }
         public BaseResponse UpsertCourseDetails(string JSONString)
         {
             BaseResponse obj = new BaseResponse();
