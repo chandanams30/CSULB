@@ -2220,6 +2220,7 @@ namespace ThoughtFocus.Service.Implementation
             string gradeLevelTaught = string.Empty;
             string schoolDistrict = string.Empty;
             string schoolName = string.Empty;
+            string studentName = string.Empty;
 
             string promptness = string.Empty;
             string responsibility = string.Empty;
@@ -2243,6 +2244,7 @@ namespace ThoughtFocus.Service.Implementation
             gradeLevelTaught = Convert.ToString(personalInfo.GetValue("gradeLevelTaught"));
             schoolDistrict = Convert.ToString(personalInfo.GetValue("schoolDistrict"));
             schoolName = Convert.ToString(personalInfo.GetValue("schoolName"));
+            studentName = Convert.ToString(personalInfo.GetValue("studentName"));
             //teacherSignature = Convert.ToString(schema.GetValue("teacherSignature"));
             teacherName = Convert.ToString(schema.GetValue("teacherName"));
             comment = Convert.ToString(schema.GetValue("comments"));
@@ -2305,7 +2307,8 @@ namespace ThoughtFocus.Service.Implementation
                                                                      .Replace("[[Knowledge]]", knowledge)
                                                                      .Replace("[[FinalEvaluation]]", finalEvaluation)
                                                                      .Replace("[[AdditinalComments]]", comment)
-                                                                     .Replace("[[CooperatingTeacherName]]", teacherName);
+                                                                     .Replace("[[CooperatingTeacherName]]", teacherName)
+                                                                     .Replace("[[studentName]]", studentName);
             // get the filecontent
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
 

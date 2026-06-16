@@ -32,6 +32,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     {
         public int ID { get; set; }
         public string EvaluatorMailBody { get; set; }
+        public string Identifier { get; set; }
     }
     public class AdmissionRequirementsBodyResponse : BaseResponse
     {
