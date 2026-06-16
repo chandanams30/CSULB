@@ -4219,7 +4219,7 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     if (applicationId == 1 && identifier == "Evaluation")
                     {
-                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Where(row => row.Field<long>("ID") == 2 || row.Field<long>("ID") == 3 || row.Field<long>("ID") == 4).Select(row =>
+                        obj.ApplicationProgramsList = dtApplicationPrograms.AsEnumerable().Select(row =>
                                               new ApplicationProgramsList
                                               {
                                                   ProgramID = Convert.ToInt32(row["ID"]),
@@ -4594,7 +4594,8 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                        {
                                           new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
-                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.EvaluatorMailBody }
+                                          new SqlParameter("@RecommenderMailBody", SqlDbType.NVarChar, -1) { Value = input.EvaluatorMailBody },
+                                          new SqlParameter("@Identifier", SqlDbType.NVarChar, 50) { Value = input.Identifier }
                                         };
             DataTable dtResponse = _helper.GetDataTable("[dbo].[UpdateRecommenderMailBody]", parameters);
             if (dtResponse.Rows.Count > 0)
