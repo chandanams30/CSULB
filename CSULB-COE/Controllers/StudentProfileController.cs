@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -362,6 +363,32 @@ namespace CSULB_COE.Controllers
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(input.ProgramPlannerCourseJSON);
             BaseResponse response = _studentProfileService.UpsertCourseDetails(json);
             return response;
+        }
+        [HttpPost("SaveProgramChecklistData")]
+        public BaseResponse SaveProgramChecklistData(ProgramChecklistInput input)
+        {
+            string json = JsonConvert.SerializeObject(input);
+            BaseResponse response = _studentProfileService.UpsertProgramChecklistData(json);
+            return response;
+        }
+        [HttpGet("GetProgramChecklistCoursesTerm")]
+        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID)
+        {
+            try
+            {
+                ProgramCheckListCourseResponse response = _studentProfileService.GetProgramChecklistCoursesTerm(CSULBID, ProgramID, TermCode, FormID);
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                ProgramCheckListCourseResponse response = new ProgramCheckListCourseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
         }
 
         [HttpGet("GetProgramChecklistCoursesTerm")]
