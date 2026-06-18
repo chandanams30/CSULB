@@ -5,6 +5,7 @@ using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.StudentProfile;
 
 namespace ThoughtFocus.Service.Interfaces
@@ -28,7 +29,9 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveStudentProfilePersonalInfoData(SaveStudentProfilePersonalInfoDataRequest input);
         ProgramPlannerCourseListResponse GetProgramPlannerCourseList(string CSULBID, int ProgramID, string TermCode);
         BaseResponse UpsertCourseDetails(string JSONString);
-        ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID);
-
+        ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID);
+        BaseResponse UpsertProgramChecklistData(string JSONString);
+        BaseResponse UpsertTeachingEvaluation(TeachingEvaluationRequest input);
+        TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode);
     }
 }

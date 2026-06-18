@@ -58,5 +58,28 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
     {
         public object ProgramPlannerCourseJSON { get; set; }
     }
+    public class ProgramChecklistInput
+    {
+        public object programChecklistCourseJSON { get; set; }
+    }
+    public class TeachingEvaluationRequest
+    {
+        public int ID { get; set; }
+        public int FieldWorkID { get; set; }
+        public int FormID { get; set; }
+        public int TermCode { get; set; }
+        public int ProgramID { get; set; }
+
+        public int UserID { get; set; }
+        public string CooperatingTeacherName { get; set; }
+        public string CooperatingTeacherEmail { get; set; }
+        public string EvaluationType { get; set; }
+        public bool isMidtermMailSent { get; set; }
+        public bool isFinalMailSent { get; set; }
+        public string ApplicationType { get; set; }
+
+        public bool isTeachingEvaluation { get; set; }
+
+    }
 
 }

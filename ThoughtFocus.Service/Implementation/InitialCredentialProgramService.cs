@@ -2221,6 +2221,8 @@ namespace ThoughtFocus.Service.Implementation
             string gradeLevelTaught = string.Empty;
             string schoolDistrict = string.Empty;
             string schoolName = string.Empty;
+            string studentName = string.Empty;
+
 
             string promptness = string.Empty;
             string responsibility = string.Empty;
@@ -2306,6 +2308,7 @@ namespace ThoughtFocus.Service.Implementation
                                                                      .Replace("[[Knowledge]]", knowledge)
                                                                      .Replace("[[FinalEvaluation]]", finalEvaluation)
                                                                      .Replace("[[AdditinalComments]]", comment)
+                                                                     .Replace("[[StudentName]]", studentName)
                                                                      .Replace("[[CooperatingTeacherName]]", teacherName);
             // get the filecontent
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
@@ -2409,7 +2412,7 @@ namespace ThoughtFocus.Service.Implementation
                                                                      .Replace("[[position]]", position)
                                                                      .Replace("[[date]]", date)
                                                                      .Replace("[[totalHours]]", totalHours)
-                                                                     .Replace("[[dateHoursRows]]",dateHoursSb.ToString());
+                                                                     .Replace("[[dateHoursRows]]", dateHoursSb.ToString());
             // get the filecontent
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
             return pdfFileContent;

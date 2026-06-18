@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Implementation;
@@ -368,17 +370,63 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetProgramChecklistCoursesTerm")]
-        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID)
+        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID)
         {
             try
             {
-                ProgramCheckListCourseResponse response = _studentProfileService.GetProgramChecklistCoursesTerm(CSULBID, ProgramID);
+                ProgramCheckListCourseResponse response = _studentProfileService.GetProgramChecklistCoursesTerm(CSULBID, ProgramID, TermCode, FormID);
                 return response;
 
             }
             catch (Exception ex)
             {
                 ProgramCheckListCourseResponse response = new ProgramCheckListCourseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("SaveProgramChecklistData")]
+        public BaseResponse SaveProgramChecklistData(ProgramChecklistInput input)
+        {
+            string json = JsonConvert.SerializeObject(input);
+            BaseResponse response = _studentProfileService.UpsertProgramChecklistData(json);
+            return response;
+        }
+
+        [HttpPost("UpsertTeachingEvaluation")]
+        public BaseResponse UpsertTeachingEvaluation(TeachingEvaluationRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentProfileService.UpsertTeachingEvaluation(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetTeachingEvaluationByFieldWorkID")]
+        public TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                TeachingEvaluationByIDResponse response = _studentProfileService.GetTeachingEvaluationByFieldWorkID(UserID, FieldWorkID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                TeachingEvaluationByIDResponse response = new TeachingEvaluationByIDResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
