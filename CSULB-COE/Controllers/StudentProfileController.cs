@@ -368,7 +368,7 @@ namespace CSULB_COE.Controllers
             BaseResponse response = _studentProfileService.UpsertCourseDetails(json);
             return response;
         }
-
+        
         [HttpGet("GetProgramChecklistCoursesTerm")]
         public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID)
         {
@@ -388,6 +388,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
         [HttpPost("SaveProgramChecklistData")]
         public BaseResponse SaveProgramChecklistData(ProgramChecklistInput input)
         {

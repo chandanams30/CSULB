@@ -1065,40 +1065,6 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-
-        public BaseResponse UpsertCourseDetails(string JSONString)
-        {
-            BaseResponse obj = new BaseResponse();
-            try
-            {
-                SqlParameter[] parameters =
-                                   {
-                                          new SqlParameter("@Json", SqlDbType.NVarChar, -1) { Value = JSONString }
-                                   };
-                DataTable SPCDID = _helper.GetDataTable("[dbo].[SaveStudentProfileCourseDetails]", parameters);
-
-                if (SPCDID.Rows.Count > 0)
-                {
-                    obj.IsSuccess = true;
-                    obj.Message = "Data updated Successfully";
-                }
-                else
-                {
-                    obj.IsSuccess = false;
-                    obj.Message = "Failed to save data";
-                }
-            }
-            catch (Exception ex)
-            {
-                obj.IsSuccess = false;
-                obj.Message = "Data update Failed , Please contact site admin ";
-                obj.StackTrace = ex.Message;
-                _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
-            }
-
-            return obj;
-        }
-
         public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID)
         {
             ProgramCheckListCourseResponse obj = new ProgramCheckListCourseResponse();
@@ -1131,14 +1097,13 @@ namespace ThoughtFocus.Service.Implementation
                         })
                         .ToList()
                     : new List<ProgramCheckListCourse>();
-                   
-                   obj.programEvaluationDetails = dtProgramPlannerCourseList.Tables[1].AsEnumerable().Select(row =>
-                   new ProgramEvaluationDetails
-                   {
-                       LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"]),
-                       FileLink = Convert.ToString(row["FileLink"]),
-                       ApplicationType = Convert.ToString(row["ApplicationType"])
-                   }).ToList();
+                    obj.programEvaluationDetails = dtProgramPlannerCourseList.Tables[1].AsEnumerable().Select(row =>
+                    new ProgramEvaluationDetails
+                    {
+                        LetterOfRecommendationJSON = Convert.ToString(row["LetterOfRecommendationJSON"]),
+                        FileLink = Convert.ToString(row["FileLink"]),
+                        ApplicationType = Convert.ToString(row["ApplicationType"])
+                    }).ToList();
 
                     obj.BILARequirementDetails = dtProgramPlannerCourseList.Tables[2]
                     .AsEnumerable()
@@ -1210,7 +1175,6 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
 
         }
-
         public BaseResponse UpsertProgramChecklistData(string JSONString)
         {
             BaseResponse obj = new BaseResponse();
@@ -1231,6 +1195,38 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     obj.IsSuccess = false;
                     obj.Message = "No data returned from stored procedure";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data update Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+                _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
+            }
+
+            return obj;
+        }
+        public BaseResponse UpsertCourseDetails(string JSONString)
+        {
+            BaseResponse obj = new BaseResponse();
+            try
+            {
+                SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@Json", SqlDbType.NVarChar, -1) { Value = JSONString }
+                                   };
+                DataTable SPCDID = _helper.GetDataTable("[dbo].[SaveStudentProfileCourseDetails]", parameters);
+
+                if (SPCDID.Rows.Count > 0)
+                {
+                    obj.IsSuccess = true;
+                    obj.Message = "Data updated Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "Failed to save data";
                 }
             }
             catch (Exception ex)
@@ -1357,8 +1353,6 @@ namespace ThoughtFocus.Service.Implementation
 
                 return response;
             }
-            
-
         private void UpdateEvaluationMailSent(TeachingEvaluationRequest input, bool isMailSent, string id)
         {
             SqlParameter[] parameters =
