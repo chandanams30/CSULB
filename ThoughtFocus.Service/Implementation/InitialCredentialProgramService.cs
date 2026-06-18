@@ -2222,6 +2222,7 @@ namespace ThoughtFocus.Service.Implementation
             string schoolName = string.Empty;
             string studentName = string.Empty;
 
+
             string promptness = string.Empty;
             string responsibility = string.Empty;
             string honor = string.Empty;
@@ -2411,7 +2412,7 @@ namespace ThoughtFocus.Service.Implementation
                                                                      .Replace("[[position]]", position)
                                                                      .Replace("[[date]]", date)
                                                                      .Replace("[[totalHours]]", totalHours)
-                                                                     .Replace("[[dateHoursRows]]",dateHoursSb.ToString());
+                                                                     .Replace("[[dateHoursRows]]", dateHoursSb.ToString());
             // get the filecontent
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
             return pdfFileContent;

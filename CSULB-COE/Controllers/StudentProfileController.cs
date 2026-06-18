@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Implementation;
 using ThoughtFocus.Service.Interfaces;
@@ -391,18 +394,38 @@ namespace CSULB_COE.Controllers
             }
         }
 
-        [HttpGet("GetProgramChecklistCoursesTerm")]
-        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID)
+
+        [HttpPost("UpsertTeachingEvaluation")]
+        public BaseResponse UpsertTeachingEvaluation(TeachingEvaluationRequest input)
         {
             try
             {
-                ProgramCheckListCourseResponse response = _studentProfileService.GetProgramChecklistCoursesTerm(CSULBID, ProgramID);
-                return response;
+                BaseResponse response = new BaseResponse();
 
+                response = _studentProfileService.UpsertTeachingEvaluation(input);
+                return response;
             }
             catch (Exception ex)
             {
-                ProgramCheckListCourseResponse response = new ProgramCheckListCourseResponse();
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetTeachingEvaluationByFieldWorkID")]
+        public TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                TeachingEvaluationByIDResponse response = _studentProfileService.GetTeachingEvaluationByFieldWorkID(UserID, FieldWorkID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                TeachingEvaluationByIDResponse response = new TeachingEvaluationByIDResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;

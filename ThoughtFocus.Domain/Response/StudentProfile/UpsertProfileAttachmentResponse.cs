@@ -100,6 +100,12 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string fieldWorkEvaluation { get; set; }
 
     }
+    public class ProgramEvaluationDetails
+    {
+        public string LetterOfRecommendationJSON { get; set; }
+        public string FileLink { get; set; }
+        public string ApplicationType { get; set; }
+    }
     public class BILARequirementDetails
     {
         public string CSETSubset { get; set; }
@@ -132,12 +138,28 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string TPAType { get; set; }
         public string Score { get; set; }
         public string TaskName { get; set; }
+
         public DateTime? ReleaseDate { get; set; }
 
     }
-    public class ProgramEvaluationDetails
+    public class TeachingEvaluationByIDResponse : BaseResponse
     {
-        public string LetterOfRecommendationJSON { get; set; }
+        public List<TeachingEvaluationByID> teachingEvaluationByID { get; set; }
+    }
+    public class TeachingEvaluationByID
+    {
+        public int? EvaluationID { get; set; }
+        public int? FieldWorkId { get; set; }
+        public string CooperatingTeacherName { get; set; }
+        public string CooperatingTeacherEmail { get; set; }
+        public int? CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public string CooperatingTeacherURL { get; set; }
+        public string CooperatingTeacherIdentifier { get; set; }
+        public bool isFinalMailSent { get; set; }
+        public bool isMidtermMailSent { get; set; }
+        public string CooperatingTeacherJSON { get; set; }
+        public bool CanView { get; set; }
         public string FileLink { get; set; }
         public string ApplicationType { get; set; }
     }

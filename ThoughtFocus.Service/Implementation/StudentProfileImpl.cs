@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Nancy;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Tls.Crypto.Impl.BC;
 using System;
 using System.Collections.Generic;
@@ -10,11 +12,17 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Request.FieldWork;
+using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response.SearchApplication;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
@@ -1222,38 +1230,190 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-
-        public ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID)
+        public BaseResponse UpsertTeachingEvaluation(TeachingEvaluationRequest input)
         {
-            ProgramCheckListCourseResponse obj = new ProgramCheckListCourseResponse();
+            BaseResponse response = new BaseResponse();
+            
+                SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID  },
+                                          new SqlParameter("@FieldWorkId", SqlDbType.BigInt) { Value = input.FieldWorkID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@CooperatingTeacherName", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherName },
+                                          new SqlParameter("@CooperatingTeacherEmail", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherEmail },
+                                          new SqlParameter("@EvaluationType", SqlDbType.NVarChar,  200) { Value = input.EvaluationType }
+
+                                   };
+                DataSet evaluationDetails = _helper.GetDataSet("[dbo].[SaveStudentTeachingEvaluation]", parameters);
+
+                string logoText = "cid:myImageID";
+                string evaluatorName = string.Empty;
+                string evaluatorEmail = string.Empty;
+                string evaluationURL = string.Empty;
+                string evaluationIdentifier = string.Empty;
+                string applicantName = string.Empty;
+                string body = string.Empty;
+                string link = string.Empty;
+                bool isMailSent = false;
+                int programID = 0;
+                string subject = string.Empty;
+                try
+                {
+                    if (evaluationDetails.Tables[1].Rows.Count > 0)
+                    {
+                        if (Convert.ToString(evaluationDetails.Tables[1].Rows[0]["Status"]) == "FAILURE")
+                        {
+                            response.Message = Convert.ToString(evaluationDetails.Tables[1].Rows[0]["Message"]);
+                            response.IsSuccess = false;
+                        }
+                        else
+                        {
+                            if (evaluationDetails.Tables[0].Rows.Count > 0)
+                            {
+                                // send mail to the evaluator with the URL link  
+                                evaluatorName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherName"]);
+                                evaluatorEmail = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherEmail"]);
+                                evaluationURL = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherURL"]);
+                                evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherIdentifier"]);
+                                //applicantName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["StudentName"]);
+                                link = evaluationURL + evaluationIdentifier;
+                                subject = "CSULB Clinical Practice Evaluation Form";
+                                
+                                //get evaluation mail body
+                                SqlParameter[] parameters1 ={
+                                            new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = programID },
+                                            new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
+                                       };
+                                DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
+                                if (dtEval.Rows.Count > 0)
+                                {
+                                    if (dtEval.Rows[0]["EvaluatorMailBody"] != DBNull.Value)
+                                    {
+                                        body = Convert.ToString(dtEval.Rows[0]["EvaluatorMailBody"]);
+
+                                        string beforeBody = string.Empty;
+                                        string afterBody = string.Empty;
+                                        string facultySupervisorEmail = evaluationDetails?.Tables.Count >= 2 && evaluationDetails.Tables[2].Rows.Count > 0 &&
+                                        evaluationDetails.Tables[2].Columns.Contains("Email") ? Convert.ToString(evaluationDetails.Tables[2].Rows[0]["Email"]): string.Empty;
+                                        bool isMidtermMailSent = evaluationDetails?.Tables.Count >= 2 && evaluationDetails.Tables[2].Rows.Count > 0 &&
+                                        evaluationDetails.Tables[2].Columns.Contains("isMidtermMailSent") ? Convert.ToBoolean(evaluationDetails.Tables[2].Rows[0]["isMidtermMailSent"]) : false;
+
+                                        beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                                        afterBody = "</body></html>";
+                                        body = $"{beforeBody}{body}{afterBody}";
+                                        //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
+                                        body = body.Replace("[[logoPath]]", logoText)
+                                            .Replace("[[applicantname]]", applicantName)
+                                            .Replace("[[link]]", link);
+                                    if (isMidtermMailSent == false)
+                                    {
+                                        _sendMail.SendEmail(evaluatorEmail, facultySupervisorEmail, "COMMON", subject, body, "");
+                                    }
+                                    else
+                                    {
+                                        _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                                    }
+                                    isMailSent = true;
+                                    SqlParameter[] parmeter1 =
+                                    {
+                                        new SqlParameter("@EvaluationIdentifier", SqlDbType.UniqueIdentifier) { Value = new Guid(evaluationIdentifier) }
+                                    };
+                                    DataTable evalDetails = _helper.GetDataTable("[FieldWork].[GetEvaluationByEvaluationIdentifier]", parmeter1);
+                                    string id = evalDetails.Rows[0]["EvaluationID"].ToString();
+                                    input.isTeachingEvaluation = true;
+                                    UpdateEvaluationMailSent(input, isMailSent, id);
+                                }
+                                }
+                            }
+                            response.Message = "Evaluation added and mail sent successfully";
+                            response.IsSuccess = true;
+                        }
+                    }
+
+                }
+
+                catch (Exception ex)
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Data update Failed , Please contact site admin ";
+                    response.StackTrace = ex.Message;
+                    _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
+                }
+
+                return response;
+            }
+            
+
+        private void UpdateEvaluationMailSent(TeachingEvaluationRequest input, bool isMailSent, string id)
+        {
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@EvaluationID", SqlDbType.BigInt) { Value = id},
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@IsMailSent", SqlDbType.Bit) { Value = isMailSent},
+                                          new SqlParameter("@isTeachingEvaluation", SqlDbType.Bit) { Value = input.isTeachingEvaluation}
+                                        };
+
+            int ID = _helper.InsertTable("[FieldWork].[UpdateEvaluationMailSent]", parameters);
+
+        }
+        public TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode)
+        {
+            TeachingEvaluationByIDResponse obj = new TeachingEvaluationByIDResponse();
             SqlParameter[] parameters =
                                     {
-                                          new SqlParameter("@StudentID", SqlDbType.VarChar,20) { Value = CSULBID },
-                                          new SqlParameter("@ProgramID", SqlDbType.Int) { Value = ProgramID }
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = FieldWorkID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode }
                                      };
-            DataSet dtProgramPlannerCourseList = _helper.GetDataSet("[dbo].[GetProgramChecklistCourses&Term]", parameters);
+            DataTable evaluationDetails = _helper.GetDataTable("[FieldWork].[GetTeachingEvaluationByFieldWorkID]", parameters);
             try
             {
-                if (dtProgramPlannerCourseList != null & dtProgramPlannerCourseList.Tables.Count > 0)
+                if (evaluationDetails != null)
                 {
-                    obj.ProgramCheckListCourse =
-                    dtProgramPlannerCourseList.Tables.Count > 0
-                    ? dtProgramPlannerCourseList.Tables[1]
-                        .AsEnumerable()
-                        .Select(row => new ProgramCheckListCourse
-                        {
-                            CourseName = row["CourseName"] == DBNull.Value ? null : Convert.ToString(row["CourseName"]),
-                            TermCode = row["TermCode"] == DBNull.Value ? null : Convert.ToString(row["TermCode"]),
-                            Grade = row["Grade"] == DBNull.Value ? null : Convert.ToString(row["Grade"]),
-                        })
-                        .ToList()
-                    : new List<ProgramCheckListCourse>();
+                    if (evaluationDetails.Rows.Count > 0)
+                    {
+                        obj.teachingEvaluationByID = evaluationDetails.AsEnumerable().Select(row =>
+                                                  new TeachingEvaluationByID
+                                                  {
+                                                      EvaluationID = Convert.ToInt32(row["EvaluationID"]),
+                                                      FieldWorkId = Convert.ToInt32(row["FieldWorkId"]),
+                                                      CooperatingTeacherName = Convert.ToString(row["CooperatingTeacherName"]),
+                                                      CooperatingTeacherEmail = Convert.ToString(row["CooperatingTeacherEmail"]),
+                                                      CreatedBy = Convert.ToInt16(row["CreatedBY"]),
+                                                      CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                                                      CooperatingTeacherURL = Convert.ToString(row["CooperatingTeacherURL"]),
+                                                      CooperatingTeacherIdentifier = Convert.ToString(row["CooperatingTeacherIdentifier"]),
+                                                      isFinalMailSent = Convert.ToBoolean(row["isFinalMailSent"]),
+                                                      isMidtermMailSent = Convert.ToBoolean(row["isMidtermMailSent"]),
+                                                      CooperatingTeacherJSON = Convert.ToString(row["CooperatingTeacherJSON"] == DBNull.Value ? null : row["CooperatingTeacherJSON"]),
+                                                      CanView = Convert.ToBoolean(row["CanView"]),
+                                                      FileLink = Convert.ToString(row["FileLink"]),
+                                                      ApplicationType = Convert.ToString(row["ApplicationType"])
+                                                  }).ToList();
 
+                    }
+                    else
+                    {
+                        List<TeachingEvaluationByID> lstEvl = new List<TeachingEvaluationByID>();
+                        TeachingEvaluationByID objEvl = new TeachingEvaluationByID();
+                        objEvl.EvaluationID = 0;
+                        objEvl.FieldWorkId = FieldWorkID;
+                        objEvl.CooperatingTeacherName = string.Empty;
+                        objEvl.CooperatingTeacherEmail = string.Empty;
+                        lstEvl.Add(objEvl);
+                        obj.teachingEvaluationByID = lstEvl;
+                    }
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
                 }
-                obj.IsSuccess = true;
             }
             catch (Exception ex)
             {
@@ -1262,7 +1422,9 @@ namespace ThoughtFocus.Service.Implementation
                 obj.StackTrace = ex.Message;
             }
             return obj;
+
         }
+
 
     }
 }

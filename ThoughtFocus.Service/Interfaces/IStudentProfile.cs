@@ -4,6 +4,8 @@ using System.Text;
 using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.StudentProfile;
 
 namespace ThoughtFocus.Service.Interfaces
@@ -26,13 +28,13 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpsertCourseDetails(string JSONString);
         ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID, string TermCode, int FormID);
         BaseResponse UpsertProgramChecklistData(string JSONString);
-        ProgramCheckListCourseResponse GetProgramChecklistCoursesTerm(string CSULBID, int ProgramID);
+        BaseResponse UpsertTeachingEvaluation(TeachingEvaluationRequest input);
+        TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode);
         UpsertProfileAttachmentResponse UpsertProfileAttachment(UpsertProfileDocumentRequest input);
 
         DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID);
 
         ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID);
-
 
     }
 }
