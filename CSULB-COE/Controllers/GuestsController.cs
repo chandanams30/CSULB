@@ -161,7 +161,7 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetApplicationList")]
-        public IActionResult GetApplicationList(int userId)
+        public IActionResult GetApplicationList(int userId,int roleId)
         {
             try
             {
@@ -172,7 +172,7 @@ namespace CSULB_COE.Controllers
                 // gets the application list  
                 #endregion
 
-                List<ApplicationListResponse> response = _applicationService.GetApplications(userId);
+                List<ApplicationListResponse> response = _applicationService.GetApplications(userId,roleId);
                 return Ok(response);
             }
             catch (Exception ex)
