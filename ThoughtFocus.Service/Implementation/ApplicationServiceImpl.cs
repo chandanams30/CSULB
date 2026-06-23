@@ -11,6 +11,7 @@ using System.Linq;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using ThoughtFocus.DataAccess.DBHelper;
+using System.Numerics;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -24,7 +25,7 @@ namespace ThoughtFocus.Service.Implementation
             _context = context;
             _helper = helper;
         }
-        public List<ApplicationListResponse> GetApplications(int userId)
+        public List<ApplicationListResponse> GetApplications(int userId,int roleId)
         {
             #region Linq Statement
             //var obj = _context.Forms
@@ -44,7 +45,8 @@ namespace ThoughtFocus.Service.Implementation
 
             SqlParameter[] parameters =
                                   {
-                                    new SqlParameter("@UserID", SqlDbType.NVarChar, 255) { Value = userId}
+                                    new SqlParameter("@UserID", SqlDbType.BigInt, 255) { Value = userId},
+                                    new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleId},
                                   };
 
             DataTable dtApplications = _helper.GetDataTable("[dbo].[GetApplications]", parameters);
