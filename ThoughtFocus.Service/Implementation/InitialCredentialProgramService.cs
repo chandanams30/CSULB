@@ -115,7 +115,7 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID)
+        public AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID, int roleID)
         {
             AppliedFormsByProgramsResponse obj = new AppliedFormsByProgramsResponse();
 
@@ -125,7 +125,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
                                           new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
                                           new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = termcode },
-                                          new SqlParameter("@FormStateID", SqlDbType.Int, 50) { Value = formStateID }
+                                          new SqlParameter("@FormStateID", SqlDbType.Int, 50) { Value = formStateID },
+                                          new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID }
                                         };
 
             DataSet dsAppliedFormsByProgram = _helper.GetDataSet("[dbo].[GetAppliedFormsByPrograms]", parameters);

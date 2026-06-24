@@ -65,11 +65,11 @@ namespace CSULB_COE.Controllers
 
 
         [HttpGet("GetAppliedFormsByPrograms")]
-        public AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID,string termCode,int formStateID)
+        public AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID,string termCode,int formStateID,int roleID)
         {
             try
             {
-                AppliedFormsByProgramsResponse response = _graduateProgramService.GetAppliedFormsByPrograms(userID, programID,termCode,formStateID);
+                AppliedFormsByProgramsResponse response = _graduateProgramService.GetAppliedFormsByPrograms(userID, programID,termCode,formStateID,roleID);
                 return response;
             }
             catch (Exception ex)
