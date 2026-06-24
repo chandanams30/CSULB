@@ -17,7 +17,7 @@ namespace ThoughtFocus.Service.Interfaces
         AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID);
         FormStatesResponse GetFormStates(int userID);
         SemesterListResponse GetSemesterList();
-        GraduateProgramFormResponse GetForm(int userID, int formID, int programID, string termCode, bool showMilestone);
+        GraduateProgramFormResponse GetForm(int userID, int formID, int programID, string termCode, bool showMilestone, int roleId);
         BaseResponse UpdatePersonalInfoSchema(FormPersonalInfoSchemaRequest input);
         BaseResponse UpdateMessageBoardSchema(FormMessageBoardSchema input);
         BaseResponse UpsertFormAttachment(FormUpsertAttachmentRequest input);
