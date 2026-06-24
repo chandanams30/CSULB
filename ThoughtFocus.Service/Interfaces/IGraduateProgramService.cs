@@ -14,7 +14,7 @@ namespace ThoughtFocus.Service.Interfaces
     {
         ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode);
         AppliedFormsResponse GetAppliedForms(int userID, int applicationTypeID);
-        AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID);
+        AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID, int roleID);
         FormStatesResponse GetFormStates(int userID);
         SemesterListResponse GetSemesterList();
         GraduateProgramFormResponse GetForm(int userID, int formID, int programID, string termCode, bool showMilestone);
