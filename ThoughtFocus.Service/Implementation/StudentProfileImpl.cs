@@ -1395,7 +1395,8 @@ namespace ThoughtFocus.Service.Implementation
                                                       CooperatingTeacherJSON = Convert.ToString(row["CooperatingTeacherJSON"] == DBNull.Value ? null : row["CooperatingTeacherJSON"]),
                                                       CanView = Convert.ToBoolean(row["CanView"]),
                                                       FileLink = Convert.ToString(row["FileLink"]),
-                                                      ApplicationType = Convert.ToString(row["ApplicationType"])
+                                                      ApplicationType = Convert.ToString(row["ApplicationType"]),
+                                                      EvaluationType= Convert.ToString(row["EvaluationType"])
                                                   }).ToList();
 
                     }
