@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -126,7 +127,8 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID,formID,programID,termCode,false);
+                int roleId = 0;
+                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID, formID, programID, termCode, false, roleId);
                 return response;
             }
             catch (Exception ex)
@@ -306,15 +308,17 @@ namespace CSULB_COE.Controllers
                     DataTable dtAppliedForms = _helper.GetDataTable("[Application].[GetFormID]", parameters);
                     int formID = 0;
                     GraduateProgramFormResponse response = new GraduateProgramFormResponse();
+                    int roleId = 0;
+
                     if (dtAppliedForms.Rows.Count > 0)
                     {
                         formID = Convert.ToInt32(dtAppliedForms.Rows[0]["FormID"]);
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone, roleId);
                     }
                     else
                     {
                         formID = 0;
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone, roleId);
                     }
                     return response;
                 }
