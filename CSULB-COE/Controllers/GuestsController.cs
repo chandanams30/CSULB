@@ -127,7 +127,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                int roleId = 0;
+                int roleId = 3;
                 GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID, formID, programID, termCode, false, roleId);
                 return response;
             }
@@ -308,7 +308,7 @@ namespace CSULB_COE.Controllers
                     DataTable dtAppliedForms = _helper.GetDataTable("[Application].[GetFormID]", parameters);
                     int formID = 0;
                     GraduateProgramFormResponse response = new GraduateProgramFormResponse();
-                    int roleId = 0;
+                    int roleId = 3;
 
                     if (dtAppliedForms.Rows.Count > 0)
                     {
