@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThoughtFocus.Domain.Request.FieldWork;
+using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
@@ -426,6 +428,48 @@ namespace CSULB_COE.Controllers
             catch (Exception ex)
             {
                 TeachingEvaluationByIDResponse response = new TeachingEvaluationByIDResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [AllowAnonymous]
+        [HttpPost("UpdateTeachingEvaluationJSON")]
+        public BaseResponse UpdateTeachingEvaluationJSON(UpdateTeachingEvaluationJSONRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentProfileService.UpdateTeachingEvaluationJSON(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetTeachingEvaluationByIdentifier")]
+        public TeachingEvaluationByIdentifierResponse GetTeachingEvaluationByIdentifier(string evaluationIdentifier)
+        {
+            try
+            {
+
+                TeachingEvaluationByIdentifierResponse response = _studentProfileService.GetTeachingEvaluationByIdentifier(evaluationIdentifier);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                TeachingEvaluationByIdentifierResponse response = new TeachingEvaluationByIdentifierResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;

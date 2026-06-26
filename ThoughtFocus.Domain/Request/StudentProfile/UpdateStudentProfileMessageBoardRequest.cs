@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.Domain.Response;
 
 namespace ThoughtFocus.Domain.Request.StudentProfile
 {
@@ -64,22 +65,64 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
     }
     public class TeachingEvaluationRequest
     {
-        public int ID { get; set; }
+        public int evaluationID { get; set; }
         public int FieldWorkID { get; set; }
         public int FormID { get; set; }
-        public int TermCode { get; set; }
+        public string TermCode { get; set; }
         public int ProgramID { get; set; }
-
         public int UserID { get; set; }
         public string CooperatingTeacherName { get; set; }
         public string CooperatingTeacherEmail { get; set; }
         public string EvaluationType { get; set; }
-        public bool isMidtermMailSent { get; set; }
-        public bool isFinalMailSent { get; set; }
         public string ApplicationType { get; set; }
 
-        public bool isTeachingEvaluation { get; set; }
+    }
+    public class UpdateTeachingEvaluationJSONRequest
+    {
+        public int EvaluationID { get; set; }
+        public int UserID { get; set; }
+        public int FieldWorkID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public string EvaluationJSON { get; set; }
+        public string ApplicationType { get; set; }
+        public string EvaluationType { get; set; }
 
     }
+    public class UpsertTeachingEvaluationRequest
+    {
+        public int EvaluationID { get; set; }
+        public int UserID { get; set; }
+        public int FieldWorkID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public string EvaluatorName { get; set; }
+        public string EvaluatorEmail { get; set; }
+        public string ApplicationType { get; set; }
+
+    }
+    public class TeachingEvaluationByIdentifierResponse : BaseResponse
+    {
+        public TeachingEvaluationByIdentifier evaluationByEvaluationIdentifier { get; set; }
+    }
+    public class TeachingEvaluationByIdentifier
+    {
+        public int EvaluationID { get; set; }
+        public int FieldWorkID { get; set; }
+        public string EvaluatorName { get; set; }
+        public string EvaluationJSON { get; set; }
+        public string StudentName { get; set; }
+        public string StudentFirstName { get; set; }
+        public string StudentLastName { get; set; }
+        public string CSULBID { get; set; }
+        public string StudentEmail { get; set; }
+        public string CourseTitle { get; set; }
+        public string TermName { get; set; }
+        public string ApplicationType { get; set; }
+        public string CourseNameandNumber { get; set; }
+
+
+    }
+
 
 }

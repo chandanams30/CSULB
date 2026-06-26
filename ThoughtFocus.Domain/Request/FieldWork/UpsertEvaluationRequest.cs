@@ -14,6 +14,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string EvaluatorName { get; set; }
         public string EvaluatorEmail { get; set; }
         public string ApplicationType { get; set; }
+
     }
     public class UpdateEvaluationJSONRequest
     {
@@ -24,6 +25,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string TermCode { get; set; }
         public string EvaluationJSON { get; set; }
         public string ApplicationType { get; set; }
+
     }
     public class DownloadAttachment
     {

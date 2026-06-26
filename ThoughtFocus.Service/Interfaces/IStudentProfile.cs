@@ -35,6 +35,9 @@ namespace ThoughtFocus.Service.Interfaces
         DownloadProfileAttachmentResponse DownloadProfileAttachment(Guid UniqueID);
 
         ProfileAttachmentDetailsResponse GetProfileAttachmentDetails(string CSULBID);
+        BaseResponse UpdateTeachingEvaluationJSON(UpdateTeachingEvaluationJSONRequest input);
+
+        TeachingEvaluationByIdentifierResponse GetTeachingEvaluationByIdentifier(string evaluationIdentifier);
 
     }
 }
