@@ -161,8 +161,9 @@ namespace ThoughtFocus.Service.Implementation
             csulbIDs = jsonObj["EnableIntern2"]?.ToString();
 
 
+            //                            };
             SqlParameter[] parameters =
-                                        {
+                                  {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
                                           new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs }
                                         };
