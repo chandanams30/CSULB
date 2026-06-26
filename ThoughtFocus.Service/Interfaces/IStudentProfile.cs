@@ -33,5 +33,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpsertProgramChecklistData(string JSONString);
         BaseResponse UpsertTeachingEvaluation(TeachingEvaluationRequest input);
         TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode);
+        BaseResponse UpdateTeachingEvaluationJSON(UpdateTeachingEvaluationJSONRequest input);
+        TeachingEvaluationByIdentifierResponse GetTeachingEvaluationByIdentifier(string evaluationIdentifier);
+
     }
 }
