@@ -12,7 +12,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IGraduateProgramService
     {
-        ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode);
+        ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode,int roleID);
         AppliedFormsResponse GetAppliedForms(int userID, int applicationTypeID);
         AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID, int roleID);
         FormStatesResponse GetFormStates(int userID);

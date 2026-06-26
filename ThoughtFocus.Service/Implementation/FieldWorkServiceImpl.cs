@@ -184,13 +184,21 @@ namespace ThoughtFocus.Service.Implementation
             string supervisorSubjects = supervisor?["Subjects"] != null
                 ? string.Join(",", supervisor["Subjects"].Select(s => s.ToString()))
                 : null;
+            //configuration for supervisor
+            //SqlParameter[] parameters =
+            //                            {
+            //                              new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
+            //                              new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs },
+            //                              new SqlParameter("@SupervisorCSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbId },
+            //                              new SqlParameter("@SupervisorCourses", SqlDbType.NVarChar, -1) { Value = supervisorSubjects }
 
+            //                            };
             SqlParameter[] parameters =
-                                        {
+                                  {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
-                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs },
-                                          new SqlParameter("@SupervisorCSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbId },
-                                          new SqlParameter("@SupervisorCourses", SqlDbType.NVarChar, -1) { Value = supervisorSubjects }
+                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = "" },
+                                          new SqlParameter("@SupervisorCSULBIDs", SqlDbType.NVarChar, -1) { Value = "" },
+                                          new SqlParameter("@SupervisorCourses", SqlDbType.NVarChar, -1) { Value = "" }
 
                                         };
             var courseList = jsonObj["FieldWorkValidCourses"]?.ToString().Split(',').Select(id => id.Trim());
