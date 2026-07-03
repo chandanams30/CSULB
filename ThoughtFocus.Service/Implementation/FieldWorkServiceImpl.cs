@@ -2126,104 +2126,76 @@ namespace ThoughtFocus.Service.Implementation
             byte[] pdfFileContent = null;
             string evaluationTemplateBody = string.Empty;
             string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
+
             jsonString = jsonString.Replace("+", " ");
+
             JObject schema = JObject.Parse(jsonString);
 
-            string date = string.Empty;
-            string gradeLevelTaught = string.Empty;
-            string schoolDistrict = string.Empty;
-            string schoolName = string.Empty;
+            evaluationTemplateBody = GetDocumentBodyTemplate("MidTermStudentTeachingEvaluationTemplate.html");
 
-            string promptness = string.Empty;
-            string responsibility = string.Empty;
-            string honor = string.Empty;
-            string representUniversity = string.Empty;
-            string communicationSkills = string.Empty;
-            string diversePopulations = string.Empty;
-            string collaboration = string.Empty;
-            string knowledge = string.Empty;
-            string finalEvaluation = string.Empty;
+            evaluationTemplateBody = evaluationTemplateBody.Replace("[[logoPath]]", logoPath);
 
-            //string teacherSignature = string.Empty;
-            string teacherName = string.Empty;
-            string comment = string.Empty;
+            JArray sections = (JArray)schema["sections"];
 
-
-            JObject personalInfo = (JObject)schema["personalInfo"];
-            JArray disposition = (JArray)personalInfo["disposition"];
-
-            date = Convert.ToString(personalInfo["date"]);
-            gradeLevelTaught = Convert.ToString(personalInfo.GetValue("gradeLevelTaught"));
-            schoolDistrict = Convert.ToString(personalInfo.GetValue("schoolDistrict"));
-            schoolName = Convert.ToString(personalInfo.GetValue("schoolName"));
-            //teacherSignature = Convert.ToString(schema.GetValue("teacherSignature"));
-            teacherName = Convert.ToString(schema.GetValue("teacherName"));
-            comment = Convert.ToString(schema.GetValue("comments"));
-
-            //Disposition Criteria
-            foreach (JObject content in disposition.Children<JObject>())
+            for (int i = 0; i < sections.Count; i++)
             {
-                if (content["Criteria"].ToString() == "Promptness: Timeliness in first contact; Punctuality in attendance")
+                JObject section = (JObject)sections[i];
+
+                // Replace Section Title & Subtitle
+                evaluationTemplateBody = evaluationTemplateBody
+                    .Replace($"[[Section{i + 1}Title]]", section["title"]?.ToString() ?? "")
+                    .Replace($"[[Section{i + 1}Subtitle]]", section["subtitle"]?.ToString() ?? "");
+
+                JArray indicators = (JArray)section["indicators"];
+
+                char sectionLetter = GetSectionLetter(i);
+
+                for (int j = 0; j < indicators.Count; j++)
                 {
-                    promptness = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "Responsibility: Consistency in schedule and work")
-                {
-                    responsibility = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "Honoring school setting: Compliance with school policies; Displays legal and ethical conduct; and, observing confidentiality at all times")
-                {
-                    honor = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "Representing the university: Respectful in professional language, behavior, and appearance. No use of social media in the schooling context at any time.")
-                {
-                    representUniversity = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "Communication Skills: University-level language in email, phone contact, and in person")
-                {
-                    communicationSkills = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "Working with Diverse Populations: Respect and demonstrates insightfulness for all students, various backgrounds, abilities, and orientations")
-                {
-                    diversePopulations = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "Collaboration: Willing contribution to classroom environment and learning opportunities")
-                {
-                    collaboration = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "Knowledge: Application of course content and best practices; reflection on learning")
-                {
-                    knowledge = Convert.ToString(content.GetValue("value"));
-                }
-                if (content["Criteria"].ToString() == "OVERALL FINAL EVAULATION")
-                {
-                    finalEvaluation = Convert.ToString(content.GetValue("value"));
+                    JObject indicator = (JObject)indicators[j];
+
+                    string rating = indicator["rating"]?.ToString().Trim().ToUpper();
+                    rating = rating?.Trim().ToUpper();
+
+                    string prefix;
+
+                    // Handle C-1 and C-2
+                    if (i == 2)
+                        prefix = "C1" + (j + 1);
+                    else if (i == 3)
+                        prefix = "C2" + (j + 1);
+                    else
+                        prefix = sectionLetter + (j + 1).ToString();
+
+                    evaluationTemplateBody = evaluationTemplateBody
+                   .Replace($"[[{prefix}_E]]", rating == "E" ? "Yes" : "")
+                   .Replace($"[[{prefix}_P]]", rating == "P" ? "Yes" : "")
+                   .Replace($"[[{prefix}_D]]", rating == "D" ? "Yes" : "")
+                   .Replace($"[[{prefix}_NC]]", rating == "NC" ? "Yes" : "")
+                   .Replace($"[[{prefix}_NO]]", (rating == "NO" || rating == "N/O") ? "Yes" : "");
                 }
             }
 
-            evaluationTemplateBody = GetDocumentBodyTemplate("FieldWorkEvaluationFormTemplate.html");
-            // replace the values in the template 
-            evaluationTemplateBody = evaluationTemplateBody.Replace("[[logoPath]]", logoPath)
-                                                                     .Replace("[[Date]]", date)
-                                                                     .Replace("[[GradeLevelTaught]]", gradeLevelTaught)
-                                                                     .Replace("[[SchoolDistrictName]]", schoolDistrict)
-                                                                     .Replace("[[SchoolName]]", schoolName)
-                                                                     .Replace("[[Promptness]]", promptness)
-                                                                     .Replace("[[Responsibility]]", responsibility)
-                                                                     .Replace("[[HonoringSchoolSetting]]", honor)
-                                                                     .Replace("[[RepresentingUniversity]]", representUniversity)
-                                                                     .Replace("[[CommunicationSkills]]", communicationSkills)
-                                                                     .Replace("[[WorkingDiversePopulations]]", diversePopulations)
-                                                                     .Replace("[[Collaboration]]", collaboration)
-                                                                     .Replace("[[Knowledge]]", knowledge)
-                                                                     .Replace("[[FinalEvaluation]]", finalEvaluation)
-                                                                     .Replace("[[AdditinalComments]]", comment)
-                                                                     //.Replace("[[CooperatingTeacherSignature]]", teacherSignature)
-                                                                     .Replace("[[CooperatingTeacherName]]", teacherName);
-            // get the filecontent
+            evaluationTemplateBody = evaluationTemplateBody
+                .Replace("[[Strengths]]", schema["strengths"]?.ToString() ?? "")
+                .Replace("[[GrowthAreas]]", schema["growthAreas"]?.ToString() ?? "");
+
             pdfFileContent = GetPDFFileContent(evaluationTemplateBody);
 
             return pdfFileContent;
+        }
+        private char GetSectionLetter(int index)
+        {
+            switch (index)
+            {
+                case 0: return 'A';
+                case 1: return 'B';
+                case 4: return 'D';
+                case 5: return 'E';
+                case 6: return 'F';
+                case 7: return 'G';
+                default: return 'C';
+            }
         }
         public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail,int activityLogID)
         {
@@ -3031,7 +3003,8 @@ namespace ThoughtFocus.Service.Implementation
             StringReader sr = new StringReader(htmlFormBody); // workable code uncomment after testing 
             //TextReader sr = new StringReader(htmlFormBody);
             //Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 0f);
-            iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 50, 50, 50, 50);
+            //iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 50, 50, 50, 50);
+            iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4.Rotate(), 20, 20, 20, 20);
             HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
             using (MemoryStream memoryStream = new MemoryStream())
             {
