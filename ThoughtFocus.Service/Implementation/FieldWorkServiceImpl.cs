@@ -2058,22 +2058,28 @@ namespace ThoughtFocus.Service.Implementation
         public FieldWorkAttachmentsRequest DownloadAttachment(DownloadAttachment input)
         {
             FieldWorkAttachmentsRequest obj = new FieldWorkAttachmentsRequest();
-            byte[] fileContentJSONToPDF = GetPDFFromJSON(input.evaluationjson);
+            byte[] fileContentJSONToPDF = GetPDFFromJSON(input);
             obj.FileName = "FieldWorkEvaluationForm" + "_" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".pdf";
             obj.FileContent = fileContentJSONToPDF;
             return obj;
         }
-        private byte[] GetPDFFromJSON(string jsonString)
+        private byte[] GetPDFFromJSON(DownloadAttachment input)
         {
             byte[] pdfFileContent = null;
             string evaluationTemplateBody = string.Empty;
             string logoPath = Path.GetFullPath("SupportFiles/Img/logo.jpeg");
 
-            jsonString = jsonString.Replace("+", " ");
+            input.evaluationjson = input.evaluationjson.Replace("+", " ");
 
-            JObject schema = JObject.Parse(jsonString);
-
-            evaluationTemplateBody = GetDocumentBodyTemplate("MidTermStudentTeachingEvaluationTemplate.html");
+            JObject schema = JObject.Parse(input.evaluationjson);
+            if (input.evaluationType == "MidTerm")
+            {
+                evaluationTemplateBody = GetDocumentBodyTemplate("MidTermStudentTeachingEvaluationTemplate.html");
+            }
+            else
+            {
+                evaluationTemplateBody = GetDocumentBodyTemplate("FinalTermStudentTeachingEvaluationTemplate.html");
+            }
 
             evaluationTemplateBody = evaluationTemplateBody.Replace("[[logoPath]]", logoPath);
 
