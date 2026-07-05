@@ -30,6 +30,8 @@ namespace ThoughtFocus.Domain.Request.FieldWork
     public class DownloadAttachment
     {
         public string evaluationjson { get; set; }
+        public string evaluationType { get; set; }
+
     }
     public class FieldWorkActivityLogsAttachmentRequest
     {
