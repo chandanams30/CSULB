@@ -55,7 +55,7 @@ namespace CSULB_COE
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:8081", "http://180.151.61.78:7852", "http://20.25.58.133", "https://ced-tf01d.campus.ad.csulb.edu", "https://myced.ced.csulb.edu") // prod also needs to be added here 
+                        builder.WithOrigins("http://localhost:8081", "http://localhost:4200", "http://180.151.61.78:7852", "http://20.25.58.133", "https://ced-tf01d.campus.ad.csulb.edu", "https://myced.ced.csulb.edu") // prod also needs to be added here 
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                     });
