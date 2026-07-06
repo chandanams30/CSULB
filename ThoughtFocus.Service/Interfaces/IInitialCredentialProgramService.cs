@@ -25,11 +25,11 @@ namespace ThoughtFocus.Service.Interfaces
         FormSectionAttachmentResponse GetFormSubSectionAttachmentList(FormSubsectionRequest input);
         BaseResponse SaveFormSubSectionAttachment(SaveFormSubSectionAttachmentRequest input);
         FormSubsectionAttachmentDownloadResponse GetFormSubSectionAttachment(SubsectionAttachmentDownloadRequest input);
-        FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID);
+        FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID, int RoleId);
         UpsertFormEducationInformationAttachmentResponse UpsertFormEducationInformationAttachment(UpsertFormEducationInformationAttachmentRequest input);
         DownloadEducationalInformationalAttachment GetFormEducationInformationAttachment(int FormID, Guid UniqueID);
         BaseResponse UpdateFormSubSectionApproveral(UpdateFormSubSectionApproveralRequest input);
-        FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers);
+        FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers, int RoleID);
         AdditionalOfficialDocumentsResponse GetAdditionalOfficialDocuments(int UserID, int FormID, int ProgramID, string TermCode);
         BaseResponse UpdateAdditionalOfficialDocument(UpdateAdditionalOfficialDocumentRequest input);
         FormAttachments GetAdditionalOfficialDocument(GetAdditionalOfficialDocumentRequest input);
