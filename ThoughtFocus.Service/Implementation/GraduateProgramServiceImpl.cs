@@ -371,7 +371,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode },
                                           new SqlParameter("@ShowMileStone", SqlDbType.Bit) { Value = showMilestone },
-                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = roleId },
+                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = roleId }
                                         };
 
             DataSet dtFormData = _helper.GetDataSet("[dbo].[GetForm]", parameters);

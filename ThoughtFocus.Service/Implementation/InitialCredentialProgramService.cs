@@ -1,41 +1,42 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using CSULB_COE.Models;
+using iTextSharp.text;
+using iTextSharp.text.html.simpleparser;
+using iTextSharp.text.pdf;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Office.Interop.Word;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Net;
+using System.Net.Mail;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Enumeration;
+using ThoughtFocus.Domain.FormModels;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Request.Travel;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.Application;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
+using ThoughtFocus.Domain.Response.Program.TemplateResponse;
 using ThoughtFocus.Service.Interfaces;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
-using ThoughtFocus.DataAccess.Models;
-using ThoughtFocus.Domain.Response.FieldWork;
-using ThoughtFocus.Domain.Enumeration;
 using static ThoughtFocus.Service.Implementation.InitialCredentialProgramService;
 using FormAttachments = ThoughtFocus.Domain.Request.InitialCredentialProgram.FormAttachments;
-using Newtonsoft.Json.Linq;
-using iTextSharp.text.html.simpleparser;
-using iTextSharp.text.pdf;
-using iTextSharp.text;
-using Microsoft.Office.Interop.Word;
-using ThoughtFocus.Domain.FormModels;
-using System.Drawing;
-using ThoughtFocus.Domain.Response.Program.TemplateResponse;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -430,7 +431,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers }
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers },
+                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = input.RoleId }
                                         };
 
             DataTable dtSubSection = _helper.GetDataTable("[Application].[GetFormSubSection]", parameters);
@@ -812,7 +814,7 @@ namespace ThoughtFocus.Service.Implementation
             return fileContent;
         }
 
-        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID)
+        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID, int RoleId)
         {
             FormPrerequisitesResponse obj = new FormPrerequisitesResponse();
 
@@ -820,7 +822,8 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = UserId },
-                                          new SqlParameter("@FormID", SqlDbType.Int, 50) { Value = FormID }
+                                          new SqlParameter("@FormID", SqlDbType.Int, 50) { Value = FormID },
+                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = RoleId }
                                         };
 
             DataTable dsAttachments = _helper.GetDataTable("[Application].[GetFormPrerequisites]", parameters);
@@ -1204,7 +1207,7 @@ namespace ThoughtFocus.Service.Implementation
             return body;
         }
 
-        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers)
+        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers, int RoleId)
         {
             FormSectionApprovalDetailsResponse obj = new FormSectionApprovalDetailsResponse();
 
@@ -1213,7 +1216,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                           new SqlParameter("@FormSubSectionID", SqlDbType.BigInt) { Value = FormSubSectionID },
-                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,10) { Value = SubSectionIdentifiers }
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,10) { Value = SubSectionIdentifiers },
+                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = RoleId }
+
                                      };
             DataTable dtApprovalDetails = _helper.GetDataTable("[Application].[GetFormSubSectionApproveralDetails]", parameters);
             if (dtApprovalDetails.Rows.Count > 0)
