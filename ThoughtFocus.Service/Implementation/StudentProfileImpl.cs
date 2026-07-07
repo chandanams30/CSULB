@@ -1255,7 +1255,8 @@ namespace ThoughtFocus.Service.Implementation
                 string applicantName = string.Empty;
                 string body = string.Empty;
                 string link = string.Empty;
-                bool isFinaltermMailSent = false;
+            string programName = string.Empty;
+            bool isFinaltermMailSent = false;
                 bool isMidtermMailSent = false;
                 bool isMailSent = false;
                 int programID = 0;
@@ -1274,12 +1275,34 @@ namespace ThoughtFocus.Service.Implementation
                             if (evaluationDetails.Tables[0].Rows.Count > 0)
                             {
                                 // send mail to the evaluator with the URL link  
-                                evaluatorName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherName"]);
-                                evaluatorEmail = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherEmail"]);
-                                evaluationURL = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherURL"]);
-                                evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherIdentifier"]);
-                            //applicantName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["StudentName"]);
-                            //link = evaluationURL + evaluationIdentifier;
+                                //evaluatorName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherName"]);
+                                //evaluatorEmail = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherEmail"]);
+                                //evaluationURL = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherURL"]);
+                                //evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherIdentifier"]);
+                                //programID = Convert.ToInt32(evaluationDetails.Tables[0].Rows[0]["ProgramID"]);
+
+                            DataRow row = evaluationDetails.Tables[0].Rows[0];
+
+                            evaluatorName = row["CooperatingTeacherName"] != DBNull.Value
+                                ? Convert.ToString(row["CooperatingTeacherName"])
+                                : string.Empty;
+
+                            evaluatorEmail = row["CooperatingTeacherEmail"] != DBNull.Value
+                                ? Convert.ToString(row["CooperatingTeacherEmail"])
+                                : string.Empty;
+
+                            evaluationURL = row["CooperatingTeacherURL"] != DBNull.Value
+                                ? Convert.ToString(row["CooperatingTeacherURL"])
+                                : string.Empty;
+
+                            evaluationIdentifier = row["CooperatingTeacherIdentifier"] != DBNull.Value
+                                ? Convert.ToString(row["CooperatingTeacherIdentifier"])
+                                : string.Empty;
+
+                            programID = row["ProgramID"] != DBNull.Value
+                                ? Convert.ToInt32(row["ProgramID"])
+                                : 0;
+
                             if (input.EvaluationType == "MidTerm")
                             {
                                 link = _configuration["ApplicationKeys:TeachingEvaluationURLMidTerm"] + evaluationIdentifier;
@@ -1288,12 +1311,32 @@ namespace ThoughtFocus.Service.Implementation
                             {
                                 link = _configuration["ApplicationKeys:TeachingEvaluationURLFinalTerm"] + evaluationIdentifier;
                             }
-                            subject = "CSULB Clinical Practice Evaluation Form";
-                                
-                                //get evaluation mail body
-                                SqlParameter[] parameters1 ={
+
+                            if (programID == 1)
+                            {
+                                subject = "CSULB ESCP Teaching Evaluation Form";
+                                programName = "ESCP";
+                            }
+                            if (programID == 2)
+                            {
+                                subject = "CSULB MSCP Teaching Evaluation Form";
+                                programName = "MSCP";
+                            }
+                            else if (programID == 3)
+                            {
+                                subject = "CSULB PK3 Teaching Evaluation Form";
+                                programName = "PK3";
+                            }
+                            else if (programID == 4)
+                            {
+                                subject = "CSULB SSCP Teaching Evaluation Form";
+                                programName = "SSCP";
+                            }
+
+                            //get evaluation mail body
+                            SqlParameter[] parameters1 ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt) { Value = 1 },
-                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 2 },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
                                             new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = "Evaluation Mail"}
                                        };
                                 DataTable dtEval = _helper.GetDataTable("[Application].[GetEvaluatorEmail]", parameters1);
@@ -1305,27 +1348,31 @@ namespace ThoughtFocus.Service.Implementation
 
                                         string beforeBody = string.Empty;
                                         string afterBody = string.Empty;
-                                        string facultySupervisorEmail = evaluationDetails?.Tables.Count >= 2 && evaluationDetails.Tables[2].Rows.Count > 0 &&
-                                        evaluationDetails.Tables[2].Columns.Contains("Email") ? Convert.ToString(evaluationDetails.Tables[2].Rows[0]["Email"]): string.Empty;
-                                        //bool isMidtermMailSent = evaluationDetails?.Tables.Count >= 2 && evaluationDetails.Tables[2].Rows.Count > 0 &&
-                                        //evaluationDetails.Tables[2].Columns.Contains("isMidtermMailSent") ? Convert.ToBoolean(evaluationDetails.Tables[2].Rows[0]["isMidtermMailSent"]) : false;
-
-                                        beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                                    string facultySupervisorEmail = evaluationDetails.Tables[1].Rows[0]["FacultySupervisorEmail"] != DBNull.Value
+                                        ? Convert.ToString(evaluationDetails.Tables[1].Rows[0]["FacultySupervisorEmail"])
+                                        : string.Empty;
+                                    isMidtermMailSent = evaluationDetails?.Tables.Count >= 1 && evaluationDetails.Tables[1].Rows.Count > 0 &&
+                                        evaluationDetails.Tables[1].Columns.Contains("isMidtermMailSent") ? Convert.ToBoolean(evaluationDetails.Tables[1].Rows[0]["isMidtermMailSent"]) : false;
+                                    
+                                    isFinaltermMailSent = evaluationDetails?.Tables.Count >= 1 && evaluationDetails.Tables[1].Rows.Count > 0 &&
+                                    evaluationDetails.Tables[1].Columns.Contains("isFinaltermMailSent") ? Convert.ToBoolean(evaluationDetails.Tables[1].Rows[0]["isFinaltermMailSent"]) : false;
+                                   
+                                    beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                                         afterBody = "</body></html>";
                                         body = $"{beforeBody}{body}{afterBody}";
                                         //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
                                         body = body.Replace("[[logoPath]]", logoText)
                                             .Replace("[[applicantname]]", applicantName)
+                                            .Replace("[[programName]]", programName)
                                             .Replace("[[link]]", link);
-                                    //if (isMidtermMailSent == false)
-                                    //{
-                                    //    _sendMail.SendEmail(evaluatorEmail, facultySupervisorEmail, "COMMON", subject, body, "");
-                                    //}
-                                    //else
-                                    //{
-                                    //    _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
-                                    //}
-                                    _sendMail.SendEmail(evaluatorEmail, facultySupervisorEmail, "COMMON", subject, body, "");
+                                    if (isMidtermMailSent == false && isFinaltermMailSent == false && input.evaluationID == 0)
+                                    {
+                                        _sendMail.SendEmail(evaluatorEmail, facultySupervisorEmail, "COMMON", subject, body, "");
+                                    }
+                                    else
+                                    {
+                                        _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                                    }
                                     isMailSent = true;
                                     if (input.EvaluationType == "MidTerm")
                                     {
@@ -1412,7 +1459,8 @@ namespace ThoughtFocus.Service.Implementation
                                                       CanView = Convert.ToBoolean(row["CanView"]),
                                                       FileLink = Convert.ToString(row["FileLink"]),
                                                       ApplicationType = Convert.ToString(row["ApplicationType"]),
-                                                      EvaluationType= Convert.ToString(row["EvaluationType"])
+                                                      EvaluationType= Convert.ToString(row["EvaluationType"]),
+                                                      ProgramID = Convert.ToInt32(row["ProgramID"])
                                                   }).ToList();
 
                     }
@@ -1452,7 +1500,9 @@ namespace ThoughtFocus.Service.Implementation
             string subject = string.Empty;
             string beforeBody = string.Empty;
             string afterBody = string.Empty;
-            string studentEmail = string.Empty;
+            string facultySupervisorEmail = string.Empty;
+            string programName = string.Empty;
+
             int programID = 0;
             bool isFinaltermMailSent = false;
             bool isMidtermMailSent = false;
@@ -1475,31 +1525,39 @@ namespace ThoughtFocus.Service.Implementation
             {
                 evaluatorEmail = dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["EvaluatorEmail"]) : "";
                 applicantName = dtDLLOR.Tables[0].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["ApplicantName"]) : "";
-                studentEmail = dtDLLOR.Tables[0].Rows[0]["StudentEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["StudentEmail"]) : "";
+                facultySupervisorEmail = dtDLLOR.Tables[0].Rows[0]["FacultySupervisorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["FacultySupervisorEmail"]) : "";
+                programID = dtDLLOR.Tables[0].Rows[0]["ProgramID"] != DBNull.Value ? Convert.ToInt32(dtDLLOR.Tables[0].Rows[0]["ProgramID"]) : 0;
             }
 
             upsertEvaluationRequest.evaluationID = input.EvaluationID;
             upsertEvaluationRequest.UserID = input.UserID;
-            upsertEvaluationRequest.ProgramID = input.ProgramID;
+            upsertEvaluationRequest.ProgramID = programID;
             upsertEvaluationRequest.TermCode = input.TermCode;
             upsertEvaluationRequest.FieldWorkID = input.FieldWorkID;
-            subject = "CSULB SSCP Clinical Practice Evaluation Submitted";
 
-            //if (input.ApplicationType == "FieldWork-MSCP")
-            //{
-            //    programID = 2;
-            //    subject = "CSULB MSCP Clinical Practice Evaluation Submitted";
-            //}
-            //else if (input.ApplicationType == "FieldWork-PK3")
-            //{
-            //    programID = 3;
-            //    subject = "CSULB PK3 Clinical Practice Evaluation Submitted";
-            //}
-            //else if (input.ApplicationType == "FieldWork-SSCP")
-            //{
-            //    programID = 4;
-            //    subject = "CSULB SSCP Clinical Practice Evaluation Submitted";
-            //}
+            if (programID == 1)
+            {
+                subject = "CSULB ESCP Teaching Evaluation Form";
+                programName = "ESCP";
+            }
+            if (programID == 2)
+            {
+                subject = "CSULB MSCP Teaching Evaluation Submitted";
+                programName = "MSCP";
+
+            }
+            else if (programID == 3)
+            {
+                subject = "CSULB PK3 Teaching Evaluation Submitted";
+                programName = "PK3";
+
+            }
+            else if (programID == 4)
+            {
+                subject = "CSULB SSCP Teaching Evaluation Submitted";
+                programName = "SSCP";
+
+            }
 
             SqlParameter[] parameters1 ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt, 10) { Value = 1 },
@@ -1516,8 +1574,10 @@ namespace ThoughtFocus.Service.Implementation
                     afterBody = "</body></html>";
                     body = $"{beforeBody}{body}{afterBody}";
                     body = body.Replace("[[logoPath]]", logoText)
-                            .Replace("[[applicantname]]", applicantName);
-                    _sendMail.SendEmail(studentEmail, evaluatorEmail, "COMMON", subject, body, "");
+                            .Replace("[[applicantname]]", applicantName)
+                            .Replace("[[programName]]", programName);
+                    
+                    _sendMail.SendEmail(evaluatorEmail, facultySupervisorEmail, "COMMON", subject, body, "");
                     isMailSent = true;
                     if (input.EvaluationType == "MidTerm")
                     {
