@@ -163,5 +163,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string FileLink { get; set; }
         public string ApplicationType { get; set; }
         public string EvaluationType { get; set; }
+        public int ProgramID { get; set; }
+
     }
 }
