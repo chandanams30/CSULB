@@ -42,14 +42,15 @@ namespace ThoughtFocus.Service.Implementation
             _util = util;
         }
 
-        public FacultySupervisorListResponse GetFacultySupervisorList(int UserID)
+        public FacultySupervisorListResponse GetFacultySupervisorList(int UserID, int RoleID)
         {
             FacultySupervisorListResponse obj = new FacultySupervisorListResponse();
 
 
             SqlParameter[] parameters =
                                         {
-                                          new SqlParameter("@UserID", SqlDbType.Int,50) { Value = UserID }
+                                          new SqlParameter("@UserID", SqlDbType.Int,50) { Value = UserID },
+                                          new SqlParameter("@RoleID", SqlDbType.Int,50) { Value = RoleID }
                                         };
 
             DataTable dtFacultySupervisorList = _helper.GetDataTable("[Travel].[GetBusinessMileageSupervisorList]", parameters);
