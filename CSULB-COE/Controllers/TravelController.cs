@@ -34,11 +34,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetBusinessMileageSupervisorList")]
-        public FacultySupervisorListResponse GetFacultySupervisorList(int UserID)
+        public FacultySupervisorListResponse GetFacultySupervisorList(int UserID,int RoleID)
         {
             try
             {
-                FacultySupervisorListResponse response = _travelService.GetFacultySupervisorList(UserID);
+                FacultySupervisorListResponse response = _travelService.GetFacultySupervisorList(UserID,RoleID);
                 return response;
             }
             catch (Exception ex)

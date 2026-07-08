@@ -9,7 +9,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface ITravelService
     {
-        FacultySupervisorListResponse GetFacultySupervisorList(int UserID);
+        FacultySupervisorListResponse GetFacultySupervisorList(int UserID, int RoleID);
         BaseResponse UpsertBusinessMileageSupervisorList(UpsertFacultySupervisorRequest input);
         BaseResponse UpsertBusinessMileageLog(UpsertBusinessMileageLogRequest input);
         MileageLogListResponse GetBusinessMileageLogList(int BusinessMileageSupervisorID, int BusinessMileageSupervisorUserID);
