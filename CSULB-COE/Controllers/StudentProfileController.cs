@@ -419,11 +419,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetTeachingEvaluationByFieldWorkID")]
-        public TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode)
+        public TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode,int FormID)
         {
             try
             {
-                TeachingEvaluationByIDResponse response = _studentProfileService.GetTeachingEvaluationByFieldWorkID(UserID, FieldWorkID, ProgramID, TermCode);
+                TeachingEvaluationByIDResponse response = _studentProfileService.GetTeachingEvaluationByFieldWorkID(UserID, FieldWorkID, ProgramID, TermCode,FormID);
                 return response;
 
             }
