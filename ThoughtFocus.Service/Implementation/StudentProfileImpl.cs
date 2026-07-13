@@ -1243,7 +1243,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@CooperatingTeacherName", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherName },
                                           new SqlParameter("@CooperatingTeacherEmail", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherEmail },
                                           new SqlParameter("@EvaluationType", SqlDbType.NVarChar,  200) { Value = input.EvaluationType },
-
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgarmID }
                                    };
                 DataSet evaluationDetails = _helper.GetDataSet("[dbo].[SaveStudentTeachingEvaluation]", parameters);
 
@@ -1325,6 +1325,11 @@ namespace ThoughtFocus.Service.Implementation
                             {
                                 subject = "CSULB SSCP Teaching Evaluation Form";
                                 programName = "SSCP";
+                            }
+                            else if (programID == 6)
+                            {
+                                subject = "CSULB UDCP Teaching Evaluation Form";
+                                programName = "UDCP";
                             }
 
                             //get evaluation mail body
@@ -1555,6 +1560,11 @@ namespace ThoughtFocus.Service.Implementation
                 subject = "CSULB SSCP Teaching Evaluation Submitted";
                 programName = "SSCP";
 
+            }
+            else if (programID == 6)
+            {
+                subject = "CSULB UDCP Teaching Evaluation Submitted";
+                programName = "UDCP";
             }
 
             SqlParameter[] parameters1 ={
