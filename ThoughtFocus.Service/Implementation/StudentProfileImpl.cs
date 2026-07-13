@@ -1266,15 +1266,15 @@ namespace ThoughtFocus.Service.Implementation
                 string applicantName = string.Empty;
                 string body = string.Empty;
                 string link = string.Empty;
-            string programName = string.Empty;
-            bool isFinaltermMailSent = false;
+                string programName = string.Empty;
+                bool isFinaltermMailSent = false;
                 bool isMidtermMailSent = false;
                 bool isMailSent = false;
                 int programID = 0;
                 string subject = string.Empty;
                 try
                 {
-                    if (evaluationDetails.Tables[1].Rows.Count > 0)
+                    if (evaluationDetails!= null && evaluationDetails.Tables[1].Rows.Count > 0)
                     {
                         if (Convert.ToString(evaluationDetails.Tables[1].Rows[0]["Status"]) == "FAILURE")
                         {
@@ -1285,12 +1285,6 @@ namespace ThoughtFocus.Service.Implementation
                         {
                             if (evaluationDetails.Tables[0].Rows.Count > 0)
                             {
-                                // send mail to the evaluator with the URL link  
-                                //evaluatorName = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherName"]);
-                                //evaluatorEmail = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherEmail"]);
-                                //evaluationURL = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherURL"]);
-                                //evaluationIdentifier = Convert.ToString(evaluationDetails.Tables[0].Rows[0]["CooperatingTeacherIdentifier"]);
-                                //programID = Convert.ToInt32(evaluationDetails.Tables[0].Rows[0]["ProgramID"]);
 
                             DataRow row = evaluationDetails.Tables[0].Rows[0];
 
@@ -1371,14 +1365,15 @@ namespace ThoughtFocus.Service.Implementation
                                     beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                                         afterBody = "</body></html>";
                                         body = $"{beforeBody}{body}{afterBody}";
-                                        //body = GetMailBodyTemplate("FieldWork_Clinical_Practice_Evaluation_Form.html");
                                         body = body.Replace("[[logoPath]]", logoText)
                                             .Replace("[[applicantname]]", applicantName)
                                             .Replace("[[programName]]", programName)
                                             .Replace("[[link]]", link);
                                     if (isMidtermMailSent == false && isFinaltermMailSent == false && input.evaluationID == 0)
                                     {
-                                        _sendMail.SendEmail(evaluatorEmail, facultySupervisorEmail, "COMMON", subject, body, "");
+                                        _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                                        _sendMail.SendEmail(facultySupervisorEmail, "", "COMMON", subject, body, "");
+
                                     }
                                     else
                                     {
@@ -1588,7 +1583,7 @@ namespace ThoughtFocus.Service.Implementation
                             .Replace("[[applicantname]]", applicantName)
                             .Replace("[[programName]]", programName);
                     
-                    _sendMail.SendEmail(evaluatorEmail, facultySupervisorEmail, "COMMON", subject, body, "");
+                    _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
                     isMailSent = true;
                     if (input.EvaluationType == "MidTerm")
                     {
