@@ -1431,7 +1431,7 @@ namespace ThoughtFocus.Service.Implementation
             int ID = _helper.InsertTable("[dbo].[UpdateTeachingEvaluationMailSent]", parameters);
 
         }
-        public TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode)
+        public TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode,int FormID)
         {
             TeachingEvaluationByIDResponse obj = new TeachingEvaluationByIDResponse();
             SqlParameter[] parameters =
@@ -1439,7 +1439,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = FieldWorkID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
-                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode }
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
                                      };
             DataTable evaluationDetails = _helper.GetDataTable("[FieldWork].[GetTeachingEvaluationByFieldWorkID]", parameters);
             try
@@ -1466,7 +1467,9 @@ namespace ThoughtFocus.Service.Implementation
                                                       FileLink = Convert.ToString(row["FileLink"]),
                                                       ApplicationType = Convert.ToString(row["ApplicationType"]),
                                                       EvaluationType= Convert.ToString(row["EvaluationType"]),
-                                                      ProgramID = Convert.ToInt32(row["ProgramID"])
+                                                      ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                      UniversityMentorName = Convert.ToString(row["UniversityMentorName"]),
+                                                      UniversityMentorEmail = Convert.ToString(row["UniversityMentorEmail"])
                                                   }).ToList();
 
                     }
