@@ -65,7 +65,6 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
     }
     public class TeachingEvaluationRequest
     {
-        public int ProgarmID { get; set; }
         public int evaluationID { get; set; }
         public int FieldWorkID { get; set; }
         public int FormID { get; set; }
