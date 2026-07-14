@@ -1243,8 +1243,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@CooperatingTeacherName", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherName },
                                           new SqlParameter("@CooperatingTeacherEmail", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherEmail },
-                                          new SqlParameter("@EvaluationType", SqlDbType.NVarChar,  200) { Value = input.EvaluationType }
-                                         // new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgarmID }
+                                          new SqlParameter("@EvaluationType", SqlDbType.NVarChar,  200) { Value = input.EvaluationType },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID }
+
                                    };
                 DataSet evaluationDetails = _helper.GetDataSet("[dbo].[SaveStudentTeachingEvaluation]", parameters);
 
