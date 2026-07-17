@@ -1241,9 +1241,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
                                           new SqlParameter("@CooperatingTeacherName", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherName },
                                           new SqlParameter("@CooperatingTeacherEmail", SqlDbType.NVarChar,  200) { Value = input.CooperatingTeacherEmail },
-                                          new SqlParameter("@EvaluationType", SqlDbType.NVarChar,  200) { Value = input.EvaluationType },
-                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID }
-
+                                          new SqlParameter("@EvaluationType", SqlDbType.NVarChar,  200) { Value = input.EvaluationType }
+                                         // new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgarmID }
                                    };
                 DataSet evaluationDetails = _helper.GetDataSet("[dbo].[SaveStudentTeachingEvaluation]", parameters);
 
@@ -1367,18 +1366,18 @@ namespace ThoughtFocus.Service.Implementation
                                     {
                                         _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
                                         _sendMail.SendEmail(facultySupervisorEmail, "", "COMMON", subject, body, "");
-
+                                        isMailSent = true;
                                     }
                                     else
                                     {
                                         _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                                        isMailSent = true;
                                     }
-                                    isMailSent = true;
-                                    if (input.EvaluationType == "MidTerm")
+                                    if (input.EvaluationType == "MidTerm" && isMailSent == true)
                                     {
                                         isMidtermMailSent = true;
                                     }
-                                    else
+                                    else if(input.EvaluationType == "FinalTerm" && isMailSent == true)
                                     {
                                         isFinaltermMailSent = true;
                                     }
@@ -1498,6 +1497,7 @@ namespace ThoughtFocus.Service.Implementation
             string logoText = "cid:myImageID";
             string evaluatorEmail = string.Empty;
             string applicantName = string.Empty;
+            string applicantEmail = string.Empty;
             string body = string.Empty;
             bool isMailSent = false;
             string subject = string.Empty;
@@ -1530,6 +1530,8 @@ namespace ThoughtFocus.Service.Implementation
                 applicantName = dtDLLOR.Tables[0].Rows[0]["ApplicantName"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["ApplicantName"]) : "";
                 facultySupervisorEmail = dtDLLOR.Tables[0].Rows[0]["FacultySupervisorEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["FacultySupervisorEmail"]) : "";
                 programID = dtDLLOR.Tables[0].Rows[0]["ProgramID"] != DBNull.Value ? Convert.ToInt32(dtDLLOR.Tables[0].Rows[0]["ProgramID"]) : 0;
+                applicantEmail = dtDLLOR.Tables[0].Rows[0]["ApplicantEmail"] != DBNull.Value ? Convert.ToString(dtDLLOR.Tables[0].Rows[0]["ApplicantEmail"]) : "";
+
             }
 
             upsertEvaluationRequest.evaluationID = input.EvaluationID;
@@ -1585,7 +1587,7 @@ namespace ThoughtFocus.Service.Implementation
                             .Replace("[[applicantname]]", applicantName)
                             .Replace("[[programName]]", programName);
                     
-                    _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+                    _sendMail.SendEmail(applicantEmail, "", "COMMON", subject, body, "");
                     isMailSent = true;
                     if (input.EvaluationType == "MidTerm")
                     {

@@ -515,7 +515,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt, 50) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt, 50) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar, -1) { Value = input.FormSchema }
+                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar, -1) { Value = input.FormSchema },
+                                          new SqlParameter("@isYellowFlagEnabled", SqlDbType.NVarChar, -1) { Value = input.isYellowFlagEnabled }
                                         };
         
                 int identity = _helper.InsertTable("[dbo].[UpdateFormPersonalInfoSchema]", parameters);
