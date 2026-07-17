@@ -11,6 +11,8 @@ namespace ThoughtFocus.Domain.Request.GraduateProgram
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public string FormSchema { get; set; }
+        public bool isYellowFlagEnabled { get; set; }
+
     }
     public class MoveApplicationToSemesterRequest
     {

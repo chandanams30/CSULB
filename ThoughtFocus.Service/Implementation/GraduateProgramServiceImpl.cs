@@ -408,7 +408,9 @@ namespace ThoughtFocus.Service.Implementation
                                                    CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"]),
                                                    UniversityApplicationStatus = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["UniversityApplicationStatus"]),
                                                    GPA = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["GPA"]),
-                                                   StatusDate = Convert.ToDateTime(row["StatusDate"] == DBNull.Value ? null : row["StatusDate"])
+                                                   StatusDate = Convert.ToDateTime(row["StatusDate"] == DBNull.Value ? null : row["StatusDate"]),
+                                                   isYellowFlagEnabled = Convert.ToBoolean(row["isYellowFlagEnabled"] == DBNull.Value ? null : row["isYellowFlagEnabled"])
+
                                                }).FirstOrDefault();
 
                     obj.FormStateHandler = dtFormData.Tables[1].AsEnumerable().Select(row =>
@@ -518,7 +520,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt, 50) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt, 50) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar, -1) { Value = input.FormSchema }
+                                          new SqlParameter("@FormSchema", SqlDbType.NVarChar, -1) { Value = input.FormSchema },
+                                          new SqlParameter("@isYellowFlagEnabled", SqlDbType.NVarChar, -1) { Value = input.isYellowFlagEnabled }
                                         };
         
                 int identity = _helper.InsertTable("[dbo].[UpdateFormPersonalInfoSchema]", parameters);

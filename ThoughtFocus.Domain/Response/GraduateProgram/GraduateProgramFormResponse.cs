@@ -49,6 +49,8 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string UniversityApplicationStatus { get; set; }
         public string GPA {  get; set; }
         public DateTime StatusDate { get; set; }
+        public bool isYellowFlagEnabled { get; set; }
+        
 
     }
     public class FormStateHandler
