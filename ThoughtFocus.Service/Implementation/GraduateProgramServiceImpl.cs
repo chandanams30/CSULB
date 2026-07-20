@@ -53,7 +53,7 @@ namespace ThoughtFocus.Service.Implementation
             _initialCredentialProgramService = initialCredentialProgramService;
             _fieldWorkService = fieldWorkService;
         }
-        public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode, int roleID)
+        public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID,string termCode)//, int roleID)
         {
             ApplicationProgramResponse obj = new ApplicationProgramResponse();
 
@@ -62,8 +62,8 @@ namespace ThoughtFocus.Service.Implementation
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
                                           new SqlParameter("@ApplicationTypeID", SqlDbType.Int, 50) { Value = applicationTypeID },
-                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode },
-                                          new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID }
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                         // new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID }
                                         };
 
             DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationPrograms]", parameters);

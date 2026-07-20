@@ -12,7 +12,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IInitialCredentialProgramService
     {
-        ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode, int roleID);
+        ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode);//, int roleID);
         AppliedFormsByProgramsResponse GetAppliedFormsByPrograms(int userID, int programID, string termcode, int formStateID,int roleID);
         AppliedFormsResponse GetAppliedForms(int userID, int applicationTypeID);
         FormStatesResponse GetFormStates(int userID);

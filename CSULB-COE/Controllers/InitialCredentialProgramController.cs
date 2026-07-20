@@ -44,11 +44,11 @@ namespace CSULB_COE.Controllers
             _configuration = configuration;
         }
         [HttpGet("GetApplicationPrograms")]
-        public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode,int roleID)
+        public ApplicationProgramResponse GetApplicationPrograms(int userID, int applicationTypeID, string termCode)//,int roleID)
         {
             try
             {
-                ApplicationProgramResponse response = _initialCredentialProgramService.GetApplicationPrograms(userID, applicationTypeID, termCode,roleID);
+                ApplicationProgramResponse response = _initialCredentialProgramService.GetApplicationPrograms(userID, applicationTypeID, termCode);//,roleID);
                 return response;
             }
             catch (Exception ex)

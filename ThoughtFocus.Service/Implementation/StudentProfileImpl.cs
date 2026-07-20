@@ -372,15 +372,15 @@ namespace ThoughtFocus.Service.Implementation
             response.IsSuccess = true;
             return response;
         }
-        public List<ApplicationList> GetApplications(int userId, string identifier, int roleID)
+        public List<ApplicationList> GetApplications(int userId, string identifier)//, int roleID)
         {
             // gets the list of applications
             List<ApplicationList> obj = new List<ApplicationList>();
 
             SqlParameter[] parameters =
                                   {
-                                    new SqlParameter("@UserID", SqlDbType.NVarChar, 255) { Value = userId},
-                                    new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID}
+                                    new SqlParameter("@UserID", SqlDbType.NVarChar, 255) { Value = userId}
+                                    //new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID}
                                   };
 
             DataTable dtApplications = _helper.GetDataTable("[dbo].[GetApplications]", parameters);
@@ -453,7 +453,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode,int roleID)
+        public ApplicationProgramListResponse GetApplicationProgramList(int userID, int applicationTypeID, string termCode)//,int roleID)
         {
             ApplicationProgramListResponse obj = new ApplicationProgramListResponse();
 
@@ -462,8 +462,8 @@ namespace ThoughtFocus.Service.Implementation
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userID },
                                           new SqlParameter("@ApplicationTypeID", SqlDbType.Int, 50) { Value = applicationTypeID },
-                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode },
-                                          new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID }
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode }
+                                          //new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID }
                                         };
 
             DataSet dtApplicationPrograms = _helper.GetDataSet("[dbo].[GetApplicationPrograms]", parameters);
