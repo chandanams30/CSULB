@@ -128,7 +128,7 @@ namespace CSULB_COE.Controllers
             try
             {
                 int roleId = 3;
-                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID, formID, programID, termCode, false, roleId);
+                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID, formID, programID, termCode, false);//, roleId);
                 return response;
             }
             catch (Exception ex)
@@ -313,12 +313,12 @@ namespace CSULB_COE.Controllers
                     if (dtAppliedForms.Rows.Count > 0)
                     {
                         formID = Convert.ToInt32(dtAppliedForms.Rows[0]["FormID"]);
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone, roleId);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode, showMileStone);//, roleId);
                     }
                     else
                     {
                         formID = 0;
-                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode,showMileStone, roleId);
+                        response = _graduateProgramService.GetForm(userID, formID, programID, termCode, showMileStone);//, roleId);
                     }
                     return response;
                 }
@@ -554,7 +554,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID, UserID, FormSubSectionID, SubSectionIdentifiers, RoleId);
+                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID, UserID, FormSubSectionID, SubSectionIdentifiers);//, RoleId);
                 return response;
             }
             catch (Exception ex)
@@ -864,7 +864,7 @@ namespace CSULB_COE.Controllers
         {
             try
             {
-                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId, FormID, RoleId);
+                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId, FormID);//, RoleId);
                 return response;
             }
             catch (Exception ex)

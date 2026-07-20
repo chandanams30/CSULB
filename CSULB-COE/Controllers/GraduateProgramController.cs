@@ -134,11 +134,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetForm")]
-        public GraduateProgramFormResponse GetForm(int userID,int formID,int programID,string termCode, int roleId)
+        public GraduateProgramFormResponse GetForm(int userID,int formID,int programID,string termCode)//, int roleId)
         {
             try
             {
-                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID,formID,programID,termCode,false, roleId);
+                GraduateProgramFormResponse response = _graduateProgramService.GetForm(userID, formID, programID, termCode, false);//, roleId);
                 return response;
             }
             catch (Exception ex)

@@ -359,7 +359,7 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
-        public GraduateProgramFormResponse GetForm(int userID, int formID, int programID, string termCode,bool showMilestone, int roleId)
+        public GraduateProgramFormResponse GetForm(int userID, int formID, int programID, string termCode, bool showMilestone)//, int roleId)
         {
             GraduateProgramFormResponse obj = new GraduateProgramFormResponse();
 
@@ -370,8 +370,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.Int, 50) { Value = formID },
                                           new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = termCode },
-                                          new SqlParameter("@ShowMileStone", SqlDbType.Bit) { Value = showMilestone },
-                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = roleId }
+                                          new SqlParameter("@ShowMileStone", SqlDbType.Bit) { Value = showMilestone }
+                                         // new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = roleId }
                                         };
 
             DataSet dtFormData = _helper.GetDataSet("[dbo].[GetForm]", parameters);

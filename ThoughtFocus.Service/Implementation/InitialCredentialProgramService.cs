@@ -431,8 +431,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers },
-                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = input.RoleId }
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar, 10) { Value = input.SubSectionIdentifiers }
+                                          //new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = input.RoleId }
                                         };
 
             DataTable dtSubSection = _helper.GetDataTable("[Application].[GetFormSubSection]", parameters);
@@ -814,7 +814,7 @@ namespace ThoughtFocus.Service.Implementation
             return fileContent;
         }
 
-        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID, int RoleId)
+        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID)//, int RoleId)
         {
             FormPrerequisitesResponse obj = new FormPrerequisitesResponse();
 
@@ -822,8 +822,8 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                         {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = UserId },
-                                          new SqlParameter("@FormID", SqlDbType.Int, 50) { Value = FormID },
-                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = RoleId }
+                                          new SqlParameter("@FormID", SqlDbType.Int, 50) { Value = FormID }
+                                          //new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = RoleId }
                                         };
 
             DataTable dsAttachments = _helper.GetDataTable("[Application].[GetFormPrerequisites]", parameters);
@@ -1207,7 +1207,7 @@ namespace ThoughtFocus.Service.Implementation
             return body;
         }
 
-        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers, int RoleId)
+        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers)//, int RoleId)
         {
             FormSectionApprovalDetailsResponse obj = new FormSectionApprovalDetailsResponse();
 
@@ -1216,8 +1216,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
                                           new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
                                           new SqlParameter("@FormSubSectionID", SqlDbType.BigInt) { Value = FormSubSectionID },
-                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,10) { Value = SubSectionIdentifiers },
-                                          new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = RoleId }
+                                          new SqlParameter("@SubSectionIdentifiers", SqlDbType.VarChar,10) { Value = SubSectionIdentifiers }
+                                          //new SqlParameter("@LoggedInRole", SqlDbType.BigInt) { Value = RoleId }
 
                                      };
             DataTable dtApprovalDetails = _helper.GetDataTable("[Application].[GetFormSubSectionApproveralDetails]", parameters);

@@ -32,7 +32,7 @@ namespace ThoughtFocus.Domain.Request.InitialCredentialProgram
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public string SubSectionIdentifiers { get; set; }
-        public int RoleId { get; set; }
+        //public int RoleId { get; set; }
 
     }
 

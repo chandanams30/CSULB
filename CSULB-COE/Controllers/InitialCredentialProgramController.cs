@@ -341,11 +341,11 @@ namespace CSULB_COE.Controllers
             return contentType;
         }
         [HttpGet("GetFormPrerequisites")]
-        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID, int RoleId)
+        public FormPrerequisitesResponse GetFormPrerequisites(int UserId, int FormID)//, int RoleId)
         {
             try
             {
-                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId, FormID, RoleId);
+                FormPrerequisitesResponse response = _initialCredentialProgramService.GetFormPrerequisites(UserId, FormID);//, RoleId);
                 return response;
             }
             catch (Exception ex)
@@ -439,11 +439,11 @@ namespace CSULB_COE.Controllers
         }
 
         [HttpGet("GetFormSubSectionApproversDetails")]
-        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers, int RoleId)
+        public FormSectionApprovalDetailsResponse GetFormSubSectionApproveralDetails(int FormID, int UserID, int FormSubSectionID, string SubSectionIdentifiers)//, int RoleId)
         {
             try
             {
-                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID, UserID, FormSubSectionID, SubSectionIdentifiers, RoleId);
+                FormSectionApprovalDetailsResponse response = _initialCredentialProgramService.GetFormSubSectionApproveralDetails(FormID, UserID, FormSubSectionID, SubSectionIdentifiers);//, RoleId);
                 return response;
             }
             catch (Exception ex)
