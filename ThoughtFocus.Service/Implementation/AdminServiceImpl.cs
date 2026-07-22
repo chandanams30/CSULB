@@ -376,7 +376,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@LastNamePref", SqlDbType.NVarChar, 255) { Value = input.LastNamePref },
                                           new SqlParameter("@DisplayName", SqlDbType.NVarChar, 255) { Value = input.DisplayName },
                                           new SqlParameter("@Roles", SqlDbType.Structured) { Value = Roles },
-                                          new SqlParameter("@createdByUserID", SqlDbType.BigInt) { Value = input.createdByUserID }
+                                          new SqlParameter("@createdByUserID", SqlDbType.BigInt) { Value = input.createdByUserID },
+                                          new SqlParameter("@isYellowFlagEnabled", SqlDbType.Bit) { Value = input.isYellowFlagEnabled }
 
                                         };
 

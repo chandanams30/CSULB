@@ -18,6 +18,9 @@ namespace ThoughtFocus.Domain.Request.Admin
         public string DisplayName { get; set; }
         public int createdByUserID { get; set; }
         public List<UserRoles> Roles { get; set; }
+        public Boolean isYellowFlagEnabled { get; set; }
+
+
     }
     public class UserRoles
     {

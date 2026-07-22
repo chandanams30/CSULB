@@ -120,6 +120,7 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public string TermName { get; set; }
         public string ApplicationType { get; set; }
         public string CourseNameandNumber { get; set; }
+        public bool isYellowFlagEnabled { get; set; }
 
 
     }
