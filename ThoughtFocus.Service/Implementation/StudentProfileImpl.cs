@@ -28,7 +28,6 @@ using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
-using FormSubSectionResponse = ThoughtFocus.Domain.Response.StudentProfile.FormSubSectionResponse;
 using iTextSharp.text.pdf;
 using System.Security.AccessControl;
 using System.Security.Principal;
