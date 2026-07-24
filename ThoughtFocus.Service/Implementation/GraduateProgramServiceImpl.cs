@@ -404,7 +404,8 @@ namespace ThoughtFocus.Service.Implementation
                                                    CertifyDescription = Convert.ToString(row["CertifyDescription"] == DBNull.Value ? null : row["CertifyDescription"]),
                                                    UniversityApplicationStatus = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["UniversityApplicationStatus"]),
                                                    GPA = Convert.ToString(row["UniversityApplicationStatus"] == DBNull.Value ? null : row["GPA"]),
-                                                   StatusDate = Convert.ToDateTime(row["StatusDate"] == DBNull.Value ? null : row["StatusDate"])
+                                                   StatusDate = Convert.ToDateTime(row["StatusDate"] == DBNull.Value ? null : row["StatusDate"]),
+                                                   isYellowFlagEnabled = Convert.ToBoolean(row["isYellowFlagEnabled"] == DBNull.Value ? null : row["isYellowFlagEnabled"])
                                                }).FirstOrDefault();
 
                     obj.FormStateHandler = dtFormData.Tables[1].AsEnumerable().Select(row =>
