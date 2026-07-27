@@ -186,7 +186,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   PrerequisiteStatus = Convert.ToString(row["PrerequisiteStatus"]),
                                                   LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
                                                   ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
-                                                  CourseName = Convert.ToString(row["CourseName"])
+                                                  CourseName = Convert.ToString(row["CourseName"]),
+                                                  Email = Convert.ToString(row["Email"]),
+                                                  DocumentNumber = Convert.ToString(row["DocumentNumber"])
 
                                               }).ToList();
 
