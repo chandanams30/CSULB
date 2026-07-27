@@ -229,7 +229,12 @@ namespace ThoughtFocus.Service.Implementation
                                                   AlternateEmail = Convert.ToString(row["AlternateEmail"]),
                                                   ResumeUploadStatus = Convert.ToString(row["ResumeUploadStatus"]),
                                                   SOPUploadStatus = Convert.ToString(row["SOPUploadStatus"]),
-                                                  PersonalStatementDoc = Convert.ToString(row["PersonalStatementDoc"])
+                                                  PersonalStatementDoc = Convert.ToString(row["PersonalStatementDoc"]),
+                                                  UniversityApplicationDetails = Convert.ToString(row["UniversityApplicationDetails"]),
+                                                  DocumentNumber = Convert.ToString(row["DocumentNumber"]),
+                                                  WritingSampleStatus = Convert.ToString(row["WritingSampleStatus"]),
+                                                  OptionalStatus = Convert.ToString(row["OptionalStatus"]),
+                                                  ConfirmProgramOptionApplyingTo = Convert.ToString(row["ConfirmProgramOptionApplyingTo"])
                                               }).ToList();
                     }
                     if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
