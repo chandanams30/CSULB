@@ -1333,6 +1333,10 @@ namespace ThoughtFocus.Service.Implementation
                                 subject = "CSULB UDCP Teaching Evaluation Form";
                                 programName = "UDCP";
                             }
+                            else
+                            {
+                                subject = "CSULB Teaching Evaluation Form";
+                            }
 
                             //get evaluation mail body
                             SqlParameter[] parameters1 ={
@@ -1365,14 +1369,18 @@ namespace ThoughtFocus.Service.Implementation
                                             .Replace("[[applicantname]]", applicantName)
                                             .Replace("[[programName]]", programName)
                                             .Replace("[[link]]", link);
-                                    if (isMidtermMailSent == false && isFinaltermMailSent == false && input.evaluationID == 0)
+                                    if (((isMidtermMailSent == false && input.EvaluationType == "MidTerm") || (input.EvaluationType == "FinalTerm" && isFinaltermMailSent == false)) && input.evaluationID == 0)
                                     {
+                                        body = body.Replace("[[recipient]]", "Cooperating Teacher");
                                         _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
+
+                                        body = body.Replace("Cooperating Teacher", "University Mentor");
                                         _sendMail.SendEmail(facultySupervisorEmail, "", "COMMON", subject, body, "");
                                         isMailSent = true;
                                     }
                                     else
                                     {
+                                        body = body.Replace("[[recipient]]", "Cooperating Teacher");
                                         _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
                                         isMailSent = true;
                                     }
@@ -1545,7 +1553,7 @@ namespace ThoughtFocus.Service.Implementation
 
             if (programID == 1)
             {
-                subject = "CSULB ESCP Teaching Evaluation Form";
+                subject = "CSULB ESCP Teaching Evaluation Submitted";
                 programName = "ESCP";
             }
             if (programID == 2)
@@ -1571,10 +1579,14 @@ namespace ThoughtFocus.Service.Implementation
                 subject = "CSULB UDCP Teaching Evaluation Submitted";
                 programName = "UDCP";
             }
+            else
+            {
+                subject = "CSULB Teaching Evaluation Submitted";
+            }
 
             SqlParameter[] parameters1 ={
                                             new SqlParameter("@ApplicationTypeID", SqlDbType.BigInt, 10) { Value = 1 },
-                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = 2 },
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = 2 }, //update id after getting the email template
                                             new SqlParameter("@Identifier", SqlDbType.NVarChar) { Value = "Student Confirmation Mail" },
                                        };
             DataSet dtDL = _helper.GetDataSet("[Application].[GetEvaluatorEmail]", parameters1);
