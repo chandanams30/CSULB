@@ -53,6 +53,10 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string WritingSampleStatus { get; set; }
         public string OptionalStatus { get; set; }
         public string ConfirmProgramOptionApplyingTo { get; set; }
+        public string CopyOfCredEnglishLearner { get; set; }
+        public string VerificationLetter { get; set; }
+        public string CopyOfCredPrinted { get; set; }
+
     }
 
 
