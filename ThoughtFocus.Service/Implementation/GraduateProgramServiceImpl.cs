@@ -234,7 +234,10 @@ namespace ThoughtFocus.Service.Implementation
                                                   DocumentNumber = Convert.ToString(row["DocumentNumber"]),
                                                   WritingSampleStatus = Convert.ToString(row["WritingSampleStatus"]),
                                                   OptionalStatus = Convert.ToString(row["OptionalStatus"]),
-                                                  ConfirmProgramOptionApplyingTo = Convert.ToString(row["ConfirmProgramOptionApplyingTo"])
+                                                  ConfirmProgramOptionApplyingTo = Convert.ToString(row["ConfirmProgramOptionApplyingTo"]),
+                                                  CopyOfCredEnglishLearner = Convert.ToString(row["CopyOfCredEnglishLearner"]),
+                                                  VerificationLetter = Convert.ToString(row["VerificationLetter"]),
+                                                  CopyOfCredPrinted = Convert.ToString(row["CopyOfCredPrinted"])
                                               }).ToList();
                     }
                     if (dsAppliedFormsByProgram.Tables[1].Rows.Count > 0)
