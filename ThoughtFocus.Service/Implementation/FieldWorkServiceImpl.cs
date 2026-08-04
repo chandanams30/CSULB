@@ -235,7 +235,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ValidatedDate", SqlDbType.DateTime, 50) { Value = validatedDate },
                                           new SqlParameter("@ValidTill", SqlDbType.DateTime, 50) { Value = (object)input.ValidTill??DBNull.Value },
                                           new SqlParameter("@RejectReason", SqlDbType.NVarChar, 255) { Value = (object)input.RejectedReason??DBNull.Value },
-                                          new SqlParameter("@Comments", SqlDbType.NVarChar,-1) { Value = (object)input.Comments??DBNull.Value }
+                                          new SqlParameter("@Comments", SqlDbType.NVarChar,-1) { Value = (object)input.Comments??DBNull.Value },
+                                          new SqlParameter("@DocumentNumber", SqlDbType.BigInt, 50) { Value = input.DocumentNumber }
+
                                         };
 
                 int identity = _helper.InsertTable("[dbo].[UpdateFieldWorkValidation]", parameters);
