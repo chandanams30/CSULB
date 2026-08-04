@@ -14,5 +14,6 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string? RejectedReason { get; set; }
         public string? Comments { get; set; }
         public string Semester {  get; set; }
+        public int DocumentNumber { get; set; }
     }
 }
