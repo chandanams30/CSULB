@@ -38,6 +38,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateTeachingEvaluationJSON(UpdateTeachingEvaluationJSONRequest input);
 
         TeachingEvaluationByIdentifierResponse GetTeachingEvaluationByIdentifier(string evaluationIdentifier);
+        StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID);
+        BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input);
 
     }
 }

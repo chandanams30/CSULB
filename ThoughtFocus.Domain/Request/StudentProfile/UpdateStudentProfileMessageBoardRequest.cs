@@ -124,5 +124,28 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
 
     }
 
+    public class StudentTeachingObservationResponse : BaseResponse
+    {
+        public StudentTeachingObservation studentTeachingObservation { get; set; }
+    }
+    public class StudentTeachingObservation
+    {
+        public int ID { get; set; }
+        public int FieldWorkID { get; set; }
+        public int FormID { get; set; }
+        public string Observations { get; set; }
+        public string CSULBID { get; set; }
+
+    }
+
+    public class StudentTeachingObservationRequest
+    {
+        public int FieldWorkID { get; set; }
+        public int FormID { get; set; }
+        public string Observations { get; set; }
+        public string CSULBID { get; set; }
+
+    }
+
 
 }

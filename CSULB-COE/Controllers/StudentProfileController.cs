@@ -477,5 +477,48 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
+        
+        [HttpGet("GetStudentTeachingObservations")]
+        public StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID)
+        {
+            try
+            {
+
+                StudentTeachingObservationResponse response = _studentProfileService.GetStudentTeachingObservations(fieldworkID, formID, CSULBID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentTeachingObservationResponse response = new StudentTeachingObservationResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpPost("SaveStudentTeachingObservations")]
+        public BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentProfileService.SaveStudentTeachingObservations(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
     }
 }
