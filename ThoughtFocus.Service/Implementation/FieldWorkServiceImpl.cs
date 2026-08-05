@@ -2119,11 +2119,11 @@ namespace ThoughtFocus.Service.Implementation
                         prefix = sectionLetter + (j + 1).ToString();
 
                     evaluationTemplateBody = evaluationTemplateBody
-                   .Replace($"[[{prefix}_E]]", rating == "E" ? "Yes" : "")
-                   .Replace($"[[{prefix}_P]]", rating == "P" ? "Yes" : "")
-                   .Replace($"[[{prefix}_D]]", rating == "D" ? "Yes" : "")
-                   .Replace($"[[{prefix}_NC]]", rating == "NC" ? "Yes" : "")
-                   .Replace($"[[{prefix}_NO]]", (rating == "NO" || rating == "N/O") ? "Yes" : "");
+                   .Replace($"[[{prefix}_E]]", rating == "E" ? "X" : "")
+                   .Replace($"[[{prefix}_P]]", rating == "P" ? "X" : "")
+                   .Replace($"[[{prefix}_D]]", rating == "D" ? "X" : "")
+                   .Replace($"[[{prefix}_NC]]", rating == "NC" ? "X" : "")
+                   .Replace($"[[{prefix}_NO]]", (rating == "NO" || rating == "N/O") ? "X" : "");
                 }
             }
 
