@@ -35,6 +35,8 @@ namespace ThoughtFocus.Service.Interfaces
         TeachingEvaluationByIDResponse GetTeachingEvaluationByFieldWorkID(int UserID, int FieldWorkID, int ProgramID, string TermCode, int FormID);
         BaseResponse UpdateTeachingEvaluationJSON(UpdateTeachingEvaluationJSONRequest input);
         TeachingEvaluationByIdentifierResponse GetTeachingEvaluationByIdentifier(string evaluationIdentifier);
+        StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID);
+        BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input);
 
     }
 }

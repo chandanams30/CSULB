@@ -21,6 +21,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
@@ -827,7 +828,7 @@ namespace ThoughtFocus.Service.Implementation
             using (MemoryStream stream = new System.IO.MemoryStream())
             {
                 //Initialize the PDF document object.
-                using (Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 10f, 10f))
+                using (iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(PageSize.A4, 10f, 10f, 10f, 10f))
                 {
                     PdfWriter.GetInstance(pdfDoc, stream).SetFullCompression();
                     pdfDoc.Open();
@@ -1673,6 +1674,77 @@ namespace ThoughtFocus.Service.Implementation
 
         }
 
+        public StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID)
+        {
+            StudentTeachingObservationResponse obj = new StudentTeachingObservationResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldworkID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = CSULBID }                                  };
+            DataTable evaluationDetails = _helper.GetDataTable("[dbo].[GetStudentTeachingObservations]", parameters);
+            if (evaluationDetails.Rows.Count > 0)
+            {
+
+
+                obj.studentTeachingObservation = evaluationDetails.AsEnumerable().Select(row =>
+                                          new StudentTeachingObservation
+                                          {
+                                              FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                              FormID = Convert.ToInt32(row["FormID"]),
+                                              Observations = Convert.ToString(row["Observations"] == DBNull.Value ? null : row["Observations"]),
+                                              CSULBID = Convert.ToString(row["CSULBID"]),
+                                          }).FirstOrDefault();
+
+
+                obj.IsSuccess = true;
+                obj.Message = "Data Retrieved Successfully";
+
+            }
+            else
+            {
+                obj.IsSuccess = false;
+                obj.Message = "The page you are trying to reach has either expired or is not valid.";
+            }
+            return obj;
+
+        }
+
+        public BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input)
+        {
+            BaseResponse obj = new BaseResponse();
+            try
+            {
+                SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = input.CSULBID },
+                                          new SqlParameter("@Observations", SqlDbType.NVarChar, -1) { Value = input.Observations }
+                                   };
+                DataTable dt = _helper.GetDataTable("[dbo].[SaveStudentTeachingObservations]", parameters);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    obj.IsSuccess = true;
+                    obj.Message = "Data updated Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No data returned from stored procedure";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data update Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+                _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
+            }
+
+            return obj;
+        }
 
 
 
