@@ -87,6 +87,7 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public string EvaluationJSON { get; set; }
         public string ApplicationType { get; set; }
         public string EvaluationType { get; set; }
+        public string UniversityMentorJSON { get; set; }
 
     }
     public class UpsertTeachingEvaluationRequest

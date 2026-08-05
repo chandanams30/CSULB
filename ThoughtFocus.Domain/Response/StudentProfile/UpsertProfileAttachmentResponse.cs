@@ -145,6 +145,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     public class TeachingEvaluationByIDResponse : BaseResponse
     {
         public List<TeachingEvaluationByID> teachingEvaluationByID { get; set; }
+        public MidTermUniversityMentorEvaluationDetails MUMED {  get; set; }
+        public FinalTermUniversityMentorEvaluationDetails FUMED { get; set; }
     }
     public class TeachingEvaluationByID
     {
@@ -165,7 +167,20 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string EvaluationType { get; set; }
         public int ProgramID { get; set; }
         public string UniversityMentorName {  get; set; }
-        public string UniversityMentorEmail { get; set; }
 
+    }
+    public class MidTermUniversityMentorEvaluationDetails
+    {
+        public string UniversityMentorName { get; set; }
+        public string UniversityMentorEmail { get; set; }
+        public string UniversityMentorJSON { get; set; }
+        public string EvaluationType { get; set; }
+    }
+    public class FinalTermUniversityMentorEvaluationDetails
+    {
+        public string UniversityMentorName { get; set; }
+        public string UniversityMentorEmail { get; set; }
+        public string UniversityMentorJSON { get; set; }
+        public string EvaluationType { get; set; }
     }
 }

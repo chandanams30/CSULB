@@ -28,6 +28,7 @@ using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Application;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.InitialCredentialProgram;
 using ThoughtFocus.Domain.Response.SearchApplication;
 using ThoughtFocus.Domain.Response.StudentProfile;
@@ -1386,6 +1387,17 @@ namespace ThoughtFocus.Service.Implementation
                                         _sendMail.SendEmail(evaluatorEmail, "", "COMMON", subject, body, "");
 
                                         body = body.Replace("Cooperating Teacher", "University Mentor");
+                                        //replace university mentor link
+                                        string univerityMentorLink = "";
+                                        if (input.EvaluationType == "MidTerm")
+                                        {
+                                            univerityMentorLink = _configuration["ApplicationKeys:UniversityMentorEvaluationURLMidTerm"] + evaluationIdentifier;
+                                        }
+                                        else
+                                        {
+                                            univerityMentorLink = _configuration["ApplicationKeys:UniversityMentorEvaluationURLFinalTerm"] + evaluationIdentifier;
+                                        }
+                                        link = link.Replace("[[link]]", univerityMentorLink);
                                         _sendMail.SendEmail(facultySupervisorEmail, "", "COMMON", subject, body, "");
                                         isMailSent = true;
                                     }
@@ -1457,14 +1469,16 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode },
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
                                      };
-            DataTable evaluationDetails = _helper.GetDataTable("[FieldWork].[GetTeachingEvaluationByFieldWorkID]", parameters);
+            DataSet evaluationDetails = _helper.GetDataSet("[FieldWork].[GetTeachingEvaluationByFieldWorkID]", parameters);
             try
             {
                 if (evaluationDetails != null)
                 {
-                    if (evaluationDetails.Rows.Count > 0)
+                    if (evaluationDetails.Tables.Count > 0)
                     {
-                        obj.teachingEvaluationByID = evaluationDetails.AsEnumerable().Select(row =>
+                        if (evaluationDetails.Tables[0].Rows.Count > 0)
+                        {
+                            obj.teachingEvaluationByID = evaluationDetails.Tables[0].AsEnumerable().Select(row =>
                                                   new TeachingEvaluationByID
                                                   {
                                                       EvaluationID = Convert.ToInt32(row["EvaluationID"]),
@@ -1481,11 +1495,33 @@ namespace ThoughtFocus.Service.Implementation
                                                       CanView = Convert.ToBoolean(row["CanView"]),
                                                       FileLink = Convert.ToString(row["FileLink"]),
                                                       ApplicationType = Convert.ToString(row["ApplicationType"]),
-                                                      EvaluationType= Convert.ToString(row["EvaluationType"]),
+                                                      EvaluationType = Convert.ToString(row["EvaluationType"]),
                                                       ProgramID = Convert.ToInt32(row["ProgramID"]),
-                                                      UniversityMentorName = Convert.ToString(row["UniversityMentorName"]),
-                                                      UniversityMentorEmail = Convert.ToString(row["UniversityMentorEmail"])
+                                                      UniversityMentorName = Convert.ToString(row["UniversityMentorName"])
                                                   }).ToList();
+                        }
+                        if (evaluationDetails.Tables[1].Rows.Count > 0)
+                        {
+                            obj.MUMED = evaluationDetails.Tables[1].AsEnumerable().Select(row =>
+                                                  new MidTermUniversityMentorEvaluationDetails
+                                                  {
+                                                      UniversityMentorName = Convert.ToString(row["UniversityMentorName"]),
+                                                      UniversityMentorEmail = Convert.ToString(row["UniversityMentorEmail"]),
+                                                      UniversityMentorJSON = Convert.ToString(row["UniversityMentorJSON"] == DBNull.Value ? null : row["UniversityMentorJSON"]),
+                                                      EvaluationType = Convert.ToString(row["EvaluationType"])
+                                                  }).FirstOrDefault();
+                        }
+                        if (evaluationDetails.Tables[2].Rows.Count > 0)
+                        {
+                            obj.FUMED = evaluationDetails.Tables[2].AsEnumerable().Select(row =>
+                                                  new FinalTermUniversityMentorEvaluationDetails
+                                                  {
+                                                      UniversityMentorName = Convert.ToString(row["UniversityMentorName"]),
+                                                      UniversityMentorEmail = Convert.ToString(row["UniversityMentorEmail"]),
+                                                      UniversityMentorJSON = Convert.ToString(row["UniversityMentorJSON"] == DBNull.Value ? null : row["UniversityMentorJSON"]),
+                                                      EvaluationType = Convert.ToString(row["EvaluationType"])
+                                                  }).FirstOrDefault();
+                        }
 
                     }
                     else
@@ -1541,7 +1577,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
-                                          new SqlParameter("@EvaluationJSON", SqlDbType.VarChar, -1) { Value = input.EvaluationJSON }
+                                          new SqlParameter("@EvaluationJSON", SqlDbType.VarChar, -1) { Value = input.EvaluationJSON },
+                                          new SqlParameter("@UniversityMentorJSON", SqlDbType.NVarChar, -1) { Value = input.UniversityMentorJSON }
                                         };
 
             DataSet dtDLLOR = _helper.GetDataSet("[dbo].[UpdateTeachingEvaluationJSON]", parameters);
