@@ -1710,32 +1710,35 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
                                           new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = CSULBID }                                  };
             DataTable evaluationDetails = _helper.GetDataTable("[dbo].[GetStudentTeachingObservations]", parameters);
-            if (evaluationDetails.Rows.Count > 0)
+            try
             {
+                if (evaluationDetails != null && evaluationDetails.Rows.Count > 0)
+                {
 
 
-                obj.studentTeachingObservation = evaluationDetails.AsEnumerable().Select(row =>
-                                          new StudentTeachingObservation
-                                          {
-                                              FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
-                                              FormID = Convert.ToInt32(row["FormID"]),
-                                              Observations = Convert.ToString(row["Observations"] == DBNull.Value ? null : row["Observations"]),
-                                              CSULBID = Convert.ToString(row["CSULBID"]),
-                                          }).FirstOrDefault();
-
-
+                    obj.studentTeachingObservation = evaluationDetails.AsEnumerable().Select(row =>
+                                              new StudentTeachingObservation
+                                              {
+                                                  FieldWorkID = Convert.ToInt32(row["FieldWorkID"]),
+                                                  FormID = Convert.ToInt32(row["FormID"]),
+                                                  Observations = Convert.ToString(row["Observations"] == DBNull.Value ? null : row["Observations"]),
+                                                  CSULBID = Convert.ToString(row["CSULBID"])
+                                              }).FirstOrDefault();
+                }
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully";
 
             }
-            else
+            catch (Exception ex)
             {
                 obj.IsSuccess = false;
-                obj.Message = "The page you are trying to reach has either expired or is not valid.";
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
             }
             return obj;
 
         }
+
 
         public BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input)
         {
