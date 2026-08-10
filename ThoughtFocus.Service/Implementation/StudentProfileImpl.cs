@@ -1473,16 +1473,14 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = TermCode },
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
                                      };
-            DataSet evaluationDetails = _helper.GetDataSet("[FieldWork].[GetTeachingEvaluationByFieldWorkID]", parameters);
+            DataTable evaluationDetails = _helper.GetDataTable("[FieldWork].[GetTeachingEvaluationByFieldWorkID]", parameters);
             try
             {
                 if (evaluationDetails != null)
                 {
-                    if (evaluationDetails.Tables.Count > 0)
+                    if (evaluationDetails.Rows.Count > 0)
                     {
-                        if (evaluationDetails.Tables[0].Rows.Count > 0)
-                        {
-                            obj.teachingEvaluationByID = evaluationDetails.Tables[0].AsEnumerable().Select(row =>
+                            obj.teachingEvaluationByID = evaluationDetails.AsEnumerable().Select(row =>
                                                   new TeachingEvaluationByID
                                                   {
                                                       EvaluationID = Convert.ToInt32(row["EvaluationID"]),
@@ -1502,32 +1500,10 @@ namespace ThoughtFocus.Service.Implementation
                                                       EvaluationType = Convert.ToString(row["EvaluationType"]),
                                                       ProgramID = Convert.ToInt32(row["ProgramID"]),
                                                       UniversityMentorName = Convert.ToString(row["UniversityMentorName"]),
+                                                      UniversityMentorEmail = Convert.ToString(row["UniversityMentorEmail"]),
                                                       UniversityMentorJSON = Convert.ToString(row["UniversityMentorJSON"] == DBNull.Value ? null : row["UniversityMentorJSON"]),
 
                                                   }).ToList();
-                        }
-                        if (evaluationDetails.Tables.Count > 1 && evaluationDetails.Tables[1].Rows.Count > 0)
-                        {
-                            obj.MUMED = evaluationDetails.Tables[1].AsEnumerable().Select(row =>
-                                                  new MidTermUniversityMentorEvaluationDetails
-                                                  {
-                                                      UniversityMentorName = Convert.ToString(row["UniversityMentorName"]),
-                                                      UniversityMentorEmail = Convert.ToString(row["UniversityMentorEmail"]),
-                                                      UniversityMentorJSON = Convert.ToString(row["UniversityMentorJSON"] == DBNull.Value ? null : row["UniversityMentorJSON"]),
-                                                      EvaluationType = Convert.ToString(row["EvaluationType"])
-                                                  }).FirstOrDefault();
-                        }
-                        if (evaluationDetails.Tables.Count > 2 && evaluationDetails.Tables[2].Rows.Count > 0)
-                        {
-                            obj.FUMED = evaluationDetails.Tables[2].AsEnumerable().Select(row =>
-                                                  new FinalTermUniversityMentorEvaluationDetails
-                                                  {
-                                                      UniversityMentorName = Convert.ToString(row["UniversityMentorName"]),
-                                                      UniversityMentorEmail = Convert.ToString(row["UniversityMentorEmail"]),
-                                                      UniversityMentorJSON = Convert.ToString(row["UniversityMentorJSON"] == DBNull.Value ? null : row["UniversityMentorJSON"]),
-                                                      EvaluationType = Convert.ToString(row["EvaluationType"])
-                                                  }).FirstOrDefault();
-                        }
 
                     }
                     else
