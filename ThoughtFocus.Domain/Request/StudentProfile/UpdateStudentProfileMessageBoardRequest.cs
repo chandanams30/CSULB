@@ -105,6 +105,13 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
     public class TeachingEvaluationByIdentifierResponse : BaseResponse
     {
         public TeachingEvaluationByIdentifier evaluationByEvaluationIdentifier { get; set; }
+        public ProgramDetails programDetails { get; set; }
+
+    }
+    public class ProgramDetails
+    {
+        public int ProgramID { get; set; }
+
     }
     public class TeachingEvaluationByIdentifier
     {
@@ -121,7 +128,9 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public string TermName { get; set; }
         public string ApplicationType { get; set; }
         public string CourseNameandNumber { get; set; }
-
+        public int ProgramID { get; set; }
+        public bool isYellowFlagEnabled { get; set; }
+        public string UniversityMentorJSON { get; set; }
 
     }
 
