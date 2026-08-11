@@ -416,7 +416,6 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters = {
                                             new SqlParameter("@Email", SqlDbType.NVarChar, 255) { Value = request.Email },
                                             new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = request.CSULBID }
-
                                         };
 
             DataTable dtRolesList = _helper.GetDataTable("[dbo].[GetIntegratedUserRoles]", parameters);
@@ -476,6 +475,11 @@ namespace ThoughtFocus.Service.Implementation
                     "ProgramAdmin" => RoleConstants.ProgramAdmin,
                     "Reviewer" => RoleConstants.Reviewer,
                     "ProgramCoordinator" => RoleConstants.ProgramCoordinator,
+                    "Administrator" => RoleConstants.Administrator,
+                    "FacultySupervisor" => RoleConstants.FacultySupervisor,
+                    "Instructor" => RoleConstants.Instructor,
+                    "StudentProfileStaff" => RoleConstants.StudentProfileStaff,
+                    "StudentProfileGradeAdmin" => RoleConstants.StudentProfileGradeAdmin,
                     _ => 0 // Unknown role
                 };
             

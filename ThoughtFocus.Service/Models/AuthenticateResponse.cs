@@ -44,6 +44,11 @@ namespace CSULB_COE.Models
         public const int ProgramAdmin = 4;
         public const int Reviewer = 6;
         public const int ProgramCoordinator = 11;
+        public const int Administrator = 1;
+        public const int FacultySupervisor = 5;
+        public const int Instructor = 7;
+        public const int StudentProfileStaff = 13;
+        public const int StudentProfileGradeAdmin = 14;
 
     }
     public static class ApplicationTypeConstants

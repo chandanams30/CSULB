@@ -6,6 +6,7 @@ using Google.Apis.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Newtonsoft.Json;
@@ -18,6 +19,7 @@ using System.DirectoryServices.AccountManagement;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Principal;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -25,7 +27,6 @@ using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Service.Interfaces;
-using Microsoft.Extensions.Configuration;
 
 
 namespace CSULB_COE.Controllers
@@ -253,6 +254,39 @@ namespace CSULB_COE.Controllers
                 );
                     }
                 }
+                List<RoleATID> rolesList = new List<RoleATID>();
+                ViewModels.UserInfoRequest userInfo = new ViewModels.UserInfoRequest();
+                
+                var groupsTest = new List<string>();
+                groupsTest.Add("CED-TF-ProgramCoordinator-Doctoral");
+                groupsTest.Add("CED-TF-ProgramAdmin-Graduate");
+                //foreach (var groupName in groups)
+                foreach (var groupName in groupsTest)
+                {
+                    long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                    long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
+
+                    // Skip invalid or non-matching groups
+                    if (roleId == 0 || applicationTypeId == 0)
+                        continue;
+
+                    rolesList.Add(new RoleATID
+                    {
+                        RoleId = roleId,
+                        ApplicationTypeId = applicationTypeId,
+                    });
+                    authenticateRequestRoles.Email = response.Email;
+                    authenticateRequestRoles.CSULBID = response.CSULBID;
+                    authenticateRequestRoles.RoleID = roleId;
+                    authenticateRequestRoles.ApplicationTypeID = applicationTypeId;
+
+                    var upsertADRoles = _userLoginService.SaveRolesFromAD(authenticateRequestRoles);
+                }
+
+                userInfo.Email = response.Email;
+                userInfo.CSULBID = response.CSULBID;
+                var getADRoles = _userLoginService.GetIntegratedUserRoles(userInfo);
+                response.Roles = getADRoles.RolesList;
 
                 return Ok(response);
 
