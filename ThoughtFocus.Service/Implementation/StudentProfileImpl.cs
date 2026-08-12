@@ -1927,6 +1927,43 @@ namespace ThoughtFocus.Service.Implementation
 
         }
 
+        public BaseResponse DeleteStudentTeachingObservationAttachments(DeleteStudentTeachingObservationRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = input.UniqueID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@FieldworkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = input.CSULBID },
+                                          new SqlParameter("@ObservationDocumentName", SqlDbType.VarChar, 50) { Value = input.ObservationDocumentName }
+                                     };
+            try
+            {
+                DataTable dtAttachment = _helper.GetDataTable("[dbo].[DeleteStudentTeachingObservationAttachment]", parameters);
+                if (dtAttachment.Rows.Count > 0)
+                {
+                    if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "SUCCESS")
+                    {
+                        response.Message = "Attachment Deleted Successfully";
+                        response.IsSuccess = true;
+                    }
+                    else if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "FAILURE")
+                    {
+                        response.Message = "Failed to Delete Attachment";
+                        response.IsSuccess = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Data Retrieval Failed , Please contact site admin ";
+                response.StackTrace = ex.Message;
+            }
+            return response;
+        }
+
 
 
     }

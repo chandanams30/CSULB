@@ -156,8 +156,15 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public int UserID { get; set; }
         public string Observations { get; set; }
 
-
-
+    }
+    public class DeleteStudentTeachingObservationRequest
+    {
+        public Guid UniqueID { get; set; }
+        public int FieldWorkID { get; set; }
+        public int FormID { get; set; }
+        public string CSULBID { get; set; }
+        public string ObservationDocumentName { get; set; }
+        
     }
 
 
