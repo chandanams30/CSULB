@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Nancy;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Tls.Crypto.Impl.BC;
 using System;
@@ -1725,40 +1726,195 @@ namespace ThoughtFocus.Service.Implementation
         }
 
 
+        //public BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input)
+        //{
+        //    BaseResponse obj = new BaseResponse();
+        //    try
+        //    {
+
+        //        SqlParameter[] parameters =
+        //                           {
+        //                                  new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
+        //                                  new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+        //                                  new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = input.CSULBID },
+        //                                  new SqlParameter("@Observations", SqlDbType.NVarChar, -1) { Value = input.Observations }
+        //                           };
+        //        DataTable dt = _helper.GetDataTable("[dbo].[SaveStudentTeachingObservations]", parameters);
+
+        //        if (dt != null && dt.Rows.Count > 0)
+        //        {
+        //            obj.IsSuccess = true;
+        //            obj.Message = "Data updated Successfully";
+        //        }
+        //        else
+        //        {
+        //            obj.IsSuccess = false;
+        //            obj.Message = "No data returned from stored procedure";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        obj.IsSuccess = false;
+        //        obj.Message = "Data update Failed , Please contact site admin ";
+        //        obj.StackTrace = ex.Message;
+        //        _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
+        //    }
+
+        //    return obj;
+        //}
+
         public BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input)
         {
-            BaseResponse obj = new BaseResponse();
+            BaseResponse response = new BaseResponse();
             try
             {
-                SqlParameter[] parameters =
-                                   {
-                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = input.FieldWorkID },
-                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
-                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = input.CSULBID },
-                                          new SqlParameter("@Observations", SqlDbType.NVarChar, -1) { Value = input.Observations }
-                                   };
-                DataTable dt = _helper.GetDataTable("[dbo].[SaveStudentTeachingObservations]", parameters);
+                // Deserialize Observations JSON
+                var observationRoot = JsonConvert.DeserializeObject<ObservationRoot>(
+                input.Observations
+            );
 
-                if (dt != null && dt.Rows.Count > 0)
+            if (observationRoot == null || observationRoot.Observations == null)
+            {
+                response.IsSuccess = false;
+                response.Message = "Invalid observations JSON.";
+                return response;
+            }
+
+            var documents = new List<ObservationDocument>();
+
+            foreach (var observation in observationRoot.Observations)
+            {
+                if (observation.ObservationDocumentName1 != null)
+                    documents.Add(observation.ObservationDocumentName1);
+
+                if (observation.ObservationDocumentName2 != null)
+                    documents.Add(observation.ObservationDocumentName2);
+
+                if (observation.ObservationDocumentName3 != null)
+                    documents.Add(observation.ObservationDocumentName3);
+
+                if (observation.ObservationDocumentName4 != null)
+                    documents.Add(observation.ObservationDocumentName4);
+
+                if (observation.ObservationDocumentName5 != null)
+                    documents.Add(observation.ObservationDocumentName5);
+
+                if (observation.ObservationDocumentName6 != null)
+                    documents.Add(observation.ObservationDocumentName6);
+            }
+
+            // Save observation JSON
+            SqlParameter[] parameters =
+            {
+                new SqlParameter("@FieldWorkID", SqlDbType.BigInt){Value = input.FieldWorkID },
+                new SqlParameter("@FormID", SqlDbType.BigInt){Value = input.FormID},
+                new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){Value = input.CSULBID},
+                new SqlParameter("@Observations", SqlDbType.NVarChar, -1){Value = input.Observations}
+            };
+
+            DataTable dt = _helper.GetDataTable("[dbo].[SaveStudentTeachingObservations]", parameters);
+            
+            foreach (var document in documents)
+            {
+                if (string.IsNullOrWhiteSpace(document.FileContent))
+                    continue;
+
+                string fileName = document.FileName;
+                string fileExtension = document.FileExt;
+
+                byte[] fileContent;
+
+                try
                 {
-                    obj.IsSuccess = true;
-                    obj.Message = "Data updated Successfully";
+                    fileContent = Convert.FromBase64String(document.FileContent);
                 }
-                else
+                catch
                 {
-                    obj.IsSuccess = false;
-                    obj.Message = "No data returned from stored procedure";
+                    response.IsSuccess = false;
+                    response.Message =
+                        $"Invalid file content for {fileName}. FileContent must be Base64.";
+                    return response;
                 }
+
+                // Get file repository
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+
+                string userFolderName = string.Empty;
+                userFolderName =  Convert.ToString(input.UserID);
+
+                // Create user folder
+                string dirUserFolderPath =
+                    Path.Combine(fileRepoPath, userFolderName);
+
+                if (!Directory.Exists(dirUserFolderPath))
+                {
+                    Directory.CreateDirectory(dirUserFolderPath);
+                }
+
+                // Create Form folder
+                string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                if (!Directory.Exists(dirForm))
+                {
+                    Directory.CreateDirectory(dirForm);
+                }
+                // Use FileNameStatic as physical file name if supplied
+                string savedFileName = !string.IsNullOrWhiteSpace(document.FileNameStatic) ? document.FileNameStatic : Path.GetFileNameWithoutExtension(fileName);
+
+                    int tildeIndex = savedFileName.IndexOf('~');
+
+                    if (tildeIndex >= 0)
+                    {
+                        savedFileName = savedFileName.Substring(tildeIndex + 1);
+                    }
+
+                    string savedFilePath = Path.Combine(dirForm, savedFileName + "." + fileExtension );
+                    // Save physical file
+                    File.WriteAllBytes(savedFilePath,fileContent);
+                }
+                response.IsSuccess = true;
+                response.Message = "Data Retrieved Successfully";
             }
             catch (Exception ex)
             {
-                obj.IsSuccess = false;
-                obj.Message = "Data update Failed , Please contact site admin ";
-                obj.StackTrace = ex.Message;
+                response.IsSuccess = false;
+                response.Message = "Data update Failed , Please contact site admin ";
+                response.StackTrace = ex.Message;
                 _logger.LogInformation("Error Message : " + ex.Message + " Stack Trace : " + ex.StackTrace);
             }
 
+            return response;
+        }
+
+        public DownloadStudentTeachingObservationAttachmentsResponse DownloadStudentTeachingObservationAttachments(int formID, int fieldworkID, string csulbid, string observationDocument, Guid UniqueID)
+        {
+            DownloadStudentTeachingObservationAttachmentsResponse obj = new DownloadStudentTeachingObservationAttachmentsResponse();
+
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = UniqueID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@FieldworkID", SqlDbType.BigInt) { Value = fieldworkID },
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = csulbid },
+                                          new SqlParameter("@ObservationDocumentName", SqlDbType.VarChar, 50) { Value = observationDocument }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetStudentTeachingObservationAttachments]", parameters);
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new DownloadStudentTeachingObservationAttachmentsResponse
+                                          {
+                                              //UserID = Convert.ToInt32(row["UserID"]),
+                                              UniqueID = Guid.Parse(row["UniqueID"].ToString()),
+                                              FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FolderName = Convert.ToString(row["FolderName"]),
+                                              //CreatedBy = Convert.ToInt32(row["CreatedBy"]),
+                                              //CreatedDate = Convert.ToDateTime(row["CreatedDate"] == DBNull.Value ? null : row["CreatedDate"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetProfileAttachmentFileContent(_utils.GetAttachmentsFolderName(row["FolderName"].ToString()), _utils.GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+            obj.IsSuccess = true;
+            obj.Message = "Attachment retrieved Successfully";
+
             return obj;
+
         }
 
 

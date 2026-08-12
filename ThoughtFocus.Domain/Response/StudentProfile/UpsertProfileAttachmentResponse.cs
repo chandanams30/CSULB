@@ -185,5 +185,87 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string UniversityMentorJSON { get; set; }
         public string EvaluationType { get; set; }
     }
+    public class DownloadStudentTeachingObservationAttachments : BaseResponse
+    {
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public int UserID { get; set; }
+        public byte[] FileContent { get; set; }
+        public string FolderName { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+    }
+    public class StudentTeachingObservationAttachmentsResponse : BaseResponse
+    {
+        public List<StudentTeachingObservationAttachments> studentTeachingObservationAttachments { get; set; }
+    }
+    public class DownloadStudentTeachingObservationAttachmentsResponse : BaseResponse
+    {
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public int UserID { get; set; }
+        public byte[] FileContent { get; set; }
+        public string FolderName { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+    }
+    public class StudentTeachingObservationAttachments
+    {
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public int UserID { get; set; }
+        public string FolderName { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public string CanView { get; set; }
+        public string CreatedByUsername { get; set; }
+        public byte[] FileContent { get; set; }
 
     }
+
+    public class ObservationRoot
+    {
+        public List<ObservationItem> Observations { get; set; }
+    }
+
+    public class ObservationItem
+    {
+        public string ObservationDate1 { get; set; }
+        public string ObservationNotes1 { get; set; }
+        public ObservationDocument ObservationDocumentName1 { get; set; }
+
+        public string ObservationDate2 { get; set; }
+        public string ObservationNotes2 { get; set; }
+        public ObservationDocument ObservationDocumentName2 { get; set; }
+
+        public string ObservationDate3 { get; set; }
+        public string ObservationNotes3 { get; set; }
+        public ObservationDocument ObservationDocumentName3 { get; set; }
+
+        public string ObservationDate4 { get; set; }
+        public string ObservationNotes4 { get; set; }
+        public ObservationDocument ObservationDocumentName4 { get; set; }
+
+        public string ObservationDate5 { get; set; }
+        public string ObservationNotes5 { get; set; }
+        public ObservationDocument ObservationDocumentName5 { get; set; }
+
+        public string ObservationDate6 { get; set; }
+        public string ObservationNotes6 { get; set; }
+        public ObservationDocument ObservationDocumentName6 { get; set; }
+    }
+
+    public class ObservationDocument
+    {
+        public int CreatedBy { get; set; }
+        public string CSULBID { get; set; }
+        public string FileContent { get; set; }
+        public string FileName { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FileExt { get; set; }
+        public string FileNameStatic { get; set; }
+    }
+}

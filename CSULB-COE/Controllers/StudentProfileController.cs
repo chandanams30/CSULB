@@ -520,5 +520,28 @@ namespace CSULB_COE.Controllers
             }
         }
 
+        [HttpGet("DownloadStudentTeachingObservationAttachments")]
+        public IActionResult DownloadStudentTeachingObservationAttachments(int formID, int fieldworkID, string csulbid,string observationDocument, Guid UniqueID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                DownloadStudentTeachingObservationAttachmentsResponse obj = _studentProfileService.DownloadStudentTeachingObservationAttachments(formID, fieldworkID, csulbid, observationDocument, UniqueID);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }
