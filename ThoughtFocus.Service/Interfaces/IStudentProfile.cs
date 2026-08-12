@@ -37,6 +37,8 @@ namespace ThoughtFocus.Service.Interfaces
         TeachingEvaluationByIdentifierResponse GetTeachingEvaluationByIdentifier(string evaluationIdentifier);
         StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID);
         BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input);
+        DownloadStudentTeachingObservationAttachmentsResponse DownloadStudentTeachingObservationAttachments(int formID, int fieldworkID, string csulbid, string observationDocument, Guid UniqueID);
+
 
     }
 }
