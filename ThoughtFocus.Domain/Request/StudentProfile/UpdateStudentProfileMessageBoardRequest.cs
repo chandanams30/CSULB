@@ -155,6 +155,7 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public int FormID { get; set; }
         public string CSULBID { get; set; }
         public int UserID { get; set; }
+        public int ProgramID { get; set; }
         public string Observations { get; set; }
 
     }
