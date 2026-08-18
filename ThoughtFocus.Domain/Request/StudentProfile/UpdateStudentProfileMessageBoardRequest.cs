@@ -131,6 +131,7 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public int ProgramID { get; set; }
         public bool isYellowFlagEnabled { get; set; }
         public string UniversityMentorJSON { get; set; }
+        public string UniversityMentorName { get; set; }
 
     }
 
