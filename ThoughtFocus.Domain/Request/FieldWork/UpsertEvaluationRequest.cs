@@ -31,6 +31,7 @@ namespace ThoughtFocus.Domain.Request.FieldWork
     {
         public string evaluationjson { get; set; }
         public string evaluationType { get; set; }
+        public string programName { get; set; }
 
     }
     public class FieldWorkActivityLogsAttachmentRequest

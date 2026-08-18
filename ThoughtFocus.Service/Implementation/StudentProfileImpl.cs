@@ -1676,7 +1676,8 @@ namespace ThoughtFocus.Service.Implementation
                                               TermName = Convert.ToString(row["TermName"]),
                                               ApplicationType = Convert.ToString(row["EvaluationType"]),
                                               CourseNameandNumber = Convert.ToString(row["CourseNameandNumber"]),
-                                              UniversityMentorJSON = Convert.ToString(row["UniversityMentorJSON"] == DBNull.Value ? null : row["UniversityMentorJSON"])
+                                              UniversityMentorJSON = Convert.ToString(row["UniversityMentorJSON"] == DBNull.Value ? null : row["UniversityMentorJSON"]),
+                                              UniversityMentorName = Convert.ToString(row["UniversityMentorName"])
 
                                           }).FirstOrDefault();
                 obj.programDetails = evaluationDetails.Tables[1].AsEnumerable().AsEnumerable().Select(row =>
