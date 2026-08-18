@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Enumeration;
 using ThoughtFocus.Domain.Request.FieldWork;
 using ThoughtFocus.Domain.Request.InitialCredentialProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
@@ -1698,21 +1699,22 @@ namespace ThoughtFocus.Service.Implementation
 
         }
 
-        public StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID)
+        public StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID, int ProgramID)
         {
             StudentTeachingObservationResponse obj = new StudentTeachingObservationResponse();
             SqlParameter[] parameters =
                                     {
                                           new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldworkID },
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
-                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = CSULBID }                                  };
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50) { Value = CSULBID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt ) { Value = ProgramID }
+            
+        };
             DataTable evaluationDetails = _helper.GetDataTable("[dbo].[GetStudentTeachingObservations]", parameters);
             try
             {
                 if (evaluationDetails != null && evaluationDetails.Rows.Count > 0)
                 {
-
-
                     obj.studentTeachingObservation = evaluationDetails.AsEnumerable().Select(row =>
                                               new StudentTeachingObservation
                                               {
@@ -1795,23 +1797,35 @@ namespace ThoughtFocus.Service.Implementation
 
             foreach (var observation in observationRoot.Observations)
             {
-                if (observation.ObservationDocumentName1 != null)
-                    documents.Add(observation.ObservationDocumentName1);
+                    if (observation.ObservationDocumentName1 != null)
+                    {
+                        documents.Add(observation.ObservationDocumentName1);
+                    }
 
-                if (observation.ObservationDocumentName2 != null)
-                    documents.Add(observation.ObservationDocumentName2);
+                    if (observation.ObservationDocumentName2 != null)
+                    {
+                        documents.Add(observation.ObservationDocumentName2);
+                    }
 
-                if (observation.ObservationDocumentName3 != null)
-                    documents.Add(observation.ObservationDocumentName3);
+                    if (observation.ObservationDocumentName3 != null)
+                    {
+                        documents.Add(observation.ObservationDocumentName3);
+                    }
 
-                if (observation.ObservationDocumentName4 != null)
-                    documents.Add(observation.ObservationDocumentName4);
+                    if (observation.ObservationDocumentName4 != null)
+                    {
+                        documents.Add(observation.ObservationDocumentName4);
+                    }
 
-                if (observation.ObservationDocumentName5 != null)
-                    documents.Add(observation.ObservationDocumentName5);
+                    if (observation.ObservationDocumentName5 != null)
+                    {
+                        documents.Add(observation.ObservationDocumentName5);
+                    }
 
-                if (observation.ObservationDocumentName6 != null)
-                    documents.Add(observation.ObservationDocumentName6);
+                    if (observation.ObservationDocumentName6 != null)
+                    {
+                        documents.Add(observation.ObservationDocumentName6);
+                    }
             }
 
             // Save observation JSON
@@ -1820,11 +1834,17 @@ namespace ThoughtFocus.Service.Implementation
                 new SqlParameter("@FieldWorkID", SqlDbType.BigInt){Value = input.FieldWorkID },
                 new SqlParameter("@FormID", SqlDbType.BigInt){Value = input.FormID},
                 new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){Value = input.CSULBID},
-                new SqlParameter("@Observations", SqlDbType.NVarChar, -1){Value = input.Observations}
+                new SqlParameter("@Observations", SqlDbType.NVarChar, -1){Value = input.Observations},
+                new SqlParameter("@ProgramID", SqlDbType.BigInt){Value = input.ProgramID},
             };
 
             DataTable dt = _helper.GetDataTable("[dbo].[SaveStudentTeachingObservations]", parameters);
-            
+                int studentUserID = 0;
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    studentUserID = Convert.ToInt32(dt.Rows[0]["StudentUserID"]);
+                }
+
             foreach (var document in documents)
             {
                 if (string.IsNullOrWhiteSpace(document.FileContent))
@@ -1852,7 +1872,7 @@ namespace ThoughtFocus.Service.Implementation
                 var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
 
                 string userFolderName = string.Empty;
-                userFolderName =  Convert.ToString(input.UserID);
+                userFolderName =  Convert.ToString(studentUserID);
 
                 // Create user folder
                 string dirUserFolderPath =

@@ -482,12 +482,12 @@ namespace CSULB_COE.Controllers
 
         
         [HttpGet("GetStudentTeachingObservations")]
-        public StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID)
+        public StudentTeachingObservationResponse GetStudentTeachingObservations(int fieldworkID, int formID, string CSULBID, int ProgramID)
         {
             try
             {
 
-                StudentTeachingObservationResponse response = _studentProfileService.GetStudentTeachingObservations(fieldworkID, formID, CSULBID);
+                StudentTeachingObservationResponse response = _studentProfileService.GetStudentTeachingObservations(fieldworkID, formID, CSULBID, ProgramID);
                 return response;
             }
             catch (Exception ex)
