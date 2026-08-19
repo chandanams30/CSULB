@@ -1881,12 +1881,30 @@ namespace ThoughtFocus.Service.Implementation
                 }
                 // Use FileNameStatic as physical file name if supplied
                 string savedFileName = !string.IsNullOrWhiteSpace(document.FileNameStatic) ? document.FileNameStatic : Path.GetFileNameWithoutExtension(fileName);
+                    //if (!string.IsNullOrWhiteSpace(savedFileName) && savedFileName.Contains("~"))
+                    //{
+                    //    savedFileName = $"{studentUserID}~{savedFileName.Substring(savedFileName.IndexOf('~') + 1)}";
+                    //}
+                    //int tildeIndex = savedFileName.IndexOf('~');
 
-                    int tildeIndex = savedFileName.IndexOf('~');
+                    //if (tildeIndex >= 0)
+                    //{
+                    //    savedFileName = savedFileName.Substring(tildeIndex + 1);
+                    //}
 
-                    if (tildeIndex >= 0)
+                    if (!string.IsNullOrWhiteSpace(savedFileName) && savedFileName.Contains("~"))
                     {
-                        savedFileName = savedFileName.Substring(tildeIndex + 1);
+                        int tildeIndex = savedFileName.IndexOf('~');
+                        string valueAfterTilde = savedFileName.Substring(tildeIndex + 1);
+
+                        int underscoreIndex = valueAfterTilde.IndexOf('_');
+
+                        if (underscoreIndex >= 0)
+                        {
+                            valueAfterTilde = valueAfterTilde.Substring(underscoreIndex + 1);
+                        }
+
+                        savedFileName = $"{valueAfterTilde}";
                     }
 
                     string savedFilePath = Path.Combine(dirForm, savedFileName + "." + fileExtension );
