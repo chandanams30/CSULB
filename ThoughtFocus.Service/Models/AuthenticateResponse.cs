@@ -50,6 +50,7 @@ namespace CSULB_COE.Models
         public const int StudentProfileStaff = 13;
         public const int StudentProfileGradeAdmin = 14;
 
+
     }
     public static class ApplicationTypeConstants
     {

@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Service.Interfaces;
 
 
@@ -239,7 +240,24 @@ namespace CSULB_COE.Controllers
                                 continue;
 
                             var groupName = dn.Substring(3, commaIndex - 3);
-                            if (groupName.StartsWith(_configuration["ApplicationKeys:ADGroupsKey"], StringComparison.OrdinalIgnoreCase))
+                            //if (groupName.StartsWith(_configuration["ApplicationKeys:ADGroupsKey"], StringComparison.OrdinalIgnoreCase))
+                            //{
+                            //    groups.Add(groupName);
+                            //    _logger.LogInformation("Directory Search");
+                            //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                            //}
+                            var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+
+                            var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => x.Trim());
+
+                            if ((!string.IsNullOrEmpty(adGroupsKey) &&
+                             groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
+                            || allowedGroups.Any(g => string.Equals(
+                                groupName,
+                                g,
+                                StringComparison.OrdinalIgnoreCase)))
                             {
                                 groups.Add(groupName);
                                 _logger.LogInformation("Directory Search");
@@ -256,38 +274,62 @@ namespace CSULB_COE.Controllers
                 }
                 List<RoleATID> rolesList = new List<RoleATID>();
                 ViewModels.UserInfoRequest userInfo = new ViewModels.UserInfoRequest();
-                
+                //////////TEST
                 var groupsTest = new List<string>();
-                groupsTest.Add("CED-TF-ProgramCoordinator-Doctoral");
-                groupsTest.Add("CED-TF-ProgramAdmin-Graduate");
-                //foreach (var groupName in groups)
-                foreach (var groupName in groupsTest)
+                var adGroupsKey1 = _configuration["ApplicationKeys:ADGroupsKey"];
+                var groupName1 = "CN=CED-TF-TEST-DataFeed";
+                // ---------------------------
+                var allowedGroups1 = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim());
+
+                if ((!string.IsNullOrEmpty(adGroupsKey1) &&
+                 groupName1.StartsWith(adGroupsKey1, StringComparison.OrdinalIgnoreCase))
+                || allowedGroups1.Any(g => string.Equals(
+                    groupName1,
+                    g,
+                    StringComparison.OrdinalIgnoreCase)))
                 {
-                    long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
-                    long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
-
-                    // Skip invalid or non-matching groups
-                    if (roleId == 0 || applicationTypeId == 0)
-                        continue;
-
-                    rolesList.Add(new RoleATID
-                    {
-                        RoleId = roleId,
-                        ApplicationTypeId = applicationTypeId,
-                    });
-                    authenticateRequestRoles.Email = response.Email;
-                    authenticateRequestRoles.CSULBID = response.CSULBID;
-                    authenticateRequestRoles.RoleID = roleId;
-                    authenticateRequestRoles.ApplicationTypeID = applicationTypeId;
-
-                    var upsertADRoles = _userLoginService.SaveRolesFromAD(authenticateRequestRoles);
+                    groups.Add(groupName1);
+                    _logger.LogInformation("Directory Search");
+                    _logger.LogInformation("Assigned Group: {GroupName}", groupName1);
                 }
 
-                userInfo.Email = response.Email;
-                userInfo.CSULBID = response.CSULBID;
-                var getADRoles = _userLoginService.GetIntegratedUserRoles(userInfo);
-                response.Roles = getADRoles.RolesList;
+                if (groups != null)
+                {
+                    //groupsTest.Add("CED-TF-ProgramCoordinator-Doctoral");
+                    //groupsTest.Add("CED-TF-ProgramAdmin-Graduate");
+                    //groupsTest.Add(groupName1);
+                    ////////// END
 
+                    //foreach (var groupName in groups)
+                    foreach (var groupName in groupsTest)
+                    {
+                        long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                        long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
+
+                        // Skip invalid or non-matching groups
+                        if (roleId == 0 || applicationTypeId == 0)
+                            continue;
+
+                        rolesList.Add(new RoleATID
+                        {
+                            RoleId = roleId,
+                            ApplicationTypeId = applicationTypeId,
+                        });
+                        authenticateRequestRoles.Email = response.Email;
+                        authenticateRequestRoles.CSULBID = response.CSULBID;
+                        authenticateRequestRoles.RoleID = roleId;
+                        authenticateRequestRoles.ApplicationTypeID = applicationTypeId;
+
+                        var upsertADRoles = _userLoginService.SaveRolesFromAD(authenticateRequestRoles);
+                    }
+
+                    userInfo.Email = response.Email;
+                    userInfo.CSULBID = response.CSULBID;
+                    var getADRoles = _userLoginService.GetIntegratedUserRoles(userInfo);
+                    response.Roles = getADRoles.RolesList;
+                }
                 return Ok(response);
 
             }
@@ -398,7 +440,25 @@ namespace CSULB_COE.Controllers
                                     continue;
 
                                 var groupName = dn.Substring(3, commaIndex - 3);
-                                if (groupName.StartsWith(_configuration["ApplicationKeys:ADGroupsKey"], StringComparison.OrdinalIgnoreCase))
+                                //if (groupName.StartsWith(_configuration["ApplicationKeys:ADGroupsKey"], StringComparison.OrdinalIgnoreCase))
+                                //{
+                                //    groups.Add(groupName);
+                                //    _logger.LogInformation("Directory Search");
+                                //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                //}
+
+                                var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+
+                                var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(x => x.Trim());
+
+                                if ((!string.IsNullOrEmpty(adGroupsKey) &&
+                                 groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
+                                || allowedGroups.Any(g => string.Equals(
+                                    groupName,
+                                    g,
+                                    StringComparison.OrdinalIgnoreCase)))
                                 {
                                     groups.Add(groupName);
                                     _logger.LogInformation("Directory Search");
@@ -412,6 +472,38 @@ namespace CSULB_COE.Controllers
                         string.Join(" | ", groups)
                     );
                         }
+                    }
+                    if (groups != null)
+                    {
+                        AuthenticateRequestRoles authenticateRequestRoles = new AuthenticateRequestRoles();
+                        List<RoleATID> rolesList = new List<RoleATID>();
+                        ViewModels.UserInfoRequest userInfo = new ViewModels.UserInfoRequest();
+                        foreach (var groupName in groups)
+                        {
+                            long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                            long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
+
+                            // Skip invalid or non-matching groups
+                            if (roleId == 0 || applicationTypeId == 0)
+                                continue;
+
+                            rolesList.Add(new RoleATID
+                            {
+                                RoleId = roleId,
+                                ApplicationTypeId = applicationTypeId,
+                            });
+                            authenticateRequestRoles.Email = response.Email;
+                            authenticateRequestRoles.CSULBID = response.CSULBID;
+                            authenticateRequestRoles.RoleID = roleId;
+                            authenticateRequestRoles.ApplicationTypeID = applicationTypeId;
+
+                            var upsertADRoles = _userLoginService.SaveRolesFromAD(authenticateRequestRoles);
+                        }
+
+                        userInfo.Email = response.Email;
+                        userInfo.CSULBID = response.CSULBID;
+                        var getADRoles = _userLoginService.GetIntegratedUserRoles(userInfo);
+                        response.Roles = getADRoles.RolesList;
                     }
 
                     return Ok(response);

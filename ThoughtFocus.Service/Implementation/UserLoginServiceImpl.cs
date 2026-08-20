@@ -462,6 +462,27 @@ namespace ThoughtFocus.Service.Implementation
                 if (string.IsNullOrWhiteSpace(groupName))
                     return 0;
 
+            var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+            .Split('|', StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim());
+
+            if (allowedGroups.Any(g =>
+            {
+                var configuredCN = g.Contains(',')
+                    ? g.Substring(0, g.IndexOf(',')).Trim()
+                    : g.Trim();
+
+                return string.Equals(
+                    groupName.Trim(),
+                    configuredCN,
+                    StringComparison.OrdinalIgnoreCase);
+            }))
+            {
+                return RoleConstants.StudentProfileGradeAdmin;
+            }
+            else
+            {
+
                 // Expected format: CED-TF-RoleName-ApplicationType
                 var parts = groupName.Split('-');
 
@@ -482,6 +503,7 @@ namespace ThoughtFocus.Service.Implementation
                     "StudentProfileGradeAdmin" => RoleConstants.StudentProfileGradeAdmin,
                     _ => 0 // Unknown role
                 };
+            }
             
         }
         public long GetApplicationTypeIdFromGroup(string groupName)
