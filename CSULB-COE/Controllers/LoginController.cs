@@ -1,24 +1,28 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-//using CSULB_COE.ViewModels;
+﻿//using CSULB_COE.ViewModels;
 using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
-using ThoughtFocus.Service.Interfaces;
-using Microsoft.Extensions.Logging;
-using ThoughtFocus.Domain.Request;
-using System.Globalization;
-using Owin;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.Graph;
 using Google.Apis.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
+using Newtonsoft.Json;
+using Owin;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection.PortableExecutable;
+using System.Threading.Tasks;
+using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
-using Microsoft.AspNetCore.Http.Features;
+using ThoughtFocus.Service.Interfaces;
+using System.DirectoryServices;
+using Microsoft.Extensions.Configuration;
+
 
 namespace CSULB_COE.Controllers
 {
@@ -29,11 +33,14 @@ namespace CSULB_COE.Controllers
         private readonly IUserLoginService _userLoginService;
         public ILogger<LoginController> _logger;
         private readonly HttpClient _client;
-        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory)
+        private readonly IConfiguration _configuration;
+
+        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _userLoginService = userLoginService;
             _logger = logger;
             _client = httpClientFactory.CreateClient();
+            _configuration = configuration;
         }
 
         [HttpPost("Authenticate")]
@@ -55,6 +62,100 @@ namespace CSULB_COE.Controllers
                     req.AuthenticationType = "Basic";
                     var auditResponse = _userLoginService.SaveAuditLog(req);
 
+                }
+                var groups = new List<string>();
+                string _samAccountName = string.Empty;
+
+                string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                //string username = mail;
+                _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
+
+                using (var entry = new System.DirectoryServices.DirectoryEntry()) // implicit credentials
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    searcher.Filter =
+                        $"(&(objectClass=user)(userPrincipalName={username}))";
+
+                    searcher.PropertiesToLoad.Add("memberOf");
+
+                    var result = searcher.FindOne();
+
+                    if (result == null)
+                    {
+                        _logger.LogWarning("AD user not found: {Username}", username);
+                    }
+                    else
+                    {
+                        if (!result.Properties.Contains("memberOf"))
+                        {
+                            _logger.LogInformation(
+                                "User {Username} has no direct group memberships",
+                                username
+                            );
+                        }
+                        foreach (var groupDn in result.Properties["memberOf"])
+                        {
+                            if (groupDn == null)
+                                continue;
+
+                            var dn = groupDn.ToString();
+                            if (string.IsNullOrWhiteSpace(dn))
+                                continue;
+
+                            var commaIndex = dn.IndexOf(',');
+                            if (commaIndex < 0)
+                                continue;
+
+                            var groupName = dn.Substring(3, commaIndex - 3);
+
+                            //Find SamAccountName
+                            using (var groupEntry = new System.DirectoryServices.DirectoryEntry($"LDAP://{dn}"))
+                            using (var groupSearcher = new DirectorySearcher(groupEntry))
+                            {
+                                groupSearcher.Filter = "(objectClass=group)";
+                                groupSearcher.PropertiesToLoad.Add("sAMAccountName");
+
+                                var groupResult = groupSearcher.FindOne();
+
+                                if (groupResult != null &&
+                                    groupResult.Properties.Contains("sAMAccountName"))
+                                {
+                                    var samAccountName =
+                                        groupResult.Properties["sAMAccountName"][0]?.ToString();
+                                    _samAccountName = samAccountName;
+
+                                    _logger.LogInformation(
+                                        "AD Group: {GroupName}, sAMAccountName: {SamAccountName}",
+                                        groupName,
+                                        samAccountName);
+                                }
+
+                                //var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+
+                                //var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                                //.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                //.Select(x => x.Trim());
+
+                                //if ((!string.IsNullOrEmpty(adGroupsKey) &&
+                                // groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
+                                //|| allowedGroups.Any(g => string.Equals(
+                                //    groupName,
+                                //    g,
+                                //    StringComparison.OrdinalIgnoreCase)))
+                                //{
+                                //    groups.Add(groupName);
+                                //    _logger.LogInformation("Directory Search");
+                                //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                //}
+                            }
+
+                        }
+                        _logger.LogInformation(
+                    "User {Username} MEMBER OF groups: {Groups}",
+                    username,
+                    string.Join(" | ", groups)
+                );
+                    }
                 }
                 return Ok(response);
             }
@@ -124,6 +225,102 @@ namespace CSULB_COE.Controllers
                         var auditResponse = _userLoginService.SaveAuditLog(req);
 
                     }
+
+                    var groups = new List<string>();
+                    string _samAccountName = string.Empty;
+
+                    string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                    //string username = mail;
+                    _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
+
+                    using (var entry = new System.DirectoryServices.DirectoryEntry()) // implicit credentials
+                    using (var searcher = new DirectorySearcher(entry))
+                    {
+                        searcher.Filter =
+                            $"(&(objectClass=user)(userPrincipalName={username}))";
+
+                        searcher.PropertiesToLoad.Add("memberOf");
+
+                        var result = searcher.FindOne();
+
+                        if (result == null)
+                        {
+                            _logger.LogWarning("AD user not found: {Username}", username);
+                        }
+                        else
+                        {
+                            if (!result.Properties.Contains("memberOf"))
+                            {
+                                _logger.LogInformation(
+                                    "User {Username} has no direct group memberships",
+                                    username
+                                );
+                            }
+                            foreach (var groupDn in result.Properties["memberOf"])
+                            {
+                                if (groupDn == null)
+                                    continue;
+
+                                var dn = groupDn.ToString();
+                                if (string.IsNullOrWhiteSpace(dn))
+                                    continue;
+
+                                var commaIndex = dn.IndexOf(',');
+                                if (commaIndex < 0)
+                                    continue;
+
+                                var groupName = dn.Substring(3, commaIndex - 3);
+
+                                //Find SamAccountName
+                                using (var groupEntry = new System.DirectoryServices.DirectoryEntry($"LDAP://{dn}"))
+                                using (var groupSearcher = new DirectorySearcher(groupEntry))
+                                {
+                                    groupSearcher.Filter = "(objectClass=group)";
+                                    groupSearcher.PropertiesToLoad.Add("sAMAccountName");
+
+                                    var groupResult = groupSearcher.FindOne();
+
+                                    if (groupResult != null &&
+                                        groupResult.Properties.Contains("sAMAccountName"))
+                                    {
+                                        var samAccountName =
+                                            groupResult.Properties["sAMAccountName"][0]?.ToString();
+                                        _samAccountName = samAccountName;
+
+                                        _logger.LogInformation(
+                                            "AD Group: {GroupName}, sAMAccountName: {SamAccountName}",
+                                            groupName,
+                                            samAccountName);
+                                    }
+
+                                    //var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+
+                                    //var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                                    //.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    //.Select(x => x.Trim());
+
+                                    //if ((!string.IsNullOrEmpty(adGroupsKey) &&
+                                    // groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
+                                    //|| allowedGroups.Any(g => string.Equals(
+                                    //    groupName,
+                                    //    g,
+                                    //    StringComparison.OrdinalIgnoreCase)))
+                                    //{
+                                    //    groups.Add(groupName);
+                                    //    _logger.LogInformation("Directory Search");
+                                    //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                    //}
+                                }
+
+                            }
+                            _logger.LogInformation(
+                        "User {Username} MEMBER OF groups: {Groups}",
+                        username,
+                        string.Join(" | ", groups)
+                    );
+                        }
+                    }
+
                     return Ok(response);
                 }
                 else
