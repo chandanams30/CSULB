@@ -23,6 +23,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Security.Principal;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ThoughtFocus.DataAccess.Models;
 using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
@@ -198,6 +199,7 @@ namespace CSULB_COE.Controllers
 
                 }
                 var groups = new List<string>();
+                string _samAccountName = string.Empty;
                 string username = _configuration["ApplicationKeys:LoggedInUserName"];
                 //string username = "yash.jayaram@csulb.edu";
                 //string username = response.Email;
@@ -246,30 +248,54 @@ namespace CSULB_COE.Controllers
                             //    _logger.LogInformation("Directory Search");
                             //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
                             //}
-                            var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
 
-                            var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
-                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(x => x.Trim());
-
-                            if ((!string.IsNullOrEmpty(adGroupsKey) &&
-                             groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
-                            || allowedGroups.Any(g => string.Equals(
-                                groupName,
-                                g,
-                                StringComparison.OrdinalIgnoreCase)))
+                            //Find SamAccountName
+                            using (var groupEntry = new DirectoryEntry($"LDAP://{dn}"))
+                            using (var groupSearcher = new DirectorySearcher(groupEntry))
                             {
-                                groups.Add(groupName);
-                                _logger.LogInformation("Directory Search");
-                                _logger.LogInformation("Assigned Group: {GroupName}", groupName);
-                            }
+                                groupSearcher.Filter = "(objectClass=group)";
+                                groupSearcher.PropertiesToLoad.Add("sAMAccountName");
 
+                                var groupResult = groupSearcher.FindOne();
+
+                                if (groupResult != null &&
+                                    groupResult.Properties.Contains("sAMAccountName"))
+                                {
+                                    var samAccountName =
+                                        groupResult.Properties["sAMAccountName"][0]?.ToString();
+                                    _samAccountName = samAccountName;
+
+                                    _logger.LogInformation(
+                                        "AD Group: {GroupName}, sAMAccountName: {SamAccountName}",
+                                        groupName,
+                                        samAccountName);
+                                }
+
+                                var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+
+                                var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(x => x.Trim());
+
+                                if ((!string.IsNullOrEmpty(adGroupsKey) &&
+                                 groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
+                                || allowedGroups.Any(g => string.Equals(
+                                    groupName,
+                                    g,
+                                    StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    groups.Add(groupName);
+                                    _logger.LogInformation("Directory Search");
+                                    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                }
+
+                            }
+                            _logger.LogInformation(
+                        "User {Username} MEMBER OF groups: {Groups}",
+                        username,
+                        string.Join(" | ", groups)
+                    );
                         }
-                        _logger.LogInformation(
-                    "User {Username} MEMBER OF groups: {Groups}",
-                    username,
-                    string.Join(" | ", groups)
-                );
                     }
                 }
                 List<RoleATID> rolesList = new List<RoleATID>();
@@ -297,15 +323,32 @@ namespace CSULB_COE.Controllers
 
                 if (groups != null)
                 {
-                    //groupsTest.Add("CED-TF-ProgramCoordinator-Doctoral");
+                    groupsTest.Add("CED-TF-ProgramCoordinator-Doctoral");
                     //groupsTest.Add("CED-TF-ProgramAdmin-Graduate");
                     //groupsTest.Add(groupName1);
                     ////////// END
-
+                    var SamAccountNameLstForGradeAdmin = (_configuration["ApplicationKeys:SamAccountNameForGradeAdmin"] ?? "")
+                                                             .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                             .Select(x => x.Trim());
                     //foreach (var groupName in groups)
                     foreach (var groupName in groupsTest)
                     {
-                        long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                        long roleId = 0;
+                        //test _samAccountName
+                        _samAccountName = "008728484";
+                        if (SamAccountNameLstForGradeAdmin.Any(x =>
+                            string.Equals(
+                                x,
+                                _samAccountName,
+                                StringComparison.OrdinalIgnoreCase)))
+                        {
+                            roleId = RoleConstants.StudentProfileGradeAdmin;
+                        }
+                        else
+                        {
+                            roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                        }
+
                         long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
 
                         // Skip invalid or non-matching groups
@@ -399,6 +442,8 @@ namespace CSULB_COE.Controllers
 
                     }
                     var groups = new List<string>();
+                    string _samAccountName = string.Empty;
+
                     string username = _configuration["ApplicationKeys:LoggedInUserName"];
                     //string username = mail;
                     _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
@@ -440,29 +485,46 @@ namespace CSULB_COE.Controllers
                                     continue;
 
                                 var groupName = dn.Substring(3, commaIndex - 3);
-                                //if (groupName.StartsWith(_configuration["ApplicationKeys:ADGroupsKey"], StringComparison.OrdinalIgnoreCase))
-                                //{
-                                //    groups.Add(groupName);
-                                //    _logger.LogInformation("Directory Search");
-                                //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
-                                //}
 
-                                var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
-
-                                var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
-                                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                .Select(x => x.Trim());
-
-                                if ((!string.IsNullOrEmpty(adGroupsKey) &&
-                                 groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
-                                || allowedGroups.Any(g => string.Equals(
-                                    groupName,
-                                    g,
-                                    StringComparison.OrdinalIgnoreCase)))
+                                //Find SamAccountName
+                                using (var groupEntry = new DirectoryEntry($"LDAP://{dn}"))
+                                using (var groupSearcher = new DirectorySearcher(groupEntry))
                                 {
-                                    groups.Add(groupName);
-                                    _logger.LogInformation("Directory Search");
-                                    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                    groupSearcher.Filter = "(objectClass=group)";
+                                    groupSearcher.PropertiesToLoad.Add("sAMAccountName");
+
+                                    var groupResult = groupSearcher.FindOne();
+
+                                    if (groupResult != null &&
+                                        groupResult.Properties.Contains("sAMAccountName"))
+                                    {
+                                        var samAccountName =
+                                            groupResult.Properties["sAMAccountName"][0]?.ToString();
+                                        _samAccountName = samAccountName;
+
+                                        _logger.LogInformation(
+                                            "AD Group: {GroupName}, sAMAccountName: {SamAccountName}",
+                                            groupName,
+                                            samAccountName);
+                                    }
+
+                                    var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+
+                                    var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(x => x.Trim());
+
+                                    if ((!string.IsNullOrEmpty(adGroupsKey) &&
+                                     groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
+                                    || allowedGroups.Any(g => string.Equals(
+                                        groupName,
+                                        g,
+                                        StringComparison.OrdinalIgnoreCase)))
+                                    {
+                                        groups.Add(groupName);
+                                        _logger.LogInformation("Directory Search");
+                                        _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                    }
                                 }
 
                             }
@@ -478,9 +540,25 @@ namespace CSULB_COE.Controllers
                         AuthenticateRequestRoles authenticateRequestRoles = new AuthenticateRequestRoles();
                         List<RoleATID> rolesList = new List<RoleATID>();
                         ViewModels.UserInfoRequest userInfo = new ViewModels.UserInfoRequest();
+                        var SamAccountNameLstForGradeAdmin = (_configuration["ApplicationKeys:SamAccountNameForGradeAdmin"] ?? "")
+                                                             .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                             .Select(x => x.Trim());
+
                         foreach (var groupName in groups)
                         {
-                            long roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                            long roleId = 0;
+                            if (SamAccountNameLstForGradeAdmin.Any(x =>
+                                string.Equals(
+                                    x,
+                                    _samAccountName,
+                                    StringComparison.OrdinalIgnoreCase)))
+                            {
+                                roleId = RoleConstants.StudentProfileGradeAdmin;
+                            }
+                            else
+                            {
+                                roleId = _userLoginService.GetRoleIdFromGroup(groupName);
+                            }
                             long applicationTypeId = _userLoginService.GetApplicationTypeIdFromGroup(groupName);
 
                             // Skip invalid or non-matching groups
