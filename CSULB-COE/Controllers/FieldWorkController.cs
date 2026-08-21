@@ -656,12 +656,12 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents")]
-        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string? communitySiteUserName, string? communitySiteUserEmail,int activityLogID)
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string? communitySiteUserName, string? communitySiteUserEmail,int activityLogID, int fieldWorkID)
         {
             try
             {
                 PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents response = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
-                response = _fieldWorkService.PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(communitySiteUsersID,communitySiteUserName,communitySiteUserEmail,activityLogID);
+                response = _fieldWorkService.PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(communitySiteUsersID,communitySiteUserName,communitySiteUserEmail,activityLogID, fieldWorkID);
                 return response;
             }
             catch (Exception ex)

@@ -29,6 +29,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string CommunitySiteUserName { get; set; }
         public string CommunitySiteUserEmail { get; set; }
         public string CommunitySiteUserIdentifier { get; set; }
+        public string StudentName { get; set; }
+
     }
     public class PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents : BaseResponse
     {
@@ -36,6 +38,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string CommunitySiteUserName { get; set; }
         public string CommunitySiteUserEmail { get; set; }
         public string CommunitySiteUserIdentifier { get; set; }
+        public string StudentName { get; set; }
+
     }
     public class UpdateCommunitySiteSupervisorDemonstrationTeacherListResponse : BaseResponse
     {

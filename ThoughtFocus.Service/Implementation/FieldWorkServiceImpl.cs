@@ -1395,7 +1395,6 @@ namespace ThoughtFocus.Service.Implementation
                                               CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
                                               CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
                                               CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"])
-
                                           }).FirstOrDefault();
 
                 obj.IsSuccess = true;
@@ -1415,6 +1414,7 @@ namespace ThoughtFocus.Service.Implementation
                                  new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
                                  new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
                                  new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PartnerUser" }
+
                             };
                     DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
                     if (dtMailBody.Rows.Count > 0)
@@ -1433,12 +1433,13 @@ namespace ThoughtFocus.Service.Implementation
                     string link = @"<a href ='" + URL + "' target='_blank' class='custom-link'>Click here</a>";
                     body = body.Replace("[[logoPath]]", logoText)
                               .Replace("[[link]]", link);
+
                     string subject = "Approve student hours for CSULB Clinical Practice";
                     _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
                     obj.IsSuccess = true;
                     obj.Message = "Partner User Activation mail sent successfully.";
                 }
-                catch (Exception ee)
+                catch (Exception ex)
                 {
                     obj.IsSuccess = false;
                     obj.Message = "Failure sending mail.";
@@ -2160,7 +2161,7 @@ namespace ThoughtFocus.Service.Implementation
 
             return pdfFileContent;
         }
-        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail,int activityLogID)
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail,int activityLogID,int fieldWorkID)
         {
             PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
 
@@ -2169,8 +2170,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@CommunitySiteUsersID", SqlDbType.BigInt) { Value = communitySiteUsersID },
                                           new SqlParameter("@CommunitySiteUserName", SqlDbType.NVarChar,200) { Value = communitySiteUserName },
                                           new SqlParameter("@CommunitySiteUserEmail", SqlDbType.NVarChar,200) { Value = communitySiteUserEmail },
-                                          new SqlParameter("@FieldWorkActivityLogId", SqlDbType.BigInt) { Value =  activityLogID }
-
+                                          new SqlParameter("@FieldWorkActivityLogId", SqlDbType.BigInt) { Value =  activityLogID },
+                                          new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value =  fieldWorkID }
                               };
 
             DataSet dtFieldWork = _helper.GetDataSet("[FieldWork].[PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents]", parameters);
@@ -2182,14 +2183,15 @@ namespace ThoughtFocus.Service.Implementation
                                               CSSDTID = Convert.ToInt32(row["CSSDTID"]),
                                               CommunitySiteUserName = Convert.ToString(row["CommunitySiteUserName"]),
                                               CommunitySiteUserEmail = Convert.ToString(row["CommunitySiteUserEmail"]),
-                                              CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"])
-
+                                              CommunitySiteUserIdentifier = Convert.ToString(row["CommunitySiteUserIdentifier"]),
+                                              StudentName = Convert.ToString(row["StudentName"])
                                           }).FirstOrDefault();
 
                 obj.IsSuccess = true;
                 obj.Message = "Data Retrieved Successfully.";
                 try
                 {
+                    var StudentName = obj.StudentName;
                     //please uncomment after testing
                     //string toUser = "asif.khan@thoughtfocus.com";
                     string toUser = obj.CommunitySiteUserEmail;
@@ -2201,7 +2203,7 @@ namespace ThoughtFocus.Service.Implementation
                                  new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
                                  new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
                                  new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
-                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PartnerUser" }
+                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PartnerUserFieldwork" }
                             };
                     DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
                     if (dtMailBody.Rows.Count > 0)
@@ -2220,7 +2222,8 @@ namespace ThoughtFocus.Service.Implementation
                     string link = @"<a href ='" + URL + "' target='_blank' class='custom-link'>Click here</a>";
                     string logoText = "cid:myImageID";
                     body = body.Replace("[[logoPath]]", logoText)
-                              .Replace("[[link]]", link);
+                              .Replace("[[link]]", link)
+                              .Replace("[[StudentName]]", StudentName);
                     string subject = "Approve student hours for CSULB Clinical Practice";
                     _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
                     obj.IsSuccess = true;
