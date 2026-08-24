@@ -876,7 +876,7 @@ namespace ThoughtFocus.Service.Implementation
                 }
                 else
                 {
-                    obj.IsSuccess = false;
+                    obj.IsSuccess = true;
                     obj.Message = "No Data Present";
                 }
             }
