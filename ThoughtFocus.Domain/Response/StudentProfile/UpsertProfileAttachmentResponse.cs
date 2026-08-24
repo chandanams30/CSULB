@@ -268,4 +268,39 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string FileExt { get; set; }
         public string FileNameStatic { get; set; }
     }
+    public class ExitSurveyAttachmentResponse : BaseResponse
+    {
+        public int SurveyAttachementID { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+    }
+    public class ExitSurveyAttachementDetailsResponse : BaseResponse
+    {
+        public List<ExitSurveyAttachementDetails> ExitSurveyAttachementDetails { get; set; }
+    }
+    public class ExitSurveyAttachementDetails
+    {
+        public int SurveyAttachementID { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public string FolderName { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public string CanView { get; set; }
+        public string CSUExitSurveyMet {  get; set; }
+        public string CEDExitSurveyMet { get; set; }
+    }
+    public class DownloadExitSurveyAttachementResponse : BaseResponse
+    {
+        public int SurveyAttachementID { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public byte[] FileContent { get; set; }
+        public string FolderName { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+    }
 }
