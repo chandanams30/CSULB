@@ -194,7 +194,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   LoggedHours = Convert.ToDecimal(row["LoggedHours"]),
                                                   ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
                                                   CourseName = Convert.ToString(row["CourseName"]),
-                                                  Email = Convert.ToString(row["Email"])
+                                                  Email = Convert.ToString(row["Email"]),
+                                                  DocumentNumber = Convert.ToString(row["DocumentNumber"])
                                               }).ToList();
 
                     objList.FieldWorkResponse = obj;
