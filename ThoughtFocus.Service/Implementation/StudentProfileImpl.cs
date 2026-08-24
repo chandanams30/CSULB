@@ -1992,8 +1992,196 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public ExitSurveyAttachmentResponse UpsertExitSurveyAttachement(UpsertExitSurveyAttachementRequest input)
+        {
+            ExitSurveyAttachmentResponse response = new ExitSurveyAttachmentResponse();
+            SqlParameter[] parameters =
+                          {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = input.UniqueID },
+                                          new SqlParameter("@FileName", SqlDbType.NVarChar, 200) { Value = input.FileName },
+                                          new SqlParameter("@FileExtn", SqlDbType.NVarChar, 20) { Value = input.FileExtn },
+                                          new SqlParameter("@CSULBID", SqlDbType.NVarChar, 20) { Value = input.CSULBID},
+                                          new SqlParameter("@CreatedBy", SqlDbType.BigInt) { Value = input.CreatedBy },
+                                          new SqlParameter("@CSUExitSurveyMet", SqlDbType.NVarChar, 20) { Value = input.CSUExitSurveyMet },
+                                          new SqlParameter("@CEDExitSurveyMet", SqlDbType.NVarChar, 20) { Value = input.CEDExitSurveyMet }
+                                        };
+            DataTable dtFormAttachment = _helper.GetDataTable("[dbo].[UpsertExitSurveyAttachements]", parameters);
+            if (input.FileContent != null && input.FileContent.Length > 0)
+            {
+                string fileName = string.Empty;
+                string fileExtension = string.Empty;
+                string fileExtensionWord = string.Empty;
+                string userFolderName = string.Empty;
+                string savedFileName = string.Empty;
+                string subSectionName = string.Empty;
+                bool isNotPDFExtension = false;
+                var fileRepoPath = _configuration["ApplicationKeys:FileRepository"];
+
+                var workingFolderPath = Path.Combine(fileRepoPath, "WorkingFolder");
+                if (input.FileName != string.Empty)
+                {
+                    //AttachmentFileDetails fileDetails = GetAttachedFileSplitValues(input.FileName);
+                    //fileExtension = fileDetails.FileExtension;
+                    //fileName = input.FileName;
+                    if (fileExtension.ToUpper() == "PNG" || fileExtension.ToUpper() == "JPG" || fileExtension.ToUpper() == "JPEG")
+                    {
+                        // isNotPDFExtension = true;
+                        // logic to convert png to pdf 
+                        byte[] imageContent = null;
+                        imageContent = GetImageFilecontent(input.FileContent);
+                        input.FileContent = null;
+                        input.FileContent = imageContent;
+                        fileExtension = "pdf";
+                    }
+                }
+                if (dtFormAttachment.Rows.Count > 0 && input.FileName != string.Empty)
+                {
+                    string[] folderSplit = dtFormAttachment.Rows[0]["FolderName"].ToString().Split('~');
+                    userFolderName = folderSplit[0].ToString();
+                    string dirUserFolderPath = Path.Combine(fileRepoPath, userFolderName);
+                    fileName = input.FormID + "_" + input.FileName;
+                    if (Directory.Exists(dirUserFolderPath))
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        if (Directory.Exists(dirForm))
+                        {
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + input.FileExtn), input.FileContent);
+
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(dirForm);
+                            File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + input.FileExtn), input.FileContent);
+
+                        }
+                    }
+                    else
+                    {
+                        string dirForm = Path.Combine(dirUserFolderPath, "Form");
+                        DirectoryInfo dirUserFolder = System.IO.Directory.CreateDirectory(dirUserFolderPath);
+                        DirectoryInfo dirFieldWorkFolder = System.IO.Directory.CreateDirectory(dirForm);
+                        DirectorySecurity dSecurity = dirFieldWorkFolder.GetAccessControl();
+                        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        dirFieldWorkFolder.SetAccessControl(dSecurity);
+                        File.WriteAllBytes(Path.Combine(dirForm, fileName + "." + input.FileExtn), input.FileContent);
+
+                    }
+                    response.FileName = Convert.ToString(dtFormAttachment.Rows[0]["FileName"]);
+                    response.FileExtn = Convert.ToString(dtFormAttachment.Rows[0]["FileExtn"]);
+                    response.UniqueID = (Guid)(dtFormAttachment.Rows[0]["UniqueID"]);
+                    response.SurveyAttachementID = Convert.ToInt32(dtFormAttachment.Rows[0]["SurveyAttachementID"]);
+                    response.IsSuccess = true;
+                    response.Message = "Attachment Uploaded Successfully";
+                }
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = true;
+                response.Message = "No Attachment to upload";
+                return response;
+            }
+        }
+        public ExitSurveyAttachementDetailsResponse GetExitSurveyAttachementDetails(string formID, string roleID)
+        {
+            ExitSurveyAttachementDetailsResponse obj = new ExitSurveyAttachementDetailsResponse();
+            SqlParameter[] parameters =
+                                    {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = formID },
+                                          new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID }
+                                     };
+            DataTable dtAttachmentDetails = _helper.GetDataTable("[dbo].[GetExitSurveyAttachementDetails]", parameters);
+            try
+            {
+                if (dtAttachmentDetails.Rows.Count > 0)
+                {
+                    obj.ExitSurveyAttachementDetails = dtAttachmentDetails.AsEnumerable().Select(row =>
+                                              new ExitSurveyAttachementDetails
+                                              {
+                                                  SurveyAttachementID = Convert.ToInt32(row["SurveyAttachementID"]),
+                                                  FileName = Convert.ToString(row["FileName"] == DBNull.Value ? null : row["FileName"]),
+                                                  FileExtn = Convert.ToString(row["FileExtn"] == DBNull.Value ? null : row["FileExtn"]),
+                                                  FolderName = Convert.ToString(row["FolderName"] == DBNull.Value ? null : row["FolderName"]),
+                                                  CreatedBy = Convert.ToInt32(row["CreatedBy"] == DBNull.Value ? null : row["CreatedBy"]),
+                                                  CreatedDate = Convert.ToDateTime(row["CreatedDate"] == DBNull.Value ? null : row["CreatedDate"]),
+                                                  CanView = Convert.ToString(row["CanView"]),
+                                                  UniqueID = Guid.Parse(row["UniqueID"].ToString()),
+                                                  CSUExitSurveyMet = Convert.ToString(row["CSUExitSurveyMet"]),
+                                                  CEDExitSurveyMet = Convert.ToString(row["CEDExitSurveyMet"])
+                                              }).ToList();
 
 
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
 
+                }
+                obj.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public DownloadExitSurveyAttachementResponse DownloadExitSurveyAttachement(Guid UniqueID)
+        {
+            DownloadExitSurveyAttachementResponse obj = new DownloadExitSurveyAttachementResponse();
+
+            SqlParameter[] parameters =
+                                     {
+                                          new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = UniqueID }
+                                     };
+            DataTable dtAttachments = _helper.GetDataTable("[dbo].[GetExitSurveyAttachement]", parameters);
+            obj = dtAttachments.AsEnumerable().Select(row =>
+                                          new DownloadExitSurveyAttachementResponse
+                                          {
+                                              SurveyAttachementID = Convert.ToInt32(row["SurveyAttachementID"]),
+                                              UniqueID = Guid.Parse(row["UniqueID"].ToString()),
+                                              FileName = Convert.ToString(row["FileName"]) + "." + Convert.ToString(row["FileExtn"]),
+                                              FolderName = Convert.ToString(row["FolderName"]),
+                                              CreatedBy = Convert.ToInt32(row["CreatedBy"]),
+                                              CreatedDate = Convert.ToDateTime(row["CreatedDate"] == DBNull.Value ? null : row["CreatedDate"]),
+                                              FileContent = row["FileName"] == DBNull.Value || Convert.ToString(row["FileName"]) == string.Empty ? null : GetProfileAttachmentFileContent(_utils.GetAttachmentsFolderName(row["FolderName"].ToString()), _utils.GetAttachmentsSavedFileName(row["FolderName"].ToString()) + "." + Convert.ToString(row["FileExtn"]))
+                                          }).FirstOrDefault();
+            obj.IsSuccess = true;
+            obj.Message = "Attachment retrieved Successfully";
+
+            return obj;
+        }
+        public BaseResponse DeleteExitSurveyAttachement(DeleteExitSurveyAttachementRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                    {
+                                           new SqlParameter("@UniqueID", SqlDbType.UniqueIdentifier) { Value = input.UniqueID }
+                                     };
+            try
+            {
+                DataTable dtAttachment = _helper.GetDataTable("[dbo].[DeleteExitSurveyAttachement]", parameters);
+                if (dtAttachment.Rows.Count > 0)
+                {
+                    if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "SUCCESS")
+                    {
+                        response.Message = "Attachment Deleted Successfully";
+                        response.IsSuccess = true;
+                    }
+                    else if (Convert.ToString(dtAttachment.Rows[0]["RESULT"]) == "FAILURE")
+                    {
+                        response.Message = "Failed to Delete Attachment";
+                        response.IsSuccess = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Data Retrieval Failed , Please contact site admin ";
+                response.StackTrace = ex.Message;
+            }
+            return response;
+        }
     }
 }

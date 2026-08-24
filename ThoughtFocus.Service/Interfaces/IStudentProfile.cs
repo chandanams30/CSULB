@@ -42,6 +42,10 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveStudentTeachingObservations(StudentTeachingObservationRequest input);
         DownloadStudentTeachingObservationAttachmentsResponse DownloadStudentTeachingObservationAttachments(int formID, int fieldworkID, string csulbid, string observationDocument, Guid UniqueID);
         BaseResponse DeleteStudentTeachingObservationAttachments(DeleteStudentTeachingObservationRequest input);
+        ExitSurveyAttachmentResponse UpsertExitSurveyAttachement(UpsertExitSurveyAttachementRequest input);
+        ExitSurveyAttachementDetailsResponse GetExitSurveyAttachementDetails(string formID, string roleID);
+        DownloadExitSurveyAttachementResponse DownloadExitSurveyAttachement(Guid UniqueID);
+        BaseResponse DeleteExitSurveyAttachement(DeleteExitSurveyAttachementRequest input);
 
 
     }

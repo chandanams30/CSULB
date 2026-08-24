@@ -168,6 +168,22 @@ namespace ThoughtFocus.Domain.Request.StudentProfile
         public string ObservationDocumentName { get; set; }
         
     }
+    public class UpsertExitSurveyAttachementRequest
+    {
+        public int FormID { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public byte[] FileContent { get; set; }
+        //public int UserID { get; set; }
+        public string CSULBID { get; set; }
+        public int CreatedBy { get; set; }
+        public string CSUExitSurveyMet { get; set; }
+        public string CEDExitSurveyMet { get; set; }
 
-
+    }
+    public class DeleteExitSurveyAttachementRequest
+    {
+        public Guid UniqueID { get; set; }
+    }
 }
