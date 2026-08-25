@@ -19,6 +19,10 @@ using Google.Apis.Json;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
 using Microsoft.AspNetCore.Http.Features;
+using System.DirectoryServices.ActiveDirectory;
+using System.DirectoryServices;
+using Microsoft.Extensions.Configuration;
+
 
 namespace CSULB_COE.Controllers
 {
@@ -29,11 +33,13 @@ namespace CSULB_COE.Controllers
         private readonly IUserLoginService _userLoginService;
         public ILogger<LoginController> _logger;
         private readonly HttpClient _client;
-        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory)
+        private readonly IConfiguration _configuration;
+        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _userLoginService = userLoginService;
             _logger = logger;
             _client = httpClientFactory.CreateClient();
+            _configuration = configuration;
         }
 
         [HttpPost("Authenticate")]
@@ -56,6 +62,116 @@ namespace CSULB_COE.Controllers
                     var auditResponse = _userLoginService.SaveAuditLog(req);
 
                 }
+
+                var groups = new List<string>();
+                string _samAccountName = string.Empty;
+
+                string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                //string username = mail;
+                _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
+
+                try
+                {
+                    using (var entry = new System.DirectoryServices.DirectoryEntry()) // implicit credentials
+                    using (var searcher = new DirectorySearcher(entry))
+                    {
+                        searcher.Filter =
+                            $"(&(objectClass=user)(userPrincipalName={username}))";
+
+                        searcher.PropertiesToLoad.Add("memberOf");
+
+                        var result = searcher.FindOne();
+
+                        if (result == null)
+                        {
+                            _logger.LogWarning("AD user not found: {Username}", username);
+                        }
+                        else
+                        {
+                            if (!result.Properties.Contains("memberOf"))
+                            {
+                                _logger.LogInformation(
+                                    "User {Username} has no direct group memberships",
+                                    username
+                                );
+                            }
+                            foreach (var groupDn in result.Properties["memberOf"])
+                            {
+                                try
+                                {
+                                    if (groupDn == null)
+                                        continue;
+
+                                    var dn = groupDn.ToString();
+                                    if (string.IsNullOrWhiteSpace(dn))
+                                        continue;
+
+                                    var commaIndex = dn.IndexOf(',');
+                                    if (commaIndex < 0)
+                                        continue;
+
+                                    var groupName = dn.Substring(3, commaIndex - 3);
+
+                                    //Find SamAccountName
+                                    try
+                                    {
+                                        using (var groupEntry = new System.DirectoryServices.DirectoryEntry($"LDAP://{dn}"))
+                                        using (var groupSearcher = new DirectorySearcher(groupEntry))
+                                        {
+                                            groupSearcher.Filter = "(objectClass=group)";
+                                            groupSearcher.PropertiesToLoad.Add("sAMAccountName");
+
+                                            var groupResult = groupSearcher.FindOne();
+
+                                            if (groupResult != null &&
+                                                groupResult.Properties.Contains("sAMAccountName"))
+                                            {
+                                                var samAccountName =
+                                                    groupResult.Properties["sAMAccountName"][0]?.ToString();
+                                                _samAccountName = samAccountName;
+
+                                                _logger.LogInformation(
+                                                    "AD Group: {GroupName}, sAMAccountName: {SamAccountName}",
+                                                    groupName,
+                                                    samAccountName);
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError(
+                                            ex,
+                                            "Error retrieving sAMAccountName for group {GroupName}",
+                                            groupName);
+
+                                        continue;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(
+                                        ex,
+                                        "Error processing AD group for user {Username}",
+                                        username);
+                                    continue;
+                                }
+                            }
+                            _logger.LogInformation(
+                        "User {Username} MEMBER OF groups: {Groups}",
+                        username,
+                        string.Join(" | ", groups));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Error while fetching AD groups for user {Username}",
+                        username);
+                }
+
+
                 return Ok(response);
             }
             catch (Exception ex)
@@ -124,6 +240,116 @@ namespace CSULB_COE.Controllers
                         var auditResponse = _userLoginService.SaveAuditLog(req);
 
                     }
+
+                    var groups = new List<string>();
+                    string _samAccountName = string.Empty;
+
+                    string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                    //string username = mail;
+                    _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
+
+                    try
+                    {
+                        using (var entry = new System.DirectoryServices.DirectoryEntry()) // implicit credentials
+                        using (var searcher = new DirectorySearcher(entry))
+                        {
+                            searcher.Filter =
+                                $"(&(objectClass=user)(userPrincipalName={username}))";
+
+                            searcher.PropertiesToLoad.Add("memberOf");
+
+                            var result = searcher.FindOne();
+
+                            if (result == null)
+                            {
+                                _logger.LogWarning("AD user not found: {Username}", username);
+                            }
+                            else
+                            {
+                                if (!result.Properties.Contains("memberOf"))
+                                {
+                                    _logger.LogInformation(
+                                        "User {Username} has no direct group memberships",
+                                        username
+                                    );
+                                }
+                                foreach (var groupDn in result.Properties["memberOf"])
+                                {
+                                    try
+                                    {
+                                        if (groupDn == null)
+                                            continue;
+
+                                        var dn = groupDn.ToString();
+                                        if (string.IsNullOrWhiteSpace(dn))
+                                            continue;
+
+                                        var commaIndex = dn.IndexOf(',');
+                                        if (commaIndex < 0)
+                                            continue;
+
+                                        var groupName = dn.Substring(3, commaIndex - 3);
+
+                                        //Find SamAccountName
+                                        try
+                                        {
+                                            using (var groupEntry = new System.DirectoryServices.DirectoryEntry($"LDAP://{dn}"))
+                                            using (var groupSearcher = new DirectorySearcher(groupEntry))
+                                            {
+                                                groupSearcher.Filter = "(objectClass=group)";
+                                                groupSearcher.PropertiesToLoad.Add("sAMAccountName");
+
+                                                var groupResult = groupSearcher.FindOne();
+
+                                                if (groupResult != null &&
+                                                    groupResult.Properties.Contains("sAMAccountName"))
+                                                {
+                                                    var samAccountName =
+                                                        groupResult.Properties["sAMAccountName"][0]?.ToString();
+                                                    _samAccountName = samAccountName;
+
+                                                    _logger.LogInformation(
+                                                        "AD Group: {GroupName}, sAMAccountName: {SamAccountName}",
+                                                        groupName,
+                                                        samAccountName);
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            _logger.LogError(
+                                                ex,
+                                                "Error retrieving sAMAccountName for group {GroupName}",
+                                                groupName);
+
+                                            continue;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError(
+                                            ex,
+                                            "Error processing AD group for user {Username}",
+                                            username);
+                                        continue;
+                                    }
+                                }
+                                _logger.LogInformation(
+                            "User {Username} MEMBER OF groups: {Groups}",
+                            username,
+                            string.Join(" | ", groups));
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(
+                            ex,
+                            "Error while fetching AD groups for user {Username}",
+                            username);
+                    }
+
+
                     return Ok(response);
                 }
                 else
