@@ -315,14 +315,15 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public OptionItemListResponse GetIntialCreditialOptionItemsList(int programID)
+        public OptionItemListResponse GetIntialCreditialOptionItemsList(int programID,string semester)
         {
             OptionItemListResponse obj = new OptionItemListResponse();
 
 
             SqlParameter[] parameters =
                                         {
-                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID }
+                                          new SqlParameter("@ProgramID", SqlDbType.Int, 50) { Value = programID },
+                                          new SqlParameter("@Semester", SqlDbType.VarChar, 25) { Value = semester}
                                         };
 
             DataTable dtOptionsList = _helper.GetDataTable("[dbo].[getIntialCreditialOptionItemsList]", parameters);
