@@ -17,7 +17,7 @@ namespace ThoughtFocus.Service.Interfaces
         AppliedFormsResponse GetAppliedForms(int userID, int applicationTypeID);
         FormStatesResponse GetFormStates(int userID);
         SemesterListResponse GetSemesterList();
-        OptionItemListResponse GetIntialCreditialOptionItemsList(int programID);
+        OptionItemListResponse GetIntialCreditialOptionItemsList(int programID, string semester);
         FormDispositionsAssessmentResponse GetFormDispositionsAssessment(FormDispositionsAssessmentRequest input);
         BaseResponse UpsertFormDispositionsAssessment(UpsertFormDispositionsAssessmentRequest input);
         FormSubSectionResponse GetFormSubSection(FormSubsectionRequest input);
