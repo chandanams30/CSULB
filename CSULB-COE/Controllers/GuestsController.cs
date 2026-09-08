@@ -476,11 +476,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetIntialCreditialOptionItemsList")]
-        public OptionItemListResponse GetIntialCreditialOptionItemsList(int programID)
+        public OptionItemListResponse GetIntialCreditialOptionItemsList(int programID, string semester)
         {
             try
             {
-                OptionItemListResponse response = _initialCredentialProgramService.GetIntialCreditialOptionItemsList(programID);
+                OptionItemListResponse response = _initialCredentialProgramService.GetIntialCreditialOptionItemsList(programID,semester);
                 return response;
             }
             catch (Exception ex)

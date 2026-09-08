@@ -69,6 +69,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string CredentialProgram { get; set; }
         public string TermCode { get; set; }
         public bool isYellowFlagEnabled { get; set; }
+        public string Semester {  get; set; }
 
     }
     public class StudentProfileSearchResponse : BaseResponse

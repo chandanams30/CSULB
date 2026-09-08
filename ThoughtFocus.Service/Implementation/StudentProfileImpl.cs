@@ -126,7 +126,8 @@ namespace ThoughtFocus.Service.Implementation
                         CredentialProgram = Convert.ToString(row["CredentialProgram"]),
                         CredentialPathway = Convert.ToString(row["CredentialPathway"]),
                         TermCode = Convert.ToString(row["TermCode"]),
-                        isYellowFlagEnabled = Convert.ToBoolean(row["isYellowFlagEnabled"] == DBNull.Value ? null : row["isYellowFlagEnabled"])
+                        isYellowFlagEnabled = Convert.ToBoolean(row["isYellowFlagEnabled"] == DBNull.Value ? null : row["isYellowFlagEnabled"]),
+                        Semester = Convert.ToString(row["Semester"]),
 
                     }).FirstOrDefault();
 
