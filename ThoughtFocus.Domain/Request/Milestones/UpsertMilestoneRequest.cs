@@ -32,4 +32,13 @@ namespace ThoughtFocus.Domain.Request.Milestones
         public int MilestoneID { get; set; }
         public string TermCode { get; set; }
     }
+
+    public class SaveStudentTeachingMilestoneRequest
+    {
+        public string CSULBID { get; set; }
+        public int ID { get; set; }
+        public string StudentTeachingJSON { get; set; }
+        public string Term { get; set; }
+
+    }
 }

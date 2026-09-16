@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.Milestones;
+using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
@@ -666,6 +667,45 @@ namespace CSULB_COE.Controllers
 
             }
             return contentType;
+        }
+
+        [HttpPost("SaveStudentTeachingMilestoneData")]
+        public BaseResponse SaveStudentTeachingMilestoneData(SaveStudentTeachingMilestoneRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _milestonesService.SaveStudentTeachingMilestoneData(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetStudentTeachingMilestoneData")]
+        public GetStudentTeachingMilestoneResponse GetStudentTeachingMilestoneData(StudentTeachingMilestone input)
+        {
+            try
+            {
+                GetStudentTeachingMilestoneResponse response = _milestonesService.GetStudentTeachingMilestoneData(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetStudentTeachingMilestoneResponse response = new GetStudentTeachingMilestoneResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                return response;
+            }
         }
     }
 }

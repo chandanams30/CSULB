@@ -1,4 +1,5 @@
-﻿using iTextSharp.text.pdf;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,18 +14,18 @@ using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Enumeration;
 using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.Milestones;
+using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.FieldWork;
+using ThoughtFocus.Domain.Response.Form;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Domain.Response.Guests;
 using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Service.Interfaces;
-using iTextSharp.text;
-using ThoughtFocus.Domain.Enumeration;
-using ThoughtFocus.Domain.Response.Form;
-using ThoughtFocus.Domain.Response.Guests;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -1499,5 +1500,67 @@ namespace ThoughtFocus.Service.Implementation
             }
             return body;
         }
+
+        public BaseResponse SaveStudentTeachingMilestoneData(SaveStudentTeachingMilestoneRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar,9) { Value = input.CSULBID  },
+                                          new SqlParameter("@ID", SqlDbType.NVarChar,255) { Value = input.ID  },
+                                          new SqlParameter("@StudentTeachingJSON", SqlDbType.NVarChar,255) { Value = input.StudentTeachingJSON },
+                                          new SqlParameter("@Term", SqlDbType.NVarChar,255) { Value = input.Term }
+                                        };
+
+            int id = _helper.InsertTable("[dbo].[SaveStudentTeachingMilestone]", parameters);
+            response.Message = "Student profile data saved successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public GetStudentTeachingMilestoneResponse GetStudentTeachingMilestoneData(StudentTeachingMilestone input)
+        {
+            GetStudentTeachingMilestoneResponse obj = new GetStudentTeachingMilestoneResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
+                                            new SqlParameter("@CSULBID", SqlDbType.BigInt) { Value = input.CSULBID },
+                                            new SqlParameter("@Term", SqlDbType.BigInt) { Value = input.Term }
+
+                                        };
+
+            DataSet dtMilestones = _helper.GetDataSet("[dbo].[GetStudentTeachingMilestoneData]", parameters);
+            try
+            {
+                if (dtMilestones.Tables[0].Rows.Count > 0 && dtMilestones.Tables[1].Rows.Count > 0)
+                {
+
+                    Acknowledgements objMAF = dtMilestones.Tables[0].AsEnumerable().Select(row =>
+                                                                 new Acknowledgements
+                                                                 {
+                                                                     AcknowledgementsJSON = Convert.ToString(row["AcknowledgementsJSON"])
+                                                                 }).FirstOrDefault();
+
+                    obj.acknowledgements = objMAF;
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
     }
 }

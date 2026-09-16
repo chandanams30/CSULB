@@ -42,5 +42,8 @@ namespace ThoughtFocus.Service.Interfaces
         PublishedMilestoneDetailsResponse GetPublishedMilestoneDetails(int MilestoneTemplateID);
         StudentMilestoneListResponse GetStudentsMilestone(int UserID);
         BaseResponse SendRemainderToApprover(string ExternalApprovalIdentifier, int MilestoneFormID);
+        BaseResponse SaveStudentTeachingMilestoneData(SaveStudentTeachingMilestoneRequest input);
+        GetStudentTeachingMilestoneResponse GetStudentTeachingMilestoneData(StudentTeachingMilestone input);
+
     }
 }

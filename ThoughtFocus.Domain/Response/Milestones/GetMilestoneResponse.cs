@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Response.StudentProfile;
@@ -105,5 +106,14 @@ namespace ThoughtFocus.Domain.Response.Milestones
     public class MilestoneFormAttachmentResponse : BaseResponse
     {
         public string fileName { get; set; }
+    }
+
+    public class GetStudentTeachingMilestoneResponse : BaseResponse 
+    {
+        public Acknowledgements acknowledgements { get; set; }
+    }
+    public class Acknowledgements
+    {
+        public string AcknowledgementsJSON { get; set; }
     }
 }
