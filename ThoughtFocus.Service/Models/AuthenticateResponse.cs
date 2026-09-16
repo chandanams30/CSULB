@@ -30,4 +30,10 @@ namespace CSULB_COE.Models
         public int RoleId { get; set; }
         public string RoleName { get; set; }
     }
+    public class RoleATID
+    {
+        public long RoleId { get; set; }
+        public long ApplicationTypeId { get; set; }
+
+    }
 }

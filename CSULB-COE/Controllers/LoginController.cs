@@ -1,27 +1,29 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-//using CSULB_COE.ViewModels;
+﻿//using CSULB_COE.ViewModels;
 using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
-using ThoughtFocus.Service.Interfaces;
-using Microsoft.Extensions.Logging;
-using ThoughtFocus.Domain.Request;
-using System.Globalization;
-using Owin;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.Graph;
 using Google.Apis.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
+using Newtonsoft.Json;
+using Owin;
+using System;
+using System.Collections.Generic;
+using System.DirectoryServices;
+using System.DirectoryServices.ActiveDirectory;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using ThoughtFocus.DataAccess.Models;
+using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
-using Microsoft.AspNetCore.Http.Features;
-using System.DirectoryServices.ActiveDirectory;
-using System.DirectoryServices;
-using Microsoft.Extensions.Configuration;
+using ThoughtFocus.Domain.Response.Admin;
+using ThoughtFocus.Service.Interfaces;
 
 
 namespace CSULB_COE.Controllers
@@ -146,11 +148,11 @@ namespace CSULB_COE.Controllers
 
                                         continue;
                                     }
-                                    //var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
                                     var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
-                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(x => x.Trim());
+                                      .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                      .Select(x => x.Trim());
 
+                                    List<RoleATID> rolesList = new List<RoleATID>();
                                     if (allowedGroups.Any(g => string.Equals(
                                         groupName,
                                         g,
@@ -159,6 +161,13 @@ namespace CSULB_COE.Controllers
                                         groups.Add(groupName);
                                         _logger.LogInformation("Directory Search");
                                         _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+
+                                        response.Roles.Add(new Roles
+                                        {
+                                            RoleId = 14,
+                                            RoleName = "Student Profile Grade Admin"
+                                        });
+
                                     }
                                 }
                                 catch (Exception ex)
@@ -338,11 +347,11 @@ namespace CSULB_COE.Controllers
 
                                             continue;
                                         }
-                                        //var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
                                         var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
                                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                         .Select(x => x.Trim());
 
+                                        List<RoleATID> rolesList = new List<RoleATID>();
                                         if (allowedGroups.Any(g => string.Equals(
                                             groupName,
                                             g,
@@ -351,6 +360,13 @@ namespace CSULB_COE.Controllers
                                             groups.Add(groupName);
                                             _logger.LogInformation("Directory Search");
                                             _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+
+                                            response.Roles.Add(new Roles
+                                            {
+                                                RoleId = 14,
+                                                RoleName = "Student Profile Grade Admin"
+                                            });
+
                                         }
                                     }
                                     catch (Exception ex)
