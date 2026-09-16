@@ -707,5 +707,22 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetLatestForm")]
+        public GetLatestFormResponse GetLatestForm(string csulbid,string termCode)
+        {
+            try
+            {
+                GetLatestFormResponse response = _milestonesService.GetLatestForm(csulbid,termCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetLatestFormResponse response = new GetLatestFormResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                return response;
+            }
+        }
     }
 }

@@ -1561,6 +1561,41 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public GetLatestFormResponse GetLatestForm(string csulbid, string termCode)
+        {
+            GetLatestFormResponse obj = new GetLatestFormResponse();
+            SqlParameter[] parameters = {
+                                            new SqlParameter("@CSULBID", SqlDbType.VarChar,9) { Value = csulbid },
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = termCode }
+                                        };
 
+            DataTable dtFormDetails = _helper.GetDataTable("[Milestone].[GetLatestForm]", parameters);
+            try
+            {
+                if (dtFormDetails.Rows.Count > 0)
+                {
+                    obj.getLatestFormDetails = dtFormDetails.AsEnumerable().Select(row =>
+                                              new GetLatestFormDetails
+                                              {
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  FormId = Convert.ToInt32(row["FormId"])
+                                              }).FirstOrDefault();
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
     }
 }

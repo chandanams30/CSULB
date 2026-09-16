@@ -116,4 +116,13 @@ namespace ThoughtFocus.Domain.Response.Milestones
     {
         public string AcknowledgementsJSON { get; set; }
     }
+    public class GetLatestFormResponse : BaseResponse
+    {
+        public GetLatestFormDetails getLatestFormDetails { get; set; }
+    }
+    public class GetLatestFormDetails
+    {
+        public int FormId { get; set; }
+        public int ProgramID { get; set; }
+    }
 }
