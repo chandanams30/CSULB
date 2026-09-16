@@ -147,22 +147,19 @@ namespace CSULB_COE.Controllers
                                         continue;
                                     }
                                     //var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+                                    var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(x => x.Trim());
 
-                                    //var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
-                                    //.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                    //.Select(x => x.Trim());
-
-                                    //if ((!string.IsNullOrEmpty(adGroupsKey) &&
-                                    // groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
-                                    //|| allowedGroups.Any(g => string.Equals(
-                                    //    groupName,
-                                    //    g,
-                                    //    StringComparison.OrdinalIgnoreCase)))
-                                    //{
-                                    //    groups.Add(groupName);
-                                    //    _logger.LogInformation("Directory Search");
-                                    //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
-                                    //}
+                                    if (allowedGroups.Any(g => string.Equals(
+                                        groupName,
+                                        g,
+                                        StringComparison.OrdinalIgnoreCase)))
+                                    {
+                                        groups.Add(groupName);
+                                        _logger.LogInformation("Directory Search");
+                                        _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -342,22 +339,19 @@ namespace CSULB_COE.Controllers
                                             continue;
                                         }
                                         //var adGroupsKey = _configuration["ApplicationKeys:ADGroupsKey"];
+                                        var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(x => x.Trim());
 
-                                        //var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
-                                        //.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                        //.Select(x => x.Trim());
-
-                                        //if ((!string.IsNullOrEmpty(adGroupsKey) &&
-                                        // groupName.StartsWith(adGroupsKey, StringComparison.OrdinalIgnoreCase))
-                                        //|| allowedGroups.Any(g => string.Equals(
-                                        //    groupName,
-                                        //    g,
-                                        //    StringComparison.OrdinalIgnoreCase)))
-                                        //{
-                                        //    groups.Add(groupName);
-                                        //    _logger.LogInformation("Directory Search");
-                                        //    _logger.LogInformation("Assigned Group: {GroupName}", groupName);
-                                        //}
+                                        if (allowedGroups.Any(g => string.Equals(
+                                            groupName,
+                                            g,
+                                            StringComparison.OrdinalIgnoreCase)))
+                                        {
+                                            groups.Add(groupName);
+                                            _logger.LogInformation("Directory Search");
+                                            _logger.LogInformation("Assigned Group: {GroupName}", groupName);
+                                        }
                                     }
                                     catch (Exception ex)
                                     {
