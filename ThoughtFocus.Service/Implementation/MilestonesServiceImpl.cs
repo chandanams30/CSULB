@@ -1524,23 +1524,29 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters = {
                                             new SqlParameter("@ID", SqlDbType.BigInt) { Value = input.ID },
                                             new SqlParameter("@CSULBID", SqlDbType.BigInt) { Value = input.CSULBID },
-                                            new SqlParameter("@Term", SqlDbType.BigInt) { Value = input.Term }
+                                            new SqlParameter("@Term", SqlDbType.BigInt) { Value = input.Term },
+                                            new SqlParameter("@MilestoneID", SqlDbType.BigInt) { Value = input.MilestoneID }
 
                                         };
 
             DataSet dtMilestones = _helper.GetDataSet("[dbo].[GetStudentTeachingMilestoneData]", parameters);
             try
             {
-                if (dtMilestones.Tables[0].Rows.Count > 0 && dtMilestones.Tables[1].Rows.Count > 0)
+                if (dtMilestones.Tables[0].Rows.Count > 0 )
                 {
 
-                    Acknowledgements objMAF = dtMilestones.Tables[0].AsEnumerable().Select(row =>
+                    obj.acknowledgements = dtMilestones.Tables[0].AsEnumerable().Select(row =>
                                                                  new Acknowledgements
                                                                  {
                                                                      AcknowledgementsJSON = Convert.ToString(row["AcknowledgementsJSON"])
                                                                  }).FirstOrDefault();
 
-                    obj.acknowledgements = objMAF;
+
+                    obj.placementConsiderations = dtMilestones.Tables[1].AsEnumerable().Select(row =>
+                                                                 new PlacementConsiderations
+                                                                 {
+                                                                     PlacementConsiderationsJSON = Convert.ToString(row["AcknowledgementsJSON"])
+                                                                 }).FirstOrDefault(); ;
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";

@@ -44,5 +44,7 @@ namespace ThoughtFocus.Domain.Request.Milestones
         public int ID { get; set; }
         public string Term { get; set; }
         public string CSULBID { get; set; }
+        public int MilestoneID { get; set; }
+
     }
 }

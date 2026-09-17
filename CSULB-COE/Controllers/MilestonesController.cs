@@ -20,7 +20,7 @@ namespace CSULB_COE.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class MilestonesController : ControllerBase
     {
         private ILogger<MilestonesController> _logger;

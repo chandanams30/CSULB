@@ -111,10 +111,14 @@ namespace ThoughtFocus.Domain.Response.Milestones
     public class GetStudentTeachingMilestoneResponse : BaseResponse 
     {
         public Acknowledgements acknowledgements { get; set; }
+        public PlacementConsiderations placementConsiderations { get; set; }
+
     }
     public class Acknowledgements
     {
         public string AcknowledgementsJSON { get; set; }
+        public int MilestoneID { get; set; }
+
     }
     public class GetLatestFormResponse : BaseResponse
     {
@@ -124,5 +128,11 @@ namespace ThoughtFocus.Domain.Response.Milestones
     {
         public int FormId { get; set; }
         public int ProgramID { get; set; }
+    }
+    public class PlacementConsiderations
+    {
+        public string PlacementConsiderationsJSON { get; set; }
+        public int MilestoneID { get; set; }
+
     }
 }
