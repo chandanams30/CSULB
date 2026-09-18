@@ -1,4 +1,5 @@
-﻿using iTextSharp.text;
+﻿using CSULB_COE.Models;
+using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.xmp.impl;
 using Microsoft.Data.SqlClient;
@@ -60,7 +61,7 @@ namespace ThoughtFocus.Service.Implementation
         }
 
 
-        public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID, int formID)
+        public StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID, int formID, int roleID)
         {
             StudentProfileResponse obj = new StudentProfileResponse();
             string csulbIDsStaff = String.Empty;
@@ -71,7 +72,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId },
                                           new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
                                           new SqlParameter("@CSULBIDStaffSP", SqlDbType.NVarChar, -1) { Value = csulbIDsStaff },
-                                          new SqlParameter("@FormID", SqlDbType.NVarChar, -1) { Value = formID }
+                                          new SqlParameter("@FormID", SqlDbType.NVarChar, -1) { Value = formID },
+                                          new SqlParameter("@LoggedInRole", SqlDbType.NVarChar, -1) { Value = roleID }
+
                                         };
 
             DataSet dtStudentProfile = _helper.GetDataSet("[dbo].[GetStudentProfile]", parameters);

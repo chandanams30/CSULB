@@ -37,11 +37,11 @@ namespace CSULB_COE.Controllers
         }
         //feches student profile data
         [HttpGet("GetStudentProfileData")]
-        public StudentProfileResponse GetStudentProfileData(string CsulbId,int UserID, int formID)
+        public StudentProfileResponse GetStudentProfileData(string CsulbId,int UserID, int formID, int roleID)
         {
             try
             {
-                StudentProfileResponse response = _studentProfileService.GetStudentProfileData(CsulbId, UserID,formID);
+                StudentProfileResponse response = _studentProfileService.GetStudentProfileData(CsulbId, UserID,formID, roleID);
                 return response;
             }
             catch (Exception ex)

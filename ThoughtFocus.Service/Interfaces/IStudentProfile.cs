@@ -12,7 +12,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IStudentProfile
     {
-        StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID, int formID);
+        StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID, int formID, int roleID);
         StudentProfileSearchResponse GetStudentProfileSearchData(string searchString);
         StudentProfileMessageBoardResponse GetStudentProfileMessageBoard(string CsulbId, string MessageBoardIdentifier);
         BaseResponse UpdateStudentProfileMessageBoard(UpdateStudentProfileMessageBoardRequest input);

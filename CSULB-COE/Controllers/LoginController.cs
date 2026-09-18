@@ -1,24 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-//using CSULB_COE.ViewModels;
+﻿//using CSULB_COE.ViewModels;
 using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
-using ThoughtFocus.Service.Interfaces;
-using Microsoft.Extensions.Logging;
-using ThoughtFocus.Domain.Request;
-using System.Globalization;
-using Owin;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.Graph;
 using Google.Apis.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
+using Newtonsoft.Json;
+using Owin;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using ThoughtFocus.Domain.Request;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
-using Microsoft.AspNetCore.Http.Features;
+using ThoughtFocus.Service.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace CSULB_COE.Controllers
 {
@@ -29,11 +32,13 @@ namespace CSULB_COE.Controllers
         private readonly IUserLoginService _userLoginService;
         public ILogger<LoginController> _logger;
         private readonly HttpClient _client;
-        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory)
+        private readonly IConfiguration _configuration;
+        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _userLoginService = userLoginService;
             _logger = logger;
             _client = httpClientFactory.CreateClient();
+            _configuration = configuration;
         }
 
         [HttpPost("Authenticate")]
@@ -54,6 +59,21 @@ namespace CSULB_COE.Controllers
                     req.IPAddress = GetClientIPAddress();
                     req.AuthenticationType = "Basic";
                     var auditResponse = _userLoginService.SaveAuditLog(req);
+
+                }
+                //var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
+                //                     .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                //                     .Select(x => x.Trim());
+                var gradeAdminUserNameTest = (_configuration["ApplicationKeys:GradeAdminUserNameTest"]);
+
+                List<Roles> rolesList = new List<Roles>();
+                if (gradeAdminUserNameTest == response.UserName)
+                {
+                    response.Roles.Add(new Roles
+                    {
+                        RoleId = 14,
+                        RoleName = "Grade Admin"
+                    });
 
                 }
                 return Ok(response);
