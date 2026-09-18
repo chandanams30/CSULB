@@ -364,7 +364,7 @@ namespace CSULB_COE.Controllers
                                             response.Roles.Add(new Roles
                                             {
                                                 RoleId = 14,
-                                                RoleName = "Student Profile Grade Admin"
+                                                RoleName = "Grade Admin"
                                             });
 
                                         }
