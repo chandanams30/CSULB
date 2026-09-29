@@ -153,7 +153,7 @@ namespace ThoughtFocus.Service.Implementation
             binaryReader.Close();
             return fileContent;
         }
-        public FieldWorkListResponse GetFieldWorkList(int userId)
+        public FieldWorkListResponse GetFieldWorkList(int userId, int roleId)
         {
             FieldWorkListResponse objList = new FieldWorkListResponse();
             List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
@@ -166,6 +166,7 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                   {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
+                                          new SqlParameter("@RoleID", SqlDbType.Int, 50) { Value = roleId },
                                           new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = csulbIDs }
                                         };
             var courseList = jsonObj["FieldWorkValidCourses"]?.ToString().Split(',').Select(id => id.Trim());
@@ -195,7 +196,9 @@ namespace ThoughtFocus.Service.Implementation
                                                   ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
                                                   CourseName = Convert.ToString(row["CourseName"]),
                                                   Email = Convert.ToString(row["Email"]),
-                                                  DocumentNumber = Convert.ToString(row["DocumentNumber"])
+                                                  DocumentNumber = Convert.ToString(row["DocumentNumber"]),
+                                                  ShowCheckBox = Convert.ToBoolean(row["ShowCheckBox"]),
+                                                  ShowRemoveButton = Convert.ToBoolean(row["ShowRemoveButton"])
                                               }).ToList();
 
                     objList.FieldWorkResponse = obj;
@@ -241,7 +244,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ValidatedDate", SqlDbType.DateTime, 50) { Value = validatedDate },
                                           new SqlParameter("@ValidTill", SqlDbType.DateTime, 50) { Value = (object)input.ValidTill??DBNull.Value },
                                           new SqlParameter("@RejectReason", SqlDbType.NVarChar, 255) { Value = (object)input.RejectedReason??DBNull.Value },
-                                          new SqlParameter("@Comments", SqlDbType.NVarChar,-1) { Value = (object)input.Comments??DBNull.Value }
+                                          new SqlParameter("@Comments", SqlDbType.NVarChar,-1) { Value = (object)input.Comments??DBNull.Value },
+                                          new SqlParameter("@DocumentNumber", SqlDbType.BigInt, 50) { Value = input.DocumentNumber }
+
                                         };
 
                 int identity = _helper.InsertTable("[dbo].[UpdateFieldWorkValidation]", parameters);
@@ -3076,7 +3081,69 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public BaseResponse UpsertInternCourseForTerm(UpsertInternCourseForTermRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@CSULBIDs", SqlDbType.NVarChar,-1) { Value = input.CSULBID },
+                                          new SqlParameter("@Course", SqlDbType.VarChar,250) { Value = input.Course },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
+                                          new SqlParameter("@SecID", SqlDbType.VarChar,50) { Value =input.SecID },
+                                          new SqlParameter ("@CourseNumber", SqlDbType.VarChar,50) { Value= input.CourseNumber }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[FieldWork].[UpsertInternCourseForTerm]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public BaseResponse RemoveFieldWorkFromList(FieldWorkListRequest input)
+        {
+            BaseResponse response = new BaseResponse();
 
+            try
+            {
+                foreach (long fieldWorkID in input.FieldWorkID)
+                {
+                    SqlParameter[] parameters =
+                    {
+                            new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldWorkID }
+                    };
+
+                    DataTable dtResponse = _helper.GetDataTable("[FieldWork].[RemoveFieldWorkFromList]", parameters);
+
+                    if (dtResponse.Rows.Count > 0 && Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                    {
+                        response.IsSuccess = false;
+                        response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                        return response;
+                    }
+                }
+
+                response.IsSuccess = true;
+                response.Message = "FieldWork Updated Successfully";
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Failed to update FieldWork, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+            }
+
+            return response;
+        }
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)
         {
             AdhocMailLogResponse obj = new AdhocMailLogResponse();

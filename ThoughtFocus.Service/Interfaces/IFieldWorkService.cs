@@ -11,7 +11,7 @@ namespace ThoughtFocus.Service.Interfaces
 {
     public interface IFieldWorkService
     {
-        FieldWorkListResponse GetFieldWorkList(int userId);
+        FieldWorkListResponse GetFieldWorkList(int userId,int roleId);
         FieldWorkDataResponse GetFieldWorkDetailsById(int userId,int fieldWorkId);
         BaseResponse UpdateFieldWorkValidation(FieldWorkValidationRequest input);
         BaseResponse UpdateFieldWorkDocumentValidation(FieldWorkUploadDocumentsRequest input);
@@ -59,5 +59,9 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateFieldWorkCourseConfiguration(FieldWorkCourseConfigurationRequest input);
         StandardsAndSchoolTypeDropdownList GetStandardsAndSchoolTypeDropdown(int categoryID, string dropdownType);
         BaseResponse UpsertDropDown(UpdateDropDownRequest input);
+        BaseResponse UpsertInternCourseForTerm(UpsertInternCourseForTermRequest input);
+        //FieldWorkSubjectList GetDistinctCourseSubjects();
+        BaseResponse RemoveFieldWorkFromList(FieldWorkListRequest input);
+
     }
 }

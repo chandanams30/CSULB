@@ -38,11 +38,11 @@ namespace CSULB_COE.Controllers
 
         }
         [HttpGet("GetFieldWorkList")]
-        public IActionResult GetFieldWorkList(int userId)
+        public IActionResult GetFieldWorkList(int userId,int roleId)
         {
             try
             {
-                FieldWorkListResponse lstFieldWork = _fieldWorkService.GetFieldWorkList(userId);
+                FieldWorkListResponse lstFieldWork = _fieldWorkService.GetFieldWorkList(userId,roleId);
                 return Ok(lstFieldWork);
             }
             catch (Exception ex)
@@ -953,6 +953,43 @@ namespace CSULB_COE.Controllers
 
             }
             return contentType;
+        }
+
+        //[HttpGet("GetDistinctCourseSubjects")]
+        //public FieldWorkSubjectList GetDistinctCourseSubjects()
+        //{
+        //    try
+        //    {
+        //        FieldWorkSubjectList response = _fieldWorkService.GetDistinctCourseSubjects();
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        FieldWorkSubjectList response = new FieldWorkSubjectList();
+        //        response.IsSuccess = false;
+        //        response.Message = "Failed to retrieve data , please try after sometime";
+        //        response.StackTrace = ex.Message;
+        //        _logger.LogError(ex, ex.Message);
+        //        return response;
+        //    }
+        //}
+        [HttpPost("RemoveFieldWorkFromList")]
+        public BaseResponse RemoveFieldWorkFromList(FieldWorkListRequest input)
+        {
+            try
+            {
+                BaseResponse response = _fieldWorkService.RemoveFieldWorkFromList(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
         }
     }
 }
