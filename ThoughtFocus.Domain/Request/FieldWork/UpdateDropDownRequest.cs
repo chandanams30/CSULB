@@ -14,4 +14,8 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string ControlValue { get; set; }
         public int UserID { get; set; }
     }
+    public class FieldWorkListRequest
+    {
+        public List<int> FieldWorkID { get; set; }
+    }
 }
