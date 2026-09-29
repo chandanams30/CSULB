@@ -24,6 +24,8 @@ namespace ThoughtFocus.Domain.Response.FieldWork
         public string CourseName { get; set; }
         public string Email { get; set; }
         public string DocumentNumber { get; set; }
+        public bool ShowCheckBox { get; set; }
+        public bool ShowRemoveButton { get; set; }
     }
 
     public class FieldWorkListResponse:BaseResponse

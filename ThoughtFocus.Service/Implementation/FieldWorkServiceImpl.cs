@@ -159,7 +159,7 @@ namespace ThoughtFocus.Service.Implementation
             binaryReader.Close();
             return fileContent;
         }
-        public FieldWorkListResponse GetFieldWorkList(int userId)
+        public FieldWorkListResponse GetFieldWorkList(int userId, int roleId)
         {
             FieldWorkListResponse objList = new FieldWorkListResponse();
             List<FieldWorkResponse> obj = new List<FieldWorkResponse>();
@@ -197,6 +197,7 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                   {
                                           new SqlParameter("@UserId", SqlDbType.Int, 50) { Value = userId },
+                                          new SqlParameter("@RoleID", SqlDbType.Int, 50) { Value = roleId },
                                           new SqlParameter("@CSULBIDs", SqlDbType.NVarChar, -1) { Value = "" },
                                           new SqlParameter("@SupervisorCSULBIDs", SqlDbType.NVarChar, -1) { Value = "" },
                                           new SqlParameter("@SupervisorCourses", SqlDbType.NVarChar, -1) { Value = "" }
@@ -250,7 +251,9 @@ namespace ThoughtFocus.Service.Implementation
                         ApprovedHours = Convert.ToDecimal(row["ApprovedHours"]),
                         CourseName = Convert.ToString(row["CourseName"]),
                         Email = Convert.ToString(row["Email"]),
-                        DocumentNumber = Convert.ToString(row["DocumentNumber"])
+                        DocumentNumber = Convert.ToString(row["DocumentNumber"]),
+                        ShowCheckBox = Convert.ToBoolean(row["ShowCheckBox"]),
+                        ShowRemoveButton = Convert.ToBoolean(row["ShowRemoveButton"])
                     }).ToList();
 
 
@@ -3162,6 +3165,42 @@ namespace ThoughtFocus.Service.Implementation
                     response.IsSuccess = false;
                 }
             }
+            return response;
+        }
+        public BaseResponse RemoveFieldWorkFromList(FieldWorkListRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+
+            try
+            {
+                foreach (long fieldWorkID in input.FieldWorkID)
+                {
+                    SqlParameter[] parameters =
+                    {
+                            new SqlParameter("@FieldWorkID", SqlDbType.BigInt) { Value = fieldWorkID }
+                    };
+
+                    DataTable dtResponse = _helper.GetDataTable("[FieldWork].[RemoveFieldWorkFromList]", parameters);
+
+                    if (dtResponse.Rows.Count > 0 && Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                    {
+                        response.IsSuccess = false;
+                        response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                        return response;
+                    }
+                }
+
+                response.IsSuccess = true;
+                response.Message = "FieldWork Updated Successfully";
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Failed to update FieldWork, please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+            }
+
             return response;
         }
         public AdhocMailLogResponse GetAdocMailLogDetails(string type, string identifier, string sbLogData, int count, int totalFailure, int userID)

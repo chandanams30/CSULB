@@ -22,4 +22,8 @@ namespace ThoughtFocus.Domain.Request.FieldWork
         public string SecID {  get; set; }
         public string CourseNumber { get; set; }
     }
+    public class FieldWorkListRequest
+    {
+        public List<int> FieldWorkID { get; set; }
+    }
 }
