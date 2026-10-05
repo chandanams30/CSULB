@@ -82,6 +82,8 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
     public class ProgramCheckListCourseResponse : BaseResponse
     {
         public List<ProgramCheckListCourse> ProgramCheckListCourse { get; set; }
+        public List<ProgramCheckListCourse> studentProfileCourseMaster { get; set; }
+
         public List<ProgramEvaluationDetails> programEvaluationDetails { get; set; }
         public BILARequirementDetails BILARequirementDetails { get; set; }
         public CPRRequirementDetails CPR { get; set; }
