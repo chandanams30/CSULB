@@ -206,7 +206,7 @@ namespace CSULB_COE.Controllers
 
                 if (gradeAdminUsers != null &&
                     gradeAdminUsers.Any(x =>
-                        string.Equals(x, response.UserName, StringComparison.OrdinalIgnoreCase)))
+                        string.Equals(x, response.CSULBID, StringComparison.OrdinalIgnoreCase)))
                 {
                     response.Roles.Add(new Roles
                     {
