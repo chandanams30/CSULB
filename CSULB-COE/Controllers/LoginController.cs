@@ -66,15 +66,21 @@ namespace CSULB_COE.Controllers
                 //                     .Select(x => x.Trim());
                 var gradeAdminUserNameTest = (_configuration["ApplicationKeys:GradeAdminUserNameTest"]);
 
-                List<Roles> rolesList = new List<Roles>();
-                if (gradeAdminUserNameTest == response.UserName)
+                
+               var gradeAdminUsers = gradeAdminUserNameTest?
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .ToList();
+
+                if (gradeAdminUsers != null &&
+                    gradeAdminUsers.Any(x =>
+                        string.Equals(x, response.CSULBID, StringComparison.OrdinalIgnoreCase)))
                 {
                     response.Roles.Add(new Roles
                     {
                         RoleId = 14,
                         RoleName = "Grade Admin"
                     });
-
                 }
                 return Ok(response);
             }
