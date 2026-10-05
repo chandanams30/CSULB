@@ -120,15 +120,6 @@ namespace ThoughtFocus.Domain.Response.Milestones
         public int MilestoneID { get; set; }
 
     }
-    public class GetLatestFormResponse : BaseResponse
-    {
-        public GetLatestFormDetails getLatestFormDetails { get; set; }
-    }
-    public class GetLatestFormDetails
-    {
-        public int FormId { get; set; }
-        public int ProgramID { get; set; }
-    }
     public class PlacementConsiderations
     {
         public string PlacementConsiderationsJSON { get; set; }

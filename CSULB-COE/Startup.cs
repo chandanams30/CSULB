@@ -163,6 +163,9 @@ namespace CSULB_COE
             //Interviews
             services.AddScoped<IInterviewService, InterviewServiceImpl>();
 
+            //Student Teaching Milesone
+            services.AddScoped<IStudentTeachingMilestoneService, StudentTeachingMilestoneServiceImpl>();
+
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
