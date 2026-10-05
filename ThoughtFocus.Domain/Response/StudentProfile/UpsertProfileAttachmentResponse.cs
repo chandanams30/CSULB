@@ -87,6 +87,7 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public CPRRequirementDetails CPR { get; set; }
         public CandidateStatusDetails candidateStatusDetails { get; set; }
         public List<TPADetails> TPADetails { get; set; }
+        public List<ProgramCheckListCourse> studentProfileCourseMaster { get; set; }
 
     }
 

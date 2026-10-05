@@ -1159,6 +1159,19 @@ namespace ThoughtFocus.Service.Implementation
                     })
                     .ToList();
 
+                    obj.studentProfileCourseMaster = dtProgramPlannerCourseList.Tables[4]
+                    .AsEnumerable()
+                    .Select(row => new ProgramCheckListCourse
+                    {
+                        CourseName = row["CourseName"] == DBNull.Value ? null : Convert.ToString(row["CourseName"]),
+                        TermCode = row["TermCode"] == DBNull.Value ? null : Convert.ToString(row["TermCode"]),
+                        Grade = row["Grade"] == DBNull.Value ? null : Convert.ToString(row["Grade"]),
+                        SPCMID = row["SPCMID"] == DBNull.Value ? 0 : Convert.ToInt32(row["SPCMID"]),
+                        CourseNotes = row["CourseNotes"] == DBNull.Value ? null : Convert.ToString(row["CourseNotes"]),
+                        fieldWorkEvaluation = Convert.ToString(row["EvaluationDetails"])
+                    })
+                    .ToList();
+                    
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
