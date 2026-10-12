@@ -48,4 +48,11 @@ namespace ThoughtFocus.Domain.Response.Admin
         public int ID { get; set; }
         public string completeYourApplicationText { get; set; }
     }
+    public class DistributionList
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string SamAccountName { get; set; } = string.Empty;
+    }
+
 }

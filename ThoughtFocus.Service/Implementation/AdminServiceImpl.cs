@@ -1,6 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using CSULB_COE.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Nancy;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -338,6 +340,7 @@ namespace ThoughtFocus.Service.Implementation
                                               }).ToList();
 
 
+
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
@@ -346,6 +349,29 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     obj.IsSuccess = false;
                     obj.Message = "No Data Present";
+                }
+
+                var gradeAdminUserNameTest = _configuration["ApplicationKeys:GradeAdminUserNameTest"];
+
+                if (!string.IsNullOrWhiteSpace(gradeAdminUserNameTest))
+                {
+                    var csulbids = gradeAdminUserNameTest
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => id.Trim())
+                        .Where(id => !string.IsNullOrWhiteSpace(id))
+                        .Distinct(StringComparer.OrdinalIgnoreCase);
+
+                    obj.userList ??= new List<UserList>();
+
+                    foreach (var csulbid in csulbids)
+                    {
+                        UserList gradeAdminUser = GetUserIDByCSULBID(csulbid);
+
+                        if (gradeAdminUser != null)
+                        {
+                            obj.userList.Add(gradeAdminUser);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -981,6 +1007,44 @@ namespace ThoughtFocus.Service.Implementation
                 }
             }
             return response;
+        }
+
+        public UserList GetUserIDByCSULBID(string CSULBID)
+        {
+            UserList user = null;
+
+            SqlParameter[] parameters =
+            {
+                new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){ Value = CSULBID}
+            };
+
+            try
+            {
+                DataTable dtUser = _helper.GetDataTable("[dbo].[GetUserIDByCSULBID]", parameters);
+
+                if (dtUser.Rows.Count > 0)
+                {
+                    DataRow row = dtUser.Rows[0];
+
+                    user = new UserList
+                    {
+                        UserID = Convert.ToInt32(row["ID"]),
+                        FirstName = Convert.ToString(row["FirstName"]) ?? string.Empty,
+                        LastName = Convert.ToString(row["LastName"]) ?? string.Empty,
+                        EMAIL = Convert.ToString(row["Email"]) ?? string.Empty,
+                        CSULBID = CSULBID,
+                        UserRoles = "Grade Admin"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Error retrieving user details for CSULBID: {CSULBID}",
+                    CSULBID);
+            }
+
+            return user;
         }
 
 
