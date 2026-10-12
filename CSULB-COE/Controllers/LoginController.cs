@@ -68,8 +68,8 @@ namespace CSULB_COE.Controllers
                 var groups = new List<string>();
                 string _samAccountName = string.Empty;
 
-                string username = _configuration["ApplicationKeys:LoggedInUserName"];
-                //string username = mail;
+                //string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                string username = response.Email;
                 _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
 
                 //AD Group changes
@@ -125,6 +125,7 @@ namespace CSULB_COE.Controllers
                                             groupSearcher.PropertiesToLoad.Add("sAMAccountName");
 
                                             var groupResult = groupSearcher.FindOne();
+                                            _logger.LogInformation("AD Group Result: " +  groupResult);
 
                                             if (groupResult != null &&
                                                 groupResult.Properties.Contains("sAMAccountName"))
@@ -149,6 +150,7 @@ namespace CSULB_COE.Controllers
 
                                         continue;
                                     }
+                                    //Commented as per client request -- To fetch the allowed AD Groups
                                     //var allowedGroups = (_configuration["ApplicationKeys:AllowedADGroups"] ?? "")
                                     //  .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                     //  .Select(x => x.Trim());
@@ -196,7 +198,7 @@ namespace CSULB_COE.Controllers
                 }
                 //end Region
 
-                List<DistributionList> distributionLists = GetAllDistributionLists();
+                List<DistributionList> distributionLists = _userLoginService.GetAllDistributionLists();
 
                 foreach (var dl in distributionLists)
                 {
@@ -206,7 +208,7 @@ namespace CSULB_COE.Controllers
                 }
 
                 string loggedInSamAccountName = _samAccountName;
-                bool isEnabledDistributionListUser = IsLoggedInUserEnabled(loggedInSamAccountName);
+                bool isEnabledDistributionListUser = _userLoginService.IsLoggedInUserEnabled(loggedInSamAccountName);
 
                 if (isEnabledDistributionListUser)
                 {
@@ -309,8 +311,8 @@ namespace CSULB_COE.Controllers
                     var groups = new List<string>();
                     string _samAccountName = string.Empty;
 
-                    string username = _configuration["ApplicationKeys:LoggedInUserName"];
-                    //string username = mail;
+                    //string username = _configuration["ApplicationKeys:LoggedInUserName"];
+                    string username = mail;
                     _logger.LogInformation("Fetching MEMBER OF groups for {Username}", username);
 
                     //AD Group Changes
@@ -437,7 +439,7 @@ namespace CSULB_COE.Controllers
                     }
                     //end region
 
-                    List<DistributionList> distributionLists = GetAllDistributionLists();
+                    List<DistributionList> distributionLists =  _userLoginService.GetAllDistributionLists();
 
                     foreach (var dl in distributionLists)
                     {
@@ -447,7 +449,7 @@ namespace CSULB_COE.Controllers
                     }
 
                     string loggedInSamAccountName = _samAccountName;
-                    bool isEnabledDistributionListUser = IsLoggedInUserEnabled(loggedInSamAccountName);
+                    bool isEnabledDistributionListUser = _userLoginService.IsLoggedInUserEnabled(loggedInSamAccountName);
 
                     if (isEnabledDistributionListUser)
                     {
@@ -561,250 +563,116 @@ namespace CSULB_COE.Controllers
 
         }
 
-        public List<DistributionList> GetAllDistributionLists()
-        {
-            var distributionLists = new List<DistributionList>();
+        
 
-            try
-            {
-                using (var entry = new System.DirectoryServices.DirectoryEntry())
-                using (var searcher = new DirectorySearcher(entry))
-                {
-                    // Search for all groups
-                    searcher.Filter = "(objectCategory=group)";
+        //[HttpPost("AuthenticateSSOToken")]
+        //public async Task<IActionResult> AuthenticateSSOToken1([FromBody] LoginSSORequest request)
+        //{
+        //    AuthenticateResponse response = new AuthenticateResponse();
+        //    try
+        //    {
+        //        _logger.LogInformation(request.Token.ToString(), request);
+        //        string accessToken = request.Token;
+        //        _client.DefaultRequestHeaders.Clear();
+        //        _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
 
-                    searcher.PageSize = 1000;
 
-                    searcher.PropertiesToLoad.Add("cn");
-                    searcher.PropertiesToLoad.Add("mail");
-                    searcher.PropertiesToLoad.Add("sAMAccountName");
-                    searcher.PropertiesToLoad.Add("groupType");
+        //        bool isTestMode = true;
+        //        if (isTestMode)
+        //        {
+        //            string graphResults = string.Empty;
 
-                    _logger.LogInformation("Retrieve distribution lists from Active Directory." );
+        //            graphResults = @"{
+        //      ""employeeId"": ""123456"",
+        //      ""displayName"": ""John Doe"",
+        //      ""mail"": ""john.doe@domain.com"",
+        //      ""surname"": ""Doe"",
+        //      ""givenName"": ""John""
+        //      }";
 
-                    using (SearchResultCollection results = searcher.FindAll())
-                    {
-                        foreach (System.DirectoryServices.SearchResult result in results)
-                        {
-                            if (!result.Properties.Contains("groupType"))
-                                continue;
+        //            // Deserialize response
+        //            dynamic dynObj = JsonConvert.DeserializeObject(graphResults);
 
-                            int groupType = Convert.ToInt32(
-                                result.Properties["groupType"][0]);
+        //            string emplid = dynObj.employeeId != null ? dynObj.employeeId.ToString() : string.Empty;
+        //            string displayName = dynObj.displayName != null ? dynObj.displayName.ToString() : string.Empty;
+        //            string mail = dynObj.mail != null ? dynObj.mail.ToString() : string.Empty;
+        //            string LastName = dynObj.surname != null ? dynObj.surname.ToString() : string.Empty;
+        //            string FirstName = dynObj.givenName != null ? dynObj.givenName.ToString() : string.Empty;
 
-                            // Security-enabled groups have the high bit set.
-                            bool isSecurityGroup =
-                                (groupType & unchecked((int)0x80000000)) != 0;
+        //            _logger.LogInformation("LOGIN USER INFORMATION - CSULBID: {emplid} , DisplayName: {DisplayName}, Email: {Email}, FirstName: {FirstName}, LastName: {LastName}",
+        //          emplid, displayName, mail, FirstName, LastName);
 
-                            // Keep distribution groups only
-                            if (isSecurityGroup)
-                                continue;
+        //            return Ok(response);
+        //        }
+        //        else
+        //        {
+        //            var graphResponse = await _client.GetAsync("https://graph.microsoft.com/beta/me");
 
-                            string name = result.Properties["cn"].Count > 0
-                                ? result.Properties["cn"][0]?.ToString() ?? ""
-                                : "";
+        //            string emplid = string.Empty;
+        //            string displayName = string.Empty;
+        //            string mail = string.Empty;
+        //            string LastName = string.Empty;
+        //            string FirstName = string.Empty;
+        //            if (graphResponse.IsSuccessStatusCode)
+        //            {
 
-                            string email = result.Properties["mail"].Count > 0
-                                ? result.Properties["mail"][0]?.ToString() ?? ""
-                                : "";
+        //                var graphResults = graphResponse.Content.ReadAsStringAsync().Result;
+        //                var json = new NewtonsoftJsonSerializer();
+        //                dynamic dynObj = JsonConvert.DeserializeObject(graphResults);
+        //                foreach (var data in dynObj)
+        //                {
+        //                    if (data.Name == "employeeId")
+        //                    {
+        //                        emplid = data.Value;
+        //                    }
+        //                    if (data.Name == "displayName")
+        //                    {
+        //                        displayName = data.Value;
+        //                    }
+        //                    if (data.Name == "mail")
+        //                    {
+        //                        mail = data.Value;
+        //                    }
+        //                    if (data.Name == "surname")
+        //                    {
+        //                        LastName = data.Value;
+        //                    }
+        //                    if (data.Name == "givenName")
+        //                    {
+        //                        FirstName = data.Value;
+        //                    }
+        //                }
+        //                _logger.LogInformation("Graph Result - "+ graphResults);
+        //                _logger.LogInformation("LOGIN USER INFORMATION - CSULBID: {emplid} , DisplayName: {DisplayName}, Email: {Email}, FirstName: {FirstName}, LastName: {LastName}",
+        //                emplid, displayName, mail, FirstName, LastName);
+        //                response = _userLoginService.AuthenticateSSO(emplid, displayName, mail, LastName, FirstName);
+        //                if (response.IsSuccess == true)
+        //                {
+        //                    AuditLogRequest req = new AuditLogRequest();
+        //                    req.UserID = response.UserId;
+        //                    req.Type = "Login";
+        //                    req.IPAddress = GetClientIPAddress();
+        //                    req.AuthenticationType = "SSO";
+        //                    var auditResponse = _userLoginService.SaveAuditLog(req);
 
-                            string samAccountName =
-                                result.Properties["sAMAccountName"].Count > 0
-                                    ? result.Properties["sAMAccountName"][0]?.ToString() ?? ""
-                                    : "";
-                            _logger.LogInformation("Name: " + name + "Email: " + email + "samAccountName" + samAccountName);
+        //                }
+        //                return Ok(response);
+        //            }
+        //            else
+        //            {
 
-                            distributionLists.Add(new DistributionList
-                            {
-                                Name = name,
-                                Email = email,
-                                SamAccountName = samAccountName
-                            });
-                        }
-                    }
-                }
+        //                response.IsSuccess = false;
+        //                response.message = "Authentication Failed";
+        //                return BadRequest(response);
+        //            }
+        //        }
 
-                _logger.LogInformation("Retrieved {Count} distribution lists from Active Directory.",
-                    distributionLists.Count);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving distribution lists from Active Directory.");
-            }
-
-            return distributionLists;
-        }
-
-    public bool IsLoggedInUserEnabled(string loggedInSamAccountName)
-    {
-        bool isEnabled = false;
-
-        try
-        {
-            using (var entry = new DirectoryEntry())
-            using (var searcher = new DirectorySearcher(entry))
-            {
-                // Search for user accounts
-                searcher.Filter = "(&(objectCategory=person)(objectClass=user))";
-                searcher.PageSize = 1000;
-
-                searcher.PropertiesToLoad.Add("cn");
-                searcher.PropertiesToLoad.Add("sAMAccountName");
-                searcher.PropertiesToLoad.Add("mail");
-                searcher.PropertiesToLoad.Add("userAccountControl");
-
-                using (SearchResultCollection results = searcher.FindAll())
-                {
-                    foreach (System.DirectoryServices.SearchResult result in results)
-                    {
-                        string samAccountName =
-                            result.Properties["sAMAccountName"].Count > 0 ? result.Properties["sAMAccountName"][0]?.ToString()
-                                    ?? string.Empty
-                                : string.Empty;
-
-                        // Compare with the logged-in user's account name
-                        if (!string.Equals(
-                            samAccountName,
-                            loggedInSamAccountName,
-                            StringComparison.OrdinalIgnoreCase))
-                        {
-                            continue;
-                        }
-
-                        // Check whether the account is enabled
-                        if (result.Properties["userAccountControl"].Count > 0)
-                        {
-                            int userAccountControl = Convert.ToInt32(
-                                result.Properties["userAccountControl"][0]);
-
-                            // ACCOUNTDISABLE flag = 0x2
-                            isEnabled = (userAccountControl & 0x2) == 0;
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Error checking AD account status for {SamAccountName}",
-                loggedInSamAccountName);
-        }
-
-        return isEnabled;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, ex.Message);
+        //        return BadRequest();
+        //    }
+        //}
     }
-
-    //[HttpPost("AuthenticateSSOToken")]
-    //public async Task<IActionResult> AuthenticateSSOToken1([FromBody] LoginSSORequest request)
-    //{
-    //    AuthenticateResponse response = new AuthenticateResponse();
-    //    try
-    //    {
-    //        _logger.LogInformation(request.Token.ToString(), request);
-    //        string accessToken = request.Token;
-    //        _client.DefaultRequestHeaders.Clear();
-    //        _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
-
-
-    //        bool isTestMode = true;
-    //        if (isTestMode)
-    //        {
-    //            string graphResults = string.Empty;
-
-    //            graphResults = @"{
-    //      ""employeeId"": ""123456"",
-    //      ""displayName"": ""John Doe"",
-    //      ""mail"": ""john.doe@domain.com"",
-    //      ""surname"": ""Doe"",
-    //      ""givenName"": ""John""
-    //      }";
-
-    //            // Deserialize response
-    //            dynamic dynObj = JsonConvert.DeserializeObject(graphResults);
-
-    //            string emplid = dynObj.employeeId != null ? dynObj.employeeId.ToString() : string.Empty;
-    //            string displayName = dynObj.displayName != null ? dynObj.displayName.ToString() : string.Empty;
-    //            string mail = dynObj.mail != null ? dynObj.mail.ToString() : string.Empty;
-    //            string LastName = dynObj.surname != null ? dynObj.surname.ToString() : string.Empty;
-    //            string FirstName = dynObj.givenName != null ? dynObj.givenName.ToString() : string.Empty;
-
-    //            _logger.LogInformation("LOGIN USER INFORMATION - CSULBID: {emplid} , DisplayName: {DisplayName}, Email: {Email}, FirstName: {FirstName}, LastName: {LastName}",
-    //          emplid, displayName, mail, FirstName, LastName);
-
-    //            return Ok(response);
-    //        }
-    //        else
-    //        {
-    //            var graphResponse = await _client.GetAsync("https://graph.microsoft.com/beta/me");
-
-    //            string emplid = string.Empty;
-    //            string displayName = string.Empty;
-    //            string mail = string.Empty;
-    //            string LastName = string.Empty;
-    //            string FirstName = string.Empty;
-    //            if (graphResponse.IsSuccessStatusCode)
-    //            {
-
-    //                var graphResults = graphResponse.Content.ReadAsStringAsync().Result;
-    //                var json = new NewtonsoftJsonSerializer();
-    //                dynamic dynObj = JsonConvert.DeserializeObject(graphResults);
-    //                foreach (var data in dynObj)
-    //                {
-    //                    if (data.Name == "employeeId")
-    //                    {
-    //                        emplid = data.Value;
-    //                    }
-    //                    if (data.Name == "displayName")
-    //                    {
-    //                        displayName = data.Value;
-    //                    }
-    //                    if (data.Name == "mail")
-    //                    {
-    //                        mail = data.Value;
-    //                    }
-    //                    if (data.Name == "surname")
-    //                    {
-    //                        LastName = data.Value;
-    //                    }
-    //                    if (data.Name == "givenName")
-    //                    {
-    //                        FirstName = data.Value;
-    //                    }
-    //                }
-    //                _logger.LogInformation("Graph Result - "+ graphResults);
-    //                _logger.LogInformation("LOGIN USER INFORMATION - CSULBID: {emplid} , DisplayName: {DisplayName}, Email: {Email}, FirstName: {FirstName}, LastName: {LastName}",
-    //                emplid, displayName, mail, FirstName, LastName);
-    //                response = _userLoginService.AuthenticateSSO(emplid, displayName, mail, LastName, FirstName);
-    //                if (response.IsSuccess == true)
-    //                {
-    //                    AuditLogRequest req = new AuditLogRequest();
-    //                    req.UserID = response.UserId;
-    //                    req.Type = "Login";
-    //                    req.IPAddress = GetClientIPAddress();
-    //                    req.AuthenticationType = "SSO";
-    //                    var auditResponse = _userLoginService.SaveAuditLog(req);
-
-    //                }
-    //                return Ok(response);
-    //            }
-    //            else
-    //            {
-
-    //                response.IsSuccess = false;
-    //                response.message = "Authentication Failed";
-    //                return BadRequest(response);
-    //            }
-    //        }
-
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, ex.Message);
-    //        return BadRequest();
-    //    }
-    //}
-}
 }

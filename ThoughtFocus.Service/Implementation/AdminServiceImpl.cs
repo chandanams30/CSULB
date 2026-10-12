@@ -346,47 +346,37 @@ namespace ThoughtFocus.Service.Implementation
                     obj.IsSuccess = false;
                     obj.Message = "No Data Present";
                 }
-                List<DistributionList> distributionLists = GetAllDistributionLists();
-
-                // Append distribution list users
-                //obj.userList.AddRange(distributionLists.Select(dl =>
-                //{
-                //    string[] nameParts = (dl.Name ?? string.Empty)
-                //        .Split('_', StringSplitOptions.RemoveEmptyEntries);
-
-                //    return new UserList
-                //    {
-                //        UserID = 0,
-                //        FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
-                //        LastName = nameParts.Length > 1
-                //            ? string.Join(" ", nameParts.Skip(1).Take(nameParts.Length - 2))
-                //            : string.Empty,
-                //        EMAIL = dl.Email ?? string.Empty,
-                //        CSULBID = dl.SamAccountName ?? string.Empty,
-                //        UserRoles = "Grade Admin"
-                //    };
-                //}));
-
-                obj.userList.AddRange(distributionLists.Select(dl =>
+                if (RoleID == 14)
                 {
-                    string[] nameParts = (dl.Name ?? string.Empty).Split('_', StringSplitOptions.RemoveEmptyEntries);
+                    List<DistributionListADGroup> distributionLists = GetAllDistLists();
 
-                    string csulbid = dl.SamAccountName ?? string.Empty;
+                    // Append distribution list users
+                    obj.userList ??= new List<UserList>();
 
-                    int userID = !string.IsNullOrWhiteSpace(csulbid) ? GetUserIDByCSULBID(csulbid) : 0;
-
-                    return new UserList
+                    if (distributionLists != null && distributionLists.Any())
                     {
-                        UserID = userID,
-                        FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
-                        LastName = nameParts.Length > 2
-                            ? string.Join(" ", nameParts.Skip(1).Take(nameParts.Length - 2))
-                            : string.Empty,
-                        EMAIL = dl.Email ?? string.Empty,
-                        CSULBID = csulbid,
-                        UserRoles = "Grade Admin"
-                    };
-                }));
+                        var gradeAdminUsers = distributionLists
+                            .Select(dl =>
+                            {
+                                string csulbid = dl.SamAccountName ?? string.Empty;
+                                if (string.IsNullOrWhiteSpace(csulbid))
+                                {
+                                    return null;
+                                }
+
+                                return GetUserIDByCSULBID(csulbid);
+                            })
+                            .Where(user => user != null)
+                            .Select(user => user!)
+                            .GroupBy(
+                                user => user.CSULBID,
+                                StringComparer.OrdinalIgnoreCase)
+                            .Select(group => group.First())
+                            .ToList();
+
+                        obj.userList.AddRange(gradeAdminUsers);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -872,71 +862,9 @@ namespace ThoughtFocus.Service.Implementation
             return response;
         }
 
-        public bool IsLoggedInUserEnabled(string loggedInSamAccountName)
+        public List<DistributionListADGroup> GetAllDistLists()
         {
-            bool isEnabled = false;
-
-            try
-            {
-                using (var entry = new System.DirectoryServices.DirectoryEntry())
-                using (var searcher = new DirectorySearcher(entry))
-                {
-                    // Search for user accounts
-                    searcher.Filter = "(&(objectCategory=person)(objectClass=user))";
-                    searcher.PageSize = 1000;
-
-                    searcher.PropertiesToLoad.Add("cn");
-                    searcher.PropertiesToLoad.Add("sAMAccountName");
-                    searcher.PropertiesToLoad.Add("mail");
-                    searcher.PropertiesToLoad.Add("userAccountControl");
-
-                    using (SearchResultCollection results = searcher.FindAll())
-                    {
-                        foreach (System.DirectoryServices.SearchResult result in results)
-                        {
-                            string samAccountName =
-                                result.Properties["sAMAccountName"].Count > 0 ? result.Properties["sAMAccountName"][0]?.ToString()
-                                        ?? string.Empty
-                                    : string.Empty;
-
-                            // Compare with the logged-in user's account name
-                            if (!string.Equals(
-                                samAccountName,
-                                loggedInSamAccountName,
-                                StringComparison.OrdinalIgnoreCase))
-                            {
-                                continue;
-                            }
-
-                            // Check whether the account is enabled
-                            if (result.Properties["userAccountControl"].Count > 0)
-                            {
-                                int userAccountControl = Convert.ToInt32(
-                                    result.Properties["userAccountControl"][0]);
-
-                                // ACCOUNTDISABLE flag = 0x2
-                                isEnabled = (userAccountControl & 0x2) == 0;
-                            }
-
-                            break;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Error checking AD account status for {SamAccountName}",
-                    loggedInSamAccountName);
-            }
-
-            return isEnabled;
-        }
-
-        public List<DistributionList> GetAllDistributionLists()
-        {
-            var distributionLists = new List<DistributionList>();
+            var distributionLists = new List<DistributionListADGroup>();
 
             try
             {
@@ -984,7 +912,7 @@ namespace ThoughtFocus.Service.Implementation
                                     ? result.Properties["sAMAccountName"][0]?.ToString() ?? ""
                                     : "";
 
-                            distributionLists.Add(new DistributionList
+                            distributionLists.Add(new DistributionListADGroup
                             {
                                 Name = name,
                                 Email = email,
@@ -1006,29 +934,42 @@ namespace ThoughtFocus.Service.Implementation
             return distributionLists;
         }
 
-        public int GetUserIDByCSULBID(string CSULBID)
+        public UserList GetUserIDByCSULBID(string CSULBID)
         {
-            int userID = 0;
+            UserList user = null;
 
             SqlParameter[] parameters =
             {
-                new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){Value = CSULBID}
+                new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){ Value = CSULBID}
             };
 
             try
             {
                 DataTable dtUser = _helper.GetDataTable("[dbo].[GetUserIDByCSULBID]", parameters);
+
                 if (dtUser.Rows.Count > 0)
                 {
-                    userID = Convert.ToInt32(dtUser.Rows[0]["ID"]);
+                    DataRow row = dtUser.Rows[0];
+
+                    user = new UserList
+                    {
+                        UserID = Convert.ToInt32(row["ID"]),
+                        FirstName = Convert.ToString(row["FirstName"]) ?? string.Empty,
+                        LastName = Convert.ToString(row["LastName"]) ?? string.Empty,
+                        EMAIL = Convert.ToString(row["Email"]) ?? string.Empty,
+                        CSULBID = CSULBID,
+                        UserRoles = "Grade Admin"
+                    };
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"Error retrieving UserID for CSULBID: {CSULBID}", CSULBID);
+                _logger.LogError(ex,
+                    "Error retrieving user details for CSULBID: {CSULBID}",
+                    CSULBID);
             }
 
-            return userID;
+            return user;
         }
 
     }
