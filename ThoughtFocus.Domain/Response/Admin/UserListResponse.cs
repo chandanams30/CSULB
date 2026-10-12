@@ -72,4 +72,11 @@ namespace ThoughtFocus.Domain.Response.Admin
         public string Schools { get; set; }
     }
 
+    public class DistributionListADGroup
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string SamAccountName { get; set; } = string.Empty;
+    }
+
 }

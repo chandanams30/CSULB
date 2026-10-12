@@ -9,6 +9,7 @@ using PasswordGenerator;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.DirectoryServices;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -344,6 +345,233 @@ namespace ThoughtFocus.Service.Implementation
             obj.IsSuccess = true;
             obj.Message = "";
             return obj;
+        }
+        public List<DistributionList> GetAllDistributionLists()
+        {
+            var distributionLists = new List<DistributionList>();
+            try
+            {
+
+                //using (var entry = new DirectoryEntry())
+                //using (var searcher = new DirectorySearcher(entry))
+                //{
+                //    // Search for all user accounts
+                //    searcher.Filter = "(&(objectCategory=person)(objectClass=user))";
+                //    searcher.PageSize = 1000;
+
+                //    searcher.PropertiesToLoad.Add("sAMAccountName");
+                //    searcher.PropertiesToLoad.Add("Name");
+                //    searcher.PropertiesToLoad.Add("mail");
+                //    searcher.PropertiesToLoad.Add("memberOf");
+
+                //    using (SearchResultCollection users = searcher.FindAll())
+                //    {
+                //        foreach (SearchResult userResult in users)
+                //        {
+                //            string samAccountName =
+                //                userResult.Properties["sAMAccountName"].Count > 0
+                //                    ? userResult.Properties["sAMAccountName"][0]?.ToString() ?? ""
+                //                    : "";
+
+                //            string displayName =
+                //                userResult.Properties["Name"].Count > 0
+                //                    ? userResult.Properties["Name"][0]?.ToString() ?? ""
+                //                    : "";
+
+                //            string email =
+                //                userResult.Properties["Email"].Count > 0
+                //                    ? userResult.Properties["Email"][0]?.ToString() ?? ""
+                //                    : "";
+
+                //            _logger.LogInformation(
+                //                "User: {DisplayName}, SamAccountName: {SamAccountName}, Email: {Email}",
+                //                displayName,
+                //                samAccountName,
+                //                email);
+
+                //            // Get all direct AD groups assigned to this user
+                //            if (userResult.Properties.Contains("memberOf"))
+                //            {
+                //                foreach (var groupDn in userResult.Properties["memberOf"])
+                //                {
+                //                    string dn = groupDn?.ToString() ?? "";
+
+                //                    if (string.IsNullOrWhiteSpace(dn))
+                //                        continue;
+
+                //                    try
+                //                    {
+                //                        using (var groupEntry = new DirectoryEntry("LDAP://" + dn))
+                //                        using (var groupSearcher = new DirectorySearcher(groupEntry))
+                //                        {
+                //                            groupSearcher.Filter = "(objectCategory=group)";
+                //                            groupSearcher.PropertiesToLoad.Add("cn");
+                //                            groupSearcher.PropertiesToLoad.Add("sAMAccountName");
+
+                //                            var groupResult = groupSearcher.FindOne();
+
+                //                            if (groupResult != null)
+                //                            {
+                //                                string groupName =
+                //                                    groupResult.Properties["cn"].Count > 0
+                //                                        ? groupResult.Properties["cn"][0]?.ToString() ?? ""
+                //                                        : "";
+
+                //                                string groupSamAccountName =
+                //                                    groupResult.Properties["sAMAccountName"].Count > 0
+                //                                        ? groupResult.Properties["sAMAccountName"][0]?.ToString() ?? ""
+                //                                        : "";
+
+                //                                _logger.LogInformation(
+                //                                    "User: {SamAccountName}, AD Group: {GroupName}, Group Account: {GroupAccount}",
+                //                                    samAccountName,
+                //                                    groupName,
+                //                                    groupSamAccountName);
+                //                            }
+                //                        }
+                //                    }
+                //                    catch (Exception ex)
+                //                    {
+                //                        _logger.LogWarning(
+                //                            ex,
+                //                            "Unable to retrieve group details for user {SamAccountName}, Group DN: {GroupDN}",
+                //                            samAccountName,
+                //                            dn);
+                //                    }
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
+
+                using (var entry = new System.DirectoryServices.DirectoryEntry())
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    // Search for all groups
+                    searcher.Filter = "(objectCategory=group)";
+
+                    searcher.PageSize = 1000;
+
+                    searcher.PropertiesToLoad.Add("cn");
+                searcher.PropertiesToLoad.Add("mail");
+                searcher.PropertiesToLoad.Add("sAMAccountName");
+                searcher.PropertiesToLoad.Add("groupType");
+
+                _logger.LogInformation("Retrieve distribution lists from Active Directory.");
+
+                using (SearchResultCollection results = searcher.FindAll())
+                {
+                    foreach (System.DirectoryServices.SearchResult result in results)
+                    {
+                        if (!result.Properties.Contains("groupType"))
+                            continue;
+
+                        int groupType = Convert.ToInt32(
+                            result.Properties["groupType"][0]);
+
+                        // Security-enabled groups have the high bit set.
+                        bool isSecurityGroup =
+                            (groupType & unchecked((int)0x80000000)) != 0;
+
+                        // Keep distribution groups only
+                        if (isSecurityGroup)
+                            continue;
+
+                        string name = result.Properties["cn"].Count > 0
+                            ? result.Properties["cn"][0]?.ToString() ?? ""
+                            : "";
+
+                        string email = result.Properties["mail"].Count > 0
+                            ? result.Properties["mail"][0]?.ToString() ?? ""
+                            : "";
+
+                        string samAccountName =
+                            result.Properties["sAMAccountName"].Count > 0
+                                ? result.Properties["sAMAccountName"][0]?.ToString() ?? ""
+                                : "";
+                        _logger.LogInformation("Name: " + name + "Email: " + email + "samAccountName" + samAccountName);
+
+                        distributionLists.Add(new DistributionList
+                        {
+                            Name = name,
+                            Email = email,
+                            SamAccountName = samAccountName
+                        });
+                    }
+                }
+            }
+
+                _logger.LogInformation("Retrieved {Count} distribution lists from Active Directory.",
+                    distributionLists.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving distribution lists from Active Directory.");
+            }
+
+            return distributionLists;
+        }
+
+        public bool IsLoggedInUserEnabled(string loggedInSamAccountName)
+        {
+            bool isEnabled = false;
+
+            try
+            {
+                using (var entry = new DirectoryEntry())
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    // Search for user accounts
+                    searcher.Filter = "(&(objectCategory=person)(objectClass=user))";
+                    searcher.PageSize = 1000;
+
+                    searcher.PropertiesToLoad.Add("cn");
+                    searcher.PropertiesToLoad.Add("sAMAccountName");
+                    searcher.PropertiesToLoad.Add("mail");
+                    searcher.PropertiesToLoad.Add("userAccountControl");
+
+                    using (SearchResultCollection results = searcher.FindAll())
+                    {
+                        foreach (System.DirectoryServices.SearchResult result in results)
+                        {
+                            string samAccountName =
+                                result.Properties["sAMAccountName"].Count > 0 ? result.Properties["sAMAccountName"][0]?.ToString()
+                                        ?? string.Empty
+                                    : string.Empty;
+
+                            // Compare with the logged-in user's account name
+                            if (!string.Equals(
+                                samAccountName,
+                                loggedInSamAccountName,
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            // Check whether the account is enabled
+                            if (result.Properties["userAccountControl"].Count > 0)
+                            {
+                                int userAccountControl = Convert.ToInt32(
+                                    result.Properties["userAccountControl"][0]);
+
+                                // ACCOUNTDISABLE flag = 0x2
+                                isEnabled = (userAccountControl & 0x2) == 0;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error checking AD account status for {SamAccountName}",
+                    loggedInSamAccountName);
+            }
+
+            return isEnabled;
         }
     }
 }
