@@ -8,15 +8,18 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
 using ThoughtFocus.Domain.Request.Admin;
 using ThoughtFocus.Domain.Request.GraduateProgram;
+using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Service.Interfaces;
+using System.DirectoryServices;
 
 namespace ThoughtFocus.Service.Implementation
 {
@@ -323,8 +326,6 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtUsers.Rows.Count > 0)
                 {
-
-
                     obj.userList = dtUsers.AsEnumerable().Select(row =>
                                               new UserList
                                               {
@@ -336,7 +337,6 @@ namespace ThoughtFocus.Service.Implementation
                                                   UserRoles = Convert.ToString(row["UserRoles"])
                                               }).ToList();
 
-
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
@@ -346,6 +346,47 @@ namespace ThoughtFocus.Service.Implementation
                     obj.IsSuccess = false;
                     obj.Message = "No Data Present";
                 }
+                List<DistributionList> distributionLists = GetAllDistributionLists();
+
+                // Append distribution list users
+                //obj.userList.AddRange(distributionLists.Select(dl =>
+                //{
+                //    string[] nameParts = (dl.Name ?? string.Empty)
+                //        .Split('_', StringSplitOptions.RemoveEmptyEntries);
+
+                //    return new UserList
+                //    {
+                //        UserID = 0,
+                //        FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
+                //        LastName = nameParts.Length > 1
+                //            ? string.Join(" ", nameParts.Skip(1).Take(nameParts.Length - 2))
+                //            : string.Empty,
+                //        EMAIL = dl.Email ?? string.Empty,
+                //        CSULBID = dl.SamAccountName ?? string.Empty,
+                //        UserRoles = "Grade Admin"
+                //    };
+                //}));
+
+                obj.userList.AddRange(distributionLists.Select(dl =>
+                {
+                    string[] nameParts = (dl.Name ?? string.Empty).Split('_', StringSplitOptions.RemoveEmptyEntries);
+
+                    string csulbid = dl.SamAccountName ?? string.Empty;
+
+                    int userID = !string.IsNullOrWhiteSpace(csulbid) ? GetUserIDByCSULBID(csulbid) : 0;
+
+                    return new UserList
+                    {
+                        UserID = userID,
+                        FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
+                        LastName = nameParts.Length > 2
+                            ? string.Join(" ", nameParts.Skip(1).Take(nameParts.Length - 2))
+                            : string.Empty,
+                        EMAIL = dl.Email ?? string.Empty,
+                        CSULBID = csulbid,
+                        UserRoles = "Grade Admin"
+                    };
+                }));
             }
             catch (Exception ex)
             {
@@ -831,6 +872,164 @@ namespace ThoughtFocus.Service.Implementation
             return response;
         }
 
+        public bool IsLoggedInUserEnabled(string loggedInSamAccountName)
+        {
+            bool isEnabled = false;
+
+            try
+            {
+                using (var entry = new System.DirectoryServices.DirectoryEntry())
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    // Search for user accounts
+                    searcher.Filter = "(&(objectCategory=person)(objectClass=user))";
+                    searcher.PageSize = 1000;
+
+                    searcher.PropertiesToLoad.Add("cn");
+                    searcher.PropertiesToLoad.Add("sAMAccountName");
+                    searcher.PropertiesToLoad.Add("mail");
+                    searcher.PropertiesToLoad.Add("userAccountControl");
+
+                    using (SearchResultCollection results = searcher.FindAll())
+                    {
+                        foreach (System.DirectoryServices.SearchResult result in results)
+                        {
+                            string samAccountName =
+                                result.Properties["sAMAccountName"].Count > 0 ? result.Properties["sAMAccountName"][0]?.ToString()
+                                        ?? string.Empty
+                                    : string.Empty;
+
+                            // Compare with the logged-in user's account name
+                            if (!string.Equals(
+                                samAccountName,
+                                loggedInSamAccountName,
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            // Check whether the account is enabled
+                            if (result.Properties["userAccountControl"].Count > 0)
+                            {
+                                int userAccountControl = Convert.ToInt32(
+                                    result.Properties["userAccountControl"][0]);
+
+                                // ACCOUNTDISABLE flag = 0x2
+                                isEnabled = (userAccountControl & 0x2) == 0;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error checking AD account status for {SamAccountName}",
+                    loggedInSamAccountName);
+            }
+
+            return isEnabled;
+        }
+
+        public List<DistributionList> GetAllDistributionLists()
+        {
+            var distributionLists = new List<DistributionList>();
+
+            try
+            {
+                using (var entry = new System.DirectoryServices.DirectoryEntry())
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    // Search for all groups
+                    searcher.Filter = "(objectCategory=group)";
+
+                    searcher.PageSize = 1000;
+
+                    searcher.PropertiesToLoad.Add("cn");
+                    searcher.PropertiesToLoad.Add("mail");
+                    searcher.PropertiesToLoad.Add("sAMAccountName");
+                    searcher.PropertiesToLoad.Add("groupType");
+
+                    using (SearchResultCollection results = searcher.FindAll())
+                    {
+                        foreach (System.DirectoryServices.SearchResult result in results)
+                        {
+                            if (!result.Properties.Contains("groupType"))
+                                continue;
+
+                            int groupType = Convert.ToInt32(
+                                result.Properties["groupType"][0]);
+
+                            // Security-enabled groups have the high bit set.
+                            bool isSecurityGroup =
+                                (groupType & unchecked((int)0x80000000)) != 0;
+
+                            // Keep distribution groups only
+                            if (isSecurityGroup)
+                                continue;
+
+                            string name = result.Properties["cn"].Count > 0
+                                ? result.Properties["cn"][0]?.ToString() ?? ""
+                                : "";
+
+                            string email = result.Properties["mail"].Count > 0
+                                ? result.Properties["mail"][0]?.ToString() ?? ""
+                                : "";
+
+                            string samAccountName =
+                                result.Properties["sAMAccountName"].Count > 0
+                                    ? result.Properties["sAMAccountName"][0]?.ToString() ?? ""
+                                    : "";
+
+                            distributionLists.Add(new DistributionList
+                            {
+                                Name = name,
+                                Email = email,
+                                SamAccountName = samAccountName
+                            });
+                        }
+                    }
+                }
+
+                _logger.LogInformation(
+                    "Retrieved {Count} distribution lists from Active Directory.",
+                    distributionLists.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving distribution lists from Active Directory.");
+            }
+
+            return distributionLists;
+        }
+
+        public int GetUserIDByCSULBID(string CSULBID)
+        {
+            int userID = 0;
+
+            SqlParameter[] parameters =
+            {
+                new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){Value = CSULBID}
+            };
+
+            try
+            {
+                DataTable dtUser = _helper.GetDataTable("[dbo].[GetUserIDByCSULBID]", parameters);
+                if (dtUser.Rows.Count > 0)
+                {
+                    userID = Convert.ToInt32(dtUser.Rows[0]["ID"]);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,"Error retrieving UserID for CSULBID: {CSULBID}", CSULBID);
+            }
+
+            return userID;
+        }
 
     }
 }

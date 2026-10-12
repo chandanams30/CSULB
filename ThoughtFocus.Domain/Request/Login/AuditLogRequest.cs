@@ -11,4 +11,10 @@ namespace ThoughtFocus.Domain.Request.Login
         public string IPAddress { get; set; }
         public string AuthenticationType { get; set; }
     }
+    public class DistributionList
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string SamAccountName { get; set; } = string.Empty;
+    }
 }
