@@ -488,7 +488,12 @@ namespace ThoughtFocus.Service.Implementation
                         {
                             FinalDecision = Convert.ToString(row["FinalDecision"])
                         }).FirstOrDefault();
-                    obj.EDELFieldWorkAttachmentsInformation = dtFormData.Tables[10].AsEnumerable().Select(row =>
+                    obj.NotOfferedFinalDecision = dtFormData.Tables[10].AsEnumerable().Select(row =>
+                         new NotOfferedFinalDecisionJSON
+                         {
+                             NotOfferedFinalDecision = Convert.ToString(row["NotOfferedFinalDecision"])
+                         }).FirstOrDefault();
+                    obj.EDELFieldWorkAttachmentsInformation = dtFormData.Tables[11].AsEnumerable().Select(row =>
                                        new EDELFieldWorkAttachmentsInformation
                                        {
                                            FormAttachmentID = (row["FormAttachmentID"] == DBNull.Value) ? 0 : Convert.ToInt32(row["FormAttachmentID"]),
@@ -1188,10 +1193,10 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
                     string csulbid= Convert.ToString(dsRec.Tables[1].Rows[0]["CSULBID"]);
-                    if (applicationTypeID == 1)
+                    if ((applicationTypeID == 1 && (formStateID == 10 || formStateID == 11)) || (applicationTypeID == 2 && formStateID == 11))
                     {
-                        if (formStateID == 10)
-                        {
+                        //if (formStateID == 10)
+                        //{
                             // applicant mail
                             string logoText = "cid:myImageID";
                             string applicantsName = string.Empty;
@@ -1206,7 +1211,8 @@ namespace ThoughtFocus.Service.Implementation
                             string afterBody = string.Empty;
                             string programSelected = string.Empty;
                             string date = DateTime.Now.ToString("MMMM d, yyyy");
-                            decisionType = "Offered";
+                            string finalDecisionComments = string.Empty;
+                            decisionType = formStateID == 10 ? "Offered" : "Not Offered";
 
                             applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                             toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
@@ -1214,8 +1220,9 @@ namespace ThoughtFocus.Service.Implementation
                             programName = Convert.ToString(dsRec.Tables[0].Rows[0]["programName"]);
                             finalDecision = Convert.ToString(dsRec.Tables[0].Rows[0]["FinalDecision"]);
                             programSelected = Convert.ToString(dsRec.Tables[0].Rows[0]["ProgramSelected"]);
+                            finalDecisionComments = Convert.ToString(dsRec.Tables[0].Rows[0]["FinalDecisionComments"]);
 
-                            SqlParameter[] parameters2 ={
+                        SqlParameter[] parameters2 ={
                                             new SqlParameter("@ProgramIdentifier", SqlDbType.NVarChar, 10) { Value = "" },
                                             new SqlParameter("@OfferedCategories", SqlDbType.NVarChar , 50) { Value = finalDecision },
                                             new SqlParameter("@DecisionType", SqlDbType.NVarChar , 50) { Value = decisionType },
@@ -1230,10 +1237,10 @@ namespace ThoughtFocus.Service.Implementation
                                     body = Convert.ToString(dtDL.Tables[1].Rows[0]["MailBody"]);
                                 }
                             }
-                            if (applicationTypeID == 1)
+                            if (applicationTypeID == 1 && formStateID == 10)
                             {
                                 string beforeContent = string.Empty;
-                                (subject,beforeContent) = programID switch
+                                (subject, beforeContent) = programID switch
                                 {
                                     1 => (
                                         "CSULB Education Specialist Credential Program Admissions",
@@ -1272,7 +1279,12 @@ namespace ThoughtFocus.Service.Implementation
                                 //else
                                 //    body = GetMailBodyTemplate("Student_FormOffer_Confirmation.html");
                             }
-                            else if (applicationTypeID == 2)
+                            else if (formStateID == 11)
+                            {
+                                subject = "Application Not Offered";
+                                beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                            }
+                            else if (applicationTypeID == 2 && formStateID == 10)
                             {
                                 subject = "Application Offered";
                                 beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
@@ -1292,10 +1304,11 @@ namespace ThoughtFocus.Service.Implementation
                                        .Replace("[[finalDecision]]", finalDecision)
                                        .Replace("[[CSULBID]]", csulbid)
                                        .Replace("[[date]]", date)
-                                       .Replace("[[ProgramSelected]]", programSelected);
+                                       .Replace("[[ProgramSelected]]", programSelected)
+                                       .Replace("[[denielReason]]", finalDecisionComments);
                             byte[] inputStr = null;
                             _sendMail.SendEmail(toMail, ccMail, "COMMON", subject, body, inputStr);
-                        }
+                        //}
                     }
                 }
             }

@@ -16,6 +16,7 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public InterviwerInformation Interviewer { get; set; }
         public ProgramCoordinator ProgramCoordinator { get; set; }
         public FinalDecisionJSON FinalDecision { get; set; }
+        public NotOfferedFinalDecisionJSON NotOfferedFinalDecision { get; set; }
         public EDELFieldWorkAttachmentsInformation EDELFieldWorkAttachmentsInformation { get; set; }
 
     }
@@ -118,6 +119,10 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
     public class FinalDecisionJSON
     {
         public string FinalDecision { get; set; }
+    }
+    public class NotOfferedFinalDecisionJSON
+    {
+        public string NotOfferedFinalDecision { get; set; }
     }
     public class EDELFieldWorkAttachmentsInformation
     {
