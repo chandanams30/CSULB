@@ -339,8 +339,6 @@ namespace ThoughtFocus.Service.Implementation
                                                   //ProgramName = Convert.ToString(row["ProgramName"] == DBNull.Value ? null : row["ProgramName"])
                                               }).ToList();
 
-
-
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
@@ -350,26 +348,28 @@ namespace ThoughtFocus.Service.Implementation
                     obj.IsSuccess = false;
                     obj.Message = "No Data Present";
                 }
-
-                var gradeAdminUserNameTest = _configuration["ApplicationKeys:GradeAdminUserNameTest"];
-
-                if (!string.IsNullOrWhiteSpace(gradeAdminUserNameTest))
+                if (RoleID == 14)
                 {
-                    var csulbids = gradeAdminUserNameTest
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(id => id.Trim())
-                        .Where(id => !string.IsNullOrWhiteSpace(id))
-                        .Distinct(StringComparer.OrdinalIgnoreCase);
+                    var gradeAdminUserNameTest = _configuration["ApplicationKeys:GradeAdminUserNameTest"];
 
-                    obj.userList ??= new List<UserList>();
-
-                    foreach (var csulbid in csulbids)
+                    if (!string.IsNullOrWhiteSpace(gradeAdminUserNameTest))
                     {
-                        UserList gradeAdminUser = GetUserIDByCSULBID(csulbid);
+                        var csulbids = gradeAdminUserNameTest
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(id => id.Trim())
+                            .Where(id => !string.IsNullOrWhiteSpace(id))
+                            .Distinct(StringComparer.OrdinalIgnoreCase);
 
-                        if (gradeAdminUser != null)
+                        obj.userList ??= new List<UserList>();
+
+                        foreach (var csulbid in csulbids)
                         {
-                            obj.userList.Add(gradeAdminUser);
+                            UserList gradeAdminUser = GetUserIDByCSULBID(csulbid);
+
+                            if (gradeAdminUser != null)
+                            {
+                                obj.userList.Add(gradeAdminUser);
+                            }
                         }
                     }
                 }
