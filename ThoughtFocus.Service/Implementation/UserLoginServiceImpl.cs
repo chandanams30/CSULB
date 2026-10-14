@@ -1,5 +1,6 @@
 ﻿using CSULB_COE.Models;
 using CSULB_COE.ViewModels;
+using iTextSharp.text.log;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -379,7 +380,7 @@ namespace ThoughtFocus.Service.Implementation
                 //                    : "";
 
                 //            string email =
-                //                userResult.Properties["Email"].Count > 0
+                //                userResult.Properties["mail"].Count > 0
                 //                    ? userResult.Properties["Email"][0]?.ToString() ?? ""
                 //                    : "";
 
@@ -573,5 +574,74 @@ namespace ThoughtFocus.Service.Implementation
 
             return isEnabled;
         }
+
+
+        public List<string> GetUsersByADGroup()
+        {
+            var samAccountNames = new List<string>();
+
+            string groupDN =
+                "CN=CED-TF-TEST-DataFeed,OU=Groups,OU=CED,OU=Delegated-OUs,DC=campus,DC=ad,DC=csulb,DC=edu";
+
+            try
+            {
+                using (var entry = new DirectoryEntry())
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    searcher.Filter =
+                        "(&(objectCategory=person)(objectClass=user)" +
+                        "(memberOf=" + EscapeLdapFilterValue(groupDN) + "))";
+
+                    searcher.PageSize = 1000;
+                    searcher.PropertiesToLoad.Add("sAMAccountName");
+
+                    using (SearchResultCollection results = searcher.FindAll())
+                    {
+                        foreach (SearchResult result in results)
+                        {
+                            try
+                            {
+                                if (result.Properties["sAMAccountName"].Count > 0)
+                                {
+                                    string samAccountName =
+                                        result.Properties["sAMAccountName"][0]?.ToString() ?? "";
+
+                                    if (!string.IsNullOrWhiteSpace(samAccountName))
+                                    {
+                                        samAccountNames.Add(samAccountName);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex,
+                                    "Error processing an AD user. Continuing with the next user.");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Error retrieving users from AD group CED-TF-TEST-DataFeed. Continuing with the next process.");
+            }
+
+            _logger.LogInformation(
+                "Retrieved {Count} AD users from CED-TF-TEST-DataFeed.",
+                samAccountNames.Count);
+
+            return samAccountNames;
+        }
+
+        private static string EscapeLdapFilterValue(string value)
+    {
+        return value
+            .Replace("\\", "\\5c")
+            .Replace("*", "\\2a")
+            .Replace("(", "\\28")
+            .Replace(")", "\\29")
+            .Replace("\0", "\\00");
     }
+}
 }

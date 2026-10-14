@@ -346,26 +346,61 @@ namespace ThoughtFocus.Service.Implementation
                     obj.IsSuccess = false;
                     obj.Message = "No Data Present";
                 }
+                //if (RoleID == 14)
+                //{
+                //    List<DistributionListADGroup> distributionLists = GetAllDistLists();
+
+                //    // Append distribution list users
+                //    obj.userList ??= new List<UserList>();
+
+                //    if (distributionLists != null && distributionLists.Any())
+                //    {
+                //        var gradeAdminUsers = distributionLists
+                //            .Select(dl =>
+                //            {
+                //                string csulbid = dl.SamAccountName ?? string.Empty;
+                //                if (string.IsNullOrWhiteSpace(csulbid))
+                //                {
+                //                    return null;
+                //                }
+
+                //                return GetUserIDByCSULBID(csulbid);
+                //            })
+                //            .Where(user => user != null)
+                //            .Select(user => user!)
+                //            .GroupBy(
+                //                user => user.CSULBID,
+                //                StringComparer.OrdinalIgnoreCase)
+                //            .Select(group => group.First())
+                //            .ToList();
+
+                //        obj.userList.AddRange(gradeAdminUsers);
+                //    }
+                //}
+
+
                 if (RoleID == 14)
                 {
-                    List<DistributionListADGroup> distributionLists = GetAllDistLists();
+                    List<string> samAccountNames = new List<string>();
+
+                    try
+                    {
+                        samAccountNames = GetUsersByADGroups();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex,
+                            "Failed to retrieve AD users. Continuing with the next process.");
+                    }
 
                     // Append distribution list users
                     obj.userList ??= new List<UserList>();
 
-                    if (distributionLists != null && distributionLists.Any())
+                    if (samAccountNames.Count > 0)
                     {
-                        var gradeAdminUsers = distributionLists
-                            .Select(dl =>
-                            {
-                                string csulbid = dl.SamAccountName ?? string.Empty;
-                                if (string.IsNullOrWhiteSpace(csulbid))
-                                {
-                                    return null;
-                                }
-
-                                return GetUserIDByCSULBID(csulbid);
-                            })
+                        var gradeAdminUsers = samAccountNames
+                            .Where(csulbid => !string.IsNullOrWhiteSpace(csulbid))
+                            .Select(csulbid => GetUserIDByCSULBID(csulbid))
                             .Where(user => user != null)
                             .Select(user => user!)
                             .GroupBy(
@@ -377,6 +412,7 @@ namespace ThoughtFocus.Service.Implementation
                         obj.userList.AddRange(gradeAdminUsers);
                     }
                 }
+
             }
             catch (Exception ex)
             {
@@ -971,6 +1007,73 @@ namespace ThoughtFocus.Service.Implementation
 
             return user;
         }
+        public List<string> GetUsersByADGroups()
+        {
+            var samAccountNames = new List<string>();
+
+            string groupDN =
+                "CN=CED-TF-TEST-DataFeed,OU=Groups,OU=CED,OU=Delegated-OUs,DC=campus,DC=ad,DC=csulb,DC=edu";
+
+            try
+            {
+                using (var entry = new System.DirectoryServices.DirectoryEntry())
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    searcher.Filter =
+                        "(&(objectCategory=person)(objectClass=user)" +
+                        "(memberOf=" + EscapeLdapFilterValue(groupDN) + "))";
+
+                    searcher.PageSize = 1000;
+                    searcher.PropertiesToLoad.Add("sAMAccountName");
+
+                    using (SearchResultCollection results = searcher.FindAll())
+                    {
+                        foreach (SearchResult result in results)
+                        {
+                            try
+                            {
+                                if (result.Properties["sAMAccountName"].Count > 0)
+                                {
+                                    string samAccountName =
+                                        result.Properties["sAMAccountName"][0]?.ToString() ?? "";
+
+                                    if (!string.IsNullOrWhiteSpace(samAccountName))
+                                    {
+                                        samAccountNames.Add(samAccountName);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex,
+                                    "Error processing an AD user. Continuing with the next user.");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Error retrieving users from AD group CED-TF-TEST-DataFeed. Continuing with the next process.");
+            }
+
+            _logger.LogInformation(
+                "Retrieved {Count} AD users from CED-TF-TEST-DataFeed.",
+                samAccountNames.Count);
+
+            return samAccountNames;
+        }
+        private static string EscapeLdapFilterValue(string value)
+        {
+            return value
+                .Replace("\\", "\\5c")
+                .Replace("*", "\\2a")
+                .Replace("(", "\\28")
+                .Replace(")", "\\29")
+                .Replace("\0", "\\00");
+        }
+
 
     }
 }

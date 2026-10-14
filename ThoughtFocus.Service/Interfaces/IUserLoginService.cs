@@ -16,6 +16,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse SaveAuditLog(AuditLogRequest request);
         bool IsLoggedInUserEnabled(string loggedInSamAccountName);
         List<DistributionList> GetAllDistributionLists();
+        List<string> GetUsersByADGroup();
 
     }
 }
