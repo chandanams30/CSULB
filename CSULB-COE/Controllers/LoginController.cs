@@ -19,6 +19,7 @@ using Google.Apis.Json;
 using ThoughtFocus.Domain.Request.Login;
 using ThoughtFocus.Domain.Response;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Configuration;
 
 namespace CSULB_COE.Controllers
 {
@@ -29,11 +30,13 @@ namespace CSULB_COE.Controllers
         private readonly IUserLoginService _userLoginService;
         public ILogger<LoginController> _logger;
         private readonly HttpClient _client;
-        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory)
+        private readonly IConfiguration _configuration;
+        public LoginController(IUserLoginService userLoginService, ILogger<LoginController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _userLoginService = userLoginService;
             _logger = logger;
             _client = httpClientFactory.CreateClient();
+            _configuration = configuration;
         }
 
         [HttpPost("Authenticate")]
@@ -55,6 +58,25 @@ namespace CSULB_COE.Controllers
                     req.AuthenticationType = "Basic";
                     var auditResponse = _userLoginService.SaveAuditLog(req);
 
+                }
+                //add flagAdmin
+                var flagAdminUsers = (_configuration["ApplicationKeys:FlagAdminCSULBID"]);
+
+
+                var flagAdminUserID = flagAdminUsers?
+                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                 .Select(x => x.Trim())
+                 .ToList();
+
+                if (flagAdminUserID != null &&
+                    flagAdminUserID.Any(x =>
+                        string.Equals(x, response.CSULBID, StringComparison.OrdinalIgnoreCase)))
+                {
+                    response.Roles.Add(new Roles
+                    {
+                        RoleId = 15,
+                        RoleName = "Flag Admin"
+                    });
                 }
                 return Ok(response);
             }
