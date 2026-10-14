@@ -9,5 +9,6 @@ namespace ThoughtFocus.Service.Interfaces
     public interface IStudentTeachingMilestoneService
     {
         GetLatestFormResponse GetLatestForm(string csulbid);
+        StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID);
     }
 }
