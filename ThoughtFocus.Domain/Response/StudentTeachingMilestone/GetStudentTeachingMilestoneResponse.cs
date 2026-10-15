@@ -24,9 +24,14 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     public class StudentTeachingMilestonesResponse : BaseResponse
     {
         public StudentTeachingMilestones studentTeachingMilestones { get; set; }
+        public StudentTeachingAcknowledgment studentTeachingAcknowledgment { get; set; }
+
 
     }
-
+    public class StudentTeachingAcknowledgment
+    {
+        public string AcknowledgmentJSON { get; set; }
+    }
     public class StudentTeachingMilestones
     {
         public int ID { get; set; }

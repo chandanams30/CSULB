@@ -114,6 +114,10 @@ namespace ThoughtFocus.Service.Implementation
                         ProgramStatusDesc = Convert.ToString(row["ProgramStatusDesc"])
 
                     }).FirstOrDefault();
+                    obj.studentTeachingAcknowledgment = dtStudentTeaching.Tables[1].AsEnumerable().Select(row => new StudentTeachingAcknowledgment
+                    {
+                        AcknowledgmentJSON = Convert.ToString(row["AcknowledgementsJSON"])
+                    }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data retrieved succesfully ";
