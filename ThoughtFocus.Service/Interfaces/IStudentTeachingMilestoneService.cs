@@ -10,5 +10,7 @@ namespace ThoughtFocus.Service.Interfaces
     {
         GetLatestFormResponse GetLatestForm(string csulbid);
         StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID);
+        DistrictListResponse GetDistrictsByProgramID(int programId);
+        CredentialAreaListResponse GetCredentialPathwayAreaList();
     }
 }

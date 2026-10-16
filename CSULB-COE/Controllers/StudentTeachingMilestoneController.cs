@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
 using ThoughtFocus.Service.Interfaces;
@@ -60,5 +61,43 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetDistrictsByProgramID")]
+        public DistrictListResponse GetDistrictsByProgramID(int programId)
+        {
+            try
+            {
+                DistrictListResponse response = _studentTeachingMilestoneService.GetDistrictsByProgramID(programId);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                DistrictListResponse response = new DistrictListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetCredentialPathwayAreaList")]
+        public CredentialAreaListResponse GetCredentialPathwayAreaList()
+        {
+            try
+            {
+                CredentialAreaListResponse response = _studentTeachingMilestoneService.GetCredentialPathwayAreaList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                CredentialAreaListResponse response = new CredentialAreaListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
+
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 
 namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
@@ -57,5 +58,27 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public string CredentialProgram { get; set; }
         public string TermCode { get; set; }
         public string ProgramStatusDesc { get; set; }
+    }
+
+    public class DistrictListResponse : BaseResponse
+    {
+        public List<Districts> Districts { get; set; }
+    }
+    
+    public class Districts
+    {
+        public int ID { get; set; }
+        public int ProgramID { get; set; }
+        public string Name { get; set; }
+    }
+    public class CredentialAreaListResponse : BaseResponse
+    {
+        public List<CredentialArea> CredentialArea { get; set; }
+    }
+
+    public class CredentialArea
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
     }
 }

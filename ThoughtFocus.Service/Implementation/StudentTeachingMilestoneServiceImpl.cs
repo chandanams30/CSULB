@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
 using ThoughtFocus.Service.Interfaces;
@@ -132,6 +133,84 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
+        public DistrictListResponse GetDistrictsByProgramID(int programId)
+        {
+            DistrictListResponse obj = new DistrictListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@ProgramId", SqlDbType.BigInt) { Value = programId }
+                                       };
+
+            DataTable dtDD = _helper.GetDataTable("[Milestone].[GetDistrictsByProgramID]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+                    
+                        obj.Districts = dtDD.AsEnumerable().Select(row =>
+                                              new Districts
+                                              {
+                                                  ID = Convert.ToInt32(row["ID"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  Name = Convert.ToString(row["Name"]),
+                                              }).ToList();
+                    
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public CredentialAreaListResponse GetCredentialPathwayAreaList()
+        {
+            CredentialAreaListResponse obj = new CredentialAreaListResponse();
+            SqlParameter[] parameters = { };
+
+            DataTable dtDD = _helper.GetDataTable("[Milestone].[GetCredentialAreas]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+
+                    obj.CredentialArea = dtDD.AsEnumerable().Select(row =>
+                                          new CredentialArea
+                                          {
+                                              ID = Convert.ToInt32(row["ID"]),
+                                              Name = Convert.ToString(row["Name"])
+                                          }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+
 
     }
 }
