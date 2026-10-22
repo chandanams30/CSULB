@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using ThoughtFocus.Domain.Request.StudentProfile;
+using ThoughtFocus.Domain.Request.StudentTeachingMilestone;
+using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
@@ -97,6 +101,111 @@ namespace CSULB_COE.Controllers
                 _logger.LogError(ex, ex.Message);
                 return response;
             }
+        }
+        [HttpPost("UpsertAttachement")]
+        public AttachmentResponse UpsertAttachement(UpsertAttachments input)
+        {
+            try
+            {
+                AttachmentResponse response = new AttachmentResponse();
+
+                //#region to get the file content from local
+                //byte[] fileContent = null;
+                ////string filepath = "D:\\CSULB\\GitHub\\Documents\\test3.pdf";
+                //string filepath = "D:\\ExcelDoc\\Mileage-Report-1775048340024.pdf";
+                //System.IO.FileStream fs = new System.IO.FileStream(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                //System.IO.BinaryReader binaryReader = new System.IO.BinaryReader(fs);
+                //long byteLength = new System.IO.FileInfo(filepath).Length;
+                //fileContent = binaryReader.ReadBytes((Int32)byteLength);
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+                //Byte[] InputStream = null;
+                //input.FileContent = fileContent;
+                //#endregion
+
+                response = _studentTeachingMilestoneService.UpsertAttachement(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                AttachmentResponse response = new AttachmentResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("DownloadAttachement")]
+        public IActionResult DownloadAttachement(Guid UniqueID)
+        {
+            try
+            {
+                byte[] inputStream = null;
+                string fileType = string.Empty;
+                string fileName = string.Empty;
+                DownloadAttachementResponse obj = _studentTeachingMilestoneService.DownloadAttachement(UniqueID);
+                fileName = obj.FileName;
+                inputStream = obj.FileContent;
+                string[] fileSplit = fileName.Split('.');
+                string fileextension = fileName.Split('.').Last();
+                fileType = GetFileType(fileextension);
+                return File(inputStream, fileType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("DeleteAttachement")]
+        public BaseResponse DeleteAttachement(DeleteAttachementRequest input)
+        {
+            try
+            {
+                BaseResponse response = _studentTeachingMilestoneService.DeleteAttachement(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to delete data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        private string GetFileType(string fileExt)
+        {
+            string contentType = string.Empty;
+            switch (fileExt.ToUpper())
+            {
+                case "PDF":
+                    contentType = "application/pdf";
+                    break;
+                case "DOCX":
+                    contentType = "Application/msword";
+                    break;
+                case "DOC":
+                    contentType = "Application/msword";
+                    break;
+                case "XLSX":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "XLS":
+                    contentType = "Application/x-msexcel";
+                    break;
+                case "JPG":
+                    contentType = "image/jpeg";
+                    break;
+                case "JPEG":
+                    contentType = "image/jpeg";
+                    break;
+
+            }
+            return contentType;
         }
     }
 

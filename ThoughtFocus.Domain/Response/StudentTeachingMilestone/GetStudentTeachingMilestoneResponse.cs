@@ -26,8 +26,7 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     {
         public StudentTeachingMilestones studentTeachingMilestones { get; set; }
         public StudentTeachingAcknowledgment studentTeachingAcknowledgment { get; set; }
-
-
+        public List<AttachmentsInformation> AttachmentsInformation { get; set; }
     }
     public class StudentTeachingAcknowledgment
     {
@@ -80,5 +79,34 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     {
         public int ID { get; set; }
         public string Name { get; set; }
+    }
+    public class AttachmentResponse : BaseResponse
+    {
+        public int AttachementID { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+    }
+    public class AttachmentsInformation
+    {
+        public int ID { get; set; }
+        public int DocumentID { get; set; }
+        public string DocumentName { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FolderName { get; set; }
+
+    }
+    public class DownloadAttachementResponse : BaseResponse
+    {
+        public int ID { get; set; }
+        public Guid UniqueID { get; set; }
+        public string FileName { get; set; }
+        public string FileExtn { get; set; }
+        public byte[] FileContent { get; set; }
+        public string FolderName { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
     }
 }
