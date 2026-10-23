@@ -177,6 +177,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("AddCredentialArea")]
+        public BaseResponse AddCredentialArea(AddCredentialAreaRequest input)
+        {
+            try
+            {
+                BaseResponse response = _studentTeachingMilestoneService.AddCredentialArea(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
         private string GetFileType(string fileExt)
         {
             string contentType = string.Empty;

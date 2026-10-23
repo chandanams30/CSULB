@@ -17,5 +17,6 @@ namespace ThoughtFocus.Service.Interfaces
         AttachmentResponse UpsertAttachement(UpsertAttachments input);
         DownloadAttachementResponse DownloadAttachement(Guid UniqueID);
         BaseResponse DeleteAttachement(DeleteAttachementRequest input);
+        BaseResponse AddCredentialArea(AddCredentialAreaRequest input);
     }
 }

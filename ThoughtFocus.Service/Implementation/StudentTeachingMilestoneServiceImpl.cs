@@ -373,6 +373,29 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public BaseResponse AddCredentialArea(AddCredentialAreaRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@Name", SqlDbType.NVarChar,100) { Value = input.Name }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[STMilestone].[AddCredentialArea]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "SUCCESS")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["Message"]) == "FAILURE")
+                {
+                    response.Message = Convert.ToString(dtResponse.Rows[0]["SuccessMessage"]);
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
         private byte[] GetImageFilecontent(byte[] fileContent)
         {
             byte[] inputStream = null;

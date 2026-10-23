@@ -18,4 +18,8 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
     {
         public Guid UniqueID { get; set; }
     }
+    public class AddCredentialAreaRequest
+    {
+        public string Name { get; set; }
+    }
 }
