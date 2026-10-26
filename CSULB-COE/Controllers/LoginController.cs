@@ -164,6 +164,23 @@ namespace CSULB_COE.Controllers
                         req.AuthenticationType = "SSO";
                         var auditResponse = _userLoginService.SaveAuditLog(req);
 
+                        //add flagAdmin
+                        var flagAdminUsers = (_configuration["ApplicationKeys:FlagAdminCSULBID"]);
+                        var flagAdminUserID = flagAdminUsers?
+                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(x => x.Trim())
+                         .ToList();
+
+                        if (flagAdminUserID != null &&
+                            flagAdminUserID.Any(x =>
+                                string.Equals(x, response.CSULBID, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            response.Roles.Add(new Roles
+                            {
+                                RoleId = 15,
+                                RoleName = "Flag Admin"
+                            });
+                        }
                     }
                     return Ok(response);
                 }
