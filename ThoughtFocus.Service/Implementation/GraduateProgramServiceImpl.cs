@@ -4929,6 +4929,34 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public BaseResponse UpsertRegisteredStudents(RegisteredStudentsRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 25) { Value = input.TermCode },
+                                          new SqlParameter("@AppStatus", SqlDbType.VarChar, 100) { Value = input.AppStatus },
+                                          new SqlParameter("@GPA", SqlDbType.VarChar, 20) { Value = input.GPA },
+                                          new SqlParameter("@StatusDate", SqlDbType.DateTime) { Value = input.StatusDate }
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[Application].[UpsertRegisteredStudents]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                {
+                    response.Message = "Updated clinical practice evaluation mail body successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                {
+                    response.Message = "Failed to update the clinical practice evaluation mail body";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
     }
 
 

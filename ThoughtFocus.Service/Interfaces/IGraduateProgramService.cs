@@ -76,5 +76,6 @@ namespace ThoughtFocus.Service.Interfaces
         FormDocumentResponse GetFormAttachment(int userId, int formID, int programID);
         BaseResponse UpsertFormDocument(FormDocumentRequest input);
         BaseResponse UpdateFormDocumentValidation(FormDocumentValidationRequest input);
+        BaseResponse UpsertRegisteredStudents(RegisteredStudentsRequest input);
     }
 }
