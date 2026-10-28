@@ -44,4 +44,13 @@ namespace ThoughtFocus.Domain.Response.GraduateProgram
         public string EmailBody { get; set; }
         public string Subject { get; set; }
     }
+    public class RegisteredStudentsRequest
+    {
+        public int FormID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public string AppStatus { get; set; }
+        public string GPA { get; set; }
+        public DateTime StatusDate { get; set; }
+    }
 }
