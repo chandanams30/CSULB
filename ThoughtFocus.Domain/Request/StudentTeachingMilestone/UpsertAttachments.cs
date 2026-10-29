@@ -22,4 +22,9 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
     {
         public string Name { get; set; }
     }
+    public class StudentTeachingMilestoneRequest
+    {
+        public object JSON { get; set; }
+
+    }
 }

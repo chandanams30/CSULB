@@ -27,10 +27,26 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public StudentTeachingMilestones studentTeachingMilestones { get; set; }
         public StudentTeachingAcknowledgment studentTeachingAcknowledgment { get; set; }
         public List<AttachmentsInformation> AttachmentsInformation { get; set; }
+        public StudentTeachingPlacementConsiderations studentTeachingPlacementConsiderations { get; set; }
+
     }
     public class StudentTeachingAcknowledgment
     {
         public string AcknowledgmentJSON { get; set; }
+        public string CSULBID { get; set; }
+        public string Term { get; set; }
+        public int FormId { get; set; }
+        public int ProgramID { get; set; }
+
+    }
+    public class StudentTeachingPlacementConsiderations
+    {
+        public string PlacementConsiderationsJSON { get; set; }
+        public string CSULBID { get; set; }
+        public string Term { get; set; }
+        public int FormId { get; set; }
+        public int ProgramID { get; set; }
+
     }
     public class StudentTeachingMilestones
     {
@@ -57,6 +73,13 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public string CredentialProgram { get; set; }
         public string TermCode { get; set; }
         public string ProgramStatusDesc { get; set; }
+        public string AddressST { get; set; }
+        public string ApartmentST { get; set; }
+
+        public string CityST { get; set; }
+        public string StateST { get; set; }
+        public string ZipST { get; set; }
+        public string PhoneST { get; set; }
     }
 
     public class DistrictListResponse : BaseResponse

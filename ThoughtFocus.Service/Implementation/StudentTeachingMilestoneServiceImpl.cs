@@ -3,6 +3,7 @@ using iTextSharp.text.pdf;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
@@ -81,7 +83,7 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID)
+        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID, int programID)
         {
             StudentTeachingMilestonesResponse obj = new StudentTeachingMilestonesResponse();
             
@@ -89,6 +91,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@csulbid", SqlDbType.VarChar, 50) { Value = CsuldId },
                                           new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
                                           new SqlParameter("@FormID", SqlDbType.NVarChar, -1) { Value = formID },
+                                          new SqlParameter("@ProgramID", SqlDbType.NVarChar, -1) { Value = programID },
                                           new SqlParameter("@LoggedInRole", SqlDbType.NVarChar, -1) { Value = roleID }
                                         };
 
@@ -120,14 +123,15 @@ namespace ThoughtFocus.Service.Implementation
                         CredentialProgram = Convert.ToString(row["CredentialProgram"]),
                         CredentialPathway = Convert.ToString(row["CredentialPathway"]),
                         TermCode = Convert.ToString(row["TermCode"]),
-                        ProgramStatusDesc = Convert.ToString(row["ProgramStatusDesc"])
-
+                        ProgramStatusDesc = Convert.ToString(row["ProgramStatusDesc"]),
+                        AddressST = Convert.ToString(row["AddressST"]),
+                        ApartmentST = Convert.ToString(row["ApartmentST"]),
+                        CityST = Convert.ToString(row["CityST"]),
+                        PhoneST = Convert.ToString(row["PhoneST"]),
+                        ZipST = Convert.ToString(row["ZipST"]),
                     }).FirstOrDefault();
-                    obj.studentTeachingAcknowledgment = dtStudentTeaching.Tables[1].AsEnumerable().Select(row => new StudentTeachingAcknowledgment
-                    {
-                        AcknowledgmentJSON = Convert.ToString(row["AcknowledgementsJSON"])
-                    }).FirstOrDefault();
-                    obj.AttachmentsInformation = dtStudentTeaching.Tables[3].AsEnumerable().Select(row => new AttachmentsInformation
+                    
+                    obj.AttachmentsInformation = dtStudentTeaching.Tables[1].AsEnumerable().Select(row => new AttachmentsInformation
                     {
                         ID = row["ID"] == DBNull.Value ? 0: Convert.ToInt32(row["ID"]),
                         DocumentID = Convert.ToInt32(row["DocumentID"]),
@@ -138,6 +142,20 @@ namespace ThoughtFocus.Service.Implementation
                         FolderName = Convert.ToString(row["FolderName"])
                     }).ToList();
 
+                    obj.studentTeachingPlacementConsiderations = dtStudentTeaching.Tables[2].AsEnumerable().Select(row => new StudentTeachingPlacementConsiderations
+                    {
+                        PlacementConsiderationsJSON = Convert.ToString(row["PlacementConsiderationsJSON"]),
+                        CSULBID = Convert.ToString(row["CSULBID"]),
+                        FormId = Convert.ToInt32(row["FormId"]),
+
+                    }).FirstOrDefault();
+
+                    obj.studentTeachingAcknowledgment = dtStudentTeaching.Tables[3].AsEnumerable().Select(row => new StudentTeachingAcknowledgment
+                        {
+                            AcknowledgmentJSON = Convert.ToString(row["AcknowledgementsJSON"]),
+                            CSULBID = Convert.ToString(row["CSULBID"]),
+                            FormId = Convert.ToInt32(row["FormId"]),
+                    }).FirstOrDefault();
                     obj.IsSuccess = true;
                     obj.Message = "Data retrieved succesfully ";
                 }
@@ -445,6 +463,57 @@ namespace ThoughtFocus.Service.Implementation
             fs.Dispose();
             binaryReader.Close();
             return fileContent;
+        }
+        public BaseResponse SaveStudentTeachingMilestone(StudentTeachingMilestoneRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            //string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(input.JSON);
+
+            //SqlParameter[] parameters =
+            //                           {
+            //                              new SqlParameter("@JSON", SqlDbType.NVarChar,255) { Value = jsonString },
+            //                            };
+
+            string jsonString;
+
+            if (input.JSON is JsonElement element)
+            {
+                // ASP.NET Core may deserialize object properties as JsonElement.
+                jsonString = element.ValueKind == JsonValueKind.String
+                    ? element.GetString()
+                    : element.GetRawText();
+            }
+            else if (input.JSON is string s)
+            {
+                jsonString = s;
+
+                // Decode if the string contains JSON serialized as a string.
+                if (!string.IsNullOrWhiteSpace(s) &&
+                    s.TrimStart().StartsWith("\""))
+                {
+                    jsonString = JsonConvert.DeserializeObject<string>(s);
+                }
+            }
+            else
+            {
+                jsonString = JsonConvert.SerializeObject(input.JSON);
+            }
+
+            // Validate the JSON before calling SQL Server.
+            JsonDocument.Parse(jsonString).Dispose();
+
+            SqlParameter[] parameters =
+            {
+    new SqlParameter("@JSON", SqlDbType.NVarChar, -1)
+    {
+        Value = jsonString
+    }
+};
+
+            var id = _helper.GetDataTable("[Milestone].[SaveStudentTeachingData]", parameters);
+            response.Message = "Student profile data saved successfully";
+            response.IsSuccess = true;
+            return response;
         }
     }
 }

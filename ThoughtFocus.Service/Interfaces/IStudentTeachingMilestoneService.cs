@@ -11,12 +11,13 @@ namespace ThoughtFocus.Service.Interfaces
     public interface IStudentTeachingMilestoneService
     {
         GetLatestFormResponse GetLatestForm(string csulbid);
-        StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID);
+        StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID, int programID);
         DistrictListResponse GetDistrictsByProgramID(int programId);
         CredentialAreaListResponse GetCredentialPathwayAreaList();
         AttachmentResponse UpsertAttachement(UpsertAttachments input);
         DownloadAttachementResponse DownloadAttachement(Guid UniqueID);
         BaseResponse DeleteAttachement(DeleteAttachementRequest input);
         BaseResponse AddCredentialArea(AddCredentialAreaRequest input);
+        BaseResponse SaveStudentTeachingMilestone(StudentTeachingMilestoneRequest input);
     }
 }
