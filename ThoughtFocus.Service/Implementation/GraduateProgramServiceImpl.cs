@@ -4944,14 +4944,14 @@ namespace ThoughtFocus.Service.Implementation
             DataTable dtResponse = _helper.GetDataTable("[Application].[UpsertRegisteredStudents]", parameters);
             if (dtResponse.Rows.Count > 0)
             {
-                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "SUCCESS")
+                if (Convert.ToString(dtResponse.Rows[0]["Status"]) == "SUCCESS")
                 {
-                    response.Message = "Updated clinical practice evaluation mail body successfully";
+                    response.Message = "Data saved successfully";
                     response.IsSuccess = true;
                 }
-                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "FAILURE")
+                else if (Convert.ToString(dtResponse.Rows[0]["Status"]) == "FAILURE")
                 {
-                    response.Message = "Failed to update the clinical practice evaluation mail body";
+                    response.Message = "Failed to Save/Update the data";
                     response.IsSuccess = false;
                 }
             }
