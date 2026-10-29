@@ -156,6 +156,12 @@ namespace ThoughtFocus.Service.Implementation
                             CSULBID = Convert.ToString(row["CSULBID"]),
                             FormId = Convert.ToInt32(row["FormId"]),
                     }).FirstOrDefault();
+
+                    obj.BilaRequirements = dtStudentTeaching.Tables[2].AsEnumerable().Select(row => new BILARequirements
+                    {
+                        BILARequirementsJSON = Convert.ToString(row["BILARequirementJSON"]),
+                    }).FirstOrDefault();
+
                     obj.IsSuccess = true;
                     obj.Message = "Data retrieved succesfully ";
                 }

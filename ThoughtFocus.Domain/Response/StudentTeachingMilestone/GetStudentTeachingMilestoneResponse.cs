@@ -28,6 +28,16 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public StudentTeachingAcknowledgment studentTeachingAcknowledgment { get; set; }
         public List<AttachmentsInformation> AttachmentsInformation { get; set; }
         public StudentTeachingPlacementConsiderations studentTeachingPlacementConsiderations { get; set; }
+        public BILARequirements BilaRequirements { get; set; }
+
+    }
+    public class BILARequirements
+    {
+        public string BILARequirementsJSON { get; set; }
+        public string CSULBID { get; set; }
+        public string Term { get; set; }
+        public int FormId { get; set; }
+        public int ProgramID { get; set; }
 
     }
     public class StudentTeachingAcknowledgment
