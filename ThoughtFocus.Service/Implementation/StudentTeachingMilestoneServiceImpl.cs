@@ -83,7 +83,7 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
         }
 
-        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID, int programID)
+        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID, int programID,int milestoneStateID)
         {
             StudentTeachingMilestonesResponse obj = new StudentTeachingMilestonesResponse();
             
@@ -92,7 +92,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
                                           new SqlParameter("@FormID", SqlDbType.NVarChar, -1) { Value = formID },
                                           new SqlParameter("@ProgramID", SqlDbType.NVarChar, -1) { Value = programID },
-                                          new SqlParameter("@LoggedInRole", SqlDbType.NVarChar, -1) { Value = roleID }
+                                          new SqlParameter("@LoggedInRole", SqlDbType.NVarChar, -1) { Value = roleID },
+                                          new SqlParameter("@MilestoneStateID", SqlDbType.BigInt) { Value = milestoneStateID}
                                         };
 
             DataSet dtStudentTeaching = _helper.GetDataSet("[Milestone].[GetStudentTeachingData]", parameters);
@@ -160,6 +161,13 @@ namespace ThoughtFocus.Service.Implementation
                     obj.BilaRequirements = dtStudentTeaching.Tables[2].AsEnumerable().Select(row => new BILARequirements
                     {
                         BILARequirementsJSON = Convert.ToString(row["BILARequirementJSON"]),
+                    }).FirstOrDefault();
+
+                    obj.MilestoneState = dtStudentTeaching.Tables[4].AsEnumerable().Select(row => new MilestoneState
+                    {
+                        StateID = Convert.ToInt32(row["MilestoneStateID"]),
+                        StateName = Convert.ToString(row["MilestoneStateName"])
+
                     }).FirstOrDefault();
 
                     obj.IsSuccess = true;
