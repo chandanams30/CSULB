@@ -19,5 +19,9 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse DeleteAttachement(DeleteAttachementRequest input);
         BaseResponse AddCredentialArea(AddCredentialAreaRequest input);
         BaseResponse SaveStudentTeachingMilestone(StudentTeachingMilestoneRequest input);
+        BaseResponse AssignApproverAssigner(AssignApproverAssignerRequest input);
+        ExternalApproversListResponse GetExternalApprovers();
+        BaseResponse AddExternalApprover(AddExternalApproverRequest input);
+        ApproverAssignmentsResponse GetExternalApproverAssignments(ApproverAssignmentsRequest input);
     }
 }

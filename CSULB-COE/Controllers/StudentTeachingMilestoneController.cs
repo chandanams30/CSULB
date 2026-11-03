@@ -246,6 +246,85 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpPost("AssignApproverAssigner")]
+        public BaseResponse AssignApproverAssigner(AssignApproverAssignerRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentTeachingMilestoneService.AssignApproverAssigner(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
+        [HttpGet("GetExternalApprovers")]
+        public ExternalApproversListResponse GetExternalApprovers()
+        {
+            try
+            {
+                ExternalApproversListResponse response = _studentTeachingMilestoneService.GetExternalApprovers();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ExternalApproversListResponse response = new ExternalApproversListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                return response;
+            }
+        }
+        [HttpPost("AddExternalApprover")]
+        public BaseResponse AddExternalApprover(AddExternalApproverRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+
+                response = _studentTeachingMilestoneService.AddExternalApprover(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetExternalApproverAssignments")]
+        public ApproverAssignmentsResponse GetExternalApproverAssignments(ApproverAssignmentsRequest input)
+        {
+            try
+            {
+                ApproverAssignmentsResponse response = new ApproverAssignmentsResponse();
+
+                response = _studentTeachingMilestoneService.GetExternalApproverAssignments(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ApproverAssignmentsResponse response = new ApproverAssignmentsResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+
     }
 
 }

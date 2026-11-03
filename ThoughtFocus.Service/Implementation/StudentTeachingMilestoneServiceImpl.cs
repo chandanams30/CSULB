@@ -17,6 +17,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using ThoughtFocus.Common.Utilities.Interfaces;
 using ThoughtFocus.DataAccess.DBHelper;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Request.StudentTeachingMilestone;
 using ThoughtFocus.Domain.Response;
@@ -473,18 +474,10 @@ namespace ThoughtFocus.Service.Implementation
         public BaseResponse SaveStudentTeachingMilestone(StudentTeachingMilestoneRequest input)
         {
             BaseResponse response = new BaseResponse();
-            //string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(input.JSON);
-
-            //SqlParameter[] parameters =
-            //                           {
-            //                              new SqlParameter("@JSON", SqlDbType.NVarChar,255) { Value = jsonString },
-            //                            };
-
             string jsonString;
 
             if (input.JSON is JsonElement element)
             {
-                // ASP.NET Core may deserialize object properties as JsonElement.
                 jsonString = element.ValueKind == JsonValueKind.String
                     ? element.GetString()
                     : element.GetRawText();
@@ -493,7 +486,6 @@ namespace ThoughtFocus.Service.Implementation
             {
                 jsonString = s;
 
-                // Decode if the string contains JSON serialized as a string.
                 if (!string.IsNullOrWhiteSpace(s) &&
                     s.TrimStart().StartsWith("\""))
                 {
@@ -505,21 +497,149 @@ namespace ThoughtFocus.Service.Implementation
                 jsonString = JsonConvert.SerializeObject(input.JSON);
             }
 
-            // Validate the JSON before calling SQL Server.
             JsonDocument.Parse(jsonString).Dispose();
 
             SqlParameter[] parameters =
             {
-    new SqlParameter("@JSON", SqlDbType.NVarChar, -1)
-    {
-        Value = jsonString
-    }
-};
+            new SqlParameter("@JSON", SqlDbType.NVarChar, -1)
+            {
+                Value = jsonString
+            }
+            };
 
             var id = _helper.GetDataTable("[Milestone].[SaveStudentTeachingData]", parameters);
-            response.Message = "Student profile data saved successfully";
+            response.Message = "Student Teaching data saved successfully";
             response.IsSuccess = true;
             return response;
+        }
+
+        public BaseResponse AssignApproverAssigner(AssignApproverAssignerRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            string jsonString;
+            SqlParameter[] parameters =
+            {
+            new SqlParameter("@CSULBID", SqlDbType.NVarChar, -1){Value = input.CSULBID},
+            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID }
+            };
+
+            var id = _helper.GetDataTable("[STMilestone].[AssignApproverAssigner]", parameters);
+            response.Message = "Assighner added successfully";
+            response.IsSuccess = true;
+            return response;
+        }
+
+        public ExternalApproversListResponse GetExternalApprovers()
+        {
+            ExternalApproversListResponse obj = new ExternalApproversListResponse();
+            SqlParameter[] parameters ={
+                                       };
+
+            DataTable dtDD = _helper.GetDataTable("[STMilestone].[GetExternalApprovers]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+
+                    obj.externalApprovers = dtDD.AsEnumerable().Select(row =>
+                                          new ExternalApprovers
+                                          {
+                                              ID = Convert.ToInt32(row["ID"]),
+                                              LastName = Convert.ToString(row["LastName"]),
+                                              FirstName = Convert.ToString(row["FirstName"]),
+                                          }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse AddExternalApprover(AddExternalApproverRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            string jsonString;
+            string Message = string.Empty;
+            SqlParameter[] parameters =
+            {
+            new SqlParameter("@CSULBID", SqlDbType.NVarChar, -1){Value = input.CSULBID},
+            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+            new SqlParameter("@ExternalApproverID", SqlDbType.BigInt) { Value = input.ExternalApproverID }
+
+            };
+
+            var result = _helper.GetDataTable("[STMilestone].[SaveExternalApprover]", parameters);
+            if (result.Rows.Count > 0)
+            {
+                Message =  Convert.ToString(result.Rows[0]["Message"]);
+            }
+            response.Message = Message;
+            response.IsSuccess = true;
+            return response;
+        }
+        public ApproverAssignmentsResponse GetExternalApproverAssignments(ApproverAssignmentsRequest input)
+        {
+            ApproverAssignmentsResponse obj = new ApproverAssignmentsResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@CSULBID", SqlDbType.NVarChar, -1){Value = input.CSULBID},
+                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID }
+                                       };
+
+            DataTable dtDD = _helper.GetDataTable("[STMilestone].[GetExternalApproverAssignments]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+
+                    obj.approverAssignments = dtDD.AsEnumerable().Select(row =>
+                                          new ApproverAssignments
+                                          {
+                                              ID = row["ID"] != DBNull.Value ? Convert.ToInt32(row["ID"]) : 0,
+                                              ApproverAssighnerLastName = row["ApproverAssighnerLastName"] != DBNull.Value ? Convert.ToString(row["ApproverAssighnerLastName"]) : string.Empty,
+                                              ApproverAssighnerFirstName = row["ApproverAssighnerFirstName"] != DBNull.Value ? Convert.ToString(row["ApproverAssighnerFirstName"]) : string.Empty,
+                                              ExternalApproverFirstName = row["ExternalApproverFirstName"] != DBNull.Value ? Convert.ToString(row["ExternalApproverFirstName"]) : string.Empty,
+                                              ExternalApproverLastName = row["ExternalApproverLastName"] != DBNull.Value ? Convert.ToString(row["ExternalApproverLastName"]) : string.Empty,
+                                              ApprovalStatus = row["ApprovalStatus"] != DBNull.Value ? Convert.ToString(row["ApprovalStatus"]) : string.Empty,
+                                              Active = row["Active"] != DBNull.Value && Convert.ToBoolean(row["Active"]),
+                                              DateAdded = row["DateAdded"] != DBNull.Value ? Convert.ToDateTime(row["DateAdded"]) : DateTime.MinValue,
+                                              CSULBID = row["CSULBID"] != DBNull.Value ? Convert.ToString(row["CSULBID"]) : string.Empty,
+                                              FormId = row["FormID"] != DBNull.Value ? Convert.ToInt32(row["FormID"]) : 0,
+                                              ProgramID = row["ProgramID"] != DBNull.Value ? Convert.ToInt32(row["ProgramID"]) : 0,
+                                              ApproverSequence = row["ApproverSequence"] != DBNull.Value ? Convert.ToInt32(row["ApproverSequence"]) : 0
+                                          }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
         }
     }
 }

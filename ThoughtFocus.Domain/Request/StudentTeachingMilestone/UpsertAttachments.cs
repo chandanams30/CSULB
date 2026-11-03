@@ -27,4 +27,25 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public object JSON { get; set; }
 
     }
+    public class AssignApproverAssignerRequest
+    {
+        public int FormID { get; set; }
+        public string CSULBID { get; set; }
+        public int ProgramID { get; set; }
+
+    }
+    public class AddExternalApproverRequest
+    {
+        public int FormID { get; set; }
+        public string CSULBID { get; set; }
+        public int ProgramID { get; set; }
+        public int ExternalApproverID { get; set; }
+
+    }
+    public class ApproverAssignmentsRequest
+    {
+        public int FormID { get; set; }
+        public string CSULBID { get; set; }
+        public int ProgramID { get; set; }
+    }
 }

@@ -142,4 +142,36 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public int CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
     }
+    public class ExternalApproversListResponse : BaseResponse
+    {
+        public List<ExternalApprovers> externalApprovers { get; set; }
+    }
+
+    public class ExternalApprovers
+    {
+        public int ID { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+    public class ApproverAssignmentsResponse : BaseResponse
+    {
+        public List<ApproverAssignments> approverAssignments { get; set; }
+    }
+    public class ApproverAssignments
+    {
+        public int ID { get; set; }
+        public string ApproverAssighnerFirstName { get; set; }
+        public string ApproverAssighnerLastName { get; set; }
+        public string ExternalApproverFirstName { get; set; }
+        public string ExternalApproverLastName { get; set; }
+        public int ApproverSequence { get; set; }
+        public string ApprovalStatus { get; set; }
+        public bool Active { get; set; }
+        public DateTime DateAdded { get; set; }
+        public int FormId { get; set; }
+        public int ProgramID { get; set; }
+        public string CSULBID { get; set; }
+
+
+    }
 }
