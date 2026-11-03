@@ -300,7 +300,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   ProgramName = Convert.ToString(row["ProgramName"]),
                                                   Term = Convert.ToString(row["Term"]),
                                                   Status = Convert.ToString(row["Status"]),
-                                                  ProgramPlannerState = row["ProgramPlannerState"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["ProgramPlannerState"])
+                                                  ProgramPlannerState = row["ProgramPlannerState"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["ProgramPlannerState"]),
+                                                  STMilestoneState = Convert.ToString(row["STMilestoneState"])
                                               }).ToList();
                 obj.IsSuccess = true;
                 obj.Message = "Data retrieved succesfully ";

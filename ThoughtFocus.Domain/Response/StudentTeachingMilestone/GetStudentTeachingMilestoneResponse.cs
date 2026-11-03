@@ -29,6 +29,7 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public List<AttachmentsInformation> AttachmentsInformation { get; set; }
         public StudentTeachingPlacementConsiderations studentTeachingPlacementConsiderations { get; set; }
         public BILARequirements BilaRequirements { get; set; }
+        public MilestoneState MilestoneState { get; set; }
 
     }
     public class BILARequirements
@@ -173,5 +174,10 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public string CSULBID { get; set; }
 
 
+    }
+    public class MilestoneState
+    {
+        public int StateID { get; set; }
+        public string StateName { get; set; }
     }
 }

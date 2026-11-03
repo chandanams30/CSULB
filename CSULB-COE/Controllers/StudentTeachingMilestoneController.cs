@@ -48,11 +48,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetStudentTeachingMilestoneDetails")]
-        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsulbId, int UserID, int formID, int roleID, int programID)
+        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsulbId, int UserID, int formID, int roleID, int programID, int milestoneStateID)
         {
             try
             {
-                StudentTeachingMilestonesResponse response = _studentTeachingMilestoneService.GetStudentTeachingMilestoneDetails(CsulbId, UserID, formID, roleID, programID);
+                StudentTeachingMilestonesResponse response = _studentTeachingMilestoneService.GetStudentTeachingMilestoneDetails(CsulbId, UserID, formID, roleID, programID,milestoneStateID);
                 return response;
             }
             catch (Exception ex)
