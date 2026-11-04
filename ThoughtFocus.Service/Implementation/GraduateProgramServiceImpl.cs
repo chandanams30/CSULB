@@ -4539,7 +4539,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ControlValue", SqlDbType.NVarChar,-1) { Value = input.ControlValue },
                                           new SqlParameter("@Active", SqlDbType.Bit) { Value = input.Active },
                                           new SqlParameter("@Action", SqlDbType.BigInt) { Value = input.Action},
-                                          new SqlParameter("@DropdownId", SqlDbType.BigInt) { Value = input.DropdownId}
+                                          new SqlParameter("@DropdownId", SqlDbType.BigInt) { Value = input.DropdownId},
+
                                         };
             DataTable dtResponse = _helper.GetDataTable("[Master].[Upsert_Dropdowns_for_ICP_and_GRAD]", parameters);
             if (dtResponse.Rows.Count > 0)
@@ -4919,9 +4920,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 25) { Value = input.TermCode },
-                                          new SqlParameter("@AppStatus", SqlDbType.VarChar, 100) { Value = input.AppStatus },
                                           new SqlParameter("@GPA", SqlDbType.VarChar, 20) { Value = input.GPA },
-                                          new SqlParameter("@StatusDate", SqlDbType.DateTime) { Value = input.StatusDate }
+                                          new SqlParameter("@StatusDate", SqlDbType.DateTime){ Value = input.StatusDate.HasValue ? (object)input.StatusDate.Value : DBNull.Value},
+                                          new SqlParameter("@AppStatus", SqlDbType.VarChar, 100){Value = string.IsNullOrWhiteSpace(input.AppStatus) ? DBNull.Value : (object)input.AppStatus}
                                         };
             DataTable dtResponse = _helper.GetDataTable("[Application].[UpsertRegisteredStudents]", parameters);
             if (dtResponse.Rows.Count > 0)
