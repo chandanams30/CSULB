@@ -11,7 +11,7 @@ namespace ThoughtFocus.Service.Interfaces
     public interface IStudentTeachingMilestoneService
     {
         GetLatestFormResponse GetLatestForm(string csulbid);
-        StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID, int programID, int milestoneStateID);
+        StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsuldId, int UserID, int formID, int roleID, int programID);
         DistrictListResponse GetDistrictsByProgramID(int programId);
         CredentialAreaListResponse GetCredentialPathwayAreaList();
         AttachmentResponse UpsertAttachement(UpsertAttachments input);
@@ -23,5 +23,6 @@ namespace ThoughtFocus.Service.Interfaces
         ExternalApproversListResponse GetExternalApprovers();
         BaseResponse AddExternalApprover(AddExternalApproverRequest input);
         ApproverAssignmentsResponse GetExternalApproverAssignments(ApproverAssignmentsRequest input);
+        BaseResponse UpdateMilestoneFormState(UpdateFormStateRequest input);
     }
 }

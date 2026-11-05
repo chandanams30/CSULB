@@ -48,11 +48,11 @@ namespace CSULB_COE.Controllers
             }
         }
         [HttpGet("GetStudentTeachingMilestoneDetails")]
-        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsulbId, int UserID, int formID, int roleID, int programID, int milestoneStateID)
+        public StudentTeachingMilestonesResponse GetStudentTeachingMilestoneDetails(string CsulbId, int UserID, int formID, int roleID, int programID)
         {
             try
             {
-                StudentTeachingMilestonesResponse response = _studentTeachingMilestoneService.GetStudentTeachingMilestoneDetails(CsulbId, UserID, formID, roleID, programID,milestoneStateID);
+                StudentTeachingMilestonesResponse response = _studentTeachingMilestoneService.GetStudentTeachingMilestoneDetails(CsulbId, UserID, formID, roleID, programID);
                 return response;
             }
             catch (Exception ex)
@@ -324,7 +324,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-
+        [HttpPost("UpdateMilestoneFormState")]
+        public BaseResponse UpdateMilestoneFormState(UpdateFormStateRequest input)
+        {
+            try
+            {
+                BaseResponse response = _studentTeachingMilestoneService.UpdateMilestoneFormState(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 
 }
