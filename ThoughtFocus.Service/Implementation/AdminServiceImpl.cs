@@ -1046,7 +1046,62 @@ namespace ThoughtFocus.Service.Implementation
 
             return user;
         }
+        public MilestoneDatesResponse GetMilestoneDates(string termCode)
+        {
+            MilestoneDatesResponse obj = new MilestoneDatesResponse();
 
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = termCode }
+                                       };
+            DataSet dtApplicationPrograms = _helper.GetDataSet("[STMilestone].[GetMilestoneDates]", parameters);
 
+            try
+            {
+                if (dtApplicationPrograms.Tables.Count > 0)
+                {
+                    obj = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                                 new MilestoneDatesResponse
+                                                 {
+                                                     MilestoneOpenDate = Convert.ToDateTime(row["MilestoneOpenDate"]),
+                                                     MilestoneCloseDate = Convert.ToDateTime(row["MilestoneCloseDate"]),
+                                                 }).FirstOrDefault();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpdateSTMilestoneDates(UpdateMilestoneDates input)
+        {
+            BaseResponse response = new BaseResponse();
+
+                SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
+                                          new SqlParameter("@MilestoneOpenDate", SqlDbType.DateTime) {Value = input.MilestoneOpenDate},
+                                          new SqlParameter("@MilestoneCloseDate", SqlDbType.DateTime) {Value = input.MilestoneCloseDate},
+                                        };
+                var result = _helper.InsertTable("[STMilestone].[UpdateSTMilestoneDates]", parameters);
+                
+            try
+            {
+                response.Message = "Milestone dates saved successfully";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                response.Message = ex.Message;
+                response.IsSuccess = false;
+            }
+            return response;
+        }
     }
 }

@@ -35,6 +35,8 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse AddSupervisorForCourses(SupervisorForCourses input);
         CompleteYourApplicationResponse getCompleteYourApplicationText(int applicationId, int programID);
         BaseResponse UpdateCompleteYourApplicationText(CompleteYourApplicationText input);
+        MilestoneDatesResponse GetMilestoneDates(string termCode);
+        BaseResponse UpdateSTMilestoneDates(UpdateMilestoneDates input);
 
     }
 }

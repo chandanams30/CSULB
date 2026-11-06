@@ -13,5 +13,11 @@ namespace ThoughtFocus.Domain.Request.Admin
         public DateTime ApplicationCloseDate { get; set; }
         public bool Status { get; set; }
     }
-    
+    public class UpdateMilestoneDates
+    {
+        public string TermCode { get; set; }
+        public DateTime MilestoneOpenDate { get; set; }
+        public DateTime MilestoneCloseDate { get; set; }
+    }
+
 }

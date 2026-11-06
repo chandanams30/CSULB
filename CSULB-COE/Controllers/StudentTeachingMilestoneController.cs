@@ -343,7 +343,7 @@ namespace CSULB_COE.Controllers
             }
         }
 
-        [HttpGet("GetLatestForm")]
+        [HttpGet("isSubmitEnableST")]
         public MandateFieldValidationResponse isSubmitEnableST(MandateFieldValidationRequest input)
         {
             try

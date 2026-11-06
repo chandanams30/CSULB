@@ -496,5 +496,42 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("GetMilestoneDates")]
+        public MilestoneDatesResponse GetMilestoneDates(string termCode)
+        {
+            try
+            {
+                MilestoneDatesResponse response = _adminService.GetMilestoneDates(termCode);
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                MilestoneDatesResponse response = new MilestoneDatesResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateSTMilestoneDates")]
+        public BaseResponse UpdateSTMilestoneDates(UpdateMilestoneDates input)
+        {
+            try
+            {
+                BaseResponse response = _adminService.UpdateSTMilestoneDates(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update program application dates , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 }

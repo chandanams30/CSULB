@@ -54,5 +54,11 @@ namespace ThoughtFocus.Domain.Response.Admin
         public string Email { get; set; } = string.Empty;
         public string SamAccountName { get; set; } = string.Empty;
     }
+    public class MilestoneDatesResponse : BaseResponse
+    {
+        public DateTime MilestoneOpenDate { get; set; }
+        public DateTime MilestoneCloseDate { get; set; }
+
+    }
 
 }
