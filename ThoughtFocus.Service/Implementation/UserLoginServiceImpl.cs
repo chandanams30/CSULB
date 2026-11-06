@@ -580,8 +580,8 @@ namespace ThoughtFocus.Service.Implementation
         {
             var samAccountNames = new List<string>();
 
-            string groupDN =
-                "CN=CED-TF-TEST-DataFeed,OU=Groups,OU=CED,OU=Delegated-OUs,DC=campus,DC=ad,DC=csulb,DC=edu";
+            string groupDN = "ES-EXT-LBSSR_MYCED_GRADES-Criteria";
+               // "CN=CED-TF-TEST-DataFeed,OU=Groups,OU=CED,OU=Delegated-OUs,DC=campus,DC=ad,DC=csulb,DC=edu";
 
             try
             {
