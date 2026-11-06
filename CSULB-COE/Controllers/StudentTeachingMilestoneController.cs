@@ -342,6 +342,24 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
+        [HttpGet("GetLatestForm")]
+        public MandateFieldValidationResponse isSubmitEnableST(MandateFieldValidationRequest input)
+        {
+            try
+            {
+                MandateFieldValidationResponse response = _studentTeachingMilestoneService.isSubmitEnableST(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MandateFieldValidationResponse response = new MandateFieldValidationResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                return response;
+            }
+        }
     }
 
 }

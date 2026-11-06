@@ -180,4 +180,8 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public int StateID { get; set; }
         public string StateName { get; set; }
     }
+    public class MandateFieldValidationResponse : BaseResponse
+    {
+        public bool isEnableSubmit { get; set; }
+    }
 }

@@ -3,6 +3,7 @@ using iTextSharp.text.pdf;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Nancy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -673,5 +674,41 @@ namespace ThoughtFocus.Service.Implementation
             }
             return response;
         }
+        public MandateFieldValidationResponse isSubmitEnableST(MandateFieldValidationRequest input)
+        {
+            MandateFieldValidationResponse obj = new MandateFieldValidationResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@CSULBID", SqlDbType.NVarChar, -1){Value = input.CSULBID},
+                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                            new SqlParameter("@Term", SqlDbType.VarChar, 10) { Value = input.Term }
+                                       };
+
+            DataTable dtDD = _helper.GetDataTable("[STMilestone].[ValidateMandatoryFields]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+
+                    obj.isEnableSubmit = Convert.ToBoolean(dtDD.Rows[0]["ValidationFlag"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
     }
 }

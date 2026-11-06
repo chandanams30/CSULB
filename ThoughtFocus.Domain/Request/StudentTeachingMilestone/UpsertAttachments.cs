@@ -53,4 +53,11 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public int FormID { get; set; }
         public int StateID { get; set; }
     }
+    public class MandateFieldValidationRequest
+    {
+        public int FormID { get; set; }
+        public string CSULBID { get; set; }
+        public string Term { get; set; }
+        public int ProgramID { get; set; }
+    }
 }

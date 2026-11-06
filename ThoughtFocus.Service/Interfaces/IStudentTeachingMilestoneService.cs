@@ -24,5 +24,6 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse AddExternalApprover(AddExternalApproverRequest input);
         ApproverAssignmentsResponse GetExternalApproverAssignments(ApproverAssignmentsRequest input);
         BaseResponse UpdateMilestoneFormState(UpdateFormStateRequest input);
+        MandateFieldValidationResponse isSubmitEnableST(MandateFieldValidationRequest input);
     }
 }
