@@ -13,7 +13,7 @@ namespace ThoughtFocus.Service.Interfaces
     public interface IStudentProfile
     {
         StudentProfileResponse GetStudentProfileData(string CsuldId, int UserID, int formID, int roleID);
-        StudentProfileSearchResponse GetStudentProfileSearchData(string searchString);
+        StudentProfileSearchResponse GetStudentProfileSearchData(string searchString, string identifier);
         StudentProfileMessageBoardResponse GetStudentProfileMessageBoard(string CsulbId, string MessageBoardIdentifier);
         BaseResponse UpdateStudentProfileMessageBoard(UpdateStudentProfileMessageBoardRequest input);
         BaseResponse SaveStudentProfileData(SaveStudentProfileDataRequest input);
