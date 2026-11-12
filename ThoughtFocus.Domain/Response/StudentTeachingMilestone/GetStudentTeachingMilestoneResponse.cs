@@ -30,6 +30,7 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public StudentTeachingPlacementConsiderations studentTeachingPlacementConsiderations { get; set; }
         public BILARequirements BilaRequirements { get; set; }
         public MilestoneState MilestoneState { get; set; }
+        public List<MilestoneStateDetails> MilestoneStateDetails { get; set; }
 
     }
     public class BILARequirements
@@ -179,6 +180,11 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     {
         public int StateID { get; set; }
         public string StateName { get; set; }
+    }
+    public class MilestoneStateDetails
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
     }
     public class MandateFieldValidationResponse : BaseResponse
     {

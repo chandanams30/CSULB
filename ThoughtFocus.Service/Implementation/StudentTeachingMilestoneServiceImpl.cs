@@ -174,6 +174,12 @@ namespace ThoughtFocus.Service.Implementation
                         StateName = Convert.ToString(row["MilestoneStateName"])
 
                     }).FirstOrDefault();
+                    obj.MilestoneStateDetails = dtStudentTeaching.Tables[5].AsEnumerable().Select(row => new MilestoneStateDetails
+                    {
+                        ID = Convert.ToInt32(row["ID"]),
+                        Name = Convert.ToString(row["Name"])
+
+                    }).ToList();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data retrieved succesfully ";
