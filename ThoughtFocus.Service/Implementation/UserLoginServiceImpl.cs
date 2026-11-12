@@ -580,8 +580,8 @@ namespace ThoughtFocus.Service.Implementation
         {
             var samAccountNames = new List<string>();
 
-            string groupDN = "CN=CED-MYCED-STAPP-Approver,OU=Groups,OU=CED,OU=Delegated-OUs,DC=campus,DC=ad,DC=csulb,DC=edu"; 
-                //"CN=ES-EXT-LBSSR_MYCED_GRADES-Criteria,OU=Managed,OU=Groups,OU=Enterprise Support,DC=campus,DC=ad,DC=csulb,DC=edu";
+            string groupDN = "CN=ES-EXT-LBSSR_MYCED_GRADES-Criteria,OU=Managed,OU=Groups,OU=Enterprise Support,DC=campus,DC=ad,DC=csulb,DC=edu"; 
+                //"CN=ES-EXT-LBSSR_MYCED_GRADES-Criteria,OU=Managed,OU=Groups,OU=Enterprise Support,DC=campus,DC=ad,DC=csulb,DC=edu"; -- Grade Admin
                 //"ES-EXT-LBSSR_MYCED_GRADES-Criteria";
                // "CN=CED-TF-TEST-DataFeed,OU=Groups,OU=CED,OU=Delegated-OUs,DC=campus,DC=ad,DC=csulb,DC=edu";
 
