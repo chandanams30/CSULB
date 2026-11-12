@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -22,6 +23,8 @@ using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Request.StudentTeachingMilestone;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
+using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
@@ -704,11 +707,215 @@ namespace ThoughtFocus.Service.Implementation
             catch (Exception ex)
             {
                 obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
+        public ADGroupUsersListResponse GetADGroupListForSTMilestone()
+        {
+            ADGroupUsersListResponse obj = new ADGroupUsersListResponse();
+        
+            try
+            {
+                    var gradeAdminUserNameTest = _configuration["ApplicationKeys:GradeAdminUserNameTest"];
+
+                    if (!string.IsNullOrWhiteSpace(gradeAdminUserNameTest))
+                    {
+                        var csulbids = gradeAdminUserNameTest
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(id => id.Trim())
+                            .Where(id => !string.IsNullOrWhiteSpace(id))
+                            .Distinct(StringComparer.OrdinalIgnoreCase);
+                                
+                        obj.ADGroupUsersList ??= new List<ADGroupUsersList>();
+
+                        foreach (var csulbid in csulbids)
+                        {
+                        ADGroupUsersList gradeAdminUser = GetUserIDByCSULBID(csulbid);
+
+                            if (gradeAdminUser != null)
+                            {
+                                obj.ADGroupUsersList.Add(gradeAdminUser);
+                            }
+                        }
+                    }
+                
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
                 obj.Message = "Data Retrieval Failed , Please contact site admin ";
                 obj.StackTrace = ex.Message;
             }
             return obj;
         }
+        public ADGroupUsersList GetUserIDByCSULBID(string CSULBID)
+        {
+            ADGroupUsersList user = null;
+
+            SqlParameter[] parameters =
+            {
+                new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){ Value = CSULBID}
+            };
+
+            try
+            {
+                DataTable dtUser = _helper.GetDataTable("[dbo].[GetUserIDByCSULBID]", parameters);
+
+                if (dtUser.Rows.Count > 0)
+                {
+                    DataRow row = dtUser.Rows[0];
+
+                    user = new ADGroupUsersList
+                    {
+                        UserID = Convert.ToInt32(row["ID"]),
+                        FirstName = Convert.ToString(row["FirstName"]) ?? string.Empty,
+                        LastName = Convert.ToString(row["LastName"]) ?? string.Empty,
+                        EMAIL = Convert.ToString(row["Email"]) ?? string.Empty,
+                        CSULBID = CSULBID,
+                        UserRoles = "Grade Admin"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,"Error retrieving user details for CSULBID: {CSULBID}", CSULBID);
+            }
+
+            return user;
+        }
+
+        public ADGroupUsersListResponse SendSTMilestoneNotificationEmail()
+        {
+            ADGroupUsersListResponse obj = new ADGroupUsersListResponse();
+
+            try
+            {
+                // Get AD group users
+                ADGroupUsersListResponse response = GetADGroupListForSTMilestone();
+
+                if (response == null || response.ADGroupUsersList == null ||
+                    !response.ADGroupUsersList.Any())
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No users found to send the email.";
+                    return obj;
+                }
+
+                // Get unique email addresses
+                var emailList = response.ADGroupUsersList
+                    .Where(x => !string.IsNullOrWhiteSpace(x.EMAIL))
+                    .Select(x => x.EMAIL.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (!emailList.Any())
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No valid email addresses found.";
+                    return obj;
+                }
+
+                // Hardcoded email body
+                string body = @"
+            <p>Dear User,</p>
+
+            <p>
+                This is a notification regarding the Student Teaching Milestone.
+            </p>
+
+            <p>Thank you,<br/>Student Teaching Team</p>";
+
+                string beforeBody = @"<html>
+            <head>
+             
+            </head>
+            <body>
+                <div>
+                    <img alt='logo' src='[[logoPath]]'
+                    style='width:300px; height:auto;'/>
+                </div>";
+
+                string afterBody = "</body></html>";
+
+                body = $"{beforeBody}{body}{afterBody}";
+
+                string logoText = "cid:myImageID";
+
+                body = body.Replace("[[logoPath]]", logoText);
+
+                // Hardcoded subject
+                string subject = "Student Teaching Milestone Notification";
+
+                // Send email to all users using BCC
+                string toUser = string.Join(",", emailList);
+
+                _sendMail.SendEmail(toUser,"","COMMON",subject,body,"");
+
+                obj.IsSuccess = true;
+                obj.Message = "Student Teaching Milestone notification email sent successfully.";
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Email sending failed. Please contact site admin.";
+                obj.StackTrace = ex.Message;
+            }
+
+            return obj;
+        }
+
+        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents SendEmailForApprovers(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail, int activityLogID)
+        {
+            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
+
+            
+                try
+                {
+                    string toUser = obj.CommunitySiteUserEmail;
+                    string URL = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
+                    string body = string.Empty;
+                    SqlParameter[] parameters1 ={
+                                 new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
+                                 new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
+                                 new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
+                                 new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
+                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PartnerUser" }
+                            };
+                    DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
+                    if (dtMailBody.Rows.Count > 0)
+                    {
+                        if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
+                        {
+                            body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
+
+                            string beforeBody = string.Empty;
+                            string afterBody = string.Empty;
+                            beforeBody = "<html>\r\n<head>\r\n<style>\r\n\r\n#link {\r\ncolor: #0563C1;\r\n}\r\n.custom-link {\r\ncolor: #0563C1;\r\n}\r\n</style>\r\n</head>\r\n<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\"/></div>";
+                            afterBody = "</body>\r\n</html>";
+                            body = $"{beforeBody}{body}{afterBody}";
+                        }
+                    }
+                    string link = @"<a href ='" + URL + "' target='_blank' class='custom-link'>Click here</a>";
+                    string logoText = "cid:myImageID";
+                    body = body.Replace("[[logoPath]]", logoText)
+                              .Replace("[[link]]", link);
+                    string subject = "Approve student hours for CSULB Clinical Practice";
+                    _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
+                    obj.IsSuccess = true;
+                    obj.Message = "Partner User Activation mail sent successfully.";
+                }
+                catch (Exception ex)
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "Failure sending mail.";
+                }
+            return obj;
+        }
+
+
 
     }
 }

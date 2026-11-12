@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ThoughtFocus.Domain.Request.StudentTeachingMilestone;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
 
@@ -25,5 +26,8 @@ namespace ThoughtFocus.Service.Interfaces
         ApproverAssignmentsResponse GetExternalApproverAssignments(ApproverAssignmentsRequest input);
         BaseResponse UpdateMilestoneFormState(UpdateFormStateRequest input);
         MandateFieldValidationResponse isSubmitEnableST(MandateFieldValidationRequest input);
+        ADGroupUsersListResponse GetADGroupListForSTMilestone();
+        ADGroupUsersList GetUserIDByCSULBID(string CSULBID);
+        ADGroupUsersListResponse SendSTMilestoneNotificationEmail();
     }
 }

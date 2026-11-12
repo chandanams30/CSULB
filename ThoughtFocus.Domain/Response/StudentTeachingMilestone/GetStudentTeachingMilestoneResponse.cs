@@ -184,4 +184,18 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     {
         public bool isEnableSubmit { get; set; }
     }
+    public class ADGroupUsersListResponse : BaseResponse
+    {
+        public List<ADGroupUsersList> ADGroupUsersList { get; set; }
+    }
+    public class ADGroupUsersList
+    {
+        public int UserID { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string EMAIL { get; set; }
+        public string CSULBID { get; set; }
+        public string UserRoles { get; set; }
+        public string ProgramName { get; set; }
+    }
 }

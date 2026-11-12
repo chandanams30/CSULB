@@ -7,6 +7,7 @@ using System.Linq;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Request.StudentTeachingMilestone;
 using ThoughtFocus.Domain.Response;
+using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.GraduateProgram;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
@@ -357,6 +358,25 @@ namespace CSULB_COE.Controllers
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
+                return response;
+            }
+        }
+
+        [HttpGet("GetADGroupListForSTMilestone")]
+        public ADGroupUsersListResponse GetADGroupListForSTMilestone()
+        {
+            try
+            {
+                ADGroupUsersListResponse response = _studentTeachingMilestoneService.SendSTMilestoneNotificationEmail();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ADGroupUsersListResponse response = new ADGroupUsersListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
                 return response;
             }
         }
