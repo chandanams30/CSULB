@@ -29,7 +29,7 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public List<AttachmentsInformation> AttachmentsInformation { get; set; }
         public StudentTeachingPlacementConsiderations studentTeachingPlacementConsiderations { get; set; }
         public BILARequirements BilaRequirements { get; set; }
-        //public MilestoneState MilestoneState { get; set; }
+        public MilestoneState MilestoneState { get; set; }
 
     }
     public class BILARequirements

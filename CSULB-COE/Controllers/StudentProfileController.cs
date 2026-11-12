@@ -56,11 +56,11 @@ namespace CSULB_COE.Controllers
         }
         //Student profile search
         [HttpGet("GetStudentProfileSearchData")]
-        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
+        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString,string identifier)
         {
             try
             {
-                StudentProfileSearchResponse response = _studentProfileService.GetStudentProfileSearchData(searchString);
+                StudentProfileSearchResponse response = _studentProfileService.GetStudentProfileSearchData(searchString,identifier);
                 return response;
             }
             catch (Exception ex)

@@ -274,12 +274,13 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString)
+        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString, string identifier)
         {
             StudentProfileSearchResponse obj = new StudentProfileSearchResponse();
             SqlParameter[] parameters =
                                      {
-                                          new SqlParameter("@searchString", SqlDbType.NVarChar,100) { Value = searchString }
+                                          new SqlParameter("@searchString", SqlDbType.NVarChar,100) { Value = searchString },
+                                          new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = identifier }
                                      };
             DataTable dtResponse = _helper.GetDataTable("[dbo].[SearchStudentProfile]", parameters);
             if (dtResponse.Rows.Count > 0)
@@ -301,8 +302,8 @@ namespace ThoughtFocus.Service.Implementation
                                                   Term = Convert.ToString(row["Term"]),
                                                   Status = Convert.ToString(row["Status"]),
                                                   ProgramPlannerState = row["ProgramPlannerState"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["ProgramPlannerState"]),
-                                                  //STMilestoneStateName = Convert.ToString(row["STMilestoneStateName"]),
-                                                  //STMilestoneStateID = Convert.ToInt32(row["STMilestoneStateID"])
+                                                  STMilestoneStateName = row["STMilestoneStateName"] == DBNull.Value ? "" : Convert.ToString(row["STMilestoneStateName"]),
+                                                  STMilestoneStateID = row["STMilestoneStateID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["STMilestoneStateID"])
                                               }).ToList();
                 obj.IsSuccess = true;
                 obj.Message = "Data retrieved succesfully ";

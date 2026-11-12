@@ -168,12 +168,12 @@ namespace ThoughtFocus.Service.Implementation
                         BILARequirementsJSON = Convert.ToString(row["BILARequirementJSON"]),
                     }).FirstOrDefault();
 
-                    //obj.MilestoneState = dtStudentTeaching.Tables[4].AsEnumerable().Select(row => new MilestoneState
-                    //{
-                    //    StateID = Convert.ToInt32(row["MilestoneStateID"]),
-                    //    StateName = Convert.ToString(row["MilestoneStateName"])
+                    obj.MilestoneState = dtStudentTeaching.Tables[4].AsEnumerable().Select(row => new MilestoneState
+                    {
+                        StateID = Convert.ToInt32(row["MilestoneStateID"]),
+                        StateName = Convert.ToString(row["MilestoneStateName"])
 
-                    //}).FirstOrDefault();
+                    }).FirstOrDefault();
 
                     obj.IsSuccess = true;
                     obj.Message = "Data retrieved succesfully ";
