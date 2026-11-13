@@ -725,7 +725,7 @@ namespace ThoughtFocus.Service.Implementation
         
             try
             {
-                    var gradeAdminUserNameTest = _configuration["ApplicationKeys:GradeAdminUserNameTest"];
+                    var gradeAdminUserNameTest = _configuration["ApplicationKeys:StudentTeachingApprovers"];
 
                     if (!string.IsNullOrWhiteSpace(gradeAdminUserNameTest))
                     {
@@ -793,7 +793,7 @@ namespace ThoughtFocus.Service.Implementation
             return user;
         }
 
-        public ADGroupUsersListResponse SendSTMilestoneNotificationEmail()
+        public ADGroupUsersListResponse SendSTMilestoneNotificationEmail(string CSULBID, int ProgramID)
         {
             ADGroupUsersListResponse obj = new ADGroupUsersListResponse();
 
@@ -826,10 +826,10 @@ namespace ThoughtFocus.Service.Implementation
 
                 // Hardcoded email body
                 string body = @"
-            <p>Dear User,</p>
+            <p>Dear Approver,</p>
 
             <p>
-                This is a notification regarding the Student Teaching Milestone.
+                This is a notification regarding the Student Teaching Milestone. 
             </p>
 
             <p>Thank you,<br/>Student Teaching Team</p>";
@@ -857,8 +857,11 @@ namespace ThoughtFocus.Service.Implementation
 
                 // Send email to all users using BCC
                 string toUser = string.Join(",", emailList);
-
-                _sendMail.SendEmail(toUser,"","COMMON",subject,body,"");
+                foreach (string email in emailList)
+                {
+                    _sendMail.SendEmail(email, "", "COMMON", subject, body, "");
+                }
+                //_sendMail.SendEmail(toUser,"","COMMON",subject,body,"");
 
                 obj.IsSuccess = true;
                 obj.Message = "Student Teaching Milestone notification email sent successfully.";
@@ -872,55 +875,6 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-
-        public PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents SendEmailForApprovers(int communitySiteUsersID, string communitySiteUserName, string communitySiteUserEmail, int activityLogID)
-        {
-            PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents obj = new PUNS_GetCommunitySiteSupervisorDemonstrationTeacher_ToSendMail_ForStudents();
-
-            
-                try
-                {
-                    string toUser = obj.CommunitySiteUserEmail;
-                    string URL = _configuration["ApplicationKeys:PartnerUserBaseURL"] + obj.CommunitySiteUserIdentifier;
-                    string body = string.Empty;
-                    SqlParameter[] parameters1 ={
-                                 new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = 0 },
-                                 new SqlParameter("@SectionName", SqlDbType.VarChar,10) { Value = ""},
-                                 new SqlParameter("@CategoryName", SqlDbType.VarChar,20) { Value = "" },
-                                 new SqlParameter("@Identifier", SqlDbType.VarChar,20) { Value = "FieldWork Mail"},
-                                 new SqlParameter("@Name", SqlDbType.VarChar,50) { Value = "PartnerUser" }
-                            };
-                    DataTable dtMailBody = _helper.GetDataTable("[dbo].[GetAdmissionRequirementsMailBody]", parameters1);
-                    if (dtMailBody.Rows.Count > 0)
-                    {
-                        if (dtMailBody.Rows[0]["EmailBody"] != DBNull.Value)
-                        {
-                            body = Convert.ToString(dtMailBody.Rows[0]["EmailBody"]);
-
-                            string beforeBody = string.Empty;
-                            string afterBody = string.Empty;
-                            beforeBody = "<html>\r\n<head>\r\n<style>\r\n\r\n#link {\r\ncolor: #0563C1;\r\n}\r\n.custom-link {\r\ncolor: #0563C1;\r\n}\r\n</style>\r\n</head>\r\n<body>\r\n<div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\"/></div>";
-                            afterBody = "</body>\r\n</html>";
-                            body = $"{beforeBody}{body}{afterBody}";
-                        }
-                    }
-                    string link = @"<a href ='" + URL + "' target='_blank' class='custom-link'>Click here</a>";
-                    string logoText = "cid:myImageID";
-                    body = body.Replace("[[logoPath]]", logoText)
-                              .Replace("[[link]]", link);
-                    string subject = "Approve student hours for CSULB Clinical Practice";
-                    _sendMail.SendEmail(toUser, "", "COMMON", subject, body, "");
-                    obj.IsSuccess = true;
-                    obj.Message = "Partner User Activation mail sent successfully.";
-                }
-                catch (Exception ex)
-                {
-                    obj.IsSuccess = false;
-                    obj.Message = "Failure sending mail.";
-                }
-            return obj;
-        }
-
 
 
     }

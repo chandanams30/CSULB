@@ -82,6 +82,24 @@ namespace CSULB_COE.Controllers
                         RoleName = "Grade Admin"
                     });
                 }
+                //StudentTeachingApprovers
+                var studentTeachingApprovers = (_configuration["ApplicationKeys:StudentTeachingApprovers"]);
+                var studentTeachingApproversList = studentTeachingApprovers?
+                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                 .Select(x => x.Trim())
+                 .ToList();
+
+                if (studentTeachingApproversList != null &&
+                    studentTeachingApproversList.Any(x =>
+                        string.Equals(x, response.CSULBID, StringComparison.OrdinalIgnoreCase)))
+                {
+                    response.Roles.Add(new Roles
+                    {
+                        RoleId = 16,
+                        RoleName = "Student Teaching Approver"
+                    });
+                }
+
                 //add flagAdmin
                 var flagAdminUsers = (_configuration["ApplicationKeys:FlagAdminCSULBID"]);
 

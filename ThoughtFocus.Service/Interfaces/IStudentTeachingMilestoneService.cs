@@ -28,6 +28,6 @@ namespace ThoughtFocus.Service.Interfaces
         MandateFieldValidationResponse isSubmitEnableST(MandateFieldValidationRequest input);
         ADGroupUsersListResponse GetADGroupListForSTMilestone();
         ADGroupUsersList GetUserIDByCSULBID(string CSULBID);
-        ADGroupUsersListResponse SendSTMilestoneNotificationEmail();
+        ADGroupUsersListResponse SendSTMilestoneNotificationEmail(string CSULBID, int ProgramID);
     }
 }

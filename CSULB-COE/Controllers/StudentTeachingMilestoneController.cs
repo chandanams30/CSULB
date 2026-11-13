@@ -362,12 +362,12 @@ namespace CSULB_COE.Controllers
             }
         }
 
-        [HttpGet("GetADGroupListForSTMilestone")]
-        public ADGroupUsersListResponse GetADGroupListForSTMilestone()
+        [HttpGet("SendSTMilestoneNotificationEmail")]
+        public ADGroupUsersListResponse SendSTMilestoneNotificationEmail(string CSULBID, int ProgramID)
         {
             try
             {
-                ADGroupUsersListResponse response = _studentTeachingMilestoneService.SendSTMilestoneNotificationEmail();
+                ADGroupUsersListResponse response = _studentTeachingMilestoneService.SendSTMilestoneNotificationEmail(CSULBID, ProgramID);
                 return response;
             }
             catch (Exception ex)
