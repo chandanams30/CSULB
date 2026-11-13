@@ -204,4 +204,21 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public string UserRoles { get; set; }
         public string ProgramName { get; set; }
     }
+
+    public class MilestoneWorkflowDetailsListResponse : BaseResponse
+    {
+        public List<MilestoneWorkflowDetails> milestoneWorkflowDetails { get; set; }
+    }
+    public class MilestoneWorkflowDetails
+    {
+        public int FormID { get; set; }
+        public string CSULBID { get; set; }
+        public string ApproverCSULBID { get; set; }
+        public string TermCode { get; set; }
+        public int ProgramID { get; set; }
+        public int FormState { get; set; }
+        public DateTime ModifiedTime { get; set; }
+
+
+    }
 }

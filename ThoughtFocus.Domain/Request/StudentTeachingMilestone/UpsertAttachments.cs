@@ -60,4 +60,14 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public string Term { get; set; }
         public int ProgramID { get; set; }
     }
+    public class UpdateMilestoneWorkflowRequest
+    {
+        public int FormID { get; set; }
+        public string CSULBID { get; set; }
+        public string ApproverCSULBID { get; set; }
+        public string TermCode { get; set; }
+        public int ProgramID { get; set; }
+        public int FormState { get; set; }
+
+    }
 }

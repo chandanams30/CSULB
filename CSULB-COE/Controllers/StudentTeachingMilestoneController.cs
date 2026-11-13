@@ -380,6 +380,44 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+        [HttpGet("UpdateMilestoneWorkflowDetails")]
+        public BaseResponse UpdateMilestoneWorkflowDetails(UpdateMilestoneWorkflowRequest input)
+        {
+            try
+            {
+                BaseResponse response = _studentTeachingMilestoneService.UpdateMilestoneWorkflowDetails(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("GetMilestoneWorkflowDetails")]
+        public MilestoneWorkflowDetailsListResponse GetMilestoneWorkflowDetails(string CSULBID, int FormID)
+        {
+            try
+            {
+                MilestoneWorkflowDetailsListResponse response = new MilestoneWorkflowDetailsListResponse();
+
+                response = _studentTeachingMilestoneService.GetMilestoneWorkflowDetails(CSULBID, FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                MilestoneWorkflowDetailsListResponse response = new MilestoneWorkflowDetailsListResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 
 }

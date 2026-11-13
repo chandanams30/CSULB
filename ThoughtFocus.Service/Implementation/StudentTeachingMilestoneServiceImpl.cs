@@ -875,6 +875,80 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
+        public BaseResponse UpdateMilestoneWorkflowDetails(UpdateMilestoneWorkflowRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                   {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@FormState", SqlDbType.BigInt) { Value = input.FormState },
+                                          new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){Value = input.CSULBID},
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@ApproverCSULBID", SqlDbType.VarChar, 50) { Value = input.ApproverCSULBID },
+
+                                        };
+            DataTable dtResponse = _helper.GetDataTable("[STMilestone].[SaveMilestoneWorkflowDetails]", parameters);
+            if (dtResponse.Rows.Count > 0)
+            {
+                if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "1")
+                {
+                    response.Message = "FormState Updated successfully";
+                    response.IsSuccess = true;
+                }
+                else if (Convert.ToString(dtResponse.Rows[0]["RESULT"]) == "0")
+                {
+                    response.Message = "Failed to update the FormState";
+                    response.IsSuccess = false;
+                }
+            }
+            return response;
+        }
+        public MilestoneWorkflowDetailsListResponse GetMilestoneWorkflowDetails(string CSULBID, int FormID)
+        {
+            MilestoneWorkflowDetailsListResponse obj = new MilestoneWorkflowDetailsListResponse();
+            SqlParameter[] parameters ={
+                                            new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){Value = CSULBID},
+                                            new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
+                                       };
+
+            DataTable dtDD = _helper.GetDataTable("[STMilestone].[GetMilestoneWorkflowDetails]", parameters);
+            try
+            {
+                if (dtDD.Rows.Count > 0)
+                {
+
+                    obj.milestoneWorkflowDetails = dtDD.AsEnumerable().Select(row =>
+                                          new MilestoneWorkflowDetails
+                                          {
+                                              TermCode = row["TermCode"] != DBNull.Value ? Convert.ToString(row["TermCode"]) : string.Empty,
+                                              ModifiedTime = row["ModifiedTime"] != DBNull.Value ? Convert.ToDateTime(row["ModifiedTime"]) : DateTime.MinValue,
+                                              CSULBID = row["CSULBID"] != DBNull.Value ? Convert.ToString(row["CSULBID"]) : string.Empty,
+                                              ApproverCSULBID = row["ApproverCSULBID"] != DBNull.Value ? Convert.ToString(row["ApproverCSULBID"]) : string.Empty,
+                                              FormID = row["FormID"] != DBNull.Value ? Convert.ToInt32(row["FormID"]) : 0,
+                                              ProgramID = row["ProgramID"] != DBNull.Value ? Convert.ToInt32(row["ProgramID"]) : 0,
+                                              FormState = row["ApproverSequence"] != DBNull.Value ? Convert.ToInt32(row["ApproverSequence"]) : 0
+                                          }).ToList();
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+
 
 
     }
