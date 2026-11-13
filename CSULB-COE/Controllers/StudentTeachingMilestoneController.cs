@@ -9,6 +9,7 @@ using ThoughtFocus.Domain.Request.StudentTeachingMilestone;
 using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
 using ThoughtFocus.Service.Interfaces;
@@ -413,6 +414,24 @@ namespace CSULB_COE.Controllers
                 MilestoneWorkflowDetailsListResponse response = new MilestoneWorkflowDetailsListResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetSTMilestoneWorkflowProcessTransitionHistory")]
+        public GetSTMilestoneWorkflowProcessTransitionHistoryResponse GetSTMilestoneWorkflowProcessTransitionHistory(int FormID)
+        {
+            try
+            {
+                GetSTMilestoneWorkflowProcessTransitionHistoryResponse response = _studentTeachingMilestoneService.GetSTMilestoneWorkflowProcessTransitionHistory(FormID);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                GetSTMilestoneWorkflowProcessTransitionHistoryResponse response = new GetSTMilestoneWorkflowProcessTransitionHistoryResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

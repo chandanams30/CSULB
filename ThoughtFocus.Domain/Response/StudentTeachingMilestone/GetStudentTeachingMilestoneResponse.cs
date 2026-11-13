@@ -221,4 +221,9 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
 
 
     }
+    public class GetSTMilestoneWorkflowProcessTransitionHistoryResponse : BaseResponse
+    {
+        public string WorkflowTransitionHistory { get; set; }
+    }
+
 }

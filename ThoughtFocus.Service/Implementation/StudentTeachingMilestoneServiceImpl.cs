@@ -26,6 +26,7 @@ using ThoughtFocus.Domain.Response;
 using ThoughtFocus.Domain.Response.Admin;
 using ThoughtFocus.Domain.Response.FieldWork;
 using ThoughtFocus.Domain.Response.GraduateProgram;
+using ThoughtFocus.Domain.Response.Milestones;
 using ThoughtFocus.Domain.Response.StudentProfile;
 using ThoughtFocus.Domain.Response.StudentTeachingMilestone;
 using ThoughtFocus.Service.Interfaces;
@@ -665,7 +666,10 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters =
                                    {
                                           new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
-                                          new SqlParameter("@StateID", SqlDbType.BigInt) { Value = input.StateID }
+                                          new SqlParameter("@StateID", SqlDbType.BigInt) { Value = input.StateID },
+                                          new SqlParameter("@FromWorkFlowStateID", SqlDbType.BigInt) { Value = input.FromWorkFlowStateID },
+                                          new SqlParameter("@ToWorkFlowStateID", SqlDbType.BigInt) { Value = input.ToWorkFlowStateID },
+                                          new SqlParameter("@ActionTakenBy", SqlDbType.BigInt) { Value = input.ActionTakenBy }
                                         };
             DataTable dtResponse = _helper.GetDataTable("[STMilestone].[UpdateMilestoneFormState]", parameters);
             if (dtResponse.Rows.Count > 0)
@@ -948,6 +952,44 @@ namespace ThoughtFocus.Service.Implementation
             }
             return obj;
         }
+        public GetSTMilestoneWorkflowProcessTransitionHistoryResponse GetSTMilestoneWorkflowProcessTransitionHistory(int FormID)
+        {
+            GetSTMilestoneWorkflowProcessTransitionHistoryResponse obj = new GetSTMilestoneWorkflowProcessTransitionHistoryResponse();
+            SqlParameter[] parameters = {
+                                    new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID }
+                                };
+
+            DataTable dtSTMilestonePublishedForm = _helper.GetDataTable("[STMilestone].[GetWorkflowProcessTransitionHistory]", parameters);
+            try
+            {
+
+                if (dtSTMilestonePublishedForm.Rows.Count > 0)
+                {
+                    obj.WorkflowTransitionHistory = Convert.ToString(dtSTMilestonePublishedForm.Rows[0]["WorkflowTransitionHistory"]);
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+
+            }
+
+            catch (Exception ex)
+            {
+
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+
+            }
+            return obj;
+
+        }
+
 
 
 

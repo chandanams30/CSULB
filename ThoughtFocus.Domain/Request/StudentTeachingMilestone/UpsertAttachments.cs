@@ -48,11 +48,7 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public string CSULBID { get; set; }
         public int ProgramID { get; set; }
     }
-    public class UpdateFormStateRequest
-    {
-        public int FormID { get; set; }
-        public int StateID { get; set; }
-    }
+    
     public class MandateFieldValidationRequest
     {
         public int FormID { get; set; }
@@ -70,4 +66,15 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public int FormState { get; set; }
 
     }
+    public class UpdateFormStateRequest
+
+    {
+        public int FormID { get; set; }
+        public int StateID { get; set; }
+        public int FromWorkFlowStateID { get; set; }
+        public int ToWorkFlowStateID { get; set; }
+        public int ActionTakenBy { get; set; }
+
+    }
+
 }

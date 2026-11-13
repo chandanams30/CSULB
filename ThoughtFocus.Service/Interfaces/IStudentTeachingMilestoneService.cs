@@ -31,5 +31,6 @@ namespace ThoughtFocus.Service.Interfaces
         ADGroupUsersListResponse SendSTMilestoneNotificationEmail(string CSULBID, int ProgramID);
         BaseResponse UpdateMilestoneWorkflowDetails(UpdateMilestoneWorkflowRequest input);
         MilestoneWorkflowDetailsListResponse GetMilestoneWorkflowDetails(string CSULBID, int FormID);
+        GetSTMilestoneWorkflowProcessTransitionHistoryResponse GetSTMilestoneWorkflowProcessTransitionHistory(int FormID);
     }
 }
