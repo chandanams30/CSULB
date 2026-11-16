@@ -931,7 +931,7 @@ namespace ThoughtFocus.Service.Implementation
                                               ApproverCSULBID = row["ApproverCSULBID"] != DBNull.Value ? Convert.ToString(row["ApproverCSULBID"]) : string.Empty,
                                               FormID = row["FormID"] != DBNull.Value ? Convert.ToInt32(row["FormID"]) : 0,
                                               ProgramID = row["ProgramID"] != DBNull.Value ? Convert.ToInt32(row["ProgramID"]) : 0,
-                                              FormState = row["ApproverSequence"] != DBNull.Value ? Convert.ToInt32(row["ApproverSequence"]) : 0
+                                              FormState = row["FormState"] != DBNull.Value ? Convert.ToInt32(row["FormState"]) : 0
                                           }).ToList();
 
                     obj.IsSuccess = true;

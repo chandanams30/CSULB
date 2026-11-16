@@ -381,7 +381,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpGet("UpdateMilestoneWorkflowDetails")]
+        [HttpPost("UpdateMilestoneWorkflowDetails")]
         public BaseResponse UpdateMilestoneWorkflowDetails(UpdateMilestoneWorkflowRequest input)
         {
             try
@@ -399,7 +399,7 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
-        [HttpPost("GetMilestoneWorkflowDetails")]
+        [HttpGet("GetMilestoneWorkflowDetails")]
         public MilestoneWorkflowDetailsListResponse GetMilestoneWorkflowDetails(string CSULBID, int FormID)
         {
             try

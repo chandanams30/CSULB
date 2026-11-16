@@ -10,7 +10,6 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     {
 
     }
-
         public class GetLatestFormResponse : BaseResponse
         {
             public GetLatestFormDetails getLatestFormDetails { get; set; }
@@ -218,7 +217,6 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public int ProgramID { get; set; }
         public int FormState { get; set; }
         public DateTime ModifiedTime { get; set; }
-
 
     }
     public class GetSTMilestoneWorkflowProcessTransitionHistoryResponse : BaseResponse
