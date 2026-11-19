@@ -1048,7 +1048,7 @@ namespace ThoughtFocus.Service.Implementation
                     }
                 }
             }
-            else if (input.FormStateID == 10 || input.FormStateID == 11)
+            else if (input.FormStateID == 9 || input.FormStateID == 10 || input.FormStateID == 11 )
             {
                 sendFormOfferedNotOffered(input.UserID, input.FormID, input.ProgramID, input.TermCode, input.FormStateID);
             }
@@ -1191,7 +1191,7 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     int applicationTypeID = Convert.ToInt32(dsRec.Tables[1].Rows[0]["ApplicationTypeID"]);
                     string csulbid= Convert.ToString(dsRec.Tables[1].Rows[0]["CSULBID"]);
-                    if ((applicationTypeID == 1 && (formStateID == 10 || formStateID == 11)) || (applicationTypeID == 2 && formStateID == 11))
+                    if ((applicationTypeID == 1 && (formStateID == 9 || formStateID == 10 || formStateID == 11)) || (applicationTypeID == 2 && (formStateID == 9 || formStateID == 11)))
                     {
                         //if (formStateID == 10)
                         //{
@@ -1210,7 +1210,7 @@ namespace ThoughtFocus.Service.Implementation
                             string programSelected = string.Empty;
                             string date = DateTime.Now.ToString("MMMM d, yyyy");
                             string finalDecisionComments = string.Empty;
-                            decisionType = formStateID == 10 ? "Offered" : "Not Offered";
+                            decisionType = formStateID == 9 ? "Disqualified" : formStateID == 10 ? "Offered" : "Not Offered";
 
                             applicantsName = Convert.ToString(dsRec.Tables[0].Rows[0]["ApplicantName"]);
                             toMail = Convert.ToString(dsRec.Tables[0].Rows[0]["cusulbEmail"]);
@@ -1287,14 +1287,19 @@ namespace ThoughtFocus.Service.Implementation
                                 subject = "Application Offered";
                                 beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
                             }
-                            //else(formStateID == 11)
-                            //{
-                            //   subject = "Application Not Offered";
-                            //   decisionType = "Not Offered";
-                            //   beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
-                            //}
-                            //beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
-                            afterBody = "</body></html>";
+                            else if (formStateID == 9)
+                            {
+                                subject = "Application Disqualified";
+                                beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                            }
+                        //else(formStateID == 11)
+                        //{
+                        //   subject = "Application Not Offered";
+                        //   decisionType = "Not Offered";
+                        //   beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                        //}
+                        //beforeBody = "<html><body><div><img alt=\"logo\" src=[[logoPath]] style=\"width:300px; height:auto;\" /></div>";
+                        afterBody = "</body></html>";
                             body = $"{beforeBody}{body}{afterBody}";
                             body = body.Replace("[[logoPath]]", logoText)
                                        .Replace("[[ApplicantName]]", applicantsName)
