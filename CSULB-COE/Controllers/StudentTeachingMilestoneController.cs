@@ -476,6 +476,26 @@ namespace CSULB_COE.Controllers
                 return response;
             }
         }
+
+        [HttpPost("RemoveStudentTeachingReviewer")]
+        public BaseResponse RemoveStudentTeachingReviewer(AddSTReviewerRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _studentTeachingMilestoneService.RemoveStudentTeachingReviewer(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to save data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
     }
 
 }

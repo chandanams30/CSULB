@@ -28,8 +28,6 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public string TermCode { get; set; }
         public string CSULBID { get; set; }
 
-
-
     }
     public class AssignApproverAssignerRequest
     {
@@ -89,6 +87,13 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public int ProgramID { get; set; }
         public string TermCode { get; set; }
         public string StudentTeachingMessageBoard { get; set; }
+    }
+    public class AddSTReviewerRequest
+    {
+        public int FormID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public int ReviewerID { get; set; }
     }
 
 }

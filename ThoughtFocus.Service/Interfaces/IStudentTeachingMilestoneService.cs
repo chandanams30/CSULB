@@ -34,5 +34,6 @@ namespace ThoughtFocus.Service.Interfaces
         GetSTMilestoneWorkflowProcessTransitionHistoryResponse GetSTMilestoneWorkflowProcessTransitionHistory(int FormID);
         StudentTeachingMessageBoardResponse GetStudentTeachingMessageBoard(int UserID, int FormID, int ProgramID, string TermCode);
         BaseResponse UpdateStudentTeachingMessageBoard(StudentTeachingMessageBoardRequest input);
+        BaseResponse RemoveStudentTeachingReviewer(AddSTReviewerRequest input);
     }
 }

@@ -232,6 +232,7 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public int ProgramID { get; set; }
         public int FormState { get; set; }
         public DateTime ModifiedTime { get; set; }
+        public string ReviewerCSULBID { get; set; }
 
     }
     public class GetSTMilestoneWorkflowProcessTransitionHistoryResponse : BaseResponse

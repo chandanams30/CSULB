@@ -998,9 +998,11 @@ namespace ThoughtFocus.Service.Implementation
                                               ApproverCSULBID = row["ApproverCSULBID"] != DBNull.Value ? Convert.ToString(row["ApproverCSULBID"]) : string.Empty,
                                               FormID = row["FormID"] != DBNull.Value ? Convert.ToInt32(row["FormID"]) : 0,
                                               ProgramID = row["ProgramID"] != DBNull.Value ? Convert.ToInt32(row["ProgramID"]) : 0,
-                                              FormState = row["FormState"] != DBNull.Value ? Convert.ToInt32(row["FormState"]) : 0
-                                          }).ToList();
+                                              FormState = row["FormState"] != DBNull.Value ? Convert.ToInt32(row["FormState"]) : 0,
+                                              ReviewerCSULBID = row["ReviewerCSULBID"] != DBNull.Value ? Convert.ToString(row["ReviewerCSULBID"]) : string.Empty,
 
+                                          }).ToList();
+                    
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
 
@@ -1130,7 +1132,22 @@ namespace ThoughtFocus.Service.Implementation
             return response;
         }
 
+        public BaseResponse RemoveStudentTeachingReviewer(AddSTReviewerRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@ReviewerID", SqlDbType.BigInt) { Value = input.ReviewerID }
+                                        };
 
+            int ID = _helper.InsertTable("[STMilestone].[RemoveStudentTeachingReviewer]", parameters);
+            response.Message = "Reviewer Removed Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
 
     }
 }
