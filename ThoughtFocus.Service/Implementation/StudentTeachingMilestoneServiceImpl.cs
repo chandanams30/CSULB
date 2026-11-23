@@ -98,11 +98,16 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@UserID", SqlDbType.VarChar, 50) { Value = UserID },
                                           new SqlParameter("@FormID", SqlDbType.NVarChar, -1) { Value = formID },
                                           new SqlParameter("@ProgramID", SqlDbType.NVarChar, -1) { Value = programID },
-                                          new SqlParameter("@LoggedInRole", SqlDbType.NVarChar, -1) { Value = roleID },
+                                          new SqlParameter("@LoggedInRole", SqlDbType.NVarChar, -1) { Value = roleID }
                                           //new SqlParameter("@MilestoneStateID", SqlDbType.BigInt) { Value = milestoneStateID}
                                         };
 
             DataSet dtStudentTeaching = _helper.GetDataSet("[Milestone].[GetStudentTeachingData]", parameters);
+            MandateFieldValidationRequest input = new MandateFieldValidationRequest();
+            input.FormID = formID;
+            input.ProgramID = programID;
+            input.CSULBID = CsuldId;
+            var isSubmitEnabled = isSubmitEnableST(input);
             try
             {
                 if (dtStudentTeaching.Tables.Count > 0)
@@ -136,6 +141,8 @@ namespace ThoughtFocus.Service.Implementation
                         CityST = Convert.ToString(row["CityST"]),
                         PhoneST = Convert.ToString(row["PhoneST"]),
                         ZipST = Convert.ToString(row["ZipST"]),
+                        isSubmitEnabled = isSubmitEnabled.isEnableSubmit
+
                     }).FirstOrDefault();
                     
                     obj.AttachmentsInformation = dtStudentTeaching.Tables[1].AsEnumerable().Select(row => new AttachmentsInformation
@@ -181,6 +188,36 @@ namespace ThoughtFocus.Service.Implementation
                         Name = Convert.ToString(row["Name"])
 
                     }).ToList();
+
+                    obj.studentTeachingRoleHandler = dtStudentTeaching.Tables.Count > 5
+                   && dtStudentTeaching.Tables[6] != null
+                   && dtStudentTeaching.Tables[6].Rows.Count > 0
+                   ? new StudentTeachingRoleHandler
+                   {
+                       StudentTeachingControls =
+                           dtStudentTeaching.Tables[6].Rows[0]["StudentTeachingRoleHandler"] != DBNull.Value
+                           ? Newtonsoft.Json.JsonConvert.DeserializeObject(
+                               Convert.ToString(
+                                   dtStudentTeaching.Tables[6].Rows[0]["StudentTeachingRoleHandler"]))
+                           : new { }
+
+                   }
+                   : null;
+
+                    obj.STFormStateHandler = dtStudentTeaching.Tables.Count > 6
+                  && dtStudentTeaching.Tables[7] != null
+                  && dtStudentTeaching.Tables[7].Rows.Count > 0
+                  ? new STFormStateHandler
+                  {
+                      STStateHandler =
+                          dtStudentTeaching.Tables[7].Rows[0]["StudentTeachingFormStateHandler"] != DBNull.Value
+                          ? Newtonsoft.Json.JsonConvert.DeserializeObject(
+                              Convert.ToString(
+                                  dtStudentTeaching.Tables[7].Rows[0]["StudentTeachingFormStateHandler"]))
+                          : new { }
+
+                  }
+                  : null;
 
                     obj.IsSuccess = true;
                     obj.Message = "Data retrieved succesfully ";
@@ -494,6 +531,7 @@ namespace ThoughtFocus.Service.Implementation
         {
             BaseResponse response = new BaseResponse();
             string jsonString;
+            bool IsMilestoneOpen = false;
 
             if (input.JSON is JsonElement element)
             {
@@ -526,9 +564,27 @@ namespace ThoughtFocus.Service.Implementation
             }
             };
 
-            var id = _helper.GetDataTable("[Milestone].[SaveStudentTeachingData]", parameters);
-            response.Message = "Student Teaching data saved successfully";
-            response.IsSuccess = true;
+            SqlParameter[] parameters1 =
+            {
+            new SqlParameter("@TermCode", SqlDbType.VarChar, 10){Value = input.TermCode},
+            new SqlParameter("@CSULBID", SqlDbType.VarChar, 50){Value = input.CSULBID}
+            };
+            var result = _helper.GetDataTable("[STMilestone].[ValidateMilestoneDeadline]", parameters1);
+            if (result.Rows.Count > 0)
+            {
+                IsMilestoneOpen = Convert.ToBoolean(result.Rows[0]["IsMilestoneOpen"]);
+            }
+            if (IsMilestoneOpen == true)
+            {
+                var id = _helper.GetDataTable("[Milestone].[SaveStudentTeachingData]", parameters);
+                response.Message = "Student Teaching data saved successfully";
+                response.IsSuccess = true;
+            }
+            else
+            {
+                response.Message = "Student Teaching Milestone have passed the Deadline for the given term";
+                response.IsSuccess = true;
+            }
             return response;
         }
 
@@ -693,8 +749,7 @@ namespace ThoughtFocus.Service.Implementation
             SqlParameter[] parameters ={
                                             new SqlParameter("@CSULBID", SqlDbType.NVarChar, -1){Value = input.CSULBID},
                                             new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
-                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
-                                            new SqlParameter("@Term", SqlDbType.VarChar, 10) { Value = input.Term }
+                                            new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID }
                                        };
 
             DataTable dtDD = _helper.GetDataTable("[STMilestone].[ValidateMandatoryFields]", parameters);
@@ -890,6 +945,7 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
                                           new SqlParameter("@TermCode", SqlDbType.VarChar, 10) { Value = input.TermCode },
                                           new SqlParameter("@ApproverCSULBID", SqlDbType.VarChar, 50) { Value = input.ApproverCSULBID },
+                                          new SqlParameter("@ReviewerCSULBID", SqlDbType.VarChar, 50) { Value = input.ReviewerCSULBID }
 
                                         };
             DataTable dtResponse = _helper.GetDataTable("[STMilestone].[SaveMilestoneWorkflowDetails]", parameters);
@@ -904,6 +960,17 @@ namespace ThoughtFocus.Service.Implementation
                 {
                     response.Message = "Failed to update the FormState";
                     response.IsSuccess = false;
+                }
+                if (input.isApprovedByApprover)
+                {
+                    var studentDetails = GetUserIDByCSULBID(input.CSULBID);
+                    string logoText = "cid:myImageID";
+                    string body = GetMailBodyTemplate("StudentTeachingMilestoneApproved.html");
+                    string subject = "Milestone Approved by the Approver";
+                    body = body.Replace("[[logoPath]]", logoText)
+                               .Replace("[[studentName]]", studentDetails.FirstName + " " + studentDetails.LastName);
+                    studentDetails.EMAIL = "ramyashree.suresh@thoughtfocus.com";
+                    _sendMail.SendEmail(studentDetails.EMAIL, "", "COMMON", subject, body, "");
                 }
             }
             return response;
@@ -989,7 +1056,79 @@ namespace ThoughtFocus.Service.Implementation
             return obj;
 
         }
+        private string GetMailBodyTemplate(string templateName)
+        {
+            string body = string.Empty;
+            string filepath = Path.Combine("SupportFiles/EmailTemplates", templateName);
+            using (StreamReader reader = new StreamReader(Path.GetFullPath(filepath)))
+            {
+                body = reader.ReadToEnd();
+            }
+            return body;
+        }
+        public StudentTeachingMessageBoardResponse GetStudentTeachingMessageBoard(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            StudentTeachingMessageBoardResponse obj = new StudentTeachingMessageBoardResponse();
+            SqlParameter[] parameters = {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = TermCode }
+                                        };
 
+            DataTable dtMessageBoard = _helper.GetDataTable("[STMilestone].[getStudentTeachingMessageBoard]", parameters);
+            try
+            {
+                if (dtMessageBoard.Rows.Count > 0)
+                {
+
+
+                    obj = dtMessageBoard.AsEnumerable().Select(row =>
+                                              new StudentTeachingMessageBoardResponse
+                                              {
+                                                  FormID = Convert.ToInt32(row["ID"]),
+                                                  UserID = Convert.ToInt32(row["UserID"]),
+                                                  ProgramID = Convert.ToInt32(row["ProgramID"]),
+                                                  TermCode = Convert.ToString(row["TermCode"]),
+                                                  StudentMessageBoard = Convert.ToString(row["StudentTeachingMessageBoard"])
+                                              }).FirstOrDefault();
+
+
+                    obj.IsSuccess = true;
+                    obj.Message = "Data Retrieved Successfully";
+
+                }
+                else
+                {
+                    obj.IsSuccess = false;
+                    obj.Message = "No Data Present";
+                }
+            }
+            catch (Exception ex)
+            {
+                obj.IsSuccess = false;
+                obj.Message = "Data Retrieval Failed , Please contact site admin ";
+                obj.StackTrace = ex.Message;
+            }
+            return obj;
+        }
+        public BaseResponse UpdateStudentTeachingMessageBoard(StudentTeachingMessageBoardRequest input)
+        {
+            BaseResponse response = new BaseResponse();
+            SqlParameter[] parameters =
+                                       {
+                                          new SqlParameter("@UserID", SqlDbType.BigInt) { Value = input.UserID },
+                                          new SqlParameter("@FormID", SqlDbType.BigInt) { Value = input.FormID },
+                                          new SqlParameter("@ProgramID", SqlDbType.BigInt) { Value = input.ProgramID },
+                                          new SqlParameter("@TermCode", SqlDbType.NVarChar, 10) { Value = input.TermCode },
+                                          new SqlParameter("@StudentTeachingMessageBoard", SqlDbType.NVarChar,-1) { Value = input.StudentTeachingMessageBoard }
+                                        };
+
+            int ID = _helper.InsertTable("[STMilestone].[updateStudentTeachingMessageBoard]", parameters);
+            response.Message = "Message board updated Successfully";
+            response.IsSuccess = true;
+            return response;
+        }
 
 
 

@@ -30,7 +30,19 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public BILARequirements BilaRequirements { get; set; }
         public MilestoneState MilestoneState { get; set; }
         public List<MilestoneStateDetails> MilestoneStateDetails { get; set; }
+        public StudentTeachingRoleHandler studentTeachingRoleHandler { get; set; }
+        public STFormStateHandler STFormStateHandler { get; set; }
 
+
+    }
+    public class StudentTeachingRoleHandler
+    {
+        public object StudentTeachingControls { get; set; }
+
+    }
+    public class STFormStateHandler
+    {
+        public object STStateHandler { get; set; }
     }
     public class BILARequirements
     {
@@ -91,6 +103,9 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public string StateST { get; set; }
         public string ZipST { get; set; }
         public string PhoneST { get; set; }
+        public bool isSubmitEnabled { get; set; }
+
+        
     }
 
     public class DistrictListResponse : BaseResponse
@@ -223,5 +238,14 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     {
         public string WorkflowTransitionHistory { get; set; }
     }
+    public class StudentTeachingMessageBoardResponse : BaseResponse
+    {
+        public int FormID { get; set; }
+        public int UserID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public string StudentMessageBoard { get; set; }
+    }
+
 
 }

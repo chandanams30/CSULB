@@ -56,9 +56,21 @@ namespace ThoughtFocus.Domain.Response.Admin
     }
     public class MilestoneDatesResponse : BaseResponse
     {
+        public MilestoneDates milestoneDates;
+
+        public ExceptionalCSULBIDs exceptionalCSULBIDs;
+
+    }
+    public class MilestoneDates
+    {
         public DateTime MilestoneOpenDate { get; set; }
         public DateTime MilestoneCloseDate { get; set; }
 
     }
+    public class ExceptionalCSULBIDs
+    {
+        public string CSULBIDs { get; set; }
+        public string TermCode { get; set; }
 
+    }
 }

@@ -32,5 +32,7 @@ namespace ThoughtFocus.Service.Interfaces
         BaseResponse UpdateMilestoneWorkflowDetails(UpdateMilestoneWorkflowRequest input);
         MilestoneWorkflowDetailsListResponse GetMilestoneWorkflowDetails(string CSULBID, int FormID);
         GetSTMilestoneWorkflowProcessTransitionHistoryResponse GetSTMilestoneWorkflowProcessTransitionHistory(int FormID);
+        StudentTeachingMessageBoardResponse GetStudentTeachingMessageBoard(int UserID, int FormID, int ProgramID, string TermCode);
+        BaseResponse UpdateStudentTeachingMessageBoard(StudentTeachingMessageBoardRequest input);
     }
 }

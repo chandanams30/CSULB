@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using ThoughtFocus.Domain.Request.GraduateProgram;
 using ThoughtFocus.Domain.Request.StudentProfile;
 using ThoughtFocus.Domain.Request.StudentTeachingMilestone;
 using ThoughtFocus.Domain.Response;
@@ -432,6 +433,44 @@ namespace CSULB_COE.Controllers
                 GetSTMilestoneWorkflowProcessTransitionHistoryResponse response = new GetSTMilestoneWorkflowProcessTransitionHistoryResponse();
                 response.IsSuccess = false;
                 response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpGet("GetStudentTeachingMessageBoard")]
+        public StudentTeachingMessageBoardResponse GetStudentTeachingMessageBoard(int UserID, int FormID, int ProgramID, string TermCode)
+        {
+            try
+            {
+                StudentTeachingMessageBoardResponse response = new StudentTeachingMessageBoardResponse();
+                response = _studentTeachingMilestoneService.GetStudentTeachingMessageBoard(UserID, FormID, ProgramID, TermCode);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                StudentTeachingMessageBoardResponse response = new StudentTeachingMessageBoardResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to retrieve data , please try after sometime";
+                response.StackTrace = ex.Message;
+                _logger.LogError(ex, ex.Message);
+                return response;
+            }
+        }
+        [HttpPost("UpdateStudentTeachingMessageBoard")]
+        public BaseResponse UpdateStudentTeachingMessageBoard(StudentTeachingMessageBoardRequest input)
+        {
+            try
+            {
+                BaseResponse response = new BaseResponse();
+                response = _studentTeachingMilestoneService.UpdateStudentTeachingMessageBoard(input);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BaseResponse response = new BaseResponse();
+                response.IsSuccess = false;
+                response.Message = "Failed to update data , please try after sometime";
                 response.StackTrace = ex.Message;
                 _logger.LogError(ex, ex.Message);
                 return response;

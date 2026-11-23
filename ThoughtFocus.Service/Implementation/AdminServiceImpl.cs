@@ -1059,12 +1059,22 @@ namespace ThoughtFocus.Service.Implementation
             {
                 if (dtApplicationPrograms.Tables.Count > 0)
                 {
-                    obj = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
-                                                 new MilestoneDatesResponse
+                    obj.milestoneDates = dtApplicationPrograms.Tables[0].AsEnumerable().Select(row =>
+                                                 new MilestoneDates
                                                  {
                                                      MilestoneOpenDate = Convert.ToDateTime(row["MilestoneOpenDate"]),
-                                                     MilestoneCloseDate = Convert.ToDateTime(row["MilestoneCloseDate"]),
+                                                     MilestoneCloseDate = Convert.ToDateTime(row["MilestoneCloseDate"])
                                                  }).FirstOrDefault();
+                    if (dtApplicationPrograms != null && dtApplicationPrograms.Tables.Count > 1 &&
+                        dtApplicationPrograms.Tables[1] != null && dtApplicationPrograms.Tables[1].Rows.Count > 0)
+                    {
+                        obj.exceptionalCSULBIDs = dtApplicationPrograms.Tables[1].AsEnumerable().Select(row =>
+                                                 new ExceptionalCSULBIDs
+                                                 {
+                                                     CSULBIDs = Convert.ToString(row["CSULBIDs"]),
+                                                     TermCode = Convert.ToString(row["TermCode"])
+                                                 }).FirstOrDefault();
+                    }
 
                     obj.IsSuccess = true;
                     obj.Message = "Data Retrieved Successfully";
@@ -1087,6 +1097,9 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
                                           new SqlParameter("@MilestoneOpenDate", SqlDbType.DateTime) {Value = input.MilestoneOpenDate},
                                           new SqlParameter("@MilestoneCloseDate", SqlDbType.DateTime) {Value = input.MilestoneCloseDate},
+                                          new SqlParameter("@Identifier", SqlDbType.VarChar) {Value = input.Identifier},
+                                          new SqlParameter("@CSULBIDs", SqlDbType.VarChar) {Value = input.CSULBIDs}
+
                                         };
                 var result = _helper.InsertTable("[STMilestone].[UpdateSTMilestoneDates]", parameters);
                 

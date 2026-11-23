@@ -25,6 +25,10 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
     public class StudentTeachingMilestoneRequest
     {
         public object JSON { get; set; }
+        public string TermCode { get; set; }
+        public string CSULBID { get; set; }
+
+
 
     }
     public class AssignApproverAssignerRequest
@@ -61,10 +65,12 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public int FormID { get; set; }
         public string CSULBID { get; set; }
         public string ApproverCSULBID { get; set; }
+        public string ReviewerCSULBID { get; set; }
         public string TermCode { get; set; }
         public int ProgramID { get; set; }
         public int FormState { get; set; }
-
+        public bool isApprovedByApprover { get; set; }
+        
     }
     public class UpdateFormStateRequest
 
@@ -75,6 +81,14 @@ namespace ThoughtFocus.Domain.Request.StudentTeachingMilestone
         public int ToWorkFlowStateID { get; set; }
         public int ActionTakenBy { get; set; }
 
+    }
+    public class StudentTeachingMessageBoardRequest
+    {
+        public int FormID { get; set; }
+        public int UserID { get; set; }
+        public int ProgramID { get; set; }
+        public string TermCode { get; set; }
+        public string StudentTeachingMessageBoard { get; set; }
     }
 
 }
