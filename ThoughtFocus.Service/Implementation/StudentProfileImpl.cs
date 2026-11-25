@@ -306,7 +306,26 @@ namespace ThoughtFocus.Service.Implementation
                                                   Status = Convert.ToString(row["Status"]),
                                                   ProgramPlannerState = row["ProgramPlannerState"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["ProgramPlannerState"]),
                                                   STMilestoneStateName = row["STMilestoneStateName"] == DBNull.Value ? "" : Convert.ToString(row["STMilestoneStateName"]),
-                                                  STMilestoneStateID = row["STMilestoneStateID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["STMilestoneStateID"])
+                                                  STMilestoneStateID = row["STMilestoneStateID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["STMilestoneStateID"]),
+                                                  AlternateEmail = row["AlternateEmail"] == DBNull.Value ? "" : Convert.ToString(row["AlternateEmail"]),
+                                                  CredentialProgram = row["CredentialProgram"] == DBNull.Value ? "" : Convert.ToString(row["CredentialProgram"]),
+                                                  CredentialPathway = row["CredentialPathway"] == DBNull.Value ? "" : Convert.ToString(row["CredentialPathway"]),
+                                                  CredentilAreaPathway = row["CredentilAreaPathway"] == DBNull.Value ? "" : Convert.ToString(row["CredentilAreaPathway"]),
+                                                  PursuingBILA = row["PursuingBILA"] == DBNull.Value ? "" : Convert.ToString(row["PursuingBILA"]),
+                                                  CTCDocumentNumber = row["CTCDocumentNumber"] == DBNull.Value ? "" : Convert.ToString(row["CTCDocumentNumber"]),
+                                                  StudentTeachingStatus = row["StudentTeachingStatus"] == DBNull.Value ? "" : Convert.ToString(row["StudentTeachingStatus"]),
+                                                  PossibleInternship = row["PossibleInternship"] == DBNull.Value ? "" : Convert.ToString(row["PossibleInternship"]),
+                                                  RelativeLocalSchool = row["RelativeLocalSchool"] == DBNull.Value ? "" : Convert.ToString(row["RelativeLocalSchool"]),
+                                                  TransportationMethod = row["TransportationMethod"] == DBNull.Value ? "" : Convert.ToString(row["TransportationMethod"]),
+                                                  SpecialConsiderations = row["SpecialConsiderations"] == DBNull.Value ? "" : Convert.ToString(row["SpecialConsiderations"]),
+                                                  DistrictPreference1 = row["DistrictPreference1"] == DBNull.Value ? "" : Convert.ToString(row["DistrictPreference1"]),
+                                                  DistrictPreference2 = row["DistrictPreference2"] == DBNull.Value ? "" : Convert.ToString(row["DistrictPreference2"]),
+                                                  DistrictPreference3 = row["DistrictPreference3"] == DBNull.Value ? "" : Convert.ToString(row["DistrictPreference3"]),
+                                                  PhysicalAddress = row["PhysicalAddress"] == DBNull.Value ? "" : Convert.ToString(row["PhysicalAddress"]),
+                                                  Address = row["Address"] == DBNull.Value ? "" : Convert.ToString(row["Address"]),
+                                                  City = row["City"] == DBNull.Value ? "" : Convert.ToString(row["City"]),
+                                                  Zip = row["Zip"] == DBNull.Value ? "" : Convert.ToString(row["Zip"]),
+                                                  Phone = row["Phone"] == DBNull.Value ? "" : Convert.ToString(row["Phone"])
                                               }).ToList();
                 obj.IsSuccess = true;
                 obj.Message = "Data retrieved succesfully ";
