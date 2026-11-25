@@ -32,7 +32,13 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
         public List<MilestoneStateDetails> MilestoneStateDetails { get; set; }
         public StudentTeachingRoleHandler studentTeachingRoleHandler { get; set; }
         public STFormStateHandler STFormStateHandler { get; set; }
+        public CredentialPathway CredentialPathway { get; set; }
 
+    }
+    public class CredentialPathway
+    {
+        public string STCredentialPathway { get; set; }
+        public string STAuthorizationArea { get; set; }
 
     }
     public class StudentTeachingRoleHandler

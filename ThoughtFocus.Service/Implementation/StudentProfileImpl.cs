@@ -274,13 +274,16 @@ namespace ThoughtFocus.Service.Implementation
 
             return obj;
         }
-        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString, string identifier)
+        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString, string identifier, string LoggedInCSULBID, int roleID)
         {
             StudentProfileSearchResponse obj = new StudentProfileSearchResponse();
             SqlParameter[] parameters =
                                      {
                                           new SqlParameter("@searchString", SqlDbType.NVarChar,100) { Value = searchString },
-                                          new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = identifier }
+                                          new SqlParameter("@Identifier", SqlDbType.NVarChar,50) { Value = identifier },
+                                          new SqlParameter("@LoggedInCSULBID", SqlDbType.NVarChar,50) { Value = LoggedInCSULBID },
+                                          new SqlParameter("@RoleID", SqlDbType.BigInt) { Value = roleID }
+
                                      };
             DataTable dtResponse = _helper.GetDataTable("[dbo].[SearchStudentProfile]", parameters);
             if (dtResponse.Rows.Count > 0)

@@ -56,11 +56,11 @@ namespace CSULB_COE.Controllers
         }
         //Student profile search
         [HttpGet("GetStudentProfileSearchData")]
-        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString,string identifier)
+        public StudentProfileSearchResponse GetStudentProfileSearchData(string searchString,string identifier, string LoggedInCSULBID, int roleID)
         {
             try
             {
-                StudentProfileSearchResponse response = _studentProfileService.GetStudentProfileSearchData(searchString,identifier);
+                StudentProfileSearchResponse response = _studentProfileService.GetStudentProfileSearchData(searchString,identifier, LoggedInCSULBID, roleID);
                 return response;
             }
             catch (Exception ex)

@@ -1097,8 +1097,8 @@ namespace ThoughtFocus.Service.Implementation
                                           new SqlParameter("@TermCode", SqlDbType.VarChar,10) { Value = input.TermCode },
                                           new SqlParameter("@MilestoneOpenDate", SqlDbType.DateTime) {Value = input.MilestoneOpenDate},
                                           new SqlParameter("@MilestoneCloseDate", SqlDbType.DateTime) {Value = input.MilestoneCloseDate},
-                                          new SqlParameter("@Identifier", SqlDbType.VarChar) {Value = input.Identifier},
-                                          new SqlParameter("@CSULBIDs", SqlDbType.VarChar) {Value = input.CSULBIDs}
+                                          new SqlParameter("@Identifier", SqlDbType.VarChar,255) {Value = input.Identifier},
+                                          new SqlParameter("@CSULBIDs", SqlDbType.VarChar,50) {Value = input.CSULBIDs}
 
                                         };
                 var result = _helper.InsertTable("[STMilestone].[UpdateSTMilestoneDates]", parameters);

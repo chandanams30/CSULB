@@ -133,7 +133,6 @@ namespace ThoughtFocus.Service.Implementation
                         ConsolidatedAddress = Convert.ToString(row["ConsolidatedAddress"]),
                         UserID = Convert.ToInt32(row["UserID"]),
                         CredentialProgram = Convert.ToString(row["CredentialProgram"]),
-                        CredentialPathway = Convert.ToString(row["CredentialPathway"]),
                         TermCode = Convert.ToString(row["TermCode"]),
                         ProgramStatusDesc = Convert.ToString(row["ProgramStatusDesc"]),
                         AddressST = Convert.ToString(row["AddressST"]),
@@ -162,6 +161,12 @@ namespace ThoughtFocus.Service.Implementation
                         CSULBID = Convert.ToString(row["CSULBID"]),
                         FormId = Convert.ToInt32(row["FormId"]),
 
+                    }).FirstOrDefault();
+
+                    obj.CredentialPathway = dtStudentTeaching.Tables[2].AsEnumerable().Select(row => new CredentialPathway
+                    {
+                        STCredentialPathway = Convert.ToString(row["CredentialPathway"]),
+                        STAuthorizationArea = Convert.ToString(row["AuthorizationArea"])
                     }).FirstOrDefault();
 
                     obj.studentTeachingAcknowledgment = dtStudentTeaching.Tables[3].AsEnumerable().Select(row => new StudentTeachingAcknowledgment
