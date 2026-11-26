@@ -92,8 +92,27 @@ namespace ThoughtFocus.Domain.Response.StudentProfile
         public string Term { get; set; }
         public string Status { get; set; }
         public int? ProgramPlannerState { get; set; }
-        public string  STMilestoneStateName { get; set; }
+        public string STMilestoneStateName { get; set; }
         public int? STMilestoneStateID { get; set; }
+        public string AlternateEmail { get; set; }
+        public string CredentialProgram { get; set; }
+        public string CredentialPathway { get; set; }
+        public string CredentilAreaPathway { get; set; }
+        public string PursuingBILA { get; set;}
+        public string CTCDocumentNumber { get; set; }
+        public string StudentTeachingStatus { get; set; }
+        public string PossibleInternship { get; set; }
+        public string RelativeLocalSchool { get; set; }
+        public string TransportationMethod { get; set; }
+		public string SpecialConsiderations { get; set; }
+        public string DistrictPreference1 { get; set; }
+        public string DistrictPreference2 { get; set; }
+        public string DistrictPreference3 { get; set; }
+        public string PhysicalAddress { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string Zip {  get; set; }
+        public string Phone {  get; set; }
     }
     public class StudentProfileMessageBoardResponse :BaseResponse
     {
