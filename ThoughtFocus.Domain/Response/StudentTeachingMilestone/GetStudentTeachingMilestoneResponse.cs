@@ -39,6 +39,8 @@ namespace ThoughtFocus.Domain.Response.StudentTeachingMilestone
     {
         public string STCredentialPathway { get; set; }
         public string STAuthorizationArea { get; set; }
+        public int isphysicalAddress { get; set; }
+
 
     }
     public class StudentTeachingRoleHandler

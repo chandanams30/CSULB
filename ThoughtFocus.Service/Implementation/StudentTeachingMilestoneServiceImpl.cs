@@ -143,56 +143,139 @@ namespace ThoughtFocus.Service.Implementation
                         isSubmitEnabled = isSubmitEnabled.isEnableSubmit
 
                     }).FirstOrDefault();
-                    
-                    obj.AttachmentsInformation = dtStudentTeaching.Tables[1].AsEnumerable().Select(row => new AttachmentsInformation
-                    {
-                        ID = row["ID"] == DBNull.Value ? 0: Convert.ToInt32(row["ID"]),
-                        DocumentID = Convert.ToInt32(row["DocumentID"]),
-                        DocumentName = Convert.ToString(row["DocumentName"]),
-                        FileName = Convert.ToString(row["FileName"]),
-                        FileExtn = Convert.ToString(row["FileExtn"]),
-                        UniqueID = row["UniqueID"] == DBNull.Value ? Guid.Empty: Guid.Parse(Convert.ToString(row["UniqueID"])),
-                        FolderName = Convert.ToString(row["FolderName"])
-                    }).ToList();
 
-                    obj.studentTeachingPlacementConsiderations = dtStudentTeaching.Tables[2].AsEnumerable().Select(row => new StudentTeachingPlacementConsiderations
-                    {
-                        PlacementConsiderationsJSON = Convert.ToString(row["PlacementConsiderationsJSON"]),
-                        CSULBID = Convert.ToString(row["CSULBID"]),
-                        FormId = Convert.ToInt32(row["FormId"]),
+                    obj.AttachmentsInformation = dtStudentTeaching != null && dtStudentTeaching.Tables.Count > 1 && dtStudentTeaching.Tables[1].Rows.Count > 0
+                                        ? dtStudentTeaching.Tables[1].AsEnumerable()
+                                            .Select(row => new AttachmentsInformation
+                                            {
+                                                ID = row["ID"] != DBNull.Value
+                                                    ? Convert.ToInt32(row["ID"])
+                                                    : 0,
+                                        
+                                                DocumentID = row["DocumentID"] != DBNull.Value
+                                                    ? Convert.ToInt32(row["DocumentID"])
+                                                    : 0,
+                                        
+                                                DocumentName = row["DocumentName"] != DBNull.Value
+                                                    ? Convert.ToString(row["DocumentName"])
+                                                    : null,
+                                        
+                                                FileName = row["FileName"] != DBNull.Value
+                                                    ? Convert.ToString(row["FileName"])
+                                                    : null,
+                                        
+                                                FileExtn = row["FileExtn"] != DBNull.Value
+                                                    ? Convert.ToString(row["FileExtn"])
+                                                    : null,
+                                        
+                                                UniqueID = row["UniqueID"] != DBNull.Value &&
+                                                           !string.IsNullOrWhiteSpace(Convert.ToString(row["UniqueID"]))
+                                                    ? Guid.Parse(Convert.ToString(row["UniqueID"]))
+                                                    : Guid.Empty,
+                                        
+                                                FolderName = row["FolderName"] != DBNull.Value
+                                                    ? Convert.ToString(row["FolderName"])
+                                                    : null
+                                            }).ToList()
+                                        : new List<AttachmentsInformation>();
 
-                    }).FirstOrDefault();
 
-                    obj.CredentialPathway = dtStudentTeaching.Tables[2].AsEnumerable().Select(row => new CredentialPathway
-                    {
-                        STCredentialPathway = Convert.ToString(row["CredentialPathway"]),
-                        STAuthorizationArea = Convert.ToString(row["AuthorizationArea"])
-                    }).FirstOrDefault();
+                    obj.studentTeachingPlacementConsiderations =dtStudentTeaching != null &&dtStudentTeaching.Tables.Count > 2 &&dtStudentTeaching.Tables[2].Rows.Count > 0
+                                        ? dtStudentTeaching.Tables[2].AsEnumerable()
+                                            .Select(row => new StudentTeachingPlacementConsiderations
+                                            {
+                                                PlacementConsiderationsJSON = row["PlacementConsiderationsJSON"] != DBNull.Value
+                                                    ? Convert.ToString(row["PlacementConsiderationsJSON"])
+                                                    : null,
 
-                    obj.studentTeachingAcknowledgment = dtStudentTeaching.Tables[3].AsEnumerable().Select(row => new StudentTeachingAcknowledgment
-                        {
-                            AcknowledgmentJSON = Convert.ToString(row["AcknowledgementsJSON"]),
-                            CSULBID = Convert.ToString(row["CSULBID"]),
-                            FormId = Convert.ToInt32(row["FormId"]),
-                    }).FirstOrDefault();
+                                                CSULBID = row["CSULBID"] != DBNull.Value
+                                                    ? Convert.ToString(row["CSULBID"])
+                                                    : null,
 
-                    obj.BilaRequirements = dtStudentTeaching.Tables[2].AsEnumerable().Select(row => new BILARequirements
-                    {
-                        BILARequirementsJSON = Convert.ToString(row["BILARequirementJSON"]),
-                    }).FirstOrDefault();
+                                                FormId = row["FormId"] != DBNull.Value
+                                                    ? Convert.ToInt32(row["FormId"])
+                                                    : 0
+                                            }).FirstOrDefault()
+                                        : null;
 
-                    obj.MilestoneState = dtStudentTeaching.Tables[4].AsEnumerable().Select(row => new MilestoneState
-                    {
-                        StateID = Convert.ToInt32(row["MilestoneStateID"]),
-                        StateName = Convert.ToString(row["MilestoneStateName"])
+                    // Credential Pathway
+                    obj.CredentialPathway =dtStudentTeaching != null &&dtStudentTeaching.Tables.Count > 2 && dtStudentTeaching.Tables[2].Rows.Count > 0
+                            ? dtStudentTeaching.Tables[2].AsEnumerable()
+                                .Select(row => new CredentialPathway
+                                {
+                                    STCredentialPathway = row["CredentialPathway"] != DBNull.Value
+                                        ? Convert.ToString(row["CredentialPathway"])
+                                        : null,
 
-                    }).FirstOrDefault();
-                    obj.MilestoneStateDetails = dtStudentTeaching.Tables[5].AsEnumerable().Select(row => new MilestoneStateDetails
-                    {
-                        ID = Convert.ToInt32(row["ID"]),
-                        Name = Convert.ToString(row["Name"])
+                                    STAuthorizationArea = row["AuthorizationArea"] != DBNull.Value
+                                        ? Convert.ToString(row["AuthorizationArea"])
+                                        : null,
 
-                    }).ToList();
+                                    isphysicalAddress = row["isphysicalAddress"] != DBNull.Value
+                                        ? Convert.ToInt32(row["isphysicalAddress"])
+                                        : 0
+                                }).FirstOrDefault()
+                            : null;
+
+                    // Student Teaching Acknowledgment
+                    obj.studentTeachingAcknowledgment =dtStudentTeaching != null &&dtStudentTeaching.Tables.Count > 3 && dtStudentTeaching.Tables[3].Rows.Count > 0
+                            ? dtStudentTeaching.Tables[3].AsEnumerable()
+                                .Select(row => new StudentTeachingAcknowledgment
+                                {
+                                    AcknowledgmentJSON = row["AcknowledgementsJSON"] != DBNull.Value
+                                        ? Convert.ToString(row["AcknowledgementsJSON"])
+                                        : null,
+
+                                    CSULBID = row["CSULBID"] != DBNull.Value
+                                        ? Convert.ToString(row["CSULBID"])
+                                        : null,
+
+                                    FormId = row["FormId"] != DBNull.Value
+                                        ? Convert.ToInt32(row["FormId"])
+                                        : 0
+                                }).FirstOrDefault()
+                            : null;
+
+                    // BILA Requirements
+                    obj.BilaRequirements = dtStudentTeaching != null && dtStudentTeaching.Tables.Count > 2 && dtStudentTeaching.Tables[2].Rows.Count > 0
+                            ? dtStudentTeaching.Tables[2].AsEnumerable()
+                                .Select(row => new BILARequirements
+                                {
+                                    BILARequirementsJSON = row["BILARequirementJSON"] != DBNull.Value
+                                        ? Convert.ToString(row["BILARequirementJSON"])
+                                        : null
+                                }).FirstOrDefault()
+                            : null;
+
+                    // Milestone State
+                    obj.MilestoneState = dtStudentTeaching != null && dtStudentTeaching.Tables.Count > 4 && dtStudentTeaching.Tables[4].Rows.Count > 0
+                            ? dtStudentTeaching.Tables[4].AsEnumerable()
+                                .Select(row => new MilestoneState
+                                {
+                                    StateID = row["MilestoneStateID"] != DBNull.Value
+                                        ? Convert.ToInt32(row["MilestoneStateID"])
+                                        : 0,
+
+                                    StateName = row["MilestoneStateName"] != DBNull.Value
+                                        ? Convert.ToString(row["MilestoneStateName"])
+                                        : null
+                                }).FirstOrDefault()
+                            : null;
+
+                    // Milestone State Details
+                    obj.MilestoneStateDetails =dtStudentTeaching != null &&dtStudentTeaching.Tables.Count > 5 &&dtStudentTeaching.Tables[5].Rows.Count > 0
+                            ? dtStudentTeaching.Tables[5].AsEnumerable()
+                                .Select(row => new MilestoneStateDetails
+                                {
+                                    ID = row["ID"] != DBNull.Value
+                                        ? Convert.ToInt32(row["ID"])
+                                        : 0,
+
+                                    Name = row["Name"] != DBNull.Value
+                                        ? Convert.ToString(row["Name"])
+                                        : null
+                                }).ToList()
+                            : new List<MilestoneStateDetails>();
 
                     obj.studentTeachingRoleHandler = dtStudentTeaching.Tables.Count > 5
                    && dtStudentTeaching.Tables[6] != null
